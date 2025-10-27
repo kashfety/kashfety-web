@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.54.0",
+    "dotenv": "^17.2.1",
+    "framer-motion": "^12.23.12",
+    "jwt-decode": "^4.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}

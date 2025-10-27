@@ -1,0 +1,754 @@
+import { supabaseAdmin, TABLES, dbHelpers } from "../utils/supabase.js";
+
+// Get patient's appointments
+export const getPatientAppointments = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    const { data: appointments, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        doctor:doctors(
+          id, name, specialty, consultation_fee,
+          centers:doctor_centers(
+            center:centers(id, name, address)
+          )
+        )
+      `)
+      .eq('patient_id', patientId)
+      .order('appointment_date', { ascending: true })
+      .order('appointment_time', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching patient appointments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointments',
+      error: error.message
+    });
+  }
+};
+
+// Get doctor's appointments
+export const getDoctorAppointments = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { date, status } = req.query;
+    
+    let query = supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        patient:patients(
+          id, name, age, gender, medical_history, allergies, medications
+        )
+      `)
+      .eq('doctor_id', doctorId);
+
+    if (date) {
+      query = query.eq('appointment_date', date);
+    }
+    
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data: appointments, error } = await query
+      .order('appointment_date', { ascending: true })
+      .order('appointment_time', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointments',
+      error: error.message
+    });
+  }
+};
+
+// Book regular appointment
+export const bookAppointment = async (req, res) => {
+  try {
+    const {
+      doctor_id,
+      patient_id,
+      appointment_date,
+      appointment_time,
+      duration = 30,
+      type = 'consultation',
+      notes,
+      symptoms
+    } = req.body;
+
+    // Check if time slot is available
+    const isAvailable = await checkTimeSlotAvailability(doctor_id, appointment_date, appointment_time, duration);
+    if (!isAvailable) {
+      return res.status(400).json({
+        success: false,
+        message: 'Time slot is not available'
+      });
+    }
+
+    // Create appointment
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .insert({
+        doctor_id,
+        patient_id,
+        appointment_date,
+        appointment_time,
+        duration,
+        type,
+        notes,
+        symptoms,
+        status: 'scheduled'
+      })
+      .select(`
+        *,
+        doctor:doctors(id, name, specialty, consultation_fee),
+        patient:patients(id, name, age, gender)
+      `)
+      .single();
+
+    if (error) throw error;
+
+    // Create initial medical record
+    await supabaseAdmin
+      .from(TABLES.MEDICAL_RECORDS)
+      .insert({
+        patient_id,
+        doctor_id,
+        appointment_id: appointment.id,
+        title: `${type.charAt(0).toUpperCase() + type.slice(1)} - ${appointment_date}`,
+        description: `Initial record for ${type} appointment`,
+        record_date: appointment_date
+      });
+
+    // Log activity
+    await dbHelpers.logActivity(
+      patient_id,
+      'CREATE',
+      'appointment',
+      appointment.id,
+      null,
+      appointment
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Appointment booked successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error booking appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to book appointment',
+      error: error.message
+    });
+  }
+};
+
+// Book home visit
+export const bookHomeVisit = async (req, res) => {
+  try {
+    const {
+      doctor_id,
+      patient_id,
+      appointment_date,
+      appointment_time,
+      duration = 60,
+      notes,
+      symptoms,
+      patient_address,
+      emergency_contact
+    } = req.body;
+
+    // Check if doctor offers home visits
+    const { data: doctor, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('work_hours')
+      .eq('id', doctor_id)
+      .single();
+
+    if (doctorError) throw doctorError;
+
+    // For now, assume all doctors can do home visits (can be enhanced with a specific flag)
+    
+    // Check availability
+    const isAvailable = await checkTimeSlotAvailability(doctor_id, appointment_date, appointment_time, duration);
+    if (!isAvailable) {
+      return res.status(400).json({
+        success: false,
+        message: 'Time slot is not available for home visit'
+      });
+    }
+
+    // Create home visit appointment
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .insert({
+        doctor_id,
+        patient_id,
+        appointment_date,
+        appointment_time,
+        duration,
+        type: 'home_visit',
+        notes: `${notes || ''}\nAddress: ${patient_address}\nEmergency Contact: ${emergency_contact}`,
+        symptoms,
+        status: 'scheduled'
+      })
+      .select(`
+        *,
+        doctor:doctors(id, name, specialty, consultation_fee),
+        patient:patients(id, name, age, gender)
+      `)
+      .single();
+
+    if (error) throw error;
+
+    // Create initial medical record
+    await supabaseAdmin
+      .from(TABLES.MEDICAL_RECORDS)
+      .insert({
+        patient_id,
+        doctor_id,
+        appointment_id: appointment.id,
+        title: `Home Visit - ${appointment_date}`,
+        description: `Initial record for home visit appointment`,
+        record_date: appointment_date
+      });
+
+    res.status(201).json({
+      success: true,
+      message: 'Home visit booked successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error booking home visit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to book home visit',
+      error: error.message
+    });
+  }
+};
+
+// Book medical test
+export const bookMedicalTest = async (req, res) => {
+  try {
+    const {
+      center_id,
+      patient_id,
+      test_type,
+      appointment_date,
+      appointment_time,
+      duration = 30,
+      notes,
+      referring_doctor_id
+    } = req.body;
+
+    // Check if center offers this test type
+    const { data: center, error: centerError } = await supabaseAdmin
+      .from(TABLES.CENTERS)
+      .select('services')
+      .eq('id', center_id)
+      .single();
+
+    if (centerError) throw centerError;
+
+    if (!center.services.includes(test_type)) {
+      return res.status(400).json({
+        success: false,
+        message: `Center does not offer ${test_type} service`
+      });
+    }
+
+    // Create medical test appointment
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .insert({
+        doctor_id: referring_doctor_id, // Can be null if self-referred
+        patient_id,
+        appointment_date,
+        appointment_time,
+        duration,
+        type: 'medical_test',
+        notes: `${notes || ''}\nTest Type: ${test_type}\nCenter ID: ${center_id}`,
+        status: 'scheduled'
+      })
+      .select(`
+        *,
+        patient:patients(id, name, age, gender)
+      `)
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({
+      success: true,
+      message: 'Medical test booked successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error booking medical test:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to book medical test',
+      error: error.message
+    });
+  }
+};
+
+// Get patient's medical test appointments
+export const getPatientMedicalTests = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    const { data: tests, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        doctor:doctors(id, name, specialty)
+      `)
+      .eq('patient_id', patientId)
+      .eq('type', 'medical_test')
+      .order('appointment_date', { ascending: true });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: tests
+    });
+  } catch (error) {
+    console.error('Error fetching medical tests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch medical tests',
+      error: error.message
+    });
+  }
+};
+
+// Confirm appointment (doctor)
+export const confirmAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .update({ status: 'confirmed' })
+      .eq('id', appointmentId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Appointment confirmed successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error confirming appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to confirm appointment',
+      error: error.message
+    });
+  }
+};
+
+// Complete appointment and update medical record (doctor)
+export const completeAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const {
+      diagnosis,
+      prescription,
+      treatment,
+      follow_up_required,
+      follow_up_date,
+      notes
+    } = req.body;
+
+    // Update appointment
+    const { data: appointment, error: appointmentError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .update({
+        status: 'completed',
+        diagnosis,
+        prescription,
+        follow_up_required,
+        follow_up_date,
+        notes
+      })
+      .eq('id', appointmentId)
+      .select()
+      .single();
+
+    if (appointmentError) throw appointmentError;
+
+    // Update corresponding medical record
+    const { error: recordError } = await supabaseAdmin
+      .from(TABLES.MEDICAL_RECORDS)
+      .update({
+        diagnosis,
+        treatment,
+        prescription,
+        description: `Completed ${appointment.type} appointment. ${notes || ''}`
+      })
+      .eq('appointment_id', appointmentId);
+
+    if (recordError) throw recordError;
+
+    // Log activity
+    await dbHelpers.logActivity(
+      appointment.doctor_id,
+      'UPDATE',
+      'appointment',
+      appointmentId,
+      null,
+      { status: 'completed', diagnosis, prescription }
+    );
+
+    res.json({
+      success: true,
+      message: 'Appointment completed and medical record updated',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error completing appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to complete appointment',
+      error: error.message
+    });
+  }
+};
+
+// Cancel appointment
+export const cancelAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { reason } = req.body;
+    
+    // First, get the current appointment to access its notes
+    const { data: currentAppointment, error: fetchError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('*')
+      .eq('id', appointmentId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update the appointment with cancelled status and updated notes
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .update({
+        status: 'cancelled',
+        notes: `${currentAppointment.notes || ''}\nCancellation reason: ${reason || 'No reason provided'}`
+      })
+      .eq('id', appointmentId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Appointment cancelled successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error cancelling appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cancel appointment',
+      error: error.message
+    });
+  }
+};
+
+// Reschedule appointment
+export const rescheduleAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { new_date, new_time, reason } = req.body;
+
+    // Get current appointment
+    const { data: currentAppointment, error: fetchError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('*')
+      .eq('id', appointmentId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Check if new time slot is available
+    const isAvailable = await checkTimeSlotAvailability(
+      currentAppointment.doctor_id,
+      new_date,
+      new_time,
+      currentAppointment.duration
+    );
+
+    if (!isAvailable) {
+      return res.status(400).json({
+        success: false,
+        message: 'New time slot is not available'
+      });
+    }
+
+    // Update appointment
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .update({
+        appointment_date: new_date,
+        appointment_time: new_time,
+        notes: `${currentAppointment.notes || ''}\nRescheduled from ${currentAppointment.appointment_date} ${currentAppointment.appointment_time}. Reason: ${reason || 'No reason provided'}`
+      })
+      .eq('id', appointmentId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Appointment rescheduled successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error rescheduling appointment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reschedule appointment',
+      error: error.message
+    });
+  }
+};
+
+// Get appointment details
+export const getAppointmentDetails = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    
+    const { data: appointment, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        doctor:doctors(
+          id, name, specialty, consultation_fee,
+          centers:doctor_centers(
+            center:centers(id, name, address, phone)
+          )
+        ),
+        patient:patients(
+          id, name, age, gender, medical_history, allergies, medications, emergency_contact
+        ),
+        medical_record:medical_records(
+          id, title, description, diagnosis, treatment, prescription, lab_results
+        )
+      `)
+      .eq('id', appointmentId)
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Error fetching appointment details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointment details',
+      error: error.message
+    });
+  }
+};
+
+// Get available time slots for a doctor
+export const getAvailableSlots = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date parameter is required'
+      });
+    }
+
+    // Get doctor's work hours
+    const { data: doctor, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('work_hours')
+      .eq('id', doctorId)
+      .single();
+
+    if (doctorError) throw doctorError;
+
+    // Get day of week
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const workHours = doctor.work_hours?.[dayOfWeek];
+
+    if (!workHours) {
+      return res.json({
+        success: true,
+        data: [],
+        message: 'Doctor is not available on this day'
+      });
+    }
+
+    // Get existing appointments for this date
+    const { data: existingAppointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('appointment_time, duration')
+      .eq('doctor_id', doctorId)
+      .eq('appointment_date', date)
+      .in('status', ['scheduled', 'confirmed']);
+
+    if (appointmentsError) throw appointmentsError;
+
+    // Generate available time slots
+    const availableSlots = generateTimeSlots(workHours, existingAppointments);
+
+    res.json({
+      success: true,
+      data: availableSlots
+    });
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch available slots',
+      error: error.message
+    });
+  }
+};
+
+// Get all appointments (admin)
+export const getAllAppointments = async (req, res) => {
+  try {
+    const { status, type, date_from, date_to } = req.query;
+    
+    let query = supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        doctor:doctors(id, name, specialty),
+        patient:patients(id, name, age, gender)
+      `);
+
+    if (status) query = query.eq('status', status);
+    if (type) query = query.eq('type', type);
+    if (date_from) query = query.gte('appointment_date', date_from);
+    if (date_to) query = query.lte('appointment_date', date_to);
+
+    const { data: appointments, error } = await query
+      .order('appointment_date', { ascending: false })
+      .order('appointment_time', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching all appointments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointments',
+      error: error.message
+    });
+  }
+};
+
+// Helper function to check time slot availability
+const checkTimeSlotAvailability = async (doctorId, date, time, duration) => {
+  try {
+    const { data: conflictingAppointments, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('appointment_time, duration')
+      .eq('doctor_id', doctorId)
+      .eq('appointment_date', date)
+      .in('status', ['scheduled', 'confirmed']);
+
+    if (error) throw error;
+
+    // Check for time conflicts
+    const requestedStart = timeToMinutes(time);
+    const requestedEnd = requestedStart + duration;
+
+    for (const appointment of conflictingAppointments) {
+      const existingStart = timeToMinutes(appointment.appointment_time);
+      const existingEnd = existingStart + appointment.duration;
+
+      // Check for overlap
+      if (requestedStart < existingEnd && requestedEnd > existingStart) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    return false;
+  }
+};
+
+// Helper function to convert time string to minutes
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Helper function to generate available time slots
+const generateTimeSlots = (workHours, existingAppointments) => {
+  const slots = [];
+  const startTime = timeToMinutes(workHours.start);
+  const endTime = timeToMinutes(workHours.end);
+  const slotDuration = 30; // 30-minute slots
+
+  for (let time = startTime; time < endTime; time += slotDuration) {
+    const hours = Math.floor(time / 60);
+    const minutes = time % 60;
+    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+    // Check if this slot conflicts with existing appointments
+    const hasConflict = existingAppointments.some(appointment => {
+      const appointmentStart = timeToMinutes(appointment.appointment_time);
+      const appointmentEnd = appointmentStart + appointment.duration;
+      return time < appointmentEnd && time + slotDuration > appointmentStart;
+    });
+
+    if (!hasConflict) {
+      slots.push({
+        time: timeStr,
+        available: true
+      });
+    }
+  }
+
+  return slots;
+}; 

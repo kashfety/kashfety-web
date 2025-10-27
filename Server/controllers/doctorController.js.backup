@@ -1,0 +1,1021 @@
+import { supabaseAdmin, storageHelpers, TABLES } from "../utils/supabase.js";
+
+// Set doctor schedule (work hours)
+export const setSchedule = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    const { workHours } = req.body;
+    
+    // Update doctor document with work hours
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .update({
+        work_hours: workHours,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('uid', doctorUid)
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: "Schedule updated successfully",
+      data
+    });
+  } catch (error) {
+    console.error("Schedule update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Set vacation days
+export const setVacationDays = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    const { vacationDays } = req.body;
+    
+    // Update doctor document with vacation days
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .update({
+        vacation_days: vacationDays,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('uid', doctorUid)
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: "Vacation days updated successfully",
+      data
+    });
+  } catch (error) {
+    console.error("Vacation days update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get patients list for a doctor
+export const getPatientsList = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    
+    // Get doctor's database ID first
+    const { data: doctorData, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id')
+      .eq('uid', doctorUid)
+      .single();
+    
+    if (doctorError || !doctorData) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    
+    // Query appointments table to get patients for this doctor
+    const { data: appointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        patient_id,
+        patients (
+          id,
+          uid,
+          name,
+          email,
+          age,
+          phone,
+          created_at
+        )
+      `)
+      .eq('doctor_id', doctorData.id);
+    
+    if (appointmentsError) {
+      throw appointmentsError;
+    }
+    
+    // Extract unique patients
+    const uniquePatients = [];
+    const patientIds = new Set();
+    
+    appointments.forEach((appointment) => {
+      if (appointment.patients && !patientIds.has(appointment.patients.id)) {
+        patientIds.add(appointment.patients.id);
+        uniquePatients.push(appointment.patients);
+      }
+    });
+    
+    res.status(200).json({
+      success: true,
+      patients: uniquePatients,
+    });
+  } catch (error) {
+    console.error("Get patients list error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get patient details
+export const getPatientDetails = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    // Security check: Verify doctor can access this patient's data
+    if (req.user.role === 'doctor') {
+      // Get doctor's database ID first
+      const { data: doctorData, error: doctorError } = await supabaseAdmin
+        .from(TABLES.DOCTORS)
+        .select('id')
+        .eq('uid', req.user.uid)
+        .single();
+      
+      if (doctorError || !doctorData) {
+        return res.status(404).json({
+          success: false,
+          message: "Doctor not found",
+        });
+      }
+      
+      // Check if doctor has treated this patient (via appointments)
+      const { data: appointmentCheck } = await supabaseAdmin
+        .from(TABLES.APPOINTMENTS)
+        .select('id')
+        .eq('doctor_id', doctorData.id)
+        .eq('patient_id', (await supabaseAdmin
+          .from(TABLES.PATIENTS)
+          .select('id')
+          .eq('uid', patientId)
+          .single()).data?.id)
+        .limit(1);
+      
+      if (!appointmentCheck || appointmentCheck.length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only view details for your patients.'
+        });
+      }
+    }
+    
+    // Get patient data
+    const { data: patientData, error: patientError } = await supabaseAdmin
+      .from(TABLES.PATIENTS)
+      .select('*')
+      .eq('uid', patientId)
+      .single();
+    
+    if (patientError || !patientData) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found",
+      });
+    }
+    
+    // Get patient's medical records
+    const { data: medicalRecords, error: recordsError } = await supabaseAdmin
+      .from(TABLES.MEDICAL_RECORDS)
+      .select(`
+        *,
+        doctors (
+          name,
+          specialty
+        )
+      `)
+      .eq('patient_id', patientData.id)
+      .order('record_date', { ascending: false });
+    
+    if (recordsError) {
+      console.error("Medical records fetch error:", recordsError);
+    }
+    
+    // Get patient's appointment history
+    const { data: appointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        *,
+        doctors (
+          name,
+          specialty
+        )
+      `)
+      .eq('patient_id', patientData.id)
+      .order('appointment_date', { ascending: false });
+    
+    if (appointmentsError) {
+      console.error("Appointments fetch error:", appointmentsError);
+    }
+    
+    // Combine all patient data
+    const responseData = {
+      ...patientData,
+      medicalRecords: medicalRecords || [],
+      appointments: appointments || [],
+    };
+    
+    res.status(200).json({
+      success: true,
+      patient: responseData,
+    });
+  } catch (error) {
+    console.error("Get patient details error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Upload doctor profile picture
+export const uploadProfilePicture = async (req, res) => {
+  try {
+    // Check if file exists in the request
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+    
+    const { doctorId } = req.params;
+    const file = req.file;
+    
+    // Create file path for storage
+    const fileName = `doctors/${doctorId}/profile-picture-${Date.now()}`;
+    
+    // Upload file to Supabase Storage
+    const uploadResult = await storageHelpers.uploadFile(
+      'profile-pictures',
+      fileName,
+      file.buffer,
+      {
+        contentType: file.mimetype,
+        upsert: true
+      }
+    );
+    
+    // Get public URL
+    const publicUrl = storageHelpers.getPublicUrl('profile-pictures', fileName);
+    
+    // Update the doctor's document with the profile picture URL
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .update({
+        profile_picture: publicUrl,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('uid', doctorId)
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully",
+      url: publicUrl,
+      data
+    });
+  } catch (error) {
+    console.error("Profile picture upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get doctor profile
+export const getDoctorProfile = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    
+    const { data: doctorData, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('*')
+      .eq('uid', doctorUid)
+      .single();
+    
+    if (error || !doctorData) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      doctor: doctorData,
+    });
+  } catch (error) {
+    console.error("Get doctor profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Update doctor profile
+export const updateDoctorProfile = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    const updates = req.body;
+    
+    // Remove fields that shouldn't be updated directly
+    delete updates.id;
+    delete updates.uid;
+    delete updates.user_id;
+    delete updates.created_at;
+    delete updates.updated_at;
+    
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .update(updates)
+      .eq('uid', doctorUid)
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: "Doctor profile updated successfully",
+      doctor: data,
+    });
+  } catch (error) {
+    console.error("Update doctor profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get all doctors (for patient booking)
+export const getAllDoctors = async (req, res) => {
+  try {
+    const { specialty, search } = req.query;
+    
+    // Use the unified users table for doctors instead of legacy doctors table
+    let query = supabaseAdmin
+      .from(TABLES.USERS)
+      .select(`
+        id,
+        uid,
+        name,
+        first_name,
+        last_name,
+        specialty,
+        rating,
+        profile_picture,
+        bio,
+        experience_years,
+        consultation_fee,
+        work_hours
+      `)
+      .eq('role', 'doctor')
+      .order('rating', { ascending: false });
+    
+    // Filter by specialty if provided
+    if (specialty) {
+      query = query.ilike('specialty', `%${specialty}%`);
+    }
+    
+    // Search by name if provided
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+    }
+    
+    const { data: doctors, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+
+    // Format the doctors data to match the expected structure
+    const formattedDoctors = doctors.map(doctor => ({
+      ...doctor,
+      name: doctor.name || `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim()
+    }));
+    
+    res.status(200).json({
+      success: true,
+      doctors: formattedDoctors,
+    });
+  } catch (error) {
+    console.error("Get all doctors error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Create medical record
+export const createMedicalRecord = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const recordData = req.body;
+    
+    // Get patient's database ID
+    const { data: patientData, error: patientError } = await supabaseAdmin
+      .from(TABLES.PATIENTS)
+      .select('id')
+      .eq('uid', patientId)
+      .single();
+    
+    if (patientError || !patientData) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found",
+      });
+    }
+    
+    // Get doctor's database ID if provided
+    let doctorDbId = null;
+    if (req.user?.role === 'doctor') {
+      const { data: doctorData } = await supabaseAdmin
+        .from(TABLES.DOCTORS)
+        .select('id')
+        .eq('uid', req.user.uid)
+        .single();
+      
+      doctorDbId = doctorData?.id;
+    }
+    
+    // Create medical record
+    const { data, error } = await supabaseAdmin
+      .from(TABLES.MEDICAL_RECORDS)
+      .insert([{
+        patient_id: patientData.id,
+        doctor_id: doctorDbId,
+        ...recordData
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    res.status(201).json({
+      success: true,
+      message: "Medical record created successfully",
+      record: data,
+    });
+  } catch (error) {
+    console.error("Create medical record error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get doctor analytics
+export const getDoctorAnalytics = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    const { period = '30' } = req.query; // days
+    
+    // Get doctor's database ID
+    const { data: doctorData, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id, name, specialty')
+      .eq('uid', doctorUid)
+      .single();
+    
+    if (doctorError) throw doctorError;
+
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - parseInt(period));
+    
+    // Get appointment statistics
+    const { data: appointmentStats, error: statsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('status, type, appointment_date')
+      .eq('doctor_id', doctorData.id)
+      .gte('appointment_date', fromDate.toISOString().split('T')[0]);
+
+    if (statsError) throw statsError;
+
+    // Calculate metrics
+    const totalAppointments = appointmentStats.length;
+    const completedAppointments = appointmentStats.filter(a => a.status === 'completed').length;
+    const cancelledAppointments = appointmentStats.filter(a => a.status === 'cancelled').length;
+    const upcomingAppointments = appointmentStats.filter(a => 
+      ['scheduled', 'confirmed'].includes(a.status) && 
+      new Date(a.appointment_date) >= new Date()
+    ).length;
+
+    // Daily appointment trend
+    const dailyStats = {};
+    appointmentStats.forEach(appointment => {
+      const date = appointment.appointment_date;
+      if (!dailyStats[date]) {
+        dailyStats[date] = { total: 0, completed: 0, cancelled: 0 };
+      }
+      dailyStats[date].total++;
+      if (appointment.status === 'completed') dailyStats[date].completed++;
+      if (appointment.status === 'cancelled') dailyStats[date].cancelled++;
+    });
+
+    // Appointment types breakdown
+    const typeBreakdown = {};
+    appointmentStats.forEach(appointment => {
+      typeBreakdown[appointment.type] = (typeBreakdown[appointment.type] || 0) + 1;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        doctor: doctorData,
+        period: parseInt(period),
+        metrics: {
+          totalAppointments,
+          completedAppointments,
+          cancelledAppointments,
+          upcomingAppointments,
+          completionRate: totalAppointments > 0 ? ((completedAppointments / totalAppointments) * 100).toFixed(1) : 0,
+          cancellationRate: totalAppointments > 0 ? ((cancelledAppointments / totalAppointments) * 100).toFixed(1) : 0
+        },
+        dailyTrend: Object.entries(dailyStats).map(([date, stats]) => ({
+          date,
+          ...stats
+        })).sort((a, b) => new Date(a.date) - new Date(b.date)),
+        typeBreakdown
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching doctor analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch analytics',
+      error: error.message
+    });
+  }
+};
+
+// Get patient demographics
+export const getPatientDemographics = async (req, res) => {
+  try {
+    // Use authenticated doctor's UID instead of URL parameter for security
+    const doctorUid = req.authenticatedDoctorUid || req.user.uid;
+    
+    // Get doctor's database ID
+    const { data: doctorData, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id')
+      .eq('uid', doctorUid)
+      .single();
+    
+    if (doctorError) throw doctorError;
+
+    // Get unique patients for this doctor
+    const { data: appointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select(`
+        patient_id,
+        patient:patients(id, age, gender, medical_history)
+      `)
+      .eq('doctor_id', doctorData.id);
+
+    if (appointmentsError) throw appointmentsError;
+
+    // Extract unique patients
+    const uniquePatients = [];
+    const patientIds = new Set();
+    
+    appointments.forEach(appointment => {
+      if (appointment.patient && !patientIds.has(appointment.patient.id)) {
+        patientIds.add(appointment.patient.id);
+        uniquePatients.push(appointment.patient);
+      }
+    });
+
+    // Age distribution
+    const ageGroups = {
+      '0-18': 0,
+      '19-30': 0,
+      '31-45': 0,
+      '46-60': 0,
+      '60+': 0
+    };
+
+    // Gender distribution
+    const genderDistribution = {
+      male: 0,
+      female: 0,
+      other: 0
+    };
+
+    // Common conditions
+    const conditionsCount = {};
+
+    uniquePatients.forEach(patient => {
+      // Age grouping
+      const age = patient.age || 0;
+      if (age <= 18) ageGroups['0-18']++;
+      else if (age <= 30) ageGroups['19-30']++;
+      else if (age <= 45) ageGroups['31-45']++;
+      else if (age <= 60) ageGroups['46-60']++;
+      else ageGroups['60+']++;
+
+      // Gender
+      genderDistribution[patient.gender || 'other']++;
+
+      // Medical history
+      if (patient.medical_history) {
+        patient.medical_history.forEach(condition => {
+          conditionsCount[condition] = (conditionsCount[condition] || 0) + 1;
+        });
+      }
+    });
+
+    // Sort conditions by frequency
+    const topConditions = Object.entries(conditionsCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([condition, count]) => ({ condition, count }));
+
+    res.json({
+      success: true,
+      data: {
+        totalPatients: uniquePatients.length,
+        ageDistribution: ageGroups,
+        genderDistribution,
+        topConditions
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching patient demographics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch demographics',
+      error: error.message
+    });
+  }
+};
+
+// Get appointment statistics
+export const getAppointmentStats = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { year = new Date().getFullYear() } = req.query;
+    
+    // Get doctor's database ID
+    const { data: doctorData, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id')
+      .eq('uid', doctorId)
+      .single();
+    
+    if (doctorError) throw doctorError;
+
+    // Get appointments for the year
+    const { data: appointments, error } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('appointment_date, status, type')
+      .eq('doctor_id', doctorData.id)
+      .gte('appointment_date', `${year}-01-01`)
+      .lte('appointment_date', `${year}-12-31`);
+
+    if (error) throw error;
+
+    // Monthly breakdown
+    const monthlyStats = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      total: 0,
+      completed: 0,
+      cancelled: 0
+    }));
+
+    appointments.forEach(appointment => {
+      const month = new Date(appointment.appointment_date).getMonth();
+      monthlyStats[month].total++;
+      if (appointment.status === 'completed') monthlyStats[month].completed++;
+      if (appointment.status === 'cancelled') monthlyStats[month].cancelled++;
+    });
+
+    // Weekly pattern (which days of week are busiest)
+    const weeklyPattern = Array.from({ length: 7 }, (_, i) => ({
+      dayOfWeek: i,
+      dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i],
+      count: 0
+    }));
+
+    appointments.forEach(appointment => {
+      const dayOfWeek = new Date(appointment.appointment_date).getDay();
+      weeklyPattern[dayOfWeek].count++;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        year: parseInt(year),
+        monthlyStats,
+        weeklyPattern: weeklyPattern.sort((a, b) => b.count - a.count)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching appointment stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointment statistics',
+      error: error.message
+    });
+  }
+};
+
+// Get doctor schedule
+export const getSchedule = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    
+    const { data: doctor, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('work_hours, vacation_days')
+      .eq('uid', doctorId)
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: {
+        workHours: doctor.work_hours || {},
+        vacationDays: doctor.vacation_days || []
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch schedule',
+      error: error.message
+    });
+  }
+};
+
+// Update doctor schedule
+export const updateSchedule = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { workHours, vacationDays } = req.body;
+    
+    const updateData = {};
+    if (workHours) updateData.work_hours = workHours;
+    if (vacationDays) updateData.vacation_days = vacationDays;
+
+    const { data: doctor, error } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .update(updateData)
+      .eq('uid', doctorId)
+      .select('work_hours, vacation_days')
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Schedule updated successfully',
+      data: doctor
+    });
+  } catch (error) {
+    console.error('Error updating schedule:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update schedule',
+      error: error.message
+    });
+  }
+};
+
+// Get financial performance analytics
+export const getFinancialAnalytics = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { period = '30' } = req.query; // days
+    
+    // Get doctor's database ID and consultation fee
+    const { data: doctorData, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id, name, consultation_fee')
+      .eq('uid', doctorId)
+      .single();
+    
+    if (doctorError) throw doctorError;
+
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - parseInt(period));
+    
+    // Get completed appointments for revenue calculation
+    const { data: completedAppointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('appointment_date, consultation_fee, type')
+      .eq('doctor_id', doctorData.id)
+      .eq('status', 'completed')
+      .gte('appointment_date', fromDate.toISOString().split('T')[0]);
+
+    if (appointmentsError) throw appointmentsError;
+
+    // Calculate revenue metrics
+    const totalRevenue = completedAppointments.reduce((sum, appointment) => {
+      return sum + (appointment.consultation_fee || doctorData.consultation_fee || 0);
+    }, 0);
+
+    const averageRevenuePerAppointment = completedAppointments.length > 0 ? 
+      totalRevenue / completedAppointments.length : 0;
+
+    // Daily revenue breakdown
+    const dailyRevenue = {};
+    completedAppointments.forEach(appointment => {
+      const date = appointment.appointment_date;
+      const fee = appointment.consultation_fee || doctorData.consultation_fee || 0;
+      dailyRevenue[date] = (dailyRevenue[date] || 0) + fee;
+    });
+
+    // Revenue by appointment type
+    const revenueByType = {};
+    completedAppointments.forEach(appointment => {
+      const type = appointment.type || 'consultation';
+      const fee = appointment.consultation_fee || doctorData.consultation_fee || 0;
+      revenueByType[type] = (revenueByType[type] || 0) + fee;
+    });
+
+    res.json({
+      success: true,
+      data: {
+        period: parseInt(period),
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        totalCompletedAppointments: completedAppointments.length,
+        averageRevenuePerAppointment: parseFloat(averageRevenuePerAppointment.toFixed(2)),
+        dailyRevenue: Object.entries(dailyRevenue).map(([date, revenue]) => ({
+          date,
+          revenue: parseFloat(revenue.toFixed(2))
+        })).sort((a, b) => new Date(a.date) - new Date(b.date)),
+        revenueByType: Object.entries(revenueByType).map(([type, revenue]) => ({
+          type,
+          revenue: parseFloat(revenue.toFixed(2))
+        })).sort((a, b) => b.revenue - a.revenue)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching financial analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch financial analytics',
+      error: error.message
+    });
+  }
+};
+
+// Get doctor availability for a specific date range
+export const getDoctorAvailability = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { from_date, to_date } = req.query;
+    
+    if (!from_date || !to_date) {
+      return res.status(400).json({
+        success: false,
+        message: 'from_date and to_date are required'
+      });
+    }
+
+    // Get doctor data
+    const { data: doctor, error: doctorError } = await supabaseAdmin
+      .from(TABLES.DOCTORS)
+      .select('id, work_hours, vacation_days')
+      .eq('uid', doctorId)
+      .single();
+
+    if (doctorError) throw doctorError;
+
+    // Get existing appointments in date range
+    const { data: appointments, error: appointmentsError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('appointment_date, appointment_time, duration')
+      .eq('doctor_id', doctor.id)
+      .gte('appointment_date', from_date)
+      .lte('appointment_date', to_date)
+      .in('status', ['scheduled', 'confirmed']);
+
+    if (appointmentsError) throw appointmentsError;
+
+    // Generate availability for each day in range
+    const availability = [];
+    const currentDate = new Date(from_date);
+    const endDate = new Date(to_date);
+
+    while (currentDate <= endDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'lowercase' });
+      
+      // Check if it's a vacation day
+      const isVacationDay = doctor.vacation_days?.includes(dateStr);
+      
+      // Get work hours for this day
+      const workHours = doctor.work_hours?.[dayOfWeek];
+      
+      if (!isVacationDay && workHours && workHours.start && workHours.end) {
+        // Get appointments for this specific date
+        const dayAppointments = appointments.filter(apt => apt.appointment_date === dateStr);
+        
+        // Generate time slots
+        const timeSlots = generateTimeSlots(workHours, dayAppointments);
+        
+        availability.push({
+          date: dateStr,
+          dayOfWeek,
+          workHours,
+          availableSlots: timeSlots.filter(slot => slot.available),
+          bookedSlots: timeSlots.filter(slot => !slot.available)
+        });
+      } else {
+        availability.push({
+          date: dateStr,
+          dayOfWeek,
+          available: false,
+          reason: isVacationDay ? 'vacation' : 'not_working'
+        });
+      }
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    res.json({
+      success: true,
+      data: availability
+    });
+  } catch (error) {
+    console.error('Error fetching doctor availability:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch availability',
+      error: error.message
+    });
+  }
+};
+
+// Helper function to convert time string to minutes
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Helper function to generate time slots
+const generateTimeSlots = (workHours, existingAppointments) => {
+  const slots = [];
+  const startTime = timeToMinutes(workHours.start);
+  const endTime = timeToMinutes(workHours.end);
+  const slotDuration = 30; // 30-minute slots
+
+  for (let time = startTime; time < endTime; time += slotDuration) {
+    const hours = Math.floor(time / 60);
+    const minutes = time % 60;
+    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+    // Check if this slot conflicts with existing appointments
+    const hasConflict = existingAppointments.some(appointment => {
+      const appointmentStart = timeToMinutes(appointment.appointment_time);
+      const appointmentEnd = appointmentStart + appointment.duration;
+      return time < appointmentEnd && time + slotDuration > appointmentStart;
+    });
+
+    slots.push({
+      time: timeStr,
+      available: !hasConflict
+    });
+  }
+
+  return slots;
+};

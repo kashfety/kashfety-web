@@ -1,0 +1,44 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run E2E: booking-freeing-slots",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/e2e/booking-freeing-slots.mjs"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run E2E: booking-freeing-slots",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/e2e/booking-freeing-slots.mjs"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run E2E: booking-freeing-slots",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/e2e/booking-freeing-slots.mjs"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "test"
+		}
+	]
+}

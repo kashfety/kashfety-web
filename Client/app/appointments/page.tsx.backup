@@ -1,0 +1,925 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+// import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar, Clock, MapPin, User, Phone, ArrowLeft, Plus, RefreshCw, Filter, X } from "lucide-react";
+import { useAuth } from "@/lib/providers/auth-provider";
+import Header from "@/components/Header";
+import { appointmentService } from "@/lib/api";
+import RescheduleModal from "@/components/RescheduleModal";
+import CancelModal from "@/components/CancelModal";
+
+interface Appointment {
+  id: string
+  doctorName: string
+  specialty: string
+  date: string
+  time: string
+  duration: string
+  type: string
+  status: string
+  location: string
+  address: string
+  phone: string
+  notes: string
+  isHomeVisit: boolean
+  appointment_date: string
+  appointment_time: string
+  doctor_id?: string  // Add doctor_id field
+  doctor?: {
+    name: string
+    specialty: string
+    phone: string
+  }
+  centers?: {
+    name: string
+    address: string
+  }
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "confirmed":
+      return "bg-green-100 text-green-800 border-green-200"
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+    case "cancelled":
+      return "bg-red-100 text-red-800 border-red-200"
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200"
+  }
+}
+
+export default function MyAppointmentsPage() {
+  const router = useRouter()
+  const { user, loading } = useAuth()
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterType, setFilterType] = useState<string>("all") // all, clinic, home
+  const [filterStatus, setFilterStatus] = useState<string>("all") // all, confirmed, pending, cancelled
+  const [filterSpecialty, setFilterSpecialty] = useState<string>("all")
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("")
+  const [filterDateTo, setFilterDateTo] = useState<string>("")
+  
+  // Get unique specialties from appointments for filter
+  const availableSpecialties = Array.from(new Set(appointments.map(apt => apt.specialty))).sort()
+
+  // Filter appointments based on selected filters
+  const filteredAppointments = appointments.filter(appointment => {
+    // Type filter
+    if (filterType !== "all") {
+      if (filterType === "clinic" && appointment.isHomeVisit) return false
+      if (filterType === "home" && !appointment.isHomeVisit) return false
+    }
+
+    // Status filter
+    if (filterStatus !== "all" && appointment.status !== filterStatus) {
+      return false
+    }
+
+    // Specialty filter
+    if (filterSpecialty !== "all" && appointment.specialty !== filterSpecialty) {
+      return false
+    }
+
+    // Date range filter
+    if (filterDateFrom || filterDateTo) {
+      const appointmentDate = new Date(appointment.appointment_date)
+      if (filterDateFrom && appointmentDate < new Date(filterDateFrom)) return false
+      if (filterDateTo && appointmentDate > new Date(filterDateTo)) return false
+    }
+
+    return true
+  })
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterType("all")
+    setFilterStatus("all")
+    setFilterSpecialty("all")
+    setFilterDateFrom("")
+    setFilterDateTo("")
+  }
+
+  // Check if any filters are active
+  const hasActiveFilters = filterType !== "all" || filterStatus !== "all" || filterSpecialty !== "all" || filterDateFrom || filterDateTo
+
+  // Function to refresh appointments
+  const refreshAppointments = async () => {
+    if (!user) return
+    
+    try {
+      console.log('Refreshing appointments for user:', { id: user.id, name: user.name, role: user.role });
+      setAppointmentsLoading(true)
+      setError(null)
+      
+      // Use the API service to fetch appointments
+      const appointmentsResponse = await appointmentService.getAppointments();
+      console.log('API response:', appointmentsResponse);
+      
+      if (!appointmentsResponse.appointments) {
+        console.log('No appointments found for user:', user.id)
+        setAppointments([]);
+        setAppointmentsLoading(false);
+        return;
+      }
+      
+      console.log('Fetched appointments:', appointmentsResponse.appointments);
+      
+        // Transform the data to match our interface
+        const transformedAppointments: Appointment[] = appointmentsResponse.appointments.map((apt: any) => {
+          console.log('Processing appointment:', apt);
+          console.log('  appointment_type:', apt.appointment_type);
+          
+          // Fix: Parse date correctly to avoid timezone shift
+          const [year, month, day] = apt.appointment_date.split('-').map(Number);
+          const appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
+          const appointmentTime = apt.appointment_time
+          
+          // Format date
+          const formattedDate = appointmentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+          
+          // Format time (appointment_time is in format "HH:MM:SS")
+          let formattedTime = appointmentTime;
+          try {
+            const [hours, minutes] = appointmentTime.split(':');
+            const timeObj = new Date();
+            timeObj.setHours(parseInt(hours), parseInt(minutes), 0);
+            formattedTime = timeObj.toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            });
+          } catch (error) {
+            console.log('Time formatting error, using original:', appointmentTime);
+            formattedTime = appointmentTime;
+          }
+          
+          // Get doctor information with fallbacks
+          const doctorName = apt.doctor?.name || apt.doctor_name || 'Unknown Doctor';
+          const doctorSpecialty = apt.doctor?.specialty || apt.specialty || 'General Medicine';
+          const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+          
+          const isHomeVisit = apt.appointment_type === 'home';
+          console.log('  isHomeVisit:', isHomeVisit);
+          
+          return {
+            id: apt.id,
+            doctorName: doctorName.startsWith('Dr.') ? doctorName : `Dr. ${doctorName}`,
+            specialty: doctorSpecialty,
+            date: formattedDate,
+            time: formattedTime,
+            duration: `${apt.duration || 30} min`,
+            type: apt.type || 'Consultation',
+            status: apt.status || 'scheduled',
+            location: isHomeVisit ? 'Home Visit' : 'Medical Center',
+            address: isHomeVisit ? 'Your Address' : 'Medical Center Address',
+            phone: doctorPhone,
+            notes: apt.notes || 'No additional notes',
+            isHomeVisit: isHomeVisit,
+            appointment_date: apt.appointment_date,
+            appointment_time: apt.appointment_time,
+            doctor_id: apt.doctor_id || apt.doctor?.id || null
+          }
+        })
+        
+        setAppointments(transformedAppointments)
+        setAppointmentsLoading(false)
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load appointments')
+      setAppointmentsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    document.title = "My Appointments | Kashfity"
+  }, [])
+
+  // Refresh appointments when page becomes visible (e.g., after booking)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        console.log('Page became visible, refreshing appointments...');
+        refreshAppointments();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user])
+
+  // Fetch appointments when user is loaded
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (!user) return
+      
+      try {
+        console.log('Fetching appointments for user:', { id: user.id, name: user.name, role: user.role });
+        setAppointmentsLoading(true)
+        setError(null)
+        
+        // Use the API service to fetch appointments
+        const appointmentsResponse = await appointmentService.getAppointments();
+        console.log('API response:', appointmentsResponse);
+        
+        if (!appointmentsResponse.appointments) {
+          console.log('No appointments found for user:', user.id)
+          setAppointments([]);
+          setAppointmentsLoading(false);
+          return;
+        }
+        
+        console.log('Fetched appointments:', appointmentsResponse.appointments);
+        
+        // Transform the data to match our interface
+        const transformedAppointments: Appointment[] = appointmentsResponse.appointments.map((apt: any) => {
+          console.log('Processing appointment (fetchAppointments):', apt);
+          
+          // Fix: Parse date correctly to avoid timezone shift
+          const [year, month, day] = apt.appointment_date.split('-').map(Number);
+          const appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
+          const appointmentTime = apt.appointment_time
+          
+          // Format date
+          const formattedDate = appointmentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+          
+          // Format time (appointment_time is in format "HH:MM:SS")
+          let formattedTime = appointmentTime;
+          try {
+            const [hours, minutes] = appointmentTime.split(':');
+            const timeObj = new Date();
+            timeObj.setHours(parseInt(hours), parseInt(minutes), 0);
+            formattedTime = timeObj.toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            });
+          } catch (error) {
+            console.log('Time formatting error, using original:', appointmentTime);
+            formattedTime = appointmentTime;
+          }
+          
+          // Get doctor information with fallbacks
+          const doctorName = apt.doctor?.name || apt.doctor_name || 'Unknown Doctor';
+          const doctorSpecialty = apt.doctor?.specialty || apt.specialty || 'General Medicine';
+          const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+          
+          return {
+            id: apt.id,
+            doctorName: doctorName.startsWith('Dr.') ? doctorName : `Dr. ${doctorName}`,
+            specialty: doctorSpecialty,
+            date: formattedDate,
+            time: formattedTime,
+            duration: `${apt.duration || 30} min`,
+            type: apt.type || 'Consultation',
+            status: apt.status || 'scheduled',
+            location: apt.appointment_type === 'home' ? 'Home Visit' : 'Medical Center',
+            address: apt.appointment_type === 'home' ? 'Your Address' : 'Medical Center Address',
+            phone: doctorPhone,
+            notes: apt.notes || 'No additional notes',
+            isHomeVisit: apt.appointment_type === 'home',
+            appointment_date: apt.appointment_date,
+            appointment_time: apt.appointment_time,
+            doctor_id: apt.doctor_id || apt.doctor?.id || null
+          }
+        })
+        
+        setAppointments(transformedAppointments)
+        
+      } catch (err: any) {
+        console.error('Error fetching appointments:', err)
+        setError(err.message || 'Failed to load appointments. Please try again.')
+      } finally {
+        setAppointmentsLoading(false)
+      }
+    }
+    
+    if (user && !loading) {
+      refreshAppointments()
+    }
+  }, [user, loading])
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
+
+  // Handler functions for reschedule and cancel
+  const handleReschedule = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setRescheduleModalOpen(true)
+  }
+
+  const handleCancel = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setCancelModalOpen(true)
+  }
+
+  const handleModalSuccess = () => {
+    // Refresh appointments after successful action
+    refreshAppointments()
+  }
+
+  // Function to update a specific appointment without full refresh
+  const handleAppointmentUpdate = (updatedAppointment: Appointment) => {
+    setAppointments(prevAppointments => 
+      prevAppointments.map(apt => 
+        apt.id === updatedAppointment.id ? updatedAppointment : apt
+      )
+    )
+  }
+
+  if (loading || appointmentsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your appointments...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null // Will redirect to login
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <Header />
+        </div>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card className="text-center py-12">
+            <CardContent>
+              <div className="text-red-500 text-xl mb-4">⚠️</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Appointments</h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div 
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative"
+    >
+      {/* Animated Background Elements */}
+      <div 
+        className="absolute inset-0 opacity-10"
+      >
+        <div className="absolute top-20 right-20 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      {/* Header */}
+      <div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10"
+      >
+        <Header />
+      </div>
+
+      {/* Main Content */}
+      <div 
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10"
+      >
+        {/* Page Header */}
+        <div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mb-8"
+        >
+          <div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="flex items-center gap-4 mb-4"
+          >
+            <div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/')}
+                className="flex items-center gap-2 hover:shadow-md transition-all"
+              >
+                <ArrowLeft size={16} />
+                Back to Home
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                My Appointments
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage and view your upcoming medical appointments
+                {hasActiveFilters && (
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="ml-2 text-sm text-blue-600"
+                  >
+                    ({filteredAppointments.length} of {appointments.length} shown)
+                  </motion.span>
+                )}
+              </p>
+            </div>
+            <div 
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="flex gap-2"
+            >
+              <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  onClick={() => setShowFilters(!showFilters)}
+                  variant="outline"
+                  className={`flex items-center gap-2 transition-all ${hasActiveFilters ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-md' : 'hover:shadow-md'}`}
+                >
+                  <Filter size={16} />
+                  Filters
+                  {hasActiveFilters && (
+                    <div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 500 }}
+                    >
+                      <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                        {[filterType !== "all", filterStatus !== "all", filterSpecialty !== "all", filterDateFrom || filterDateTo].filter(Boolean).length}
+                      </Badge>
+                    </div>
+                  )}
+                </Button>
+              </div>
+              <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  onClick={refreshAppointments}
+                  variant="outline"
+                  disabled={appointmentsLoading}
+                  className="flex items-center gap-2 hover:shadow-md transition-all"
+                >
+                  <RefreshCw size={16} className={appointmentsLoading ? 'animate-spin' : ''} />
+                  {appointmentsLoading ? 'Loading...' : 'Refresh'}
+                </Button>
+              </div>
+              <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  onClick={() => router.push('/')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex items-center gap-2 shadow-lg transition-all"
+                >
+                  <Plus size={16} />
+                  Book New Appointment
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Panel */}
+          <div>
+            {showFilters && (
+              <div
+                initial={{ opacity: 0, height: 0, y: -20 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="mt-6 overflow-hidden shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Filter Appointments
+                      </CardTitle>
+                      {hasActiveFilters && (
+                        <div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            onClick={clearFilters}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            <X size={14} />
+                            Clear All
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
+                    >
+                      {/* Appointment Type Filter */}
+                      <div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                        className="space-y-2"
+                      >
+                        <Label htmlFor="type-filter" className="text-sm font-medium">Appointment Type</Label>
+                        <Select value={filterType} onValueChange={setFilterType}>
+                          <SelectTrigger id="type-filter" className="bg-white/50 backdrop-blur-sm">
+                            <SelectValue placeholder="All Types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="clinic">🏥 Clinic Visits</SelectItem>
+                            <SelectItem value="home">🏠 Home Visits</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <Label htmlFor="status-filter" className="text-sm font-medium">Status</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger id="status-filter">
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="confirmed">✅ Confirmed</SelectItem>
+                        <SelectItem value="pending">⏳ Pending</SelectItem>
+                        <SelectItem value="cancelled">❌ Cancelled</SelectItem>
+                        <SelectItem value="completed">✔️ Completed</SelectItem>
+                        <SelectItem value="rescheduled">🔄 Rescheduled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Specialty Filter */}
+                  <div className="space-y-2">
+                    <Label htmlFor="specialty-filter" className="text-sm font-medium">Specialty</Label>
+                    <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
+                      <SelectTrigger id="specialty-filter">
+                        <SelectValue placeholder="All Specialties" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Specialties</SelectItem>
+                        {availableSpecialties.map(specialty => (
+                          <SelectItem key={specialty} value={specialty}>
+                            {specialty}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date From Filter */}
+                  <div className="space-y-2">
+                    <Label htmlFor="date-from" className="text-sm font-medium">From Date</Label>
+                    <Input
+                      id="date-from"
+                      type="date"
+                      value={filterDateFrom}
+                      onChange={(e) => setFilterDateFrom(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Date To Filter */}
+                  <div className="space-y-2">
+                    <Label htmlFor="date-to" className="text-sm font-medium">To Date</Label>
+                    <Input
+                      id="date-to"
+                      type="date"
+                      value={filterDateTo}
+                      onChange={(e) => setFilterDateTo(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* Active Filters Summary */}
+                {hasActiveFilters && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-sm font-medium text-gray-700">Active filters:</span>
+                      {filterType !== "all" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Type: {filterType === "clinic" ? "🏥 Clinic" : "🏠 Home"}
+                        </Badge>
+                      )}
+                      {filterStatus !== "all" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Status: {filterStatus}
+                        </Badge>
+                      )}
+                      {filterSpecialty !== "all" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Specialty: {filterSpecialty}
+                        </Badge>
+                      )}
+                      {filterDateFrom && (
+                        <Badge variant="secondary" className="text-xs">
+                          From: {filterDateFrom}
+                        </Badge>
+                      )}
+                      {filterDateTo && (
+                        <Badge variant="secondary" className="text-xs">
+                          To: {filterDateTo}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Appointments List */}
+        <div>
+          {filteredAppointments.length === 0 ? (
+            <div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Card className="text-center py-12 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent>
+                  <div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.5, type: "spring", stiffness: 200 }}
+                  >
+                    <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  </div>
+                      {appointments.length === 0 ? (
+                    <>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">No Appointments Yet</h3>
+                      <p className="text-gray-600 mb-6">You haven't booked any appointments yet. Start by booking your first appointment.</p>
+                      <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button 
+                          onClick={() => router.push('/')}
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                        >
+                          Book Your First Appointment
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">No Matching Appointments</h3>
+                      <p className="text-gray-600 mb-6">No appointments match your current filters. Try adjusting your filter criteria.</p>
+                      <div className="flex gap-2 justify-center">
+                        <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            onClick={clearFilters}
+                            variant="outline"
+                            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                          >
+                            Clear Filters
+                          </Button>
+                        </div>
+                        <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            onClick={() => router.push('/')}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                          >
+                            Book New Appointment
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="space-y-6"
+            >
+              {filteredAppointments.map((appointment: Appointment, index) => (
+                <div
+                  key={appointment.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                >
+                  <Card className="hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
+                    <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                          <CardTitle className="text-xl text-gray-900 flex items-center gap-2">
+                            <div
+                              whileHover={{ scale: 1.2, rotate: 5 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <User className="w-5 h-5 text-blue-600" />
+                            </div>
+                            {appointment.doctorName}
+                          </CardTitle>
+                          <CardDescription className="text-blue-600 font-medium">
+                            {appointment.specialty}
+                          </CardDescription>
+                        </div>
+                        <div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.3, delay: 0.2 }}
+                        >
+                          <Badge className={`${getStatusColor(appointment.status)} border shadow-sm`}>
+                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Left Column - Time & Location */}
+                        <div className="space-y-4">
+                          <div 
+                            whileHover={{ x: 5 }}
+                            className="flex items-center gap-3 text-gray-700"
+                          >
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">{appointment.date}</div>
+                              <div className="text-sm text-gray-500">Date</div>
+                            </div>
+                          </div>
+                          
+                          <div 
+                            whileHover={{ x: 5 }}
+                            className="flex items-center gap-3 text-gray-700"
+                          >
+                            <Clock className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">{appointment.time} ({appointment.duration})</div>
+                              <div className="text-sm text-gray-500">Duration</div>
+                            </div>
+                          </div>
+                          
+                          <div 
+                            whileHover={{ x: 5 }}
+                            className="flex items-start gap-3 text-gray-700"
+                          >
+                            <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium">{appointment.location}</div>
+                                {appointment.isHomeVisit ? (
+                                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 border-green-300">
+                                    🏠 Home Visit
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 border-blue-300">
+                                    🏥 Clinic
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-500">{appointment.address}</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Right Column - Details & Actions */}
+                        <div className="space-y-4">
+                          <div 
+                            whileHover={{ x: 5 }}
+                            className="flex items-center gap-3 text-gray-700"
+                          >
+                            <Phone className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">{appointment.phone}</div>
+                              <div className="text-sm text-gray-500">Contact Number</div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 mb-1">Appointment Type</div>
+                            <Badge variant="outline" className="text-sm">
+                              {appointment.type}
+                            </Badge>
+                          </div>
+                          
+                          {appointment.notes && (
+                            <div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="text-sm font-medium text-gray-900 mb-1">Notes</div>
+                              <p className="text-sm text-gray-600 bg-gray-50/80 backdrop-blur-sm p-3 rounded-lg">
+                                {appointment.notes}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2 pt-2">
+                            <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-blue-600 border-blue-600 hover:bg-blue-50 hover:shadow-md transition-all"
+                                onClick={() => handleReschedule(appointment)}
+                                disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}
+                              >
+                                Reschedule
+                              </Button>
+                            </div>
+                            <div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-red-600 border-red-600 hover:bg-red-50 hover:shadow-md transition-all"
+                                onClick={() => handleCancel(appointment)}
+                                disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modals */}
+      <RescheduleModal
+        isOpen={rescheduleModalOpen}
+        onClose={() => setRescheduleModalOpen(false)}
+        appointment={selectedAppointment}
+        onSuccess={handleModalSuccess}
+        onReschedule={handleAppointmentUpdate}
+      />
+      
+      <CancelModal
+        isOpen={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        appointment={selectedAppointment}
+        onSuccess={handleModalSuccess}
+      />
+    </div>
+  )
+}

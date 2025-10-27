@@ -63,21 +63,21 @@ export default function HomePage() {
     <div className={`min-h-screen bg-background relative overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      
+
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={toggleSidebar}
         />
       )}
-      
+
       {/* Main Content */}
       <div
         className="transition-all duration-300"
         style={{
-          transform: isRTL 
-            ? `translateX(${sidebarOpen ? -280 : 0}px)` 
+          transform: isRTL
+            ? `translateX(${sidebarOpen ? -280 : 0}px)`
             : `translateX(${sidebarOpen ? 280 : 0}px)`
         }}
       >
@@ -107,83 +107,83 @@ export default function HomePage() {
           <Header onMenuToggle={toggleSidebar} />
         </motion.div>
 
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.2 }}
-        className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 relative z-10"
-      >
-        <Hero onBookAppointment={openDoctorBooking} />
-      </motion.div>
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 relative z-10"
+        >
+          <Hero onBookAppointment={openDoctorBooking} />
+        </motion.div>
 
-      {/* Booking Form */}
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        whileInView={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true, margin: "-100px" }}
-        id="services"
-        className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 -mt-8 sm:-mt-16 relative z-10"
-      >
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 items-start">
-          <div className="xl:col-span-2">
-            <BookingForm onBookAppointment={openDoctorBooking} />
-          </div>
-          <div className="bg-card border rounded-xl p-4 sm:p-6 mt-4 xl:mt-0">
-            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{t('bookLabTests') || 'Book lab tests and medical imaging at certified diagnostic centers'}</p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button 
-                onClick={openLabBooking}
-                className="px-4 py-2 rounded-lg bg-[#4DBCC4] dark:bg-[#2a5f6b] text-white hover:opacity-90 transition-opacity text-center"
-              >
-                {t('bookTest') || 'Book Test'}
-              </button>
-              <Link href="/labs" className="px-4 py-2 rounded-lg border-2 border-[#4DBCC4] dark:border-[#2a5f6b] text-[#4DBCC4] dark:text-[#2a5f6b] hover:bg-[#4DBCC4] dark:hover:bg-[#2a5f6b] hover:text-white transition-colors text-center">
-                {t('my_labs_title') || 'My Labs'}
-              </Link>
+        {/* Booking Form */}
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: "-100px" }}
+          id="services"
+          className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 -mt-8 sm:-mt-16 relative z-10"
+        >
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 items-start">
+            <div className="xl:col-span-2">
+              <BookingForm onBookAppointment={openDoctorBooking} />
+            </div>
+            <div className="bg-card border rounded-xl p-4 sm:p-6 mt-4 xl:mt-0">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{t('bookLabTests') || 'Book lab tests and medical imaging at certified diagnostic centers'}</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={openLabBooking}
+                  className="px-4 py-2 rounded-lg bg-[#4DBCC4] dark:bg-[#2a5f6b] text-white hover:opacity-90 transition-opacity text-center"
+                >
+                  {t('bookTest') || 'Book Test'}
+                </button>
+                <Link href="/labs" className="px-4 py-2 rounded-lg border-2 border-[#4DBCC4] dark:border-[#2a5f6b] text-[#4DBCC4] dark:text-[#2a5f6b] hover:bg-[#4DBCC4] dark:hover:bg-[#2a5f6b] hover:text-white transition-colors text-center">
+                  {t('my_labs_title') || 'My Labs'}
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Doctors Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, margin: "-50px" }}
-        id="doctors"
-        className="w-full mt-12 sm:mt-20 relative z-10"
-      >
-        <DoctorsSection />
-      </motion.div>
+        {/* Doctors Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true, margin: "-50px" }}
+          id="doctors"
+          className="w-full mt-12 sm:mt-20 relative z-10"
+        >
+          <DoctorsSection />
+        </motion.div>
 
-      {/* Reviews Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true, margin: "-50px" }}
-        id="reviews"
-        className="w-full mt-12 sm:mt-20 bg-background py-8 sm:py-16 relative z-10"
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-12"
-          >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">{t('reviews_title') || 'What Our Patients Say'}</h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              {t('reviews_subtitle') || 'Read testimonials from thousands of satisfied patients who trust Kashfety for their healthcare needs.'}
-            </p>
-          </motion.div>
+        {/* Reviews Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, margin: "-50px" }}
+          id="reviews"
+          className="w-full mt-12 sm:mt-20 bg-background py-8 sm:py-16 relative z-10"
+        >
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-center mb-8 sm:mb-12"
+            >
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">{t('reviews_title') || 'What Our Patients Say'}</h2>
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+                {t('reviews_subtitle') || 'Read testimonials from thousands of satisfied patients who trust Kashfety for their healthcare needs.'}
+              </p>
+            </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">{[
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">{[
               {
                 review: t('reviews_card_1') || "Excellent service! Dr. Ahmad was very professional and the home visit was convenient. Highly recommend HealthCare App for busy families.",
                 name: "Sarah Hassan",
@@ -255,52 +255,52 @@ export default function HomePage() {
                 </div>
               </motion.div>
             ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mt-8 sm:mt-12"
-          >
-            <div className="inline-flex items-center bg-card rounded-full px-4 sm:px-6 py-3 shadow-lg border border-border">
-              <div className="flex text-yellow-400 mr-3">
-                {"★★★★★".split("").map((star, i) => (
-                  <span key={i} className="text-base sm:text-lg">{star}</span>
-                ))}
-              </div>
-              <span className="text-foreground font-semibold text-sm sm:text-base">4.9/5</span>
-              <span className="text-muted-foreground ml-2 text-xs sm:text-sm">{t('reviews_stat') || 'from 2,500+ reviews'}</span>
             </div>
-          </motion.div>
-        </div>
-      </motion.div>
 
-      {/* About Us Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, margin: "-50px" }}
-        id="about"
-        className="w-full mt-12 sm:mt-20 bg-background py-8 sm:py-16 relative z-10"
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-12"
-          >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">{t('about_title') || 'About Kashfety'}</h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              {t('about_desc') || 'Your trusted healthcare partner, connecting you with the best medical professionals for comprehensive care.'}
-            </p>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mt-8 sm:mt-12"
+            >
+              <div className="inline-flex items-center bg-card rounded-full px-4 sm:px-6 py-3 shadow-lg border border-border">
+                <div className="flex text-yellow-400 mr-3">
+                  {"★★★★★".split("").map((star, i) => (
+                    <span key={i} className="text-base sm:text-lg">{star}</span>
+                  ))}
+                </div>
+                <span className="text-foreground font-semibold text-sm sm:text-base">4.9/5</span>
+                <span className="text-muted-foreground ml-2 text-xs sm:text-sm">{t('reviews_stat') || 'from 2,500+ reviews'}</span>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">{[
+        {/* About Us Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true, margin: "-50px" }}
+          id="about"
+          className="w-full mt-12 sm:mt-20 bg-background py-8 sm:py-16 relative z-10"
+        >
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center mb-8 sm:mb-12"
+            >
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">{t('about_title') || 'About Kashfety'}</h2>
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+                {t('about_desc') || 'Your trusted healthcare partner, connecting you with the best medical professionals for comprehensive care.'}
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">{[
               {
                 icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
                 title: t('about_feature_1_title') || 'Compassionate Care',
@@ -354,76 +354,76 @@ export default function HomePage() {
                 </p>
               </motion.div>
             ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="bg-muted rounded-2xl p-4 sm:p-6 lg:p-8"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">{t('mission_title') || 'Our Mission'}</h3>
-                <p className="text-foreground mb-4 text-sm sm:text-base">
-                  {t('mission_p1') || 'At Kashfety, we believe that quality healthcare should be accessible to everyone. Our platform bridges the gap between patients and healthcare providers, making it easier than ever to book appointments, consult with specialists, and receive the care you deserve.'}
-                </p>
-                <p className="text-foreground text-sm sm:text-base">
-                  {t('mission_p2') || 'Whether you need a routine check-up, specialist consultation, or emergency care, our comprehensive network of medical professionals is here to serve you with excellence and dedication.'}
-                </p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                viewport={{ once: true }}
-                className="grid grid-cols-2 gap-3 sm:gap-4 text-center"
-              >
-                {[
-                  { number: "500+", label: t('stat_verified_doctors') || 'Verified Doctors', color: "text-[#4DBCC4]" },
-                  { number: "10k+", label: t('stat_happy_patients') || 'Happy Patients', color: "text-[#4DBCC4]" },
-                  { number: "50+", label: t('stat_medical_centers') || 'Medical Centers', color: "text-[#4DBCC4]" },
-                  { number: "24/7", label: t('stat_support_available') || 'Support Available', color: "text-[#4DBCC4]" }
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: 0.8 + index * 0.1,
-                      type: "spring",
-                      stiffness: 200
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    viewport={{ once: true }}
-                    className="bg-card p-3 sm:p-4 rounded-lg border border-border"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      transition={{ delay: 1 + index * 0.1 }}
-                      viewport={{ once: true }}
-                      className={`text-xl sm:text-2xl lg:text-3xl font-bold ${stat.color}`}
-                    >
-                      {stat.number}
-                    </motion.div>
-                    <div className="text-muted-foreground text-xs sm:text-sm">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </motion.div>
             </div>
-          </motion.div>
-        </div>
-      </motion.div>
 
-      {/* Close main content wrapper */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="bg-muted rounded-2xl p-4 sm:p-6 lg:p-8"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">{t('mission_title') || 'Our Mission'}</h3>
+                  <p className="text-foreground mb-4 text-sm sm:text-base">
+                    {t('mission_p1') || 'At Kashfety, we believe that quality healthcare should be accessible to everyone. Our platform bridges the gap between patients and healthcare providers, making it easier than ever to book appointments, consult with specialists, and receive the care you deserve.'}
+                  </p>
+                  <p className="text-foreground text-sm sm:text-base">
+                    {t('mission_p2') || 'Whether you need a routine check-up, specialist consultation, or emergency care, our comprehensive network of medical professionals is here to serve you with excellence and dedication.'}
+                  </p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  viewport={{ once: true }}
+                  className="grid grid-cols-2 gap-3 sm:gap-4 text-center"
+                >
+                  {[
+                    { number: "500+", label: t('stat_verified_doctors') || 'Verified Doctors', color: "text-[#4DBCC4]" },
+                    { number: "10k+", label: t('stat_happy_patients') || 'Happy Patients', color: "text-[#4DBCC4]" },
+                    { number: "50+", label: t('stat_medical_centers') || 'Medical Centers', color: "text-[#4DBCC4]" },
+                    { number: "24/7", label: t('stat_support_available') || 'Support Available', color: "text-[#4DBCC4]" }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.8 + index * 0.1,
+                        type: "spring",
+                        stiffness: 200
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      viewport={{ once: true }}
+                      className="bg-card p-3 sm:p-4 rounded-lg border border-border"
+                    >
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ delay: 1 + index * 0.1 }}
+                        viewport={{ once: true }}
+                        className={`text-xl sm:text-2xl lg:text-3xl font-bold ${stat.color}`}
+                      >
+                        {stat.number}
+                      </motion.div>
+                      <div className="text-muted-foreground text-xs sm:text-sm">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Close main content wrapper */}
       </div>
 
       {/* Booking Modal */}

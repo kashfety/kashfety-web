@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import serverless from "serverless-http";
 
 // Load environment variables
 dotenv.config();
@@ -55,15 +56,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logger to debug banner routes
 app.use((req, res, next) => {
-    if (req.path.includes('/banners')) {
-        console.log('🔍 REQUEST TO BANNERS:', {
-            method: req.method,
-            path: req.path,
-            fullUrl: req.originalUrl,
-            headers: req.headers.authorization ? 'Has Auth Token' : 'No Auth Token'
-        });
-    }
-    next();
+  if (req.path.includes('/banners')) {
+    console.log('🔍 REQUEST TO BANNERS:', {
+      method: req.method,
+      path: req.path,
+      fullUrl: req.originalUrl,
+      headers: req.headers.authorization ? 'Has Auth Token' : 'No Auth Token'
+    });
+  }
+  next();
 });
 
 // Ensure local uploads directory exists and serve statically
@@ -341,14 +342,16 @@ app.get("/api", (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`API Documentation available at: http://localhost:${PORT}/api`);
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+//   console.log(`API Documentation available at: http://localhost:${PORT}/api`);
 
-  // Seed the database on server start
-  seedDatabase()
-    .then(() => console.log("Initial database setup completed"))
-    .catch(err => console.error("Database initialization error:", err));
-});
+//   // Seed the database on server start
+//   seedDatabase()
+//     .then(() => console.log("Initial database setup completed"))
+//     .catch(err => console.error("Database initialization error:", err));
+// });
 
-export default app;
+// export default app;
+module.exports = app;
+module.exports.handler = serverless(app);

@@ -49,8 +49,17 @@ import { seedDatabase } from "./utils/seedDatabase.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// Middleware - Enhanced CORS for Vercel deployment
+app.use(cors({
+  origin: true, // Allow all origins in production
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -341,17 +350,5 @@ app.get("/api", (req, res) => {
   });
 });
 
-// Start server
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-//   console.log(`API Documentation available at: http://localhost:${PORT}/api`);
-
-//   // Seed the database on server start
-//   seedDatabase()
-//     .then(() => console.log("Initial database setup completed"))
-//     .catch(err => console.error("Database initialization error:", err));
-// });
-
-// export default app;
-module.exports = app;
-module.exports.handler = serverless(app);
+// Export for Vercel serverless functions
+export default serverless(app);

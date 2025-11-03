@@ -49,16 +49,37 @@ import { seedDatabase } from "./utils/seedDatabase.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware - Enhanced CORS for Vercel deployment
-app.use(cors({
-  origin: true, // Allow all origins in production
+// Middleware - Enhanced CORS for production deployment
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // In production, allow requests from your frontend domain
+    // You can specify allowed origins here or use environment variable
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : [true]; // If no env var, allow all (for development)
+
+    if (allowedOrigins.includes(true) || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all for now, but log the origin
+      console.log('CORS request from origin:', origin);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -350,5 +371,11 @@ app.get("/api", (req, res) => {
   });
 });
 
-// Export for Vercel serverless functions
-export default serverless(app);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+export default app;
+
+// // Export for Vercel serverless functions
+// export default serverless(app);

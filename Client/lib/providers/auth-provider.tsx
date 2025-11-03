@@ -77,7 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Normalize API URL to avoid double slashes
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+      let baseUrl: string
+      if (apiUrl.includes('/api')) {
+        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+      } else {
+        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+      }
 
       const response = await fetch(`${baseUrl}/auth/verify`, {
         method: 'GET',
@@ -85,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important for CORS with credentials
       })
 
       console.log('Token verification response status:', response.status)
@@ -150,24 +156,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       console.log('Starting login process...')
+      
       // Normalize API URL to avoid double slashes or missing /api  
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-      const response = await fetch(`${baseUrl}/auth/login`, {
+      
+      // Handle both cases: URL with or without /api
+      let baseUrl: string
+      if (apiUrl.includes('/api')) {
+        // If /api is already in the URL, use it as-is (remove trailing /api if duplicated)
+        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+      } else {
+        // If no /api, add it
+        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+      }
+      
+      const loginUrl = `${baseUrl}/auth/login`
+      console.log('🌐 Login URL:', loginUrl)
+      console.log('🌐 API URL env:', apiUrl)
+      
+      const response = await fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // Important for CORS with credentials
       })
 
-      const result = await response.json()
+      // Check if response is ok before trying to parse JSON
+      let result
+      try {
+        result = await response.json()
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', parseError)
+        const text = await response.text()
+        console.error('Response text:', text)
+        throw new Error(`Server returned invalid response (${response.status}): ${text.substring(0, 200)}`)
+      }
 
       console.log('Login response status:', response.status)
       console.log('Login response data:', result)
 
       if (!response.ok) {
-        throw new Error(result.message || 'Login failed')
+        const errorMessage = result.error || result.message || `Login failed with status ${response.status}`
+        console.error('Login failed:', errorMessage)
+        throw new Error(errorMessage)
       }
 
       if (result.message === 'Login successful' && result.token && result.user) {
@@ -193,7 +226,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('❌ Login error:', err)
       const error = err instanceof Error ? err : new Error('Login failed')
-      console.error('Login error:', error)
+      console.error('Login error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
       setError(error)
       setIsAuthenticated(false)
       setUser(null)
@@ -271,14 +308,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Normalize API URL to avoid double slashes or missing /api
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-      console.log('Making request to:', `${baseUrl}/auth/register`);
-      const response = await fetch(`${baseUrl}/auth/register`, {
+      let baseUrl: string
+      if (apiUrl.includes('/api')) {
+        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+      } else {
+        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+      }
+      
+      const registerUrl = `${baseUrl}/auth/register`
+      console.log('🌐 Register URL:', registerUrl)
+      console.log('🌐 API URL env:', apiUrl)
+      
+      const response = await fetch(registerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(registrationData),
+        credentials: 'include', // Important for CORS with credentials
       })
 
       const result = await response.json()

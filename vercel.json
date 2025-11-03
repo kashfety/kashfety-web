@@ -1,15 +1,8 @@
 {
-  "buildCommand": "cd Client && npm run build",
-  "outputDirectory": "Client/.next",
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api"
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }

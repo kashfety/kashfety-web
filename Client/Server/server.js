@@ -371,11 +371,16 @@ app.get("/api", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Only start the server if not in Vercel serverless environment
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
+// Export the app for Vercel serverless functions
+// Vercel uses Node.js req/res, so we can use the app directly
 export default app;
 
-// // Export for Vercel serverless functions
-// export default serverless(app);
+// Also export serverless-wrapped version for compatibility
+export const handler = serverless(app);

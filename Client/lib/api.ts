@@ -519,10 +519,32 @@ export const labService = {
       return frontendApi.get(`/api/public/lab-tests/centers/${centerId}/services`);
     }
   },
-  getAvailableDates: async (centerId: string, typeId: string, range?: { start_date?: string; end_date?: string }) =>
-    frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-dates`, { params: range }),
-  getAvailableSlots: async (centerId: string, typeId: string, date: string) =>
-    frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-slots`, { params: { date } }),
+  getAvailableDates: async (centerId: string, typeId: string, range?: { start_date?: string; end_date?: string }) => {
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('📅 Trying lab-available-dates route');
+      const params = { centerId, typeId, ...range };
+      const response = await frontendApi.get('/api/lab-available-dates', { params });
+      console.log('✅ Lab dates fetched successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-dates`, { params: range });
+    }
+  },
+  getAvailableSlots: async (centerId: string, typeId: string, date: string) => {
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🕐 Trying lab-available-slots route');
+      const params = { centerId, typeId, date };
+      const response = await frontendApi.get('/api/lab-available-slots', { params });
+      console.log('✅ Lab slots fetched successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-slots`, { params: { date } });
+    }
+  },
   book: async (booking: { center_id: string; lab_test_type_id: string; booking_date: string; booking_time: string; notes?: string; duration?: number; fee?: number; }) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     if (!userStr) throw new Error('No user found. Please log in.');

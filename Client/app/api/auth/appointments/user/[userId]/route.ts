@@ -20,15 +20,27 @@ export async function GET(
       return NextResponse.json({ success: false, message: 'User ID is required' }, { status: 400 });
     }
 
-    const { data: appointments, error } = await supabaseAdmin
+    // Handle different roles - super_admin can see all appointments, others see their own
+    let appointmentsQuery = supabaseAdmin
       .from('appointments')
       .select(`
         *,
         doctor:users!fk_appointments_doctor (id, name, specialty, phone),
         patient:users!fk_appointments_patient (id, name, phone, email),
         center:centers!fk_appointments_center (id, name, address, phone, email)
-      `)
-      .eq(role === 'doctor' ? 'doctor_id' : 'patient_id', userId)
+      `);
+    
+    // Filter by role - super_admin sees all, others see their own
+    if (role === 'super_admin' || role === 'admin') {
+      // Super admin and admin can see all appointments - no filter
+    } else if (role === 'doctor') {
+      appointmentsQuery = appointmentsQuery.eq('doctor_id', userId);
+    } else {
+      // Default to patient
+      appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
+    }
+    
+    const { data: appointments, error } = await appointmentsQuery
       .order('appointment_date', { ascending: true })
       .order('appointment_time', { ascending: true });
 

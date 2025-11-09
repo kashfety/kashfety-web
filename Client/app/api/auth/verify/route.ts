@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
@@ -21,16 +21,23 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.split(' ')[1];
 
-    // Verify JWT token
+    // Verify JWT token (matching login route configuration)
     let decoded: any;
     try {
-      decoded = jwt.verify(token, jwtSecret);
+      decoded = jwt.verify(token, jwtSecret, {
+        issuer: 'doctor-appointment-system'
+      });
     } catch (error) {
       console.error('JWT verification error:', error);
-      return NextResponse.json(
-        { success: false, message: 'Invalid or expired token' },
-        { status: 401 }
-      );
+      // Try without issuer check for backward compatibility
+      try {
+        decoded = jwt.verify(token, jwtSecret);
+      } catch (fallbackError) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid or expired token' },
+          { status: 401 }
+        );
+      }
     }
 
     // Fetch fresh user data from database

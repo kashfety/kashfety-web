@@ -43,8 +43,16 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={onMenuToggle}
-            className="text-foreground/80 hover:text-[#4DBCC4] dark:hover:text-[#2a5f6b] transition-colors p-1.5 sm:p-2"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (onMenuToggle) {
+                onMenuToggle();
+              }
+            }}
+            className="text-foreground/80 hover:text-[#4DBCC4] dark:hover:text-[#2a5f6b] transition-colors p-1.5 sm:p-2 z-50 relative"
+            aria-label="Toggle menu"
+            type="button"
           >
             <Menu size={20} className="sm:w-6 sm:h-6" />
           </Button>

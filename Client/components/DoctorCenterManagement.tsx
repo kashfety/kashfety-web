@@ -181,17 +181,35 @@ export default function DoctorCenterManagement() {
       // If only one center selected, make it primary
       const finalPrimary = selectedCenters.length === 1 ? selectedCenters[0] : (primaryCenter || selectedCenters[0]);
 
-      const response = await axios.put(
-        `/api/doctor-dashboard/centers`,
-        { 
-          center_ids: selectedCenters,
-          primary_center_id: finalPrimary,
-          ...(doctorId ? { doctor_id: doctorId } : {}),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      // Try fallback route first for Vercel compatibility
+      let response;
+      try {
+        console.log('🏥 Trying doctor-centers-assignments fallback route');
+        response = await axios.put(
+          `/api/doctor-centers-assignments`,
+          { 
+            center_ids: selectedCenters,
+            primary_center_id: finalPrimary,
+            ...(doctorId ? { doctor_id: doctorId } : {}),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        response = await axios.put(
+          `/api/doctor-dashboard/centers`,
+          { 
+            center_ids: selectedCenters,
+            primary_center_id: finalPrimary,
+            ...(doctorId ? { doctor_id: doctorId } : {}),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      }
 
       if (response.data.success) {
         toast({

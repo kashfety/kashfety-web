@@ -47,27 +47,46 @@ export async function GET(request: NextRequest) {
     const availableDates = [];
     const current = new Date(start);
 
+    // If no schedule exists, provide default working days (Monday-Friday, 0-4 or 1-5)
+    const hasSchedule = schedule && schedule.length > 0;
+    
+    if (!hasSchedule) {
+      console.log('⚠️ No schedule found, using default working days (Monday-Friday)');
+    }
+
     while (current <= end) {
       const dayOfWeek = current.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const dateStr = current.toISOString().split('T')[0];
 
-      // Check if this day has available schedule
-      const daySchedule = schedule?.find((s: any) => s.day_of_week === dayOfWeek);
-      
-      if (daySchedule && daySchedule.is_available) {
-        // Parse time_slots if it's a JSON string
-        let timeSlots = daySchedule.time_slots;
-        if (typeof timeSlots === 'string') {
-          try {
-            timeSlots = JSON.parse(timeSlots);
-          } catch (e) {
-            console.error('Failed to parse time_slots JSON:', e);
-            timeSlots = [];
+      let shouldInclude = false;
+      let slotsCount = 0;
+
+      if (hasSchedule) {
+        // Check if this day has available schedule
+        const daySchedule = schedule?.find((s: any) => s.day_of_week === dayOfWeek);
+        
+        if (daySchedule && daySchedule.is_available) {
+          // Parse time_slots if it's a JSON string
+          let timeSlots = daySchedule.time_slots;
+          if (typeof timeSlots === 'string') {
+            try {
+              timeSlots = JSON.parse(timeSlots);
+            } catch (e) {
+              console.error('Failed to parse time_slots JSON:', e);
+              timeSlots = [];
+            }
           }
+          
+          slotsCount = Array.isArray(timeSlots) ? timeSlots.length : 0;
+          shouldInclude = slotsCount > 0;
         }
-        
-        const slotsCount = Array.isArray(timeSlots) ? timeSlots.length : 0;
-        
+      } else {
+        // Default: Monday (1) to Friday (5) are working days
+        shouldInclude = dayOfWeek >= 1 && dayOfWeek <= 5;
+        slotsCount = 16; // Default slots (8 AM - 4 PM, every 30 min)
+      }
+
+      if (shouldInclude) {
         availableDates.push({
           date: dateStr,
           day_of_week: dayOfWeek,

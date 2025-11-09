@@ -44,32 +44,42 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
+    let timeSlots = [];
+    
     if (!schedule) {
-      console.log('⚠️ No schedule found for this day');
-      return NextResponse.json({
-        success: true,
-        available_slots: [],
-        date,
-        message: 'No slots available for this date'
-      });
-    }
+      console.log('⚠️ No schedule found, using default time slots (8 AM - 4 PM)');
+      
+      // Generate default time slots: 8:00 AM to 4:00 PM, every 30 minutes
+      const defaultSlots = [];
+      for (let hour = 8; hour < 16; hour++) {
+        defaultSlots.push(`${String(hour).padStart(2, '0')}:00`);
+        defaultSlots.push(`${String(hour).padStart(2, '0')}:30`);
+      }
+      timeSlots = defaultSlots;
+    } else {
+      // Parse time_slots from schedule
+      timeSlots = schedule.time_slots;
+      if (typeof timeSlots === 'string') {
+        try {
+          timeSlots = JSON.parse(timeSlots);
+        } catch (e) {
+          console.error('Failed to parse time_slots JSON:', e);
+          // Use default slots as fallback
+          const defaultSlots = [];
+          for (let hour = 8; hour < 16; hour++) {
+            defaultSlots.push(`${String(hour).padStart(2, '0')}:00`);
+            defaultSlots.push(`${String(hour).padStart(2, '0')}:30`);
+          }
+          timeSlots = defaultSlots;
+        }
+      }
 
-    // Parse time_slots
-    let timeSlots = schedule.time_slots;
-    if (typeof timeSlots === 'string') {
-      try {
-        timeSlots = JSON.parse(timeSlots);
-      } catch (e) {
-        console.error('Failed to parse time_slots JSON:', e);
+      if (!Array.isArray(timeSlots)) {
         timeSlots = [];
       }
     }
 
-    if (!Array.isArray(timeSlots)) {
-      timeSlots = [];
-    }
-
-    console.log('📅 Found time slots:', timeSlots);
+    console.log('📅 Time slots to use:', timeSlots);
 
     // Get booked slots for this date
     const { data: bookings, error: bookingsError } = await supabase

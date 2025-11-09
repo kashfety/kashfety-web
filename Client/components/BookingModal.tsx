@@ -481,18 +481,41 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     try {
       console.log('📅 Fetching doctor working days for:', doctorId, 'at center:', centerId);
 
-      // Use the correct API endpoint
-      let apiUrl = `/api/doctors/${doctorId}/working-days`;
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.set('doctorId', doctorId);
       if (centerId) {
-        apiUrl += `?center_id=${centerId}`;
+        params.set('center_id', centerId);
       } else if (selectedCenter?.id) {
-        apiUrl += `?center_id=${selectedCenter.id}`;
+        params.set('center_id', selectedCenter.id);
       }
 
-      const response = await fetch(apiUrl);
+      // Try multiple route variants for Vercel compatibility
+      const routes = [
+        `/api/doctor-working-days?${params.toString()}`,
+        `/api/doctors/${doctorId}/working-days?${centerId ? `center_id=${centerId}` : ''}`
+      ];
 
-      if (response.ok) {
-        const data = await response.json();
+      let data = null;
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await fetch(routes[i]);
+          if (response.ok) {
+            data = await response.json();
+            console.log('✅ Route worked:', routes[i]);
+            break;
+          }
+          console.log(`❌ Route failed: ${routes[i]}`);
+        } catch (error) {
+          console.log(`❌ Route error: ${routes[i]}`, error);
+          if (i === routes.length - 1) {
+            throw error; // Rethrow on last attempt
+          }
+        }
+      }
+
+      if (data) {
         console.log('📅 Doctor working days data:', data);
 
         const days = Array.isArray(data.working_days) ? data.working_days : (Array.isArray(data.workingDays) ? data.workingDays : null);
@@ -521,7 +544,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
           setDoctorWorkingDays([]);
         }
       } else {
-        console.error('Failed to fetch doctor availability:', response.status);
+        console.error('Failed to fetch doctor availability - all routes failed');
         setAvailableDates([]);
         setDoctorWorkingDays([]);
       }

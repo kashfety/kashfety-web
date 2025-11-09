@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// GET /api/doctors/:doctorId/working-days
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ doctorId: string }> }
-) {
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+export async function GET(request: NextRequest) {
   try {
-    const { doctorId } = await params;
     const { searchParams } = new URL(request.url);
+    const doctorId = searchParams.get('doctorId');
     const centerId = searchParams.get('center_id');
     
+    console.log('📅 [Doctor Working Days API] Request - Doctor:', doctorId, 'Center:', centerId);
+
+    if (!doctorId) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Doctor ID is required as query parameter' 
+      }, { status: 400 });
+    }
+
     // Use service role key for production to bypass RLS
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     let query = supabase
       .from('doctor_schedules')
@@ -30,23 +35,29 @@ export async function GET(
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching working days:', error);
-      throw error;
+      console.error('📅 Error fetching working days:', error);
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Failed to fetch doctor working days' 
+      }, { status: 500 });
     }
 
     // Get unique working days and sort them
     const workingDays = [...new Set((data || []).map((r: any) => Number(r.day_of_week)))].sort((a, b) => a - b);
     
+    console.log(`📅 Found ${workingDays.length} working days for doctor ${doctorId}`);
+
     return NextResponse.json({ 
       success: true, 
       working_days: workingDays,
       workingDays: workingDays // Support both formats for backward compatibility
     });
   } catch (error: any) {
-    console.error('working-days error:', error);
+    console.error('📅 Error:', error);
     return NextResponse.json({ 
       success: false, 
-      message: error.message || 'Failed to fetch doctor working days' 
+      message: error.message || 'Internal server error' 
     }, { status: 500 });
   }
 }
+

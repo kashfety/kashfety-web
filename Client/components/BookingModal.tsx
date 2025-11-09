@@ -607,22 +607,47 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
 
       const dateString = formatDateForAPI(date);
 
-      console.log('🔍 Fetching available slots - Doctor:', doctorId, 'Date:', dateString, 'Center:', selectedCenter?.id);
+      console.log('🔍 Fetching available slots - Doctor:', doctorId, 'Date:', dateString, 'Center:', selectedCenter?.id, 'Location:', selectedLocation);
 
-      // Use the enhanced API route with center support
-      let apiUrl = `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}`;
-      if (selectedCenter?.id) {
-        apiUrl += `&center_id=${selectedCenter.id}`;
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.set('doctorId', doctorId);
+      params.set('date', dateString);
+      
+      // Only add center_id for clinic visits
+      if (selectedLocation === "clinic" && selectedCenter?.id) {
+        params.set('center_id', selectedCenter.id);
       }
 
-      const response = await fetch(apiUrl);
-      const result = await response.json();
+      // Try multiple route variants for Vercel compatibility
+      const routes = [
+        `/api/doctor-available-slots?${params.toString()}`,
+        `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}${selectedCenter?.id ? `&center_id=${selectedCenter.id}` : ''}`
+      ];
 
-      if (response.ok && result) {
+      let result = null;
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await fetch(routes[i]);
+          if (response.ok) {
+            result = await response.json();
+            console.log('✅ Route worked:', routes[i]);
+            break;
+          }
+          console.log(`❌ Route failed: ${routes[i]}`);
+        } catch (error) {
+          console.log(`❌ Route error: ${routes[i]}`, error);
+          if (i === routes.length - 1) {
+            throw error;
+          }
+        }
+      }
+
+      if (result && result.success) {
         console.log('📅 Available slots result:', result);
-        console.log('📅 Available slots structure:', result.available_slots);
-        // Handle new slot structure with status flags
-        const slots = result.available_slots || [];
+        // Handle both response formats (slots or available_slots)
+        const slots = result.slots || result.available_slots || [];
         console.log('📅 Setting slots:', slots);
         setAvailableSlots(slots);
         setBookedSlots(result.booked_slots || []);

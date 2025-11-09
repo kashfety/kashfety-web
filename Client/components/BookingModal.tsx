@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Home, Clock, Star, ChevronLeft } from "lucide-react";
+import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
@@ -2152,7 +2152,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                         {/* Calendar */}
                         <div className="flex flex-col">
                           <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
-                            <Calendar className="w-6 h-6 mr-2 text-[#4DBCC4]" />
+                            <CalendarIcon className="w-6 h-6 mr-2 text-[#4DBCC4]" />
                             {t('booking_select_date') || 'Select Date'}
                           </h4>
                           {!isLabMode && doctorWorkingDays.length > 0 && selectedDoctor && (
@@ -2269,7 +2269,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                           )
                         ) : (
                           <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_select_date_first') || 'Please select a date first'}</p>
                           </div>
                         )}

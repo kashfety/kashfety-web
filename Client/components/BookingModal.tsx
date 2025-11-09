@@ -2181,8 +2181,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                             selected={selectedDate}
                             onSelect={handleDateSelect}
                             disabled={(date) => {
-                              // Disable past dates
-                              if (date < new Date()) return true;
+                              // Disable past dates (before today)
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              if (date < today) return true;
 
                               if (isLabMode) {
                                 // Only enable dates returned by lab schedule
@@ -2193,13 +2195,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                               // If we have doctor's working days, only allow those days
                               if (doctorWorkingDays.length > 0) {
                                 const dayOfWeek = date.getDay();
-                                return !doctorWorkingDays.includes(dayOfWeek);
+                                const isWorkingDay = doctorWorkingDays.includes(dayOfWeek);
+                                return !isWorkingDay;
                               }
 
-                              // Default fallback - disable Fridays and weekends for safety
+                              // Default fallback - disable Fridays and weekends
                               return date.getDay() === 5 || date.getDay() === 6;
                             }}
-                            className="rounded-lg border-2 border-gray-300 dark:border-gray-600 shadow-md p-4 bg-white dark:bg-gray-800"
+                            className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 bg-white dark:bg-gray-800 w-full"
                           />
                         </div>
 
@@ -2257,12 +2260,17 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                                   <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Clock className="w-8 h-8 text-red-500" />
                                   </div>
-                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg">
+                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
                                     {t('booking_no_slots_date') || 'No available time slots for this date'}
                                   </p>
-                                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                  <p className="text-gray-600 dark:text-gray-400 text-sm">
                                     {t('booking_try_another_date') || 'Please select another date'}
                                   </p>
+                                  {!isLabMode && doctorWorkingDays.length > 0 && (
+                                    <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium">
+                                      {t('booking_doctor_available_hint') || 'Available days are highlighted in the calendar'}
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </div>

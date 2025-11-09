@@ -46,11 +46,15 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              console.log('🔘 Menu button clicked, onMenuToggle exists:', !!onMenuToggle);
               if (onMenuToggle) {
+                console.log('🔘 Calling onMenuToggle');
                 onMenuToggle();
+              } else {
+                console.error('🔘 onMenuToggle is undefined!');
               }
             }}
-            className="text-foreground/80 hover:text-[#4DBCC4] dark:hover:text-[#2a5f6b] transition-colors p-1.5 sm:p-2 z-50 relative"
+            className="text-foreground/80 hover:text-[#4DBCC4] dark:hover:text-[#2a5f6b] transition-colors p-1.5 sm:p-2 z-[60] relative cursor-pointer"
             aria-label="Toggle menu"
             type="button"
           >

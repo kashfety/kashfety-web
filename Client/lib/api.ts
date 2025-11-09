@@ -394,9 +394,16 @@ export const appointmentService = {
       }
 
       const user = JSON.parse(storedUser);
-      // Use the correct route path: /api/auth/appointments/user/[userId]
-      const response = await api.get(`/api/auth/appointments/user/${user.id}?role=${user.role}`);
-      return response;
+      // Try alternative route first (without /auth prefix) for Vercel compatibility
+      try {
+        const response = await api.get(`/api/appointments/user/${user.id}?role=${user.role}`);
+        return response;
+      } catch (altError) {
+        // Fallback to /auth route
+        console.log('Trying /auth route as fallback');
+        const response = await api.get(`/api/auth/appointments/user/${user.id}?role=${user.role}`);
+        return response;
+      }
     } catch (error) {
       console.error('Get appointments failed:', error);
       throw error;

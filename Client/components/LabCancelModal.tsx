@@ -109,18 +109,18 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-red-600" />
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{booking.type?.name}</span>
+                      <span className="font-medium text-red-900">{booking.type?.name}</span>
                       <Badge className="bg-red-100 text-red-800 text-xs">
                         {booking.type?.category?.toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-red-600" />
-                      <span className="text-gray-900 dark:text-gray-100">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
+                      <span className="text-red-900">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-red-600" />
-                      <span className="text-gray-900 dark:text-gray-100">{booking.center?.name}</span>
+                      <span className="text-red-900">{booking.center?.name}</span>
                     </div>
                     {booking.fee && (
                       <div className="text-red-700 font-medium">
@@ -158,7 +158,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                     className="mt-2"
                     rows={3}
                   />
-                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                     {t('lab_cancel_reason_help') || 'This helps us improve our service and process your cancellation faster.'}
                   </p>
                 </div>

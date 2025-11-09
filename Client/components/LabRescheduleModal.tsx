@@ -193,15 +193,15 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <CalendarIcon className="w-4 h-4 text-blue-600" />
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">{booking.type?.name}</span>
+                        <span className="text-blue-900 font-medium">{booking.type?.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-blue-600" />
-                        <span className="text-gray-900 dark:text-gray-100">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
+                        <span className="text-blue-900">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-blue-600" />
-                        <span className="text-gray-900 dark:text-gray-100">{booking.center?.name}</span>
+                        <span className="text-blue-900">{booking.center?.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-blue-100 text-blue-800">
@@ -243,7 +243,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                       loadingAvailability ? (
                         <div className="flex items-center justify-center py-8">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
-                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{t('lab_loading_times') || 'Loading available times...'}</span>
+                          <span className="ml-2 text-sm text-gray-900 dark:text-white">{t('lab_loading_times') || 'Loading available times...'}</span>
                         </div>
                       ) : (
                         <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
@@ -276,14 +276,14 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                             </motion.div>
                           ))}
                           {availableSlots.length === 0 && (
-                            <div className="col-span-3 text-center py-4 text-gray-700 dark:text-gray-300">
+                            <div className="col-span-3 text-center py-4 text-gray-900 dark:text-white">
                               {t('lab_no_times_available') || 'No available time slots for this date'}
                             </div>
                           )}
                         </div>
                       )
                     ) : (
-                      <p className="text-gray-700 dark:text-gray-300 text-center py-8">
+                      <p className="text-gray-900 dark:text-white text-center py-8">
                         {t('lab_select_date_first') || 'Please select a date first'}
                       </p>
                     )}

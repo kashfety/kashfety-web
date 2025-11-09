@@ -8,10 +8,11 @@ const supabaseAdmin = createClient(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = params;
+    // Await params in Next.js App Router
+    const { userId } = await params;
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role') || 'patient';
 
@@ -57,6 +58,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, appointments: enriched });
   } catch (err: any) {
+    console.error('Error fetching appointments:', err);
     return NextResponse.json({ success: false, message: 'Internal server error', error: err.message }, { status: 500 });
   }
 }

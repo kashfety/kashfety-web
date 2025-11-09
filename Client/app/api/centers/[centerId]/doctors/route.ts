@@ -10,43 +10,43 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ centerId: string }> }
 ) {
-  const { searchParams } = new URL(request.url);
-  const specialty = searchParams.get('specialty') || undefined;
-  const homeVisit = searchParams.get('home_visit') || undefined;
-  const authHeader = request.headers.get('authorization') || undefined;
-
-  // Await params to get the centerId
-  const { centerId } = await params;
-
-  // Attempt backend (if available)
   try {
-    const qs = new URLSearchParams();
-    if (specialty) qs.set('specialty', specialty);
-    if (homeVisit) qs.set('home_visit', homeVisit);
+    // Await params to get the centerId first
+    const { centerId } = await params;
+    
+    const { searchParams } = new URL(request.url);
+    const specialty = searchParams.get('specialty') || undefined;
+    const homeVisit = searchParams.get('home_visit') || undefined;
+    const authHeader = request.headers.get('authorization') || undefined;
 
-    const url = `${BACKEND_URL}/api/auth/centers/${centerId}/doctors${qs.toString() ? `?${qs.toString()}` : ''}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: authHeader ? { Authorization: authHeader } : undefined,
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return NextResponse.json(data, { status: response.status });
+    // Attempt backend (if available)
+    try {
+      const qs = new URLSearchParams();
+      if (specialty) qs.set('specialty', specialty);
+      if (homeVisit) qs.set('home_visit', homeVisit);
+
+      const url = `${BACKEND_URL}/api/auth/centers/${centerId}/doctors${qs.toString() ? `?${qs.toString()}` : ''}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: authHeader ? { Authorization: authHeader } : undefined,
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return NextResponse.json(data, { status: response.status });
+      }
+      // If unauthorized or server error, fall through to Supabase fallback
+    } catch (e) {
+      // Ignore and try fallback
     }
-    // If unauthorized or server error, fall through to Supabase fallback
-  } catch (e) {
-    // Ignore and try fallback
-  }
 
-  // Supabase fallback (server-side; safe to use service role)
-  try {
+    // Supabase fallback (server-side; safe to use service role)
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data, error } = await supabase
       .from('doctor_centers')
       .select(`
         doctor_id,
         users:users!fk_doctor_centers_doctor (
-          id, name, specialty, consultation_fee, home_visits_available, rating
+          id, name, specialty, consultation_fee, home_visits_available, rating, experience_years, profile_picture
         )
       `)
       .eq('center_id', centerId);
@@ -65,7 +65,9 @@ export async function GET(
         specialty: u.specialty,
         consultation_fee: Number(u.consultation_fee || 0),
         home_available: !!u.home_visits_available,
-        rating: typeof u.rating === 'number' ? u.rating : 0
+        rating: typeof u.rating === 'number' ? u.rating : 0,
+        experience_years: u.experience_years || 0,
+        profile_picture: u.profile_picture || '/default-avatar.jpg'
       }));
 
     if (specialty) {

@@ -1271,7 +1271,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                                 ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
                                 : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
                                 }`}
-                              onClick={() => setSelectedSpecialty(specialty.name)}
+                              onClick={async () => {
+                                setSelectedSpecialty(specialty.name);
+                                // If home visit is already selected, automatically fetch doctors and proceed
+                                if (selectedLocation === "home") {
+                                  setSearchMethod("doctors");
+                                  await fetchDoctorsBySpecialty(specialty.name, "home");
+                                  setCurrentStep(2);
+                                }
+                              }}
                             >
                               <CardContent className="p-5 text-center">
                                 <div className={`text-base font-semibold ${selectedSpecialty === specialty.name ? 'text-[#4DBCC4] dark:text-[#4DBCC4]' : 'text-gray-800 dark:text-gray-200'}`}>
@@ -1308,7 +1316,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                             ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
                             : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
                             }`}
-                          onClick={() => setSelectedLocation("home")}
+                          onClick={async () => {
+                            setSelectedLocation("home");
+                            // For home visits, automatically set search method to "doctors" and proceed
+                            setSearchMethod("doctors");
+                            // If specialty is already selected, automatically fetch doctors and proceed
+                            if (selectedSpecialty) {
+                              await fetchDoctorsBySpecialty(selectedSpecialty, "home");
+                              setCurrentStep(2);
+                            }
+                          }}
                         >
                           <CardContent className="p-7 text-center">
                             <Home className={`w-10 h-10 mx-auto mb-3 ${selectedLocation === "home" ? 'text-[#4DBCC4]' : 'text-gray-600 dark:text-gray-400'}`} />
@@ -1321,8 +1338,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                       </div>
                     </div>
 
-                    {/* Search Method Selection - Only show after specialty and location are selected */}
-                    {selectedSpecialty && selectedLocation && !searchMethod && (
+                    {/* Search Method Selection - Only show after specialty and location are selected, but skip for home visits */}
+                    {selectedSpecialty && selectedLocation && !searchMethod && selectedLocation !== "home" && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1357,11 +1374,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
 
                     <Button
                       onClick={handleSpecialtySelect}
-                      disabled={!selectedSpecialty || !selectedLocation || !searchMethod}
+                      disabled={!selectedSpecialty || !selectedLocation || (!searchMethod && selectedLocation !== "home")}
                       className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
                       size="lg"
                     >
-                      {searchMethod === "centers" ? (t('booking_find_centers') || 'Find Centers') : searchMethod === "doctors" ? (t('booking_find_doctors') || 'Find Doctors') : (t('booking_next') || 'Next')}
+                      {selectedLocation === "home" ? (t('booking_find_doctors') || 'Find Doctors') : searchMethod === "centers" ? (t('booking_find_centers') || 'Find Centers') : searchMethod === "doctors" ? (t('booking_find_doctors') || 'Find Doctors') : (t('booking_next') || 'Next')}
                     </Button>
                   </div>
                 )}

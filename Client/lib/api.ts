@@ -4,7 +4,10 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Frontend API Base URL for public endpoints (Next.js server)
-const FRONTEND_API_BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_API_URL || 'http://localhost:3000';
+// Use relative path in browser, or environment variable if set
+const FRONTEND_API_BASE_URL = typeof window !== 'undefined' 
+  ? '' // Use relative paths in browser (same origin)
+  : (process.env.NEXT_PUBLIC_FRONTEND_API_URL || 'http://localhost:3000'); // Only use absolute URL for SSR
 
 // Create axios instance with default config for backend
 const apiClient = axios.create({

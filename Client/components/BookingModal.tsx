@@ -1297,6 +1297,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                     {t('cd_lab_test_services')}
                   </Button>
                 </div>
+                {/* Debug Info - Remove after testing */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mb-4">
+                    Step: {currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} | 
+                    Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} | 
+                    Location: {selectedLocation || 'none'}
+                  </div>
+                )}
+                
                 {/* Step Indicator */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

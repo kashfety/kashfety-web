@@ -11,12 +11,16 @@ export async function GET(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    console.log('📋 [Appointments API] Request received');
     // Await params in Next.js App Router
     const { userId } = await params;
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role') || 'patient';
 
+    console.log('📋 [Appointments API] User ID:', userId, 'Role:', role);
+
     if (!userId) {
+      console.error('📋 [Appointments API] Missing user ID');
       return NextResponse.json({ success: false, message: 'User ID is required' }, { status: 400 });
     }
 

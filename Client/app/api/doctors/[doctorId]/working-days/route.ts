@@ -4,15 +4,17 @@ import { createClient } from '@supabase/supabase-js';
 // GET /api/doctors/:doctorId/working-days
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ doctorId: string }> }
+  { params }: { params: Promise<{ doctorId: string }> }
 ) {
   try {
-    const { doctorId } = await context.params;
+    const { doctorId } = await params;
     const { searchParams } = new URL(request.url);
     const centerId = searchParams.get('center_id');
+    
+    // Use service role key for production to bypass RLS
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
     let query = supabase
@@ -20,15 +22,31 @@ export async function GET(
       .select('day_of_week')
       .eq('doctor_id', doctorId)
       .eq('is_available', true);
-    if (centerId) query = query.eq('center_id', centerId);
+      
+    if (centerId) {
+      query = query.eq('center_id', centerId);
+    }
+    
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching working days:', error);
+      throw error;
+    }
 
-  const workingDays = (data || []).map((r: any) => Number(r.day_of_week));
-    return NextResponse.json({ success: true, workingDays });
+    // Get unique working days and sort them
+    const workingDays = [...new Set((data || []).map((r: any) => Number(r.day_of_week)))].sort((a, b) => a - b);
+    
+    return NextResponse.json({ 
+      success: true, 
+      working_days: workingDays,
+      workingDays: workingDays // Support both formats for backward compatibility
+    });
   } catch (error: any) {
     console.error('working-days error:', error);
-    return NextResponse.json({ success: false, message: error.message || 'Failed to fetch doctor working days' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      message: error.message || 'Failed to fetch doctor working days' 
+    }, { status: 500 });
   }
 }

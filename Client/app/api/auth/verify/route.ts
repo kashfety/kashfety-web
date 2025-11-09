@@ -10,9 +10,11 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔐 [Verify API] Request received');
     const authHeader = request.headers.get('authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('🔐 [Verify API] No authorization header or invalid format');
       return NextResponse.json(
         { success: false, message: 'No token provided' },
         { status: 401 }
@@ -20,42 +22,83 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('🔐 [Verify API] Token extracted, length:', token?.length);
 
     // Verify JWT token (matching login route configuration)
     let decoded: any;
+    let verificationError: any = null;
+    
     try {
+      // First try with issuer check (matching login route)
       decoded = jwt.verify(token, jwtSecret, {
         issuer: 'doctor-appointment-system'
       });
+      console.log('🔐 [Verify API] Token verified with issuer check');
     } catch (error) {
-      console.error('JWT verification error:', error);
+      verificationError = error;
+      console.error('🔐 [Verify API] JWT verification with issuer failed:', error);
       // Try without issuer check for backward compatibility
       try {
         decoded = jwt.verify(token, jwtSecret);
+        console.log('🔐 [Verify API] Token verified without issuer check');
       } catch (fallbackError) {
+        console.error('🔐 [Verify API] JWT verification without issuer also failed:', fallbackError);
+        // Try decoding without verification to see what's in the token
+        try {
+          const decodedWithoutVerify = jwt.decode(token);
+          console.log('🔐 [Verify API] Token decoded (not verified):', decodedWithoutVerify);
+        } catch (decodeError) {
+          console.error('🔐 [Verify API] Token cannot even be decoded:', decodeError);
+        }
+        
         return NextResponse.json(
-          { success: false, message: 'Invalid or expired token' },
+          { 
+            success: false, 
+            message: 'Invalid or expired token',
+            error: verificationError?.message || fallbackError?.message || 'Token verification failed'
+          },
           { status: 401 }
         );
       }
+    }
+
+    // Extract user ID from decoded token
+    const userId = decoded.id || decoded.userId || decoded.uid;
+    console.log('🔐 [Verify API] Decoded token user ID:', userId);
+    console.log('🔐 [Verify API] Full decoded token:', JSON.stringify(decoded, null, 2));
+
+    if (!userId) {
+      console.error('🔐 [Verify API] No user ID found in token');
+      return NextResponse.json(
+        { success: false, message: 'Token does not contain user ID' },
+        { status: 401 }
+      );
     }
 
     // Fetch fresh user data from database
     const { data: userData, error } = await supabaseAdmin
       .from('users')
       .select('id, name, first_name, last_name, email, phone, role, center_id, created_at, updated_at')
-      .eq('id', decoded.id || decoded.userId)
+      .eq('id', userId)
       .single();
 
-    if (error || !userData) {
-      console.error('Error fetching fresh user data:', error);
+    if (error) {
+      console.error('🔐 [Verify API] Error fetching user data:', error);
+      return NextResponse.json(
+        { success: false, message: 'Failed to fetch user data', error: error.message },
+        { status: 500 }
+      );
+    }
+
+    if (!userData) {
+      console.error('🔐 [Verify API] User not found in database for ID:', userId);
       return NextResponse.json(
         { success: false, message: 'User not found' },
         { status: 404 }
       );
     }
 
-    console.log('✅ Token verified, returning fresh user data:', userData);
+    console.log('✅ [Verify API] Token verified, returning fresh user data:', userData);
 
     return NextResponse.json({
       success: true,

@@ -75,16 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('Verifying token...')
 
-      // Normalize API URL to avoid double slashes
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-      let baseUrl: string
-      if (apiUrl.includes('/api')) {
-        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
-      } else {
-        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
-      }
-
-      const response = await fetch(`${baseUrl}/auth/verify`, {
+      // Use Next.js API route (relative path) instead of backend server
+      // This ensures we use the Next.js API route handler
+      const response = await fetch('/api/auth/verify', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,

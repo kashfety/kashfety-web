@@ -394,16 +394,30 @@ export const appointmentService = {
       }
 
       const user = JSON.parse(storedUser);
-      // Try alternative route first (without /auth prefix) for Vercel compatibility
-      try {
-        const response = await api.get(`/api/appointments/user/${user.id}?role=${user.role}`);
-        return response;
-      } catch (altError) {
-        // Fallback to /auth route
-        console.log('Trying /auth route as fallback');
-        const response = await api.get(`/api/auth/appointments/user/${user.id}?role=${user.role}`);
-        return response;
+      
+      // Try multiple route variants for Vercel compatibility
+      const routes = [
+        `/api/user-appointments/${user.id}?role=${user.role}`,
+        `/api/appointments/user/${user.id}?role=${user.role}`,
+        `/api/auth/appointments/user/${user.id}?role=${user.role}`
+      ];
+      
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await api.get(routes[i]);
+          console.log('✅ Route worked:', routes[i]);
+          return response;
+        } catch (error) {
+          console.log(`❌ Route failed: ${routes[i]}`);
+          if (i === routes.length - 1) {
+            throw error; // Rethrow on last attempt
+          }
+          // Continue to next route
+        }
       }
+      
+      throw new Error('All appointment routes failed');
     } catch (error) {
       console.error('Get appointments failed:', error);
       throw error;

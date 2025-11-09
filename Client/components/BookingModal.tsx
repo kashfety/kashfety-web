@@ -726,11 +726,19 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Step2 -> Step3', { doctorId: doctor.id, visitType: selectedLocation });
-    if (selectedLocation === "clinic" || selectedLocation === "home") {
+    console.log('[BookingModal] Step2 -> Step3/4', { doctorId: doctor.id, visitType: selectedLocation });
+    
+    // For home visits, skip center selection and go directly to step 4 (schedule)
+    if (selectedLocation === "home") {
+      // For home visits, we don't need to select a center
+      // Fetch working days without a center (home visits don't require a center)
+      await fetchDoctorWorkingDays(doctor.id);
+      setCurrentStep(4);
+    } else if (selectedLocation === "clinic") {
+      // For clinic visits, fetch centers and show step 3
       await fetchDoctorCenters(doctor.id, selectedLocation);
+      setCurrentStep(3);
     }
-    setCurrentStep(3);
   };
 
   // Handle center selection in "Find Centers" flow - moves to step 3 to show doctors
@@ -760,9 +768,13 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Centers Flow Step3 -> Step4', { doctorId: doctor.id, centerId: selectedCenter?.id });
-    // Fetch doctor's working days for this specific center
-    if (selectedCenter) {
+    console.log('[BookingModal] Centers Flow Step3 -> Step4', { doctorId: doctor.id, centerId: selectedCenter?.id, visitType: selectedLocation });
+    
+    // For home visits, we don't need the center - fetch working days without center
+    // For clinic visits, use the selected center
+    if (selectedLocation === "home") {
+      await fetchDoctorWorkingDays(doctor.id);
+    } else if (selectedCenter) {
       await fetchDoctorWorkingDays(doctor.id, selectedCenter.id);
     }
     setCurrentStep(4);
@@ -1482,7 +1494,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
                             const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
-                            const ratingMatch = (d.rating || 0) >= (minRating || 0);
+                            // Ensure rating is a number for proper comparison
+                            const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
+                            const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
+                            const ratingMatch = doctorRating >= minRatingValue;
                             const feeLimit = parseFloat(maxFee as any);
                             const feeMatch = isNaN(feeLimit) ? true : (d.consultation_fee || 0) <= feeLimit;
                             return textMatch && ratingMatch && feeMatch;
@@ -1611,7 +1626,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
                             const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
-                            const ratingMatch = (d.rating || 0) >= (minRating || 0);
+                            // Ensure rating is a number for proper comparison
+                            const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
+                            const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
+                            const ratingMatch = doctorRating >= minRatingValue;
                             const feeLimit = parseFloat(maxFee as any);
                             const feeMatch = isNaN(feeLimit) ? true : (d.consultation_fee || 0) <= feeLimit;
                             return textMatch && ratingMatch && feeMatch;
@@ -1683,8 +1701,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                   </div>
                 )}
 
-                {/* Step 3: Center Selection (Find Doctors flow) */}
-                {!isLabMode && currentStep === 3 && searchMethod === "doctors" && selectedDoctor && (
+                {/* Step 3: Center Selection (Find Doctors flow) - Only show for clinic visits */}
+                {!isLabMode && currentStep === 3 && searchMethod === "doctors" && selectedDoctor && selectedLocation === "clinic" && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm">
                       <div>
@@ -1696,7 +1714,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{selectedSpecialty}</span>
                           <span>•</span>
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">
-                            {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}
+                            {t('booking_clinic_visit') || 'Clinic Visit'}
                           </span>
                         </div>
                       </div>

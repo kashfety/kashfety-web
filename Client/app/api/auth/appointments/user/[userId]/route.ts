@@ -23,8 +23,8 @@ export async function GET(
       .from('appointments')
       .select(`
         *,
-        doctor:users!appointments_doctor_id_fkey (id, name, specialty, phone),
-        patient:users!appointments_patient_id_fkey (id, name, phone, email),
+        doctor:users!fk_appointments_doctor (id, name, specialty, phone),
+        patient:users!fk_appointments_patient (id, name, phone, email),
         center:centers!fk_appointments_center (id, name, address, phone, email)
       `)
       .eq(role === 'doctor' ? 'doctor_id' : 'patient_id', userId)

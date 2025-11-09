@@ -391,7 +391,8 @@ export const appointmentService = {
       }
 
       const user = JSON.parse(storedUser);
-      const response = await api.get(`/api/auth/appointments/${user.id}?role=${user.role}`);
+      // Use the correct route path: /api/auth/appointments/user/[userId]
+      const response = await api.get(`/api/auth/appointments/user/${user.id}?role=${user.role}`);
       return response;
     } catch (error) {
       console.error('Get appointments failed:', error);

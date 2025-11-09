@@ -568,10 +568,30 @@ export const labService = {
       return frontendApi.get(`/api/auth/lab-tests/patients/${user.id}/bookings`);
     }
   },
-  reschedule: async (bookingId: string, newDate: string, newTime: string, reason?: string) =>
-    frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/reschedule`, { newDate, newTime, reason }),
-  cancel: async (bookingId: string, reason?: string) =>
-    frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/cancel`, { reason }),
+  reschedule: async (bookingId: string, newDate: string, newTime: string, reason?: string) => {
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🔬 Trying lab-reschedule-booking route');
+      const response = await frontendApi.put(`/api/lab-reschedule-booking?bookingId=${bookingId}`, { newDate, newTime, reason });
+      console.log('✅ Lab booking rescheduled successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/reschedule`, { newDate, newTime, reason });
+    }
+  },
+  cancel: async (bookingId: string, reason?: string) => {
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🔬 Trying lab-cancel-booking route');
+      const response = await frontendApi.put(`/api/lab-cancel-booking?bookingId=${bookingId}`, { reason });
+      console.log('✅ Lab booking cancelled successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/cancel`, { reason });
+    }
+  },
   updateStatus: async (bookingId: string, status: string, notes?: string) =>
     frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/status`, { status, notes }),
   attachResult: async (bookingId: string, payload: { result_file_url?: string; result_notes?: string }) =>

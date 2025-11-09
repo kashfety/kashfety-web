@@ -521,7 +521,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
         const days = Array.isArray(data.working_days) ? data.working_days : (Array.isArray(data.workingDays) ? data.workingDays : null);
         if (data.success && Array.isArray(days)) {
           console.log('✅ Received doctor working days:', days);
-          setDoctorWorkingDays(days.map((d: any) => Number(d)));
+          
+          // If no working days found, use default schedule (Sunday to Thursday)
+          const workingDays = days.length > 0 ? days.map((d: any) => Number(d)) : [0, 1, 2, 3, 4];
+          
+          if (days.length === 0) {
+            console.warn('⚠️ No schedules found for this doctor. Using default working days (Sun-Thu)');
+          }
+          
+          setDoctorWorkingDays(workingDays);
 
           // Generate available dates for the next 30 days based on working days
           const availableDates = [];
@@ -532,7 +540,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
             date.setDate(startDate.getDate() + i);
             const dayOfWeek = date.getDay();
 
-            if (days.includes(dayOfWeek)) {
+            if (workingDays.includes(dayOfWeek)) {
               availableDates.push(date.toISOString().split('T')[0]);
             }
           }
@@ -540,13 +548,39 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
           setAvailableDates(availableDates);
         } else {
           console.log('❌ Invalid response structure');
-          setAvailableDates([]);
-          setDoctorWorkingDays([]);
+          // Use default schedule as fallback
+          console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
+          setDoctorWorkingDays([0, 1, 2, 3, 4]);
+          
+          const availableDates = [];
+          const startDate = new Date();
+          for (let i = 0; i < 30; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            const dayOfWeek = date.getDay();
+            if ([0, 1, 2, 3, 4].includes(dayOfWeek)) {
+              availableDates.push(date.toISOString().split('T')[0]);
+            }
+          }
+          setAvailableDates(availableDates);
         }
       } else {
         console.error('Failed to fetch doctor availability - all routes failed');
-        setAvailableDates([]);
-        setDoctorWorkingDays([]);
+        // Use default schedule as fallback
+        console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
+        setDoctorWorkingDays([0, 1, 2, 3, 4]);
+        
+        const availableDates = [];
+        const startDate = new Date();
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(startDate);
+          date.setDate(startDate.getDate() + i);
+          const dayOfWeek = date.getDay();
+          if ([0, 1, 2, 3, 4].includes(dayOfWeek)) {
+            availableDates.push(date.toISOString().split('T')[0]);
+          }
+        }
+        setAvailableDates(availableDates);
       }
     } catch (error) {
       console.error('Error fetching doctor availability:', error);

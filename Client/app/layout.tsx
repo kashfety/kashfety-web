@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { LocaleProvider } from "@/components/providers/locale-provider"
 import { AuthProvider } from "@/lib/providers/auth-provider"
 import RoleRedirect from "@/components/RoleRedirect"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,6 +34,7 @@ export default function RootLayout({
             </AuthProvider>
           </LocaleProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

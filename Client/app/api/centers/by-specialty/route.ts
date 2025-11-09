@@ -2,15 +2,15 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 // Use service role key for production to bypass RLS
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(req: Request) {
     try {
         // Check if environment variables are available
-        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        if (!supabaseUrl || !supabaseServiceKey) {
             return NextResponse.json({
                 success: false,
                 message: "Database connection not available",
@@ -119,13 +119,16 @@ export async function GET(req: Request) {
             center.doctor_count = doctorCount?.length || 0;
         }
 
-        console.log(`✅ Found ${centers.length} centers with doctors in specialty: ${specialty}`);
+        // Filter out centers with no doctors for this specialty
+        const centersWithDoctors = centers.filter(c => c.doctor_count > 0);
+
+        console.log(`✅ Found ${centersWithDoctors.length} centers with doctors in specialty: ${specialty} (filtered from ${centers.length} total centers)`);
 
         return NextResponse.json({
             success: true,
             specialty,
             home_visit: home_visit === 'true',
-            centers: centers
+            centers: centersWithDoctors
         });
 
     } catch (error: any) {

@@ -507,8 +507,18 @@ export const labService = {
   getTypes: async () => frontendApi.get('/api/public/lab-tests/types'),
   getCenters: async (params?: { lab_test_type_id?: string; category?: 'lab'|'imaging' }) =>
     frontendApi.get('/api/public/lab-tests/centers', { params }),
-  getCenterServices: async (centerId: string) =>
-    frontendApi.get(`/api/public/lab-tests/centers/${centerId}/services`),
+  getCenterServices: async (centerId: string) => {
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🔬 Trying lab-center-services route for center:', centerId);
+      const response = await frontendApi.get(`/api/lab-center-services?centerId=${centerId}`);
+      console.log('✅ Lab services fetched successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/public/lab-tests/centers/${centerId}/services`);
+    }
+  },
   getAvailableDates: async (centerId: string, typeId: string, range?: { start_date?: string; end_date?: string }) =>
     frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-dates`, { params: range }),
   getAvailableSlots: async (centerId: string, typeId: string, date: string) =>

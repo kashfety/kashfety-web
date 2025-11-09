@@ -397,6 +397,7 @@ export const appointmentService = {
       
       // Try multiple route variants for Vercel compatibility
       const routes = [
+        `/api/my-appointments?userId=${user.id}&role=${user.role}`,
         `/api/user-appointments/${user.id}?role=${user.role}`,
         `/api/appointments/user/${user.id}?role=${user.role}`,
         `/api/auth/appointments/user/${user.id}?role=${user.role}`

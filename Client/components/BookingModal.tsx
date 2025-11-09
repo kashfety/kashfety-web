@@ -383,14 +383,37 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
 
       // Build query parameters
       const params = new URLSearchParams();
+      params.set('centerId', centerId);
       if (specialty) params.set('specialty', specialty);
       // Only add home_visit parameter if user actually selected home visit
       if (visitType === 'home') {
         params.set('home_visit', 'true');
       }
 
-      const response = await fetch(`/api/centers/${centerId}/doctors?${params.toString()}`);
-      const result = await response.json();
+      // Try multiple route variants for Vercel compatibility
+      const routes = [
+        `/api/center-doctors?${params.toString()}`,
+        `/api/centers/${centerId}/doctors?${params.toString()}`
+      ];
+
+      let result = null;
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await fetch(routes[i]);
+          if (response.ok) {
+            result = await response.json();
+            console.log('✅ Route worked:', routes[i]);
+            break;
+          }
+          console.log(`❌ Route failed: ${routes[i]}`);
+        } catch (error) {
+          console.log(`❌ Route error: ${routes[i]}`, error);
+          if (i === routes.length - 1) {
+            throw error; // Rethrow on last attempt
+          }
+        }
+      }
 
       if (result && result.success) {
         let filteredDoctors = (result.doctors || []).map((d: any) => ({

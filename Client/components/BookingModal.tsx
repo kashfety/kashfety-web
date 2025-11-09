@@ -479,15 +479,19 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
   // NEW: Fetch doctor's working days using center-specific schedule system
   const fetchDoctorWorkingDays = async (doctorId: string, centerId?: string) => {
     try {
-      console.log('📅 Fetching doctor working days for:', doctorId, 'at center:', centerId);
+      console.log('📅 Fetching doctor working days for:', doctorId, 'at center:', centerId, 'visit type:', selectedLocation);
 
       // Build query parameters
       const params = new URLSearchParams();
       params.set('doctorId', doctorId);
-      if (centerId) {
-        params.set('center_id', centerId);
-      } else if (selectedCenter?.id) {
-        params.set('center_id', selectedCenter.id);
+      
+      // Only add center_id for clinic visits, NOT for home visits
+      if (selectedLocation === "clinic") {
+        if (centerId) {
+          params.set('center_id', centerId);
+        } else if (selectedCenter?.id) {
+          params.set('center_id', selectedCenter.id);
+        }
       }
 
       // Try multiple route variants for Vercel compatibility
@@ -2108,7 +2112,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
 
 
                 {/* Step 4: Date and Time Selection (Doctor mode) / Step 3: Date and Time Selection (Lab mode) */}
-                {((currentStep === 4 && !isLabMode && selectedDoctor && selectedCenter) || (currentStep === 3 && isLabMode && selectedLabType && selectedCenter)) && (
+                {((currentStep === 4 && !isLabMode && selectedDoctor && (selectedCenter || selectedLocation === "home")) || (currentStep === 3 && isLabMode && selectedLabType && selectedCenter)) && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm">
                       <div>
@@ -2116,6 +2120,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
                           {isLabMode
                             ? `${selectedLabType?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
+                            : selectedLocation === "home"
+                            ? `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} - ${t('booking_home_visit') || 'Home Visit'}`
                             : `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
                           }
                         </p>

@@ -556,7 +556,17 @@ export const labService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     if (!userStr) throw new Error('No user found. Please log in.');
     const user = JSON.parse(userStr);
-    return frontendApi.get(`/api/auth/lab-tests/patients/${user.id}/bookings`);
+    
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🔬 Trying my-lab-bookings route');
+      const response = await frontendApi.get('/api/my-lab-bookings', { params: { patientId: user.id } });
+      console.log('✅ Lab bookings fetched successfully');
+      return response;
+    } catch (error) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/lab-tests/patients/${user.id}/bookings`);
+    }
   },
   reschedule: async (bookingId: string, newDate: string, newTime: string, reason?: string) =>
     frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/reschedule`, { newDate, newTime, reason }),

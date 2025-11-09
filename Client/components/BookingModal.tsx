@@ -2074,70 +2074,80 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                       </Button>
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-6">
-                      {/* Calendar */}
-                      <div className="flex flex-col">
-                        <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
-                          <Calendar className="w-6 h-6 mr-2 text-[#4DBCC4]" />
-                          {t('booking_select_date') || 'Select Date'}
-                        </h4>
-                        {!isLabMode && doctorWorkingDays.length > 0 && selectedDoctor && (
-                          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
-                            <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
-                              <strong className="text-[#4DBCC4]">Dr. {selectedDoctor?.name}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
-                              <span className="font-semibold">
-                                {doctorWorkingDays.map(day => {
-                                  const dayNames = [
-                                    t('booking_day_sunday') || 'Sunday',
-                                    t('booking_day_monday') || 'Monday',
-                                    t('booking_day_tuesday') || 'Tuesday',
-                                    t('booking_day_wednesday') || 'Wednesday',
-                                    t('booking_day_thursday') || 'Thursday',
-                                    t('booking_day_friday') || 'Friday',
-                                    t('booking_day_saturday') || 'Saturday'
-                                  ];
-                                  return dayNames[day];
-                                }).join(', ')}
-                              </span>
-                            </p>
-                          </div>
-                        )}
-                        {!isLabMode && doctorWorkingDays.length === 0 && (
-                          <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800">
-                            <p className="text-base text-gray-900 dark:text-gray-100">
-                              <strong>{t('booking_loading_availability') || 'Loading doctor availability...'}</strong> {t('booking_please_wait_schedule') || 'Please wait while we fetch the schedule.'}
-                            </p>
-                          </div>
-                        )}
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={handleDateSelect}
-                          disabled={(date) => {
-                            // Disable past dates
-                            if (date < new Date()) return true;
-
-                            if (isLabMode) {
-                              // Only enable dates returned by lab schedule
-                              const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                              return !(labAvailableDates || []).includes(d);
-                            }
-
-                            // If we have doctor's working days, only allow those days
-                            if (doctorWorkingDays.length > 0) {
-                              const dayOfWeek = date.getDay();
-                              return !doctorWorkingDays.includes(dayOfWeek);
-                            }
-
-                            // Default fallback - disable Fridays and weekends for safety
-                            return date.getDay() === 5 || date.getDay() === 6;
-                          }}
-                          className="rounded-lg border-2 border-gray-300 dark:border-gray-600 shadow-md p-4 bg-white dark:bg-gray-800"
-                        />
+                    {/* Show loading message if doctor working days not loaded yet */}
+                    {!isLabMode && doctorWorkingDays.length === 0 && (
+                      <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800 text-center">
+                        <div className="flex items-center justify-center gap-3 mb-2">
+                          <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-yellow-600"></div>
+                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            {t('booking_loading_availability') || 'Loading doctor availability...'}
+                          </p>
+                        </div>
+                        <p className="text-base text-gray-700 dark:text-gray-300">
+                          {t('booking_please_wait_schedule') || 'Please wait while we fetch the schedule.'}
+                        </p>
                       </div>
+                    )}
 
-                      {/* Time Slots */}
-                      <div>
+                    {/* Only show calendar and time slots when ready */}
+                    {(isLabMode || doctorWorkingDays.length > 0) && (
+                      <div className="grid lg:grid-cols-2 gap-6">
+                        {/* Calendar */}
+                        <div className="flex flex-col">
+                          <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+                            <Calendar className="w-6 h-6 mr-2 text-[#4DBCC4]" />
+                            {t('booking_select_date') || 'Select Date'}
+                          </h4>
+                          {!isLabMode && doctorWorkingDays.length > 0 && selectedDoctor && (
+                            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+                              <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
+                                <strong className="text-[#4DBCC4]">Dr. {selectedDoctor?.name}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
+                                <span className="font-semibold">
+                                  {doctorWorkingDays.map(day => {
+                                    const dayNames = [
+                                      t('booking_day_sunday') || 'Sunday',
+                                      t('booking_day_monday') || 'Monday',
+                                      t('booking_day_tuesday') || 'Tuesday',
+                                      t('booking_day_wednesday') || 'Wednesday',
+                                      t('booking_day_thursday') || 'Thursday',
+                                      t('booking_day_friday') || 'Friday',
+                                      t('booking_day_saturday') || 'Saturday'
+                                    ];
+                                    return dayNames[day];
+                                  }).join(', ')}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={handleDateSelect}
+                            disabled={(date) => {
+                              // Disable past dates
+                              if (date < new Date()) return true;
+
+                              if (isLabMode) {
+                                // Only enable dates returned by lab schedule
+                                const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                                return !(labAvailableDates || []).includes(d);
+                              }
+
+                              // If we have doctor's working days, only allow those days
+                              if (doctorWorkingDays.length > 0) {
+                                const dayOfWeek = date.getDay();
+                                return !doctorWorkingDays.includes(dayOfWeek);
+                              }
+
+                              // Default fallback - disable Fridays and weekends for safety
+                              return date.getDay() === 5 || date.getDay() === 6;
+                            }}
+                            className="rounded-lg border-2 border-gray-300 dark:border-gray-600 shadow-md p-4 bg-white dark:bg-gray-800"
+                          />
+                        </div>
+
+                        {/* Time Slots */}
+                        <div>
                         <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
                           <Clock className="w-6 h-6 mr-2 text-[#4DBCC4]" />
                           {t('booking_select_time') || 'Select Time'}
@@ -2208,6 +2218,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                         )}
                       </div>
                     </div>
+                    )}
 
                     {/* Symptoms/Notes Section */}
                     <div className="space-y-4">

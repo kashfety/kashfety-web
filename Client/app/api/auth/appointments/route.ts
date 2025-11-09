@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       .eq('doctor_id', doctor_id)
       .eq('appointment_date', appointment_date)
       .eq('appointment_time', appointment_time)
-      .in('status', ['pending', 'confirmed', 'scheduled'])
+      .in('status', ['scheduled', 'confirmed'])
       .maybeSingle();
 
     if (existing) {
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       symptoms: symptoms || null,
       duration: duration || 30,
       type: type || 'consultation',
-      status: 'pending'
+      status: 'scheduled'
     };
 
     console.log('💾 Creating appointment:', appointmentData);

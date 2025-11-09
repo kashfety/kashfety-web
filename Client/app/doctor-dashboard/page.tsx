@@ -797,17 +797,33 @@ export default function DoctorDashboard() {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
-      // Use the unified auth endpoint for consistency with patient cancellations
-      const response = await fetch(`/api/auth/appointments/${selectedAppointment.id}/cancel`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          reason: cancelReason || 'Cancelled by doctor'
-        })
-      });
+      // Try fallback route first for Vercel compatibility
+      let response;
+      try {
+        console.log('📅 Trying appointment-cancel fallback route');
+        response = await fetch(`/api/appointment-cancel?appointmentId=${selectedAppointment.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            reason: cancelReason || 'Cancelled by doctor'
+          })
+        });
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        response = await fetch(`/api/auth/appointments/${selectedAppointment.id}/cancel`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            reason: cancelReason || 'Cancelled by doctor'
+          })
+        });
+      }
 
       if (response.ok) {
         toast({

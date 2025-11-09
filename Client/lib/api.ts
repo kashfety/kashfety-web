@@ -491,10 +491,21 @@ export const appointmentService = {
   // Cancel appointment (alternative method for compatibility)
   cancelAppointment: async (id: string, reason?: string) => {
     try {
-      const response = await api.put(`/api/auth/appointments/${id}/cancel`, {
-        reason: reason || 'Cancelled by patient'
-      });
-      return response;
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('📅 Trying appointment-cancel route');
+        const response = await api.put(`/api/appointment-cancel?appointmentId=${id}`, {
+          reason: reason || 'Cancelled by doctor'
+        });
+        console.log('✅ Appointment cancelled successfully');
+        return response;
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        const response = await api.put(`/api/auth/appointments/${id}/cancel`, {
+          reason: reason || 'Cancelled by patient'
+        });
+        return response;
+      }
     } catch (error) {
       console.error('Cancel appointment failed:', error);
       throw error;

@@ -667,12 +667,12 @@ export default function DoctorDashboard() {
     try {
       console.log('👤 Fetching patient details for:', patientId);
 
-      // Fetch detailed patient information using Next.js API routes
+      // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
       const [patientResponse, medicalRecordsResponse, appointmentsResponse] = await Promise.all([
-        fetch(`/api/doctor-dashboard/patients/${patientId}`),
-        fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`),
-        fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`)
+        fetch(`/api/doctor-patient-details?patientId=${patientId}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}`)),
+        fetch(`/api/doctor-patient-medical-records?patientId=${patientId}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`)),
+        fetch(`/api/doctor-patient-appointments?patientId=${patientId}${doctorProfile?.id ? `&doctorId=${doctorProfile.id}` : ''}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`))
       ]);
 
       if (patientResponse.ok) {

@@ -313,12 +313,25 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     try {
       const token = localStorage.getItem('auth_token');
       
-      const response = await axios.get(
-        `/api/doctor-dashboard/centers`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      // Try fallback route first for Vercel compatibility
+      let response;
+      try {
+        console.log('🏥 Trying doctor-centers fallback route');
+        response = await axios.get(
+          `/api/doctor-centers`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        response = await axios.get(
+          `/api/doctor-dashboard/centers`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      }
 
       if (response.data.success) {
         setCenters(response.data.centers || []);

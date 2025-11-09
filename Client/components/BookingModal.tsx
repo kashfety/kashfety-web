@@ -1058,15 +1058,46 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
         // Doctor appointment flow (existing)
         // ENHANCED: Pre-booking validation - check if the slot is still available
         console.log('🔍 Performing pre-booking slot validation...');
-        let validationUrl = `/api/doctor-schedule/${selectedDoctor!.id}/available-slots?date=${dateString}`;
-        if (selectedCenter?.id) {
-          validationUrl += `&center_id=${selectedCenter.id}`;
+        
+        // Build query parameters
+        const validationParams = new URLSearchParams();
+        validationParams.set('doctorId', selectedDoctor!.id);
+        validationParams.set('date', dateString);
+        
+        // Only add center_id for clinic visits
+        if (selectedLocation === "clinic" && selectedCenter?.id) {
+          validationParams.set('center_id', selectedCenter.id);
         }
-        const validationResponse = await fetch(validationUrl);
-        const validationResult = await validationResponse.json();
 
-        if (validationResult.success && validationResult.available_slots) {
-          const availableSlotTimes = validationResult.available_slots
+        // Try multiple route variants for Vercel compatibility
+        const validationRoutes = [
+          `/api/doctor-available-slots?${validationParams.toString()}`,
+          `/api/doctor-schedule/${selectedDoctor!.id}/available-slots?date=${dateString}${selectedCenter?.id ? `&center_id=${selectedCenter.id}` : ''}`
+        ];
+
+        let validationResult = null;
+        for (let i = 0; i < validationRoutes.length; i++) {
+          try {
+            console.log(`Trying validation route ${i + 1}/${validationRoutes.length}: ${validationRoutes[i]}`);
+            const validationResponse = await fetch(validationRoutes[i]);
+            if (validationResponse.ok) {
+              validationResult = await validationResponse.json();
+              console.log('✅ Validation route worked:', validationRoutes[i]);
+              break;
+            }
+            console.log(`❌ Validation route failed: ${validationRoutes[i]}`);
+          } catch (error) {
+            console.log(`❌ Validation route error: ${validationRoutes[i]}`, error);
+            if (i === validationRoutes.length - 1) {
+              console.warn('⚠️ All validation routes failed, proceeding with booking...');
+            }
+          }
+        }
+
+        if (validationResult && validationResult.success) {
+          // Handle both response formats (slots or available_slots)
+          const slotsArray = validationResult.slots || validationResult.available_slots || [];
+          const availableSlotTimes = slotsArray
             .filter((slot: any) => slot.is_available && !slot.is_booked)
             .map((slot: any) => slot.time);
 

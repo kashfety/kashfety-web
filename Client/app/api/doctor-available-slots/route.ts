@@ -50,10 +50,44 @@ export async function GET(request: NextRequest) {
     }
 
     if (!schedules || schedules.length === 0) {
-      console.log('🕐 No schedules found for this doctor on this day');
+      console.log('🕐 No schedules found for this doctor on this day - using default schedule');
+      
+      // Generate default time slots (9 AM to 5 PM) when no schedule exists
+      const defaultSlots: Array<{time: string, is_available: boolean, is_booked: boolean}> = [];
+      
+      // Get booked appointments even if there's no schedule
+      const { data: appointments, error: appointmentsError } = await supabase
+        .from('appointments')
+        .select('appointment_time, status')
+        .eq('doctor_id', doctorId)
+        .eq('appointment_date', date)
+        .in('status', ['pending', 'confirmed']);
+
+      if (appointmentsError) {
+        console.error('🕐 Error fetching appointments:', appointmentsError);
+      }
+
+      const bookedTimes = new Set((appointments || []).map(apt => apt.appointment_time));
+
+      // Generate slots from 9 AM to 5 PM (default business hours)
+      for (let hour = 9; hour < 17; hour++) {
+        for (let minute of [0, 30]) {
+          const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+          const isBooked = bookedTimes.has(timeStr) || bookedTimes.has(`${timeStr}:00`);
+          
+          defaultSlots.push({
+            time: timeStr,
+            is_available: !isBooked,
+            is_booked: isBooked
+          });
+        }
+      }
+
+      console.log(`🕐 Generated ${defaultSlots.length} default slots for doctor ${doctorId} on ${date}`);
+
       return NextResponse.json({ 
         success: true, 
-        slots: [] 
+        slots: defaultSlots 
       });
     }
 

@@ -121,7 +121,16 @@ export default function DoctorCenterManagement() {
     try {
       setCreating(true);
       const token = localStorage.getItem('auth_token');
-      const res = await axios.post('/api/doctor-dashboard/centers', newCenter, { headers: { Authorization: `Bearer ${token}` } });
+      
+      // Try fallback route first for Vercel compatibility
+      let res;
+      try {
+        console.log('🏥 Trying doctor-create-center fallback route');
+        res = await axios.post('/api/doctor-create-center', newCenter, { headers: { Authorization: `Bearer ${token}` } });
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        res = await axios.post('/api/doctor-dashboard/centers', newCenter, { headers: { Authorization: `Bearer ${token}` } });
+      }
       if (res.data?.success) {
         // Show pending state and wait for admin approval before it appears in list
         toast({ title: t('submitted_for_approval') || 'Submitted for approval', description: (res.data?.approval_status || 'pending').toUpperCase() });

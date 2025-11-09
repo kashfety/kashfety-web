@@ -334,10 +334,12 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       }
 
       if (response.data.success) {
-        setCenters(response.data.centers || []);
+        // ONLY show assigned centers in the Schedule tab
+        const assignedCenters = response.data.assigned_centers || [];
+        console.log('📅 [Schedule] Assigned centers:', assignedCenters.length);
+        setCenters(assignedCenters);
         
         // Only set default selection if there are assigned centers
-        const assignedCenters = response.data.assigned_centers || [];
         if (assignedCenters.length > 0) {
           // Prefer persisted selection if valid
           const persistedSelection = selectionKey ? localStorage.getItem(selectionKey) : null;

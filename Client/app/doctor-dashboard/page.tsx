@@ -1852,7 +1852,13 @@ export default function DoctorDashboard() {
                   </div>
                 </div>
                 <div className="scroll-animation" data-animation="slide-in-up">
-                  <DoctorScheduleManagement doctorId={doctorProfile?.id || ''} />
+                  {/* Key prop changes when switching tabs, forcing refetch of centers */}
+                  {activeTab === 'schedule' && (
+                    <DoctorScheduleManagement 
+                      key="schedule-active"
+                      doctorId={doctorProfile?.id || ''} 
+                    />
+                  )}
                 </div>
               </TabsContent>
 

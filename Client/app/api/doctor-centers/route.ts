@@ -31,10 +31,24 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Fetch doctor's center assignments first
+    const { data: assignments, error: assignmentsError } = await supabase
+      .from('doctor_centers')
+      .select('center_id, is_primary')
+      .eq('doctor_id', doctorId);
+
+    if (assignmentsError) {
+      console.error('❌ Error fetching assignments:', assignmentsError);
+    }
+
+    console.log('🏥 [Doctor Centers] Doctor assignments:', assignments?.length || 0);
+
+    const assignmentMap = new Map((assignments || []).map((a: any) => [a.center_id, a]));
+
     // Fetch all centers
     const { data: allCenters, error: centersError } = await supabase
       .from('centers')
-      .select('*')
+      .select('id, name, address, phone, email, center_type, owner_doctor_id, approval_status, created_at, updated_at')
       .eq('approval_status', 'approved');
 
     if (centersError) {
@@ -46,36 +60,37 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
+    console.log('🏥 [Doctor Centers] Total centers from DB:', allCenters?.length || 0);
+
     // Filter out personal clinics that don't belong to this doctor
     const visibleCenters = (allCenters || []).filter((c: any) => {
       const type = (c.center_type || 'generic').toLowerCase();
       if (type === 'personal') {
-        return c.owner_doctor_id === doctorId;
+        const belongs = c.owner_doctor_id === doctorId;
+        if (!belongs) {
+          console.log('🚫 [Doctor Centers] Filtering out personal clinic:', c.name, 'owned by:', c.owner_doctor_id);
+        }
+        return belongs;
       }
       return true; // Show all generic centers
     });
 
-    console.log('🏥 [Doctor Centers] Visible centers:', visibleCenters.length);
-
-    // Fetch doctor's center assignments
-    const { data: assignments, error: assignmentsError } = await supabase
-      .from('doctor_centers')
-      .select('center_id, is_primary')
-      .eq('doctor_id', doctorId);
-
-    if (assignmentsError) {
-      console.error('❌ Error fetching assignments:', assignmentsError);
-    }
-
-    const assignmentMap = new Map((assignments || []).map((a: any) => [a.center_id, a]));
+    console.log('🏥 [Doctor Centers] Visible centers after filtering:', visibleCenters.length);
 
     // Mark assigned centers and primary center
     const centersWithAssignment = visibleCenters.map((center: any) => {
       const assignment = assignmentMap.get(center.id);
+      const isAssigned = !!assignment;
+      const isPrimary = assignment?.is_primary || false;
+      
+      if (isAssigned) {
+        console.log('✅ [Doctor Centers] Assigned center:', center.name, 'primary:', isPrimary);
+      }
+      
       return {
         ...center,
-        is_assigned: !!assignment,
-        is_primary: assignment?.is_primary || false
+        is_assigned: isAssigned,
+        is_primary: isPrimary
       };
     });
 

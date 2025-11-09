@@ -221,9 +221,10 @@ export default function DoctorCenterManagement() {
       }
 
       if (response.data.success) {
+        console.log('✅ [Centers] Assignments saved successfully. Selected centers should now appear in Schedule tab.');
         toast({
           title: t('success') || 'Success',
-          description: t('dd_assignments_updated') || 'Center assignments updated successfully',
+          description: (t('dd_assignments_updated') || 'Center assignments updated successfully') + ' - ' + (t('check_schedule_tab') || 'Check the Schedule tab to set your hours.'),
         });
         // Refresh the data
         await fetchCenters();

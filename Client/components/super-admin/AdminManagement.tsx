@@ -280,9 +280,6 @@ export default function AdminManagement() {
         try {
             console.log('🔄 Updating admin with data:', formData);
             
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            
             // Prepare data for backend - only send editable fields
             const updateData = {
                 name: formData.name,
@@ -291,27 +288,62 @@ export default function AdminManagement() {
                 role: formData.role
             };
 
-            console.log('📤 Sending update request to:', `${baseUrl}/super-admin/admins/${adminId}`);
-            console.log('📤 Update data:', updateData);
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let result;
+            
+            try {
+                console.log('👑 Trying super-admin-update-admin fallback route');
+                response = await fetch(`/api/super-admin-update-admin?adminId=${adminId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                if (response.ok) {
+                    result = await response.json();
+                    if (result.success) {
+                        console.log('✅ Fallback route worked for updating admin');
+                        // Continue with success handling below
+                    } else {
+                        throw new Error(result.error || 'Update failed');
+                    }
+                } else {
+                    throw new Error('Fallback route failed');
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+                
+                // Fallback to backend route
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+                const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+                
+                console.log('📤 Sending update request to:', `${baseUrl}/super-admin/admins/${adminId}`);
+                console.log('📤 Update data:', updateData);
 
-            const response = await fetch(`${baseUrl}/super-admin/admins/${adminId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updateData)
-            });
+                response = await fetch(`${baseUrl}/super-admin/admins/${adminId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
 
-            console.log('📥 Response status:', response.status);
+                console.log('📥 Response status:', response.status);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('❌ Server error:', errorData);
-                throw new Error(errorData.message || 'Failed to update admin');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('❌ Server error:', errorData);
+                    throw new Error(errorData.message || 'Failed to update admin');
+                }
+
+                result = await response.json();
             }
 
-            const result = await response.json();
             console.log('✅ Admin updated successfully:', result);
 
             toast({

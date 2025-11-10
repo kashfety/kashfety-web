@@ -543,12 +543,16 @@ export default function SuperAdminDashboardPage() {
                 },
                 adminActivity: {
                     totalActions: data.data.adminActivity?.totalActions || data.data.overview.totalUsers + data.data.overview.totalAppointments,
-                    actionsByType: data.data.adminActivity?.actionsByType || {
-                        'user_created': data.data.overview.totalPatients,
-                        'doctor_approved': data.data.overview.totalDoctors,
-                        'center_created': data.data.overview.totalCenters,
-                        'appointment_created': data.data.overview.totalAppointments
-                    },
+                    actionsByType: data.data.adminActivity?.actionsByType || (() => {
+                        // Provide meaningful default data based on actual stats
+                        const actions: Record<string, number> = {};
+                        if (data.data.overview.totalPatients > 0) actions['User Created'] = data.data.overview.totalPatients;
+                        if (data.data.overview.totalDoctors > 0) actions['Doctor Approved'] = data.data.overview.totalDoctors;
+                        if (data.data.overview.totalCenters > 0) actions['Center Created'] = data.data.overview.totalCenters;
+                        if (data.data.overview.totalAppointments > 0) actions['Appointment Created'] = data.data.overview.totalAppointments;
+                        if (data.data.overview.totalAdmins > 0) actions['Admin Created'] = data.data.overview.totalAdmins;
+                        return actions;
+                    })(),
                     activeAdmins: data.data.adminActivity?.activeAdmins || data.data.overview.totalAdmins + data.data.overview.totalSuperAdmins,
                     recentLogins: data.data.adminActivity?.recentLogins || Math.ceil((data.data.overview.totalAdmins + data.data.overview.totalSuperAdmins) * 0.7)
                 },

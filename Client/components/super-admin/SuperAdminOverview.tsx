@@ -148,8 +148,8 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
     ];
 
     const adminActivityData = Object.entries(adminActivity.actionsByType || {}).map(([action, count]) => ({
-        action: action.replace('_', ' '),
-        count
+        action: action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        count: count as number
     }));
 
     const systemMetricsData = [
@@ -361,20 +361,28 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                         <CardTitle>Admin Actions by Type</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={adminActivityData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="action"
-                                    angle={-45}
-                                    textAnchor="end"
-                                    height={80}
-                                />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="count" fill="#3B82F6" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {adminActivityData.length === 0 || adminActivityData.every(item => item.count === 0) ? (
+                            <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+                                <Activity className="h-12 w-12 mb-4 opacity-50" />
+                                <p className="text-sm">No activity data available</p>
+                                <p className="text-xs mt-1">Activity data will appear here once actions are recorded</p>
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={adminActivityData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="action"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={80}
+                                    />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Bar dataKey="count" fill="#3B82F6" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </CardContent>
                 </Card>
             </div>

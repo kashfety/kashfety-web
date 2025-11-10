@@ -33,11 +33,52 @@ export default function DoctorApprovals() {
         try {
             setLoading(true)
 
-            // Fetch real data from API
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('📜 Trying admin-doctor-certificates fallback route');
+                response = await fetch('/api/admin-doctor-certificates?status=pending', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success && data.data?.certificates) {
+                        console.log('✅ Fallback route worked for doctor certificates');
+                        
+                        // Transform the certificate data to match our DoctorApproval interface
+                        const approvals: DoctorApproval[] = data.data.certificates.map((cert: any) => ({
+                            id: cert.id,
+                            name: cert.doctor?.name || 'Unknown',
+                            email: cert.doctor?.email || '',
+                            specialty: cert.doctor?.specialty || 'General',
+                            experience_years: cert.doctor?.experience_years || 0,
+                            status: cert.status || 'pending',
+                            created_at: cert.submitted_at || cert.created_at,
+                            certificate_type: cert.certificate_type,
+                            certificate_number: cert.certificate_number,
+                            issuing_authority: cert.issuing_authority,
+                            certificate_file_url: cert.certificate_file_url
+                        }));
+
+                        setApprovals(approvals);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
 
-            const response = await fetch(`${baseUrl}/auth/admin/certificates?status=pending`, {
+            response = await fetch(`${baseUrl}/auth/admin/certificates?status=pending`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -48,7 +89,7 @@ export default function DoctorApprovals() {
                 throw new Error('Failed to fetch doctor approvals');
             }
 
-            const data = await response.json();
+            data = await response.json();
 
             // Transform the certificate data to match our DoctorApproval interface
             const approvals: DoctorApproval[] = data.data.certificates.map((cert: any) => ({

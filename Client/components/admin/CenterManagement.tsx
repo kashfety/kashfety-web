@@ -129,10 +129,36 @@ export default function CenterManagement() {
                 ...(statusFilter && statusFilter !== 'all' && { status: statusFilter })
             });
 
-            // Normalize API URL to avoid double slashes
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('🏥 Trying admin-centers fallback route');
+                response = await fetch(`/api/admin-centers?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success) {
+                        console.log('✅ Fallback route worked for centers');
+                        setCenters(data.data.centers);
+                        setTotalPages(data.data.pagination.totalPages);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/centers?${params}`, {
+            response = await fetch(`${baseUrl}/auth/admin/centers?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -143,7 +169,7 @@ export default function CenterManagement() {
                 throw new Error('Failed to fetch centers');
             }
 
-            const data = await response.json();
+            data = await response.json();
             setCenters(data.data.centers);
             setTotalPages(data.data.pagination.totalPages);
         } catch (error) {

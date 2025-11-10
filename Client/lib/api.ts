@@ -962,6 +962,25 @@ export const adminService = {
   // Get all centers
   getAllCenters: async (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
     try {
+      console.log('🏥 Fetching centers with params:', params);
+      
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('🏥 Trying admin-centers fallback route');
+        const response = await api.get('/api/admin-centers', { params });
+        console.log('🏥 Fallback response data keys:', Object.keys(response.data || {}));
+        
+        // Check if response has centers data
+        if (response.data?.success || response.data?.data || response.data?.centers) {
+          console.log('✅ Fallback route worked for centers');
+          return response;
+        }
+      } catch (fallbackError: any) {
+        console.log('❌ Fallback failed for centers:', fallbackError?.response?.status || fallbackError?.status);
+      }
+      
+      // Fallback to original route
+      console.log('🔄 Trying original dynamic route for centers');
       const response = await api.get('/api/auth/admin/centers', { params });
       return response;
     } catch (error) {

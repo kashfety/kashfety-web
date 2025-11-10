@@ -50,32 +50,61 @@ export default function CenterApprovals() {
             setLoading(true)
             const token = localStorage.getItem('auth_token')
             
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let result;
+            
+            try {
+                let url = '/api/admin-center-requests'
+                if (status && status !== 'all') {
+                    url += `?status=${status}`
+                }
+                
+                console.log('🏥 Trying admin-center-requests fallback route:', url);
+                
+                response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+
+                if (response.ok) {
+                    result = await response.json();
+                    if (result.success) {
+                        console.log('✅ Fallback route worked for center requests');
+                        setRequests(result.data || []);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying original route');
+            }
+
+            // Fallback to original route
             let url = '/api/admin/center-requests'
             if (status && status !== 'all') {
                 url += `?status=${status}`
             }
             
-            console.log('🚨 FRONTEND: Fetching center requests', { url, status, hasToken: !!token })
+            console.log('🔄 Trying original route:', url);
             
-            const response = await fetch(url, {
+            response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             })
 
-            console.log('🚨 FRONTEND: Response status:', response.status, response.statusText)
-
             if (!response.ok) {
                 const errorText = await response.text()
-                console.error('🚨 FRONTEND: Response error:', errorText)
+                console.error('❌ Response error:', errorText)
                 throw new Error(`Failed to fetch center requests: ${response.status} ${errorText}`)
             }
 
-            const result = await response.json()
-            console.log('🚨 FRONTEND: Response data:', result)
+            result = await response.json()
+            console.log('✅ Response data:', result)
             
             if (result.success) {
-                console.log('🚨 FRONTEND: Setting requests:', result.data?.length || 0, 'items')
+                console.log('✅ Setting requests:', result.data?.length || 0, 'items')
                 setRequests(result.data || [])
             } else {
                 throw new Error(result.error || 'Failed to load center requests')

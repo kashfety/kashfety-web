@@ -709,27 +709,54 @@ export const centerService = {
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
     
-    return frontendApi.get(`/api/auth/center/patients/${patientId}`, { 
-      params: centerId ? { center_id: centerId } : {} 
-    });
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🏥 Trying center-patient-details fallback route');
+      return await frontendApi.get(`/api/center-patient-details`, { 
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      });
+    } catch (fallbackError) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/center/patients/${patientId}`, { 
+        params: centerId ? { center_id: centerId } : {} 
+      });
+    }
   },
   getPatientMedicalRecords: async (patientId: string) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
     
-    return frontendApi.get(`/api/auth/center/patients/${patientId}/medical-records`, { 
-      params: centerId ? { center_id: centerId } : {} 
-    });
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🩺 Trying center-patient-medical-records fallback route');
+      return await frontendApi.get(`/api/center-patient-medical-records`, { 
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      });
+    } catch (fallbackError) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/center/patients/${patientId}/medical-records`, { 
+        params: centerId ? { center_id: centerId } : {} 
+      });
+    }
   },
   getPatientLabHistory: async (patientId: string) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
     
-    return frontendApi.get(`/api/auth/center/patients/${patientId}/lab-history`, { 
-      params: centerId ? { center_id: centerId } : {} 
-    });
+    // Try fallback route first for Vercel compatibility
+    try {
+      console.log('🔬 Trying center-patient-lab-history fallback route');
+      return await frontendApi.get(`/api/center-patient-lab-history`, { 
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      });
+    } catch (fallbackError) {
+      console.log('❌ Fallback failed, trying dynamic route');
+      return frontendApi.get(`/api/auth/center/patients/${patientId}/lab-history`, { 
+        params: centerId ? { center_id: centerId } : {} 
+      });
+    }
   },
   listBookings: async (params?: { status?: string; page?: number; limit?: number }) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;

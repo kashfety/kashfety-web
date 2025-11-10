@@ -174,7 +174,8 @@ export default function AdminManagement() {
             }
             
             // Transform the data from the super-admin endpoint
-            const adminUsers = data.data.admins
+            console.log('📊 [AdminManagement] Raw data received:', data);
+            const adminUsers = (data.data?.admins || data.admins || [])
                 .map((user: any) => ({
                     id: user.id,
                     uid: user.uid || `admin-${user.id}`,
@@ -351,10 +352,15 @@ export default function AdminManagement() {
                 description: "Admin updated successfully",
             });
 
-            fetchAdmins();
+            // Close dialog and reset form first
             setShowEditDialog(false);
             setEditingAdmin(null);
             resetFormData();
+            
+            // Then refresh the admin list with a small delay to ensure DB is updated
+            setTimeout(() => {
+                fetchAdmins();
+            }, 500);
         } catch (error) {
             console.error('❌ Error updating admin:', error);
             const errorMessage = error instanceof Error ? error.message : "Failed to update admin";

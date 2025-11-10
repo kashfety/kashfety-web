@@ -44,7 +44,10 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
-    if (name) updateData.name = name;
+    // Always update name if provided (even if empty string, to allow clearing)
+    if (name !== undefined && name !== null) {
+      updateData.name = name.trim() || null;
+    }
     if (email) {
       // Check if email is already taken by another user
       const { data: emailUser } = await supabase
@@ -64,6 +67,9 @@ export async function PUT(request: NextRequest) {
       updateData.role = role;
     }
 
+    // Log what we're updating
+    console.log('📝 [Super Admin Update Admin] Update data:', updateData);
+
     // Update admin
     const { data: updatedAdmin, error: updateError } = await supabase
       .from('users')
@@ -82,6 +88,13 @@ export async function PUT(request: NextRequest) {
     }
 
     console.log('✅ [Super Admin Update Admin] Updated admin:', adminId);
+    console.log('✅ [Super Admin Update Admin] Updated admin data:', {
+      id: updatedAdmin.id,
+      name: updatedAdmin.name,
+      email: updatedAdmin.email,
+      phone: updatedAdmin.phone,
+      role: updatedAdmin.role
+    });
 
     return NextResponse.json({
       success: true,

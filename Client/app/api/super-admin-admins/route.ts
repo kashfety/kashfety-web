@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .in('role', ['admin', 'super_admin']);
 
-    // Build data query - explicitly select name fields to ensure they're fetched
+    // Build data query - use * to get all fields, then we'll transform what we need
     let dataQuery = supabase
       .from('users')
-      .select('id, uid, name, first_name, last_name, email, phone, role, is_active, last_login, login_count, created_at, created_by, account_locked, lock_reason, locked_at, locked_by, permissions, updated_at')
+      .select('*')
       .in('role', ['admin', 'super_admin']);
 
     // Apply role filter
@@ -67,12 +67,17 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Failed to fetch admins:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch admins',
-        details: error.message 
+        details: error.message,
+        code: error.code,
+        hint: error.hint
       }, { status: 500 });
     }
+
+    console.log('✅ [Super Admin Admins] Fetched', users?.length || 0, 'users from database');
 
     // Transform users to match AdminUser interface
     const transformedAdmins = (users || []).map((user: any) => {
@@ -86,7 +91,10 @@ export async function GET(request: NextRequest) {
         displayName = user.email.split('@')[0];
       }
       
-      console.log(`👤 [Super Admin Admins] User ${user.id}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+      // Log name resolution for debugging (only for specific cases to avoid spam)
+      if (!user.name || user.email === 'm.ismail.official23@gmail.com') {
+        console.log(`👤 [Super Admin Admins] User ${user.id}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+      }
       
       return {
       id: user.id,

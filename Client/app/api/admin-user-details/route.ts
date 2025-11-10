@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch user details
+    // Fetch user details (including password_hash for admin view)
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('*')
+      .select('*, password_hash')
       .eq('id', userId)
       .single();
 
@@ -91,7 +91,9 @@ export async function GET(request: NextRequest) {
       bio: user.bio,
       qualifications: user.qualifications,
       home_visits_available: user.home_visits_available,
-      rating: user.rating
+      rating: user.rating,
+      // Password status (for admin view)
+      password_hash: user.password_hash || null
     };
 
     // Transform appointments and enrich with doctor/center info

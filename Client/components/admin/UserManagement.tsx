@@ -762,18 +762,31 @@ export default function UserManagement() {
                                         <div><strong>{t('admin_reviews') || 'Reviews'}:</strong> {selectedUser.stats.totalReviews}</div>
                                         <div><strong>{t('admin_approval_status') || 'Approval Status'}:</strong> {selectedUser.user.approval_status}</div>
                                         <div><strong>{t('admin_password_status') || 'Password Status'}:</strong>
-                                            <span className={selectedUser.user.password_hash && selectedUser.user.password_hash !== null && selectedUser.user.password_hash !== '' ? `text-green-600 ${isRTL ? 'mr-1' : 'ml-1'}` : `text-red-600 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                                                {selectedUser.user.password_hash && selectedUser.user.password_hash !== null && selectedUser.user.password_hash !== '' ? '✅ ' + (t('admin_password_set') || 'Password Set') : '❌ ' + (t('admin_no_password_set') || 'No Password Set')}
-                                            </span>
-                                            {selectedUser.user.password_hash ? (
-                                                <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 p-1 rounded">
-                                                    <strong>{t('admin_hash') || 'Hash'}:</strong> {selectedUser.user.password_hash.substring(0, 20)}...
-                                                </div>
-                                            ) : (
-                                                <div className="text-xs text-orange-600 mt-1">
-                                                    ⚠️ {t('admin_user_needs_password') || 'User needs to set a password or admin can set one via edit'}
-                                                </div>
-                                            )}
+                                            {(() => {
+                                                // Check if password is set - password_hash should be a non-empty string
+                                                const hasPassword = selectedUser.user.password_hash && 
+                                                                   typeof selectedUser.user.password_hash === 'string' && 
+                                                                   selectedUser.user.password_hash.trim().length > 0 &&
+                                                                   selectedUser.user.password_hash !== 'null' &&
+                                                                   selectedUser.user.password_hash !== 'undefined';
+                                                
+                                                return (
+                                                    <>
+                                                        <span className={hasPassword ? `text-green-600 ${isRTL ? 'mr-1' : 'ml-1'}` : `text-red-600 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                                                            {hasPassword ? '✅ ' + (t('admin_password_set') || 'Password Set') : '❌ ' + (t('admin_no_password_set') || 'No Password Set')}
+                                                        </span>
+                                                        {hasPassword ? (
+                                                            <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 dark:bg-gray-800 p-1 rounded">
+                                                                <strong>{t('admin_hash') || 'Hash'}:</strong> {selectedUser.user.password_hash.substring(0, 30)}...
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                                                                ⚠️ {t('admin_user_needs_password') || 'User needs to set a password or admin can set one via edit'}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </div>

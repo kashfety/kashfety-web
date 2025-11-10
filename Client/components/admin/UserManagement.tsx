@@ -629,9 +629,24 @@ export default function UserManagement() {
                                                 {user.approval_status.replace(/_/g, ' ')}
                                             </Badge>
                                             <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
-                                                <span className={`text-xs px-1.5 py-0.5 rounded ${user.password_hash ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                    {user.password_hash ? '🔐 ' + (t('admin_password') || 'Password') : '❌ ' + (t('admin_no_password') || 'No Password')}
-                                                </span>
+                                                {(() => {
+                                                    // Check if password is set - password_hash should be a non-empty string
+                                                    const hasPassword = user.password_hash && 
+                                                                       typeof user.password_hash === 'string' && 
+                                                                       user.password_hash.trim().length > 0 &&
+                                                                       user.password_hash !== 'null' &&
+                                                                       user.password_hash !== 'undefined';
+                                                    
+                                                    return (
+                                                        <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                                            hasPassword 
+                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                                                                : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                        }`}>
+                                                            {hasPassword ? '🔐 ' + (t('admin_password') || 'Password') : '❌ ' + (t('admin_no_password') || 'No Password')}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
                                             {user.certificate_status && user.role === 'doctor' && (
                                                 <div className="text-xs text-muted-foreground">

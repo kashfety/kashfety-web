@@ -104,6 +104,8 @@ export async function GET(request: NextRequest) {
       specialty: user.specialty,
       certificate_status: user.certificate_status,
       profile_picture: user.profile_picture,
+      // Password status (for admin view)
+      password_hash: user.password_hash || null,
       // Medical info for patients
       medical_history: user.medical_history,
       allergies: user.allergies,

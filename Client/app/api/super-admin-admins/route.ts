@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
     // Get total count
     const { count } = await countQuery;
 
-    // Apply pagination and ordering
+    // Apply pagination and ordering - order by updated_at to get most recently updated first
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-    dataQuery = dataQuery.range(from, to).order('created_at', { ascending: false });
+    dataQuery = dataQuery.range(from, to).order('updated_at', { ascending: false });
 
     const { data: users, error } = await dataQuery;
 

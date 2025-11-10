@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,11 +113,7 @@ export default function AdminManagement() {
         confirmPassword: ''
     });
 
-    useEffect(() => {
-        fetchAdmins();
-    }, [currentPage, searchTerm, roleFilter, statusFilter]);
-
-    const fetchAdmins = async () => {
+    const fetchAdmins = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams({
@@ -220,8 +216,10 @@ export default function AdminManagement() {
                         console.log('🔍 [AdminManagement] Original user data:', user);
                     }
                     
-                    // Log name resolution for all users
-                    console.log(`👤 [AdminManagement] User ${user.id || user.email}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+                    // Log name resolution for debugging (only for specific user to avoid console spam)
+                    if (user.email === 'm.ismail.official23@gmail.com' || !user.name) {
+                        console.log(`👤 [AdminManagement] User ${user.id || user.email}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+                    }
                     
                     return transformed;
                 });
@@ -244,7 +242,11 @@ export default function AdminManagement() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, searchTerm, roleFilter, statusFilter]);
+
+    useEffect(() => {
+        fetchAdmins();
+    }, [fetchAdmins]);
 
     const createAdmin = async () => {
         try {
@@ -384,15 +386,11 @@ export default function AdminManagement() {
             setEditingAdmin(null);
             resetFormData();
             
-            // Force a refresh by resetting current page to trigger useEffect
-            // Then refresh the admin list with a small delay to ensure DB is updated
+            // Refresh the admin list with a small delay to ensure DB is updated
+            // Don't use setCurrentPage as it triggers useEffect which could cause loops
             setTimeout(() => {
                 console.log('🔄 [AdminManagement] Refreshing admin list after update...');
-                // Force refresh by toggling page or using a timestamp
-                setCurrentPage(prev => {
-                    fetchAdmins();
-                    return prev; // Keep same page
-                });
+                fetchAdmins();
             }, 1000); // Increased delay to ensure DB consistency
         } catch (error) {
             console.error('❌ Error updating admin:', error);

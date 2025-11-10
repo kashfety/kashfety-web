@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         notes,
         created_at,
         updated_at,
-        doctor:users!fk_medical_records_doctor_id(id, name, specialty, profile_picture)
+        doctor:users!medical_records_doctor_id_fkey(id, name, specialty, profile_picture)
       `)
       .eq('patient_id', patientId)
       .order('record_date', { ascending: false });

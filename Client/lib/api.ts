@@ -692,8 +692,14 @@ export const centerService = {
       form.append('result_notes', result_notes);
     }
     
-    // Use the new Supabase Storage route
-    return frontendApi.postForm('/api/center-dashboard/upload-lab-result', form);
+    // Try fallback route first for Vercel compatibility (avoids proxy loop)
+    try {
+      console.log('📤 Trying center-upload-lab-result fallback route');
+      return await frontendApi.postForm('/api/center-upload-lab-result', form);
+    } catch (fallbackError) {
+      console.log('❌ Fallback failed, trying original route');
+      return frontendApi.postForm('/api/center-dashboard/upload-lab-result', form);
+    }
   },
   listPatients: async () => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;

@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
       owner_doctor_id: center.owner_doctor_id,
       offers_labs: center.offers_labs || false,
       offers_imaging: center.offers_imaging || false,
+      is_active: center.is_active !== false, // Default to true if not set
       created_at: center.created_at,
       updated_at: center.updated_at
     }));

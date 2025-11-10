@@ -126,7 +126,7 @@ export default function CenterManagement() {
                 page: currentPage.toString(),
                 limit: '20',
                 ...(searchTerm && { search: searchTerm }),
-                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter })
+                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }) // This filters by approval_status
             });
 
             // Try fallback route first for Vercel compatibility
@@ -425,6 +425,19 @@ export default function CenterManagement() {
         return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
     };
 
+    const getApprovalStatusBadgeColor = (status: string) => {
+        switch (status) {
+            case 'approved':
+                return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+            case 'rejected':
+                return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+            default:
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+        }
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString();
     };
@@ -576,8 +589,9 @@ export default function CenterManagement() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">{t('admin_all_statuses') || 'All statuses'}</SelectItem>
-                                <SelectItem value="active">{t('admin_active') || 'Active'}</SelectItem>
-                                <SelectItem value="inactive">{t('admin_inactive') || 'Inactive'}</SelectItem>
+                                <SelectItem value="approved">{t('admin_approved') || 'Approved'}</SelectItem>
+                                <SelectItem value="pending">{t('admin_pending') || 'Pending'}</SelectItem>
+                                <SelectItem value="rejected">{t('admin_rejected') || 'Rejected'}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Button variant="outline" onClick={() => {
@@ -633,9 +647,23 @@ export default function CenterManagement() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge className={getStatusBadgeColor(center.is_active ?? true)}>
-                                            {center.is_active ? (t('admin_active') || 'Active') : (t('admin_inactive') || 'Inactive')}
-                                        </Badge>
+                                        <div className={`space-y-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                            <Badge className={getApprovalStatusBadgeColor(center.approval_status || 'pending')}>
+                                                {center.approval_status === 'approved' ? (t('admin_approved') || 'Approved') :
+                                                 center.approval_status === 'pending' ? (t('admin_pending') || 'Pending') :
+                                                 center.approval_status === 'rejected' ? (t('admin_rejected') || 'Rejected') :
+                                                 (center.approval_status || 'Pending')}
+                                            </Badge>
+                                            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
+                                                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                                    center.is_active !== false 
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
+                                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
+                                                }`}>
+                                                    {center.is_active !== false ? '✓ ' + (t('admin_active') || 'Active') : '✗ ' + (t('admin_inactive') || 'Inactive')}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className={`text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -731,9 +759,17 @@ export default function CenterManagement() {
                                         <div><strong>{t('admin_name') || 'Name'}:</strong> {selectedCenter.name}</div>
                                         <div><strong>{t('admin_email') || 'Email'}:</strong> {selectedCenter.email}</div>
                                         <div><strong>{t('admin_phone') || 'Phone'}:</strong> {selectedCenter.phone}</div>
-                                        <div><strong>{t('admin_status') || 'Status'}:</strong>
+                                        <div><strong>{t('admin_approval_status') || 'Approval Status'}:</strong>
+                                            <Badge className={`${isRTL ? 'mr-2' : 'ml-2'} ${getApprovalStatusBadgeColor(selectedCenter.approval_status || 'pending')}`}>
+                                                {selectedCenter.approval_status === 'approved' ? (t('admin_approved') || 'Approved') :
+                                                 selectedCenter.approval_status === 'pending' ? (t('admin_pending') || 'Pending') :
+                                                 selectedCenter.approval_status === 'rejected' ? (t('admin_rejected') || 'Rejected') :
+                                                 (selectedCenter.approval_status || 'Pending')}
+                                            </Badge>
+                                        </div>
+                                        <div><strong>{t('admin_active_status') || 'Active Status'}:</strong>
                                             <Badge className={`${isRTL ? 'mr-2' : 'ml-2'} ${getStatusBadgeColor(selectedCenter.is_active ?? true)}`}>
-                                                {selectedCenter.is_active ? (t('admin_active') || 'Active') : (t('admin_inactive') || 'Inactive')}
+                                                {selectedCenter.is_active !== false ? (t('admin_active') || 'Active') : (t('admin_inactive') || 'Inactive')}
                                             </Badge>
                                         </div>
                                         <div><strong>{t('admin_password_status') || 'Password Status'}:</strong>
@@ -754,31 +790,54 @@ export default function CenterManagement() {
                             </div>
 
                             {/* Description */}
+                            {selectedCenter.description && (
+                                <div className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h3 className="font-semibold mb-2">{t('admin_description') || 'Description'}</h3>
+                                    <p className="text-sm text-muted-foreground">{selectedCenter.description}</p>
+                                </div>
+                            )}
+
+                            {/* Center Type & Services */}
                             <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <h3 className="font-semibold mb-2">{t('admin_description') || 'Description'}</h3>
-                                <p className="text-sm text-muted-foreground">{selectedCenter.description}</p>
+                                <h3 className="font-semibold mb-2">{t('admin_center_type_services') || 'Center Type & Services'}</h3>
+                                <div className="space-y-2 text-sm">
+                                    <div><strong>{t('admin_center_type') || 'Center Type'}:</strong> {selectedCenter.center_type || 'generic'}</div>
+                                    <div className="flex items-center gap-2">
+                                        <strong>{t('admin_services') || 'Services'}:</strong>
+                                        {selectedCenter.offers_labs && (
+                                            <Badge variant="outline">{t('admin_labs') || 'Labs'}</Badge>
+                                        )}
+                                        {selectedCenter.offers_imaging && (
+                                            <Badge variant="outline">{t('admin_imaging') || 'Imaging'}</Badge>
+                                        )}
+                                        {!selectedCenter.offers_labs && !selectedCenter.offers_imaging && (
+                                            <span className="text-muted-foreground">{t('admin_general_services') || 'General Services'}</span>
+                                        )}
+                                    </div>
+                                    {selectedCenter.owner && (
+                                        <div><strong>{t('admin_owner') || 'Owner'}:</strong> {selectedCenter.owner.name} {selectedCenter.owner.specialty && `(${selectedCenter.owner.specialty})`}</div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Statistics */}
-                            {selectedCenter.stats && (
-                                <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <h3 className="font-semibold mb-2">{t('admin_statistics') || 'Statistics'}</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="text-center p-3 border rounded">
-                                            <div className="text-2xl font-bold">{selectedCenter.stats.totalDoctors}</div>
-                                            <div className="text-sm text-muted-foreground">{t('admin_doctors') || 'Doctors'}</div>
-                                        </div>
-                                        <div className="text-center p-3 border rounded">
-                                            <div className="text-2xl font-bold">{selectedCenter.stats.totalAppointments}</div>
-                                            <div className="text-sm text-muted-foreground">{t('admin_appointments') || 'Appointments'}</div>
-                                        </div>
-                                        <div className="text-center p-3 border rounded">
-                                            <div className="text-2xl font-bold">{selectedCenter.stats.averageRating.toFixed(1)}</div>
-                                            <div className="text-sm text-muted-foreground">{t('admin_avg_rating') || 'Avg Rating'}</div>
-                                        </div>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <h3 className="font-semibold mb-2">{t('admin_statistics') || 'Statistics'}</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="text-center p-3 border rounded">
+                                        <div className="text-2xl font-bold">{selectedCenter.stats?.totalDoctors || 0}</div>
+                                        <div className="text-sm text-muted-foreground">{t('admin_doctors') || 'Doctors'}</div>
+                                    </div>
+                                    <div className="text-center p-3 border rounded">
+                                        <div className="text-2xl font-bold">{selectedCenter.stats?.totalAppointments || 0}</div>
+                                        <div className="text-sm text-muted-foreground">{t('admin_appointments') || 'Appointments'}</div>
+                                    </div>
+                                    <div className="text-center p-3 border rounded">
+                                        <div className="text-2xl font-bold">{((selectedCenter.stats?.averageRating || 0)).toFixed(1)}</div>
+                                        <div className="text-sm text-muted-foreground">{t('admin_avg_rating') || 'Avg Rating'}</div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
                             {/* Admin Notes */}
                             {selectedCenter.admin_notes && (

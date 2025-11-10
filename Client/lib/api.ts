@@ -861,9 +861,14 @@ export const adminService = {
         const response = await api.get('/api/admin-users', { params });
         console.log('👥 Fallback response status:', response.status, 'data keys:', Object.keys(response.data || {}));
         
-        // If response is successful (200-299) and has data, use it
-        if (response.status >= 200 && response.status < 300 && (response.data?.success || response.data?.data || response.data?.users)) {
-          console.log('✅ Fallback route worked');
+        // Check if response has users data (multiple possible formats)
+        const hasUsers = response.data?.users || 
+                        response.data?.data?.users || 
+                        (Array.isArray(response.data) && response.data.length > 0);
+        
+        // If response has users data, use it (status check is optional since axios throws on non-2xx)
+        if (hasUsers || response.data?.success || response.data?.pagination) {
+          console.log('✅ Fallback route worked, using response');
           return response;
         } else {
           console.log('⚠️ Fallback route returned but no valid data, trying dynamic route');

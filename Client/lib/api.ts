@@ -853,6 +853,21 @@ export const adminService = {
   // Get all users with pagination and filtering
   getAllUsers: async (params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) => {
     try {
+      console.log('🔄 Fetching users with params:', params);
+      
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('👥 Trying admin-users fallback route');
+        const response = await api.get('/api/admin-users', { params });
+        if (response.data?.success) {
+          console.log('✅ Fallback route worked');
+          return response;
+        }
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+      }
+      
+      // Fallback to original route
       const response = await api.get('/api/auth/admin/users', { params });
       return response;
     } catch (error) {

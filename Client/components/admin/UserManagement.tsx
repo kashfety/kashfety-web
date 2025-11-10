@@ -730,12 +730,12 @@ export default function UserManagement() {
 
             {/* User Details Dialog */}
             <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
-                <DialogContent className="max-w-4xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('admin_user_details') || 'User Details'}</DialogTitle>
                     </DialogHeader>
                     {selectedUser && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 overflow-y-auto flex-1 pr-2 -mr-2">
                             {/* User Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
@@ -824,13 +824,23 @@ export default function UserManagement() {
                             {/* Recent Activity */}
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <h3 className="font-semibold mb-2">{t('admin_recent_appointments') || 'Recent Appointments'}</h3>
-                                <div className="space-y-2">
-                                    {(selectedUser.appointments || []).slice(0, 5).map((apt: any) => (
+                                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                                    {(selectedUser.appointments || []).map((apt: any) => (
                                         <div key={apt.id} className="p-2 border rounded text-sm">
                                             <div className={`flex ${isRTL ? 'flex-row-reverse' : 'justify-between'}`}>
                                                 <span>{apt.appointment_date} {t('admin_at') || 'at'} {apt.appointment_time}</span>
                                                 <Badge variant="outline">{apt.status}</Badge>
                                             </div>
+                                            {apt.doctor && (
+                                                <div className="text-xs text-muted-foreground mt-1">
+                                                    {t('admin_doctor') || 'Doctor'}: {apt.doctor.name} {apt.doctor.specialty ? `(${apt.doctor.specialty})` : ''}
+                                                </div>
+                                            )}
+                                            {apt.center && (
+                                                <div className="text-xs text-muted-foreground mt-1">
+                                                    {t('admin_center') || 'Center'}: {apt.center.name}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                     {selectedUser.appointments.length === 0 && (

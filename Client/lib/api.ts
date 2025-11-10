@@ -891,6 +891,25 @@ export const adminService = {
   // Get user by ID
   getUserById: async (id: string) => {
     try {
+      console.log('👤 Fetching user details for:', id);
+      
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('👤 Trying admin-user-details fallback route');
+        const response = await api.get('/api/admin-user-details', { params: { userId: id } });
+        console.log('👤 Fallback response data keys:', Object.keys(response.data || {}));
+        
+        // Check if response has user data
+        if (response.data?.success || response.data?.data || response.data?.user) {
+          console.log('✅ Fallback route worked for user details');
+          return response;
+        }
+      } catch (fallbackError: any) {
+        console.log('❌ Fallback failed for user details:', fallbackError?.response?.status || fallbackError?.status);
+      }
+      
+      // Fallback to original route
+      console.log('🔄 Trying original dynamic route for user details');
       const response = await api.get(`/api/auth/admin/users/${id}`);
       return response;
     } catch (error) {

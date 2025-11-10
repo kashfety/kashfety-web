@@ -105,7 +105,32 @@ export default function BannerManagement() {
                 return;
             }
             
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/banners`, {
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let result;
+            
+            try {
+                console.log('🎨 Trying admin-banners fallback route');
+                response = await fetch('/api/admin-banners', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    result = await response.json();
+                    if (result.success) {
+                        console.log('✅ Fallback route worked for banners');
+                        setBanners(result.data || []);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
+            response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/banners`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -115,7 +140,7 @@ export default function BannerManagement() {
                 throw new Error('Failed to fetch banners');
             }
 
-            const result = await response.json();
+            result = await response.json();
             setBanners(result.data || []);
         } catch (error) {
             console.error('Error fetching banners:', error);

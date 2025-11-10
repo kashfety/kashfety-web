@@ -48,27 +48,36 @@ export default function DoctorApprovals() {
                 
                 if (response.ok) {
                     data = await response.json();
+                    console.log('📜 [Doctor Approvals] Response data:', data);
+                    
                     if (data.success && data.data?.certificates) {
-                        console.log('✅ Fallback route worked for doctor certificates');
+                        console.log('✅ Fallback route worked for doctor certificates, found:', data.data.certificates.length, 'certificates');
                         
                         // Transform the certificate data to match our DoctorApproval interface
-                        const approvals: DoctorApproval[] = data.data.certificates.map((cert: any) => ({
-                            id: cert.id,
-                            name: cert.doctor?.name || 'Unknown',
-                            email: cert.doctor?.email || '',
-                            specialty: cert.doctor?.specialty || 'General',
-                            experience_years: cert.doctor?.experience_years || 0,
-                            status: cert.status || 'pending',
-                            created_at: cert.submitted_at || cert.created_at,
-                            certificate_type: cert.certificate_type,
-                            certificate_number: cert.certificate_number,
-                            issuing_authority: cert.issuing_authority,
-                            certificate_file_url: cert.certificate_file_url
-                        }));
+                        const approvals: DoctorApproval[] = data.data.certificates
+                            .filter((cert: any) => cert.status === 'pending' || !cert.status) // Only show pending certificates
+                            .map((cert: any) => ({
+                                id: cert.id,
+                                name: cert.doctor?.name || 'Unknown',
+                                email: cert.doctor?.email || '',
+                                specialty: cert.doctor?.specialty || 'General',
+                                experience_years: cert.doctor?.experience_years || 0,
+                                status: cert.status || 'pending',
+                                created_at: cert.submitted_at || cert.created_at,
+                                certificate_type: cert.certificate_type,
+                                certificate_number: cert.certificate_number,
+                                issuing_authority: cert.issuing_authority,
+                                certificate_file_url: cert.certificate_file_url
+                            }));
 
+                        console.log('📜 [Doctor Approvals] Transformed approvals:', approvals.length);
                         setApprovals(approvals);
                         return;
+                    } else {
+                        console.warn('⚠️ [Doctor Approvals] Response missing certificates data:', data);
                     }
+                } else {
+                    console.warn('⚠️ [Doctor Approvals] Response not OK:', response.status, response.statusText);
                 }
             } catch (fallbackError) {
                 console.log('❌ Fallback failed, trying backend route');

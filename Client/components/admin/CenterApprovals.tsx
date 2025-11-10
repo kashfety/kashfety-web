@@ -70,11 +70,25 @@ export default function CenterApprovals() {
 
                 if (response.ok) {
                     result = await response.json();
+                    console.log('🏥 [Center Approvals] Response data:', result);
+                    
                     if (result.success) {
-                        console.log('✅ Fallback route worked for center requests');
-                        setRequests(result.data || []);
+                        const requests = result.data || [];
+                        console.log('✅ Fallback route worked for center requests, found:', requests.length, 'requests');
+                        
+                        // Filter by status if needed (in case API didn't filter)
+                        const filteredRequests = status && status !== 'all' 
+                            ? requests.filter((r: any) => r.approval_status === status)
+                            : requests;
+                        
+                        console.log('🏥 [Center Approvals] Filtered requests:', filteredRequests.length, 'with status:', status);
+                        setRequests(filteredRequests);
                         return;
+                    } else {
+                        console.warn('⚠️ [Center Approvals] Response not successful:', result);
                     }
+                } else {
+                    console.warn('⚠️ [Center Approvals] Response not OK:', response.status, response.statusText);
                 }
             } catch (fallbackError) {
                 console.log('❌ Fallback failed, trying original route');

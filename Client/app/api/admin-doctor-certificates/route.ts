@@ -68,11 +68,15 @@ export async function GET(request: NextRequest) {
     for (const cert of certificates || []) {
       let doctorInfo = null;
       if (cert.doctor_id) {
-        const { data: doctor } = await supabase
+        const { data: doctor, error: doctorError } = await supabase
           .from('users')
           .select('id, name, email, specialty, experience_years, phone')
           .eq('id', cert.doctor_id)
           .single();
+        
+        if (doctorError) {
+          console.warn('⚠️ [Admin Doctor Certificates] Could not fetch doctor info for:', cert.doctor_id, doctorError.message);
+        }
         doctorInfo = doctor;
       }
 

@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Build query for centers
+    // Build query for centers - only get centers that need approval (pending, rejected) or all if status is 'all'
     let query = supabase
       .from('centers')
       .select('*')
@@ -26,9 +26,18 @@ export async function GET(request: NextRequest) {
     // Filter by approval status if provided
     if (status && status !== 'all') {
       query = query.eq('approval_status', status);
+    } else if (status === 'all') {
+      // For 'all', we might want to prioritize pending/rejected, but let's show all
+      // No additional filter needed
     }
 
     const { data: centers, error } = await query;
+    
+    console.log('🏥 [Admin Center Requests] Query result:', { 
+      status, 
+      count: centers?.length || 0,
+      statuses: centers?.map((c: any) => c.approval_status) || []
+    });
 
     if (error) {
       console.error('❌ Failed to fetch center requests:', error);

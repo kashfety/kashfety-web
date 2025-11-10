@@ -215,23 +215,22 @@ export default function UserManagement() {
             console.log('🔄 Fetching user details for:', userId);
 
             // Use adminService to get user details
-            const data = await adminService.getUserById(userId);
+            const response = await adminService.getUserById(userId);
+            console.log('✅ User details API response:', response);
 
-            // Create user details with additional data
+            // Handle different response formats
+            const apiData = response.data?.data || response.data || response;
+            
+            // Create user details with real data from API (or fallback to mock if not available)
             const userDetails = {
-                user: data.data || data,
-                appointments: [
-                    { id: 1, appointment_date: '2024-01-20', appointment_time: '10:00', doctor: 'Dr. Smith', status: 'completed' },
-                    { id: 2, appointment_date: '2024-01-25', appointment_time: '14:30', doctor: 'Dr. Johnson', status: 'scheduled' }
-                ],
-                medicalRecords: [
-                    { id: 1, record_date: '2024-01-15', record_type: 'consultation', title: 'Regular checkup' }
-                ],
-                reviews: [],
-                stats: {
-                    totalAppointments: 2,
-                    totalMedicalRecords: 1,
-                    totalReviews: 0
+                user: apiData.user || apiData,
+                appointments: apiData.appointments || [],
+                medicalRecords: apiData.medicalRecords || [],
+                reviews: apiData.reviews || [],
+                stats: apiData.stats || {
+                    totalAppointments: apiData.appointments?.length || 0,
+                    totalMedicalRecords: apiData.medicalRecords?.length || 0,
+                    totalReviews: apiData.reviews?.length || 0
                 }
             };
 

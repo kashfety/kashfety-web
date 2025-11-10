@@ -891,25 +891,33 @@ export const adminService = {
   // Get user by ID
   getUserById: async (id: string) => {
     try {
-      console.log('👤 Fetching user details for:', id);
+      console.log('👤 [API Service] Fetching user details for:', id);
       
       // Try fallback route first for Vercel compatibility
       try {
-        console.log('👤 Trying admin-user-details fallback route');
+        console.log('👤 [API Service] Trying admin-user-details fallback route');
         const response = await api.get('/api/admin-user-details', { params: { userId: id } });
-        console.log('👤 Fallback response data keys:', Object.keys(response.data || {}));
+        console.log('👤 [API Service] Fallback response received, data keys:', Object.keys(response.data || {}));
         
-        // Check if response has user data
-        if (response.data?.success || response.data?.data || response.data?.user) {
-          console.log('✅ Fallback route worked for user details');
+        // Check if response has user data (multiple possible formats)
+        const hasUserData = response.data?.success || 
+                           response.data?.data?.user || 
+                           response.data?.data?.appointments ||
+                           response.data?.user ||
+                           response.data?.appointments;
+        
+        if (hasUserData) {
+          console.log('✅ [API Service] Fallback route worked for user details');
           return response;
+        } else {
+          console.log('⚠️ [API Service] Fallback route returned but no valid user data structure');
         }
       } catch (fallbackError: any) {
-        console.log('❌ Fallback failed for user details:', fallbackError?.response?.status || fallbackError?.status);
+        console.log('❌ [API Service] Fallback failed for user details:', fallbackError?.response?.status || fallbackError?.status, fallbackError?.message);
       }
       
       // Fallback to original route
-      console.log('🔄 Trying original dynamic route for user details');
+      console.log('🔄 [API Service] Trying original dynamic route for user details');
       const response = await api.get(`/api/auth/admin/users/${id}`);
       return response;
     } catch (error) {

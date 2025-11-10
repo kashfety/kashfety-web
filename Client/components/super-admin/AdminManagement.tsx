@@ -128,22 +128,50 @@ export default function AdminManagement() {
                 ...(statusFilter && statusFilter !== 'all' && { status: statusFilter })
             });
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
             
-            // Use super-admin/admins endpoint to get admin users
-            const response = await fetch(`${baseUrl}/super-admin/admins?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                    'Content-Type': 'application/json'
+            try {
+                console.log('👑 Trying super-admin-admins fallback route');
+                response = await fetch(`/api/super-admin-admins?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success && data.data?.admins) {
+                        console.log('✅ Fallback route worked for super admin admins');
+                        // Continue with transformation below
+                    } else {
+                        throw new Error('Invalid response structure');
+                    }
+                } else {
+                    throw new Error('Fallback route failed');
                 }
-            });
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+                
+                // Fallback to backend route
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+                const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+                
+                response = await fetch(`${baseUrl}/super-admin/admins?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch admins');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch admins');
+                }
+
+                data = await response.json();
             }
-
-            const data = await response.json();
             
             // Transform the data from the super-admin endpoint
             const adminUsers = data.data.admins

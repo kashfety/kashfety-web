@@ -187,9 +187,36 @@ export default function CenterManagement() {
 
     const fetchCenterDetails = async (centerId: string) => {
         try {
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('🏥 Trying admin-center-details fallback route');
+                response = await fetch(`/api/admin-center-details?centerId=${centerId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success && data.data) {
+                        console.log('✅ Fallback route worked for center details');
+                        setSelectedCenter(data.data);
+                        setShowCenterDetails(true);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/centers/${centerId}`, {
+            response = await fetch(`${baseUrl}/auth/admin/centers/${centerId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -200,7 +227,7 @@ export default function CenterManagement() {
                 throw new Error('Failed to fetch center details');
             }
 
-            const data = await response.json();
+            data = await response.json();
             setSelectedCenter(data.data);
             setShowCenterDetails(true);
         } catch (error) {

@@ -7,6 +7,15 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET(request: NextRequest) {
   try {
     console.log('👥 [Admin Users] Request received');
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('❌ Missing Supabase credentials');
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Server configuration error' 
+      }, { status: 500 });
+    }
+    
     const { searchParams } = new URL(request.url);
     
     const page = parseInt(searchParams.get('page') || '1');

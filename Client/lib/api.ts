@@ -859,15 +859,22 @@ export const adminService = {
       try {
         console.log('👥 Trying admin-users fallback route');
         const response = await api.get('/api/admin-users', { params });
-        if (response.data?.success) {
+        console.log('👥 Fallback response status:', response.status, 'data keys:', Object.keys(response.data || {}));
+        
+        // If response is successful (200-299) and has data, use it
+        if (response.status >= 200 && response.status < 300 && (response.data?.success || response.data?.data || response.data?.users)) {
           console.log('✅ Fallback route worked');
           return response;
+        } else {
+          console.log('⚠️ Fallback route returned but no valid data, trying dynamic route');
         }
-      } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
+      } catch (fallbackError: any) {
+        console.log('❌ Fallback failed:', fallbackError?.response?.status || fallbackError?.status, fallbackError?.message || fallbackError);
+        // Continue to try dynamic route
       }
       
       // Fallback to original route
+      console.log('🔄 Trying original dynamic route');
       const response = await api.get('/api/auth/admin/users', { params });
       return response;
     } catch (error) {

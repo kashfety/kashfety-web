@@ -306,8 +306,33 @@ export default function CertificateApproval() {
         }
     };
 
-    const downloadCertificate = async (fileUrl: string, fileName: string) => {
+    const downloadCertificate = async (fileUrl: string, fileName: string, certificateId?: string) => {
         try {
+            // If we have a certificate ID, use the download proxy route to get a fresh signed URL
+            if (certificateId) {
+                try {
+                    console.log('📥 Trying admin-download-certificate fallback route');
+                    const response = await fetch(`/api/admin-download-certificate?certificateId=${certificateId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.download_url) {
+                            console.log('✅ Fallback route worked, got fresh download URL');
+                            // Use the fresh signed URL
+                            fileUrl = data.download_url;
+                            fileName = data.file_name || fileName;
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.log('❌ Fallback download route failed, using original URL');
+                }
+            }
+
             // Construct the full URL with the backend server
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl.replace('/api', '') : apiUrl.replace(/\/$/, '')
@@ -321,22 +346,28 @@ export default function CertificateApproval() {
                 fullUrl = `${baseUrl}${cleanPath}`
             }
 
+            console.log('📥 Downloading certificate from:', fullUrl);
             const response = await fetch(fullUrl);
 
             if (!response.ok) {
-                throw new Error(`Failed to fetch file: ${response.status}`)
+                throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`)
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = fileName;
+            a.download = fileName || 'certificate.pdf';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        } catch (error) {
+            
+            toast({
+                title: t('admin_success') || "Success",
+                description: t('admin_certificate_downloaded') || "Certificate downloaded successfully",
+            });
+        } catch (error: any) {
             console.error('Error downloading certificate:', error);
             toast({
                 title: t('admin_error') || "Error",
@@ -543,7 +574,7 @@ export default function CertificateApproval() {
                                             <Button
                                                 variant="link"
                                                 size="sm"
-                                                onClick={() => downloadCertificate(certificate.certificate_file_url, certificate.certificate_file_name)}
+                                                onClick={() => downloadCertificate(certificate.certificate_file_url, certificate.certificate_file_name, certificate.id)}
                                             >
                                                 {certificate.certificate_file_name}
                                             </Button>
@@ -656,7 +687,7 @@ export default function CertificateApproval() {
                                         <div className="text-sm text-muted-foreground">{t('admin_submitted_on') || 'Submitted on'} {formatDate(selectedCertificate.submitted_at)}</div>
                                     </div>
                                     <Button
-                                        onClick={() => downloadCertificate(selectedCertificate.certificate_file_url, selectedCertificate.certificate_file_name)}
+                                        onClick={() => downloadCertificate(selectedCertificate.certificate_file_url, selectedCertificate.certificate_file_name, selectedCertificate.id)}
                                     >
                                         <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                         {t('admin_download') || 'Download'}

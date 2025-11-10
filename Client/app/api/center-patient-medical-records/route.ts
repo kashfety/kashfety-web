@@ -17,33 +17,39 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch medical records for the patient
+    // Fetch medical records for the patient (simpler query without foreign key join)
     const { data: medicalRecords, error } = await supabase
       .from('medical_records')
-      .select(`
-        id,
-        patient_id,
-        doctor_id,
-        appointment_id,
-        record_date,
-        diagnosis,
-        treatment,
-        prescription,
-        notes,
-        created_at,
-        updated_at,
-        doctor:users!medical_records_doctor_id_fkey(id, name, specialty, profile_picture)
-      `)
+      .select('*')
       .eq('patient_id', patientId)
-      .order('record_date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('❌ Failed to fetch medical records:', error);
       return NextResponse.json({ success: false, error: 'Failed to fetch medical records', details: error.message }, { status: 500 });
     }
 
-    console.log('✅ [Center Patient Medical Records] Fetched', medicalRecords.length, 'records for patient:', patientId);
-    return NextResponse.json({ success: true, records: medicalRecords || [] });
+    // Manually enrich with doctor information
+    const enrichedRecords = [];
+    for (const record of medicalRecords || []) {
+      let doctorInfo = null;
+      if (record.doctor_id) {
+        const { data: doctor } = await supabase
+          .from('users')
+          .select('id, name, specialty, profile_picture')
+          .eq('id', record.doctor_id)
+          .single();
+        doctorInfo = doctor;
+      }
+      
+      enrichedRecords.push({
+        ...record,
+        doctor: doctorInfo
+      });
+    }
+
+    console.log('✅ [Center Patient Medical Records] Fetched', enrichedRecords.length, 'records for patient:', patientId);
+    return NextResponse.json({ success: true, records: enrichedRecords });
 
   } catch (error: any) {
     console.error('❌ Center patient medical records API error:', error);

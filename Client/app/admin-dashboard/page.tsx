@@ -457,11 +457,36 @@ export default function AdminDashboardPage() {
         try {
             setStatsLoading(true);
 
-            // Normalize API URL to avoid double slashes
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('📊 Trying admin-dashboard-stats fallback route');
+                response = await fetch('/api/admin-dashboard-stats', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success) {
+                        console.log('✅ Fallback route worked');
+                        setDashboardStats(data.data);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
 
-            const response = await fetch(`${baseUrl}/auth/admin/dashboard/stats`, {
+            response = await fetch(`${baseUrl}/auth/admin/dashboard/stats`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -472,7 +497,7 @@ export default function AdminDashboardPage() {
                 throw new Error('Failed to fetch dashboard stats');
             }
 
-            const data = await response.json();
+            data = await response.json();
             setDashboardStats(data.data);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);

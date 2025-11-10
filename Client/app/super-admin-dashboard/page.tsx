@@ -474,12 +474,53 @@ export default function SuperAdminDashboardPage() {
         try {
             setStatsLoading(true);
 
-            // Normalize API URL to avoid double slashes
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('📊 Trying admin-dashboard-stats fallback route');
+                response = await fetch('/api/admin-dashboard-stats', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success) {
+                        console.log('✅ Fallback route worked');
+                        // Transform the data to include super admin specific fields
+                        const transformedData = {
+                            ...data.data,
+                            adminActivity: {
+                                totalActions: 0,
+                                actionsByType: {},
+                                activeAdmins: data.data.overview.totalAdmins || 0,
+                                recentLogins: 0
+                            },
+                            systemHealth: {
+                                uptime: 99.9,
+                                performance: 95,
+                                errorRate: 0.1,
+                                activeConnections: 0
+                            }
+                        };
+                        setDashboardStats(transformedData);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
 
             // Use the same reliable endpoint as admin dashboard
-            const response = await fetch(`${baseUrl}/auth/admin/dashboard/stats`, {
+            response = await fetch(`${baseUrl}/auth/admin/dashboard/stats`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -490,7 +531,7 @@ export default function SuperAdminDashboardPage() {
                 throw new Error('Failed to fetch dashboard stats');
             }
 
-            const data = await response.json();
+            data = await response.json();
 
             // Transform the data to include super admin specific fields
             const transformedData = {

@@ -1036,6 +1036,25 @@ export const adminService = {
   // Get analytics data
   getAnalytics: async (params?: { start_date?: string; end_date?: string; type?: string }) => {
     try {
+      console.log('📊 Fetching analytics with params:', params);
+      
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('📊 Trying admin-analytics fallback route');
+        const response = await api.get('/api/admin-analytics', { params });
+        console.log('📊 Fallback response data keys:', Object.keys(response.data || {}));
+        
+        // Check if response has analytics data
+        if (response.data?.success || response.data?.data || response.data?.appointments || response.data?.revenue) {
+          console.log('✅ Fallback route worked for analytics');
+          return response;
+        }
+      } catch (fallbackError: any) {
+        console.log('❌ Fallback failed for analytics:', fallbackError?.response?.status || fallbackError?.status);
+      }
+      
+      // Fallback to original route
+      console.log('🔄 Trying original dynamic route for analytics');
       const response = await api.get('/api/auth/admin/analytics', { params });
       return response;
     } catch (error) {

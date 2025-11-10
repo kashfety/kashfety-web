@@ -49,11 +49,53 @@ export default function AdminAnalytics() {
         try {
             setLoading(true)
 
-            // Fetch real analytics data from API
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let result;
+            
+            try {
+                console.log('📊 Trying admin-analytics fallback route');
+                response = await fetch('/api/admin-analytics', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    result = await response.json();
+                    if (result.success && result.data) {
+                        console.log('✅ Fallback route worked for analytics');
+                        
+                        const data = result.data;
+                        // Transform the API response to match our AnalyticsData interface
+                        const analyticsData: AnalyticsData = {
+                            appointments: {
+                                daily: data.appointments?.daily || [],
+                                statusDistribution: data.appointments?.statusDistribution || []
+                            },
+                            users: {
+                                growth: data.users?.growth || [],
+                                totalByRole: data.users?.totalByRole || []
+                            },
+                            revenue: {
+                                monthly: data.revenue?.monthly || []
+                            }
+                        };
+
+                        setAnalytics(analyticsData);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
 
-            const response = await fetch(`${baseUrl}/auth/admin/analytics`, {
+            response = await fetch(`${baseUrl}/auth/admin/analytics`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -64,7 +106,7 @@ export default function AdminAnalytics() {
                 throw new Error('Failed to fetch analytics data');
             }
 
-            const result = await response.json();
+            result = await response.json();
             const data = result.data;
 
             // Transform the API response to match our AnalyticsData interface

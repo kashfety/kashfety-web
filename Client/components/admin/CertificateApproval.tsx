@@ -572,12 +572,12 @@ export default function CertificateApproval() {
 
             {/* Certificate Details Dialog */}
             <Dialog open={showCertificateDetails} onOpenChange={setShowCertificateDetails}>
-                <DialogContent className="max-w-4xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('admin_certificate_details') || 'Certificate Details'}</DialogTitle>
                     </DialogHeader>
                     {selectedCertificate && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 overflow-y-auto flex-1 pr-2 -mr-2">
                             {/* Doctor Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
@@ -673,12 +673,12 @@ export default function CertificateApproval() {
 
             {/* Review Certificate Dialog */}
             <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('admin_review_certificate') || 'Review Certificate'}</DialogTitle>
                     </DialogHeader>
                     {reviewingCertificate && (
-                        <div className="space-y-4">
+                        <div className="space-y-4 overflow-y-auto flex-1 pr-2 -mr-2">
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <label className="text-sm font-medium">{t('admin_review_status') || 'Review Status'}</label>
                                 <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>

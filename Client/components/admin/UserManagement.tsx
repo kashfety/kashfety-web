@@ -883,15 +883,15 @@ export default function UserManagement() {
 
             {/* Edit User Dialog */}
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('admin_edit_user_details') || 'Edit User Details'}</DialogTitle>
                         <DialogDescription className={isRTL ? 'text-right' : 'text-left'}>
                             {t('admin_update_user_info') || 'Update user information, status, and password settings.'}
                         </DialogDescription>
                     </DialogHeader>
                     {editingUser && (
-                        <div className="space-y-4">
+                        <div className="space-y-4 overflow-y-auto flex-1 pr-2 -mr-2">
                             {/* Basic Information */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={isRTL ? 'text-right' : 'text-left'}>

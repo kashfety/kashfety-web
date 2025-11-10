@@ -690,12 +690,12 @@ export default function CenterManagement() {
 
             {/* Center Details Dialog */}
             <Dialog open={showCenterDetails} onOpenChange={setShowCenterDetails}>
-                <DialogContent className="max-w-4xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('admin_center_details') || 'Center Details'}</DialogTitle>
                     </DialogHeader>
                     {selectedCenter && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 overflow-y-auto flex-1 pr-2 -mr-2">
                             {/* Center Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
@@ -773,11 +773,11 @@ export default function CenterManagement() {
                     setEditingCenter(null);
                 }
             }}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
+                <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
                         <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>{editingCenter ? (t('admin_edit_center') || 'Edit Center') : (t('admin_create_new_center') || 'Create New Center')}</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="space-y-4 overflow-y-auto flex-1 pr-2 -mr-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <label className="text-sm font-medium">{t('admin_center_name') || 'Center Name'}</label>

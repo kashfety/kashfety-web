@@ -134,10 +134,13 @@ export default function AdminManagement() {
             
             try {
                 console.log('👑 Trying super-admin-admins fallback route');
-                response = await fetch(`/api/super-admin-admins?${params}`, {
+                // Add cache-busting timestamp to ensure fresh data
+                const cacheBuster = `&_t=${Date.now()}`;
+                response = await fetch(`/api/super-admin-admins?${params}${cacheBuster}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
                     }
                 });
                 
@@ -176,33 +179,42 @@ export default function AdminManagement() {
             // Transform the data from the super-admin endpoint
             console.log('📊 [AdminManagement] Raw data received:', data);
             const adminUsers = (data.data?.admins || data.admins || [])
-                .map((user: any) => ({
-                    id: user.id,
-                    uid: user.uid || `admin-${user.id}`,
-                    name: user.name || user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.email.split('@')[0],
-                    email: user.email,
-                    phone: user.phone || 'Not provided',
-                    role: user.role,
-                    isActive: user.is_active !== false,
-                    lastLogin: user.last_login || user.updated_at,
-                    loginCount: user.login_count || 0,
-                    createdAt: user.created_at,
-                    createdBy: user.created_by || 'system',
-                    accountLocked: user.account_locked || false,
-                    lockReason: user.account_locked ? user.lock_reason || 'Account locked' : null,
-                    lockedAt: user.account_locked ? user.locked_at || user.updated_at : null,
-                    lockedBy: user.account_locked ? user.locked_by || 'system' : null,
-                    permissions: {
-                        user_management: user.role === 'admin' || user.role === 'super_admin',
-                        admin_management: user.role === 'super_admin',
-                        system_settings: user.role === 'super_admin',
-                        audit_logs: user.role === 'admin' || user.role === 'super_admin',
-                        all: user.role === 'super_admin'
+                .map((user: any) => {
+                    const transformed = {
+                        id: user.id,
+                        uid: user.uid || `admin-${user.id}`,
+                        name: user.name || (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.email?.split('@')[0] || 'Unknown'),
+                        email: user.email,
+                        phone: user.phone || 'Not provided',
+                        role: user.role,
+                        isActive: user.is_active !== false,
+                        lastLogin: user.last_login || user.updated_at,
+                        loginCount: user.login_count || 0,
+                        createdAt: user.created_at,
+                        createdBy: user.created_by || 'system',
+                        accountLocked: user.account_locked || false,
+                        lockReason: user.account_locked ? user.lock_reason || 'Account locked' : null,
+                        lockedAt: user.account_locked ? user.locked_at || user.updated_at : null,
+                        lockedBy: user.account_locked ? user.locked_by || 'system' : null,
+                        permissions: {
+                            user_management: user.role === 'admin' || user.role === 'super_admin',
+                            admin_management: user.role === 'super_admin',
+                            system_settings: user.role === 'super_admin',
+                            audit_logs: user.role === 'admin' || user.role === 'super_admin',
+                            all: user.role === 'super_admin'
+                        }
+                    };
+                    // Log the transformed user for debugging
+                    if (user.email === 'm.ismail.official23@gmail.com') {
+                        console.log('🔍 [AdminManagement] Transformed user:', transformed);
+                        console.log('🔍 [AdminManagement] Original user data:', user);
                     }
-                }));
+                    return transformed;
+                });
             
+            console.log('📊 [AdminManagement] Setting admins:', adminUsers.length, 'admins');
             setAdmins(adminUsers);
-            setTotalPages(data.data.pagination?.totalPages || 1);
+            setTotalPages(data.data?.pagination?.totalPages || data.pagination?.totalPages || 1);
         } catch (error) {
             console.error('Error fetching admins:', error);
             
@@ -357,10 +369,16 @@ export default function AdminManagement() {
             setEditingAdmin(null);
             resetFormData();
             
+            // Force a refresh by resetting current page to trigger useEffect
             // Then refresh the admin list with a small delay to ensure DB is updated
             setTimeout(() => {
-                fetchAdmins();
-            }, 500);
+                console.log('🔄 [AdminManagement] Refreshing admin list after update...');
+                // Force refresh by toggling page or using a timestamp
+                setCurrentPage(prev => {
+                    fetchAdmins();
+                    return prev; // Keep same page
+                });
+            }, 1000); // Increased delay to ensure DB consistency
         } catch (error) {
             console.error('❌ Error updating admin:', error);
             const errorMessage = error instanceof Error ? error.message : "Failed to update admin";

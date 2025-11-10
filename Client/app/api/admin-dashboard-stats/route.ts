@@ -104,20 +104,21 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Demographics
+    // Demographics - filter to only patients for patient demographics
     const specialties: Record<string, number> = {};
     const gender: Record<string, number> = {};
     const ageGroups: Record<string, number> = {};
 
-    (users || []).forEach((user: any) => {
-      // Specialties (for doctors)
-      if (user.specialty) {
-        specialties[user.specialty] = (specialties[user.specialty] || 0) + 1;
-      }
-      
-      // Gender
+    // Filter to only patients for patient demographics
+    const patients = (users || []).filter((u: any) => u.role === 'patient');
+
+    patients.forEach((user: any) => {
+      // Gender - normalize to lowercase to avoid duplicates
       if (user.gender) {
-        gender[user.gender] = (gender[user.gender] || 0) + 1;
+        const normalizedGender = user.gender.toLowerCase().trim();
+        if (normalizedGender === 'male' || normalizedGender === 'female' || normalizedGender === 'other') {
+          gender[normalizedGender] = (gender[normalizedGender] || 0) + 1;
+        }
       }
       
       // Age groups
@@ -131,6 +132,13 @@ export async function GET(request: NextRequest) {
         else if (age < 60) ageGroup = '45-59';
         else ageGroup = '60+';
         ageGroups[ageGroup] = (ageGroups[ageGroup] || 0) + 1;
+      }
+    });
+
+    // Specialties (for doctors) - count all doctors
+    (users || []).forEach((user: any) => {
+      if (user.specialty) {
+        specialties[user.specialty] = (specialties[user.specialty] || 0) + 1;
       }
     });
 

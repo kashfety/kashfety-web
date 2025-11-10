@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         .gte('booking_date', startDate.toISOString().split('T')[0])
         .lte('booking_date', endDate.toISOString().split('T')[0]),
       supabase.from('users')
-        .select('gender, date_of_birth, specialty')
+        .select('role, gender, date_of_birth, specialty')
         .in('role', ['patient', 'doctor'])
     ]);
 
@@ -111,6 +111,7 @@ export async function GET(request: NextRequest) {
 
     // Filter to only patients for patient demographics
     const patients = (users || []).filter((u: any) => u.role === 'patient');
+    console.log('📊 [Admin Dashboard Stats] Total users fetched:', (users || []).length, 'Patients:', patients.length);
 
     patients.forEach((user: any) => {
       // Gender - normalize to lowercase to avoid duplicates
@@ -118,6 +119,9 @@ export async function GET(request: NextRequest) {
         const normalizedGender = user.gender.toLowerCase().trim();
         if (normalizedGender === 'male' || normalizedGender === 'female' || normalizedGender === 'other') {
           gender[normalizedGender] = (gender[normalizedGender] || 0) + 1;
+        } else {
+          // Handle other gender values
+          gender['other'] = (gender['other'] || 0) + 1;
         }
       }
       
@@ -134,6 +138,8 @@ export async function GET(request: NextRequest) {
         ageGroups[ageGroup] = (ageGroups[ageGroup] || 0) + 1;
       }
     });
+
+    console.log('📊 [Admin Dashboard Stats] Demographics:', { gender, ageGroups, patientsCount: patients.length });
 
     // Specialties (for doctors) - count all doctors
     (users || []).forEach((user: any) => {

@@ -382,17 +382,23 @@ export default function AdminOverview({ stats, loading, onRefresh }: AdminOvervi
                         <CardTitle className="text-lg">{t('admin_patient_demographics') || 'Patient Demographics'}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        {Object.entries(stats?.demographics?.gender || {}).map(([gender, count]) => (
-                            <div key={gender} className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <span className="capitalize">
-                                    {gender === 'male' ? (t('admin_male') || 'Male') :
-                                        gender === 'female' ? (t('admin_female') || 'Female') :
-                                            gender === 'other' ? (t('admin_other') || 'Other') :
-                                                gender}
-                                </span>
-                                <span className="font-semibold">{formatNumber(count)}</span>
+                        {Object.keys(stats?.demographics?.gender || {}).length > 0 ? (
+                            Object.entries(stats?.demographics?.gender || {}).map(([gender, count]) => (
+                                <div key={gender} className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                    <span className="capitalize">
+                                        {gender === 'male' ? (t('admin_male') || 'Male') :
+                                            gender === 'female' ? (t('admin_female') || 'Female') :
+                                                gender === 'other' ? (t('admin_other') || 'Other') :
+                                                    gender}
+                                    </span>
+                                    <span className="font-semibold">{formatNumber(count as number)}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-sm text-muted-foreground text-center py-4">
+                                {t('admin_no_demographics_data') || 'No patient demographics data available'}
                             </div>
-                        ))}
+                        )}
                     </CardContent>
                 </Card>
             </div>

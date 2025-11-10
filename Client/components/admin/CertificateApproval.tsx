@@ -196,9 +196,47 @@ export default function CertificateApproval() {
 
     const fetchCertificateDetails = async (certificateId: string) => {
         try {
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('📜 Trying admin-certificate-details fallback route');
+                response = await fetch(`/api/admin-certificate-details?certificateId=${certificateId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    if (data.success && data.data) {
+                        console.log('✅ Fallback route worked for certificate details');
+                        
+                        // Transform the certificate data to match our CertificateSubmission interface
+                        const transformedCertificate = {
+                            ...data.data,
+                            doctor_name: data.data.doctor_name || data.data.doctor?.name || 'Unknown',
+                            doctor_email: data.data.doctor_email || data.data.doctor?.email || 'Unknown',
+                            doctor_phone: data.data.doctor_phone || data.data.doctor?.phone || 'Unknown',
+                            specialty: data.data.specialty || data.data.doctor?.specialty || 'General',
+                            certificate_status: data.data.certificate_status || data.data.status || 'pending'
+                        };
+
+                        setSelectedCertificate(transformedCertificate);
+                        setShowCertificateDetails(true);
+                        return;
+                    }
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/certificates/${certificateId}`, {
+            response = await fetch(`${baseUrl}/auth/admin/certificates/${certificateId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -209,7 +247,7 @@ export default function CertificateApproval() {
                 throw new Error('Failed to fetch certificate details');
             }
 
-            const data = await response.json();
+            data = await response.json();
 
             // Transform the certificate data to match our CertificateSubmission interface
             const transformedCertificate = {

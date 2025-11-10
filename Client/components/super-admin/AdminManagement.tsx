@@ -180,11 +180,21 @@ export default function AdminManagement() {
             console.log('📊 [AdminManagement] Raw data received:', data);
             const adminUsers = (data.data?.admins || data.admins || [])
                 .map((user: any) => {
+                    // Determine the name - prioritize name field, then first_name + last_name, then email prefix
+                    let displayName = 'Unknown';
+                    if (user.name && typeof user.name === 'string' && user.name.trim()) {
+                        displayName = user.name.trim();
+                    } else if (user.first_name || user.last_name) {
+                        displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.email) {
+                        displayName = user.email.split('@')[0];
+                    }
+                    
                     const transformed = {
                         id: user.id,
                         uid: user.uid || `admin-${user.id}`,
-                        name: user.name || (user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.email?.split('@')[0] || 'Unknown'),
-                        email: user.email,
+                        name: displayName,
+                        email: user.email || '',
                         phone: user.phone || 'Not provided',
                         role: user.role,
                         isActive: user.is_active !== false,
@@ -209,10 +219,15 @@ export default function AdminManagement() {
                         console.log('🔍 [AdminManagement] Transformed user:', transformed);
                         console.log('🔍 [AdminManagement] Original user data:', user);
                     }
+                    
+                    // Log name resolution for all users
+                    console.log(`👤 [AdminManagement] User ${user.id || user.email}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+                    
                     return transformed;
                 });
             
             console.log('📊 [AdminManagement] Setting admins:', adminUsers.length, 'admins');
+            console.log('📊 [AdminManagement] Admin names:', adminUsers.map(a => ({ id: a.id, name: a.name, email: a.email })));
             setAdmins(adminUsers);
             setTotalPages(data.data?.pagination?.totalPages || data.pagination?.totalPages || 1);
         } catch (error) {

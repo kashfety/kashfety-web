@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .in('role', ['admin', 'super_admin']);
 
-    // Build data query
+    // Build data query - explicitly select name fields to ensure they're fetched
     let dataQuery = supabase
       .from('users')
-      .select('*')
+      .select('id, uid, name, first_name, last_name, email, phone, role, is_active, last_login, login_count, created_at, created_by, account_locked, lock_reason, locked_at, locked_by, permissions, updated_at')
       .in('role', ['admin', 'super_admin']);
 
     // Apply role filter
@@ -75,10 +75,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform users to match AdminUser interface
-    const transformedAdmins = (users || []).map((user: any) => ({
+    const transformedAdmins = (users || []).map((user: any) => {
+      // Determine the name - prioritize name field, then first_name + last_name, then email prefix, then 'Unknown'
+      let displayName = 'Unknown';
+      if (user.name && user.name.trim()) {
+        displayName = user.name.trim();
+      } else if (user.first_name || user.last_name) {
+        displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      } else if (user.email) {
+        displayName = user.email.split('@')[0];
+      }
+      
+      console.log(`👤 [Super Admin Admins] User ${user.id}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
+      
+      return {
       id: user.id,
       uid: user.uid || user.id,
-      name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown',
+      name: displayName,
       email: user.email || '',
       phone: user.phone || '',
       role: user.role as 'admin' | 'super_admin',
@@ -98,7 +111,8 @@ export async function GET(request: NextRequest) {
         audit_logs: user.permissions?.audit_logs || false,
         all: user.permissions?.all || user.role === 'super_admin'
       }
-    }));
+      };
+    });
 
     const totalPages = Math.ceil((count || 0) / limit);
 

@@ -306,22 +306,52 @@ export default function SignupPage() {
       }
 
       // Create user in custom users table using backend API
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
+      // Try fallback route first (for Vercel compatibility)
+      let response: Response;
+      let result: any;
       
-      const response = await fetch(`${baseUrl}/auth/register-verified`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...pendingUserData,
-          supabase_user_id: supabaseUserId, // Pass the verified Supabase user ID
-          email_verified: true
-        }),
-      });
+      try {
+        console.log('🔄 Trying register-verified fallback route');
+        response = await fetch('/api/auth/register-verified', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...pendingUserData,
+            supabase_user_id: supabaseUserId, // Pass the verified Supabase user ID
+            email_verified: true
+          }),
+        });
 
-      const result = await response.json();
+        result = await response.json();
+        
+        if (response.ok && (result.success || result.user)) {
+          console.log('✅ Fallback route worked for register-verified');
+        } else {
+          throw new Error(result.error || 'Fallback route failed');
+        }
+      } catch (fallbackError: any) {
+        console.log('❌ Fallback failed, trying backend route:', fallbackError);
+        
+        // Fallback to original backend route
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
+        
+        response = await fetch(`${baseUrl}/auth/register-verified`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...pendingUserData,
+            supabase_user_id: supabaseUserId,
+            email_verified: true
+          }),
+        });
+
+        result = await response.json();
+      }
       
       if (!response.ok) {
         throw new Error(result.error || result.message || 'Failed to create user profile');
@@ -352,16 +382,13 @@ export default function SignupPage() {
         setShowOTPVerification(false);
         setSuccess(t('registration_success') || 'Registration successful! Please upload your medical certificates for approval.');
       } else {
-        // For other roles, redirect to appropriate dashboard
+        // For all other roles, redirect to login page after successful registration
         setShowOTPVerification(false);
-        setSuccess(t('registration_success') || 'Registration successful!');
+        setSuccess(t('registration_success') || 'Registration successful! Redirecting to login...');
         
+        // Redirect to login page after showing success message
         setTimeout(() => {
-          if (role === 'center') {
-            router.push('/center-dashboard');
-          } else if (role === 'admin' || role === 'super_admin') {
-            router.push('/admin-dashboard');
-          }
+          router.push('/login');
         }, 2000);
       }
 
@@ -384,9 +411,34 @@ export default function SignupPage() {
   const handleMedicalRecordsComplete = async () => {
     try {
       setIsLoading(true);
-      await login(formData.email, formData.password);
+      
+      // Get email and password from pendingUserData (stored during signup)
+      const email = pendingUserData?.email || formData.email;
+      const password = pendingUserData?.password || formData.password;
+      
+      if (!email || !password) {
+        throw new Error('Email or password not found. Please login manually.');
+      }
+      
+      // Try to login automatically
+      try {
+        await login(email, password);
+        // If login succeeds, the auth provider will handle redirect
+      } catch (loginErr: any) {
+        // If auto-login fails, redirect to login page so user can login manually
+        console.log('Auto-login failed, redirecting to login page:', loginErr);
+        setSuccess(t('medical_records_saved') || 'Medical records saved successfully! Please login to continue.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      }
     } catch (err: any) {
-      setError(t('login_failed_after_records') || 'Medical records saved but login failed. Please try logging in manually.');
+      console.error('Error completing medical records:', err);
+      setError(t('medical_records_error') || 'An error occurred. Please try logging in manually.');
+      // Still redirect to login page even if there's an error
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     } finally {
       setIsLoading(false);
       setShowMedicalForm(false);

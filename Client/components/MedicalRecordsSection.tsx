@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, AlertTriangle, Pill, Phone, Edit, Save, X, Plus } from "lucide-react";
+import { Heart, AlertTriangle, Pill, Phone, Edit, Save, X, Plus, FileText, Trash2, Calendar, User } from "lucide-react";
 import { useAuth } from "@/lib/providers/auth-provider";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface MedicalInfo {
   id: string;
@@ -25,6 +26,25 @@ interface MedicalInfo {
     name?: string;
     relationship?: string;
     phone?: string;
+  };
+}
+
+interface MedicalRecord {
+  id: string;
+  patient_id: string;
+  doctor_id?: string;
+  appointment_id?: string;
+  diagnosis: string;
+  treatment: string;
+  prescription?: string;
+  notes?: string;
+  record_date: string;
+  created_at: string;
+  updated_at: string;
+  doctor?: {
+    id: string;
+    name: string;
+    specialty?: string;
   };
 }
 
@@ -53,9 +73,23 @@ export default function MedicalRecordsSection() {
   const [allergiesList, setAllergiesList] = useState<string[]>([]);
   const [medicationsList, setMedicationsList] = useState<string[]>([]);
 
+  // States for medical records (from medical_records table)
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+  const [showRecordDialog, setShowRecordDialog] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null);
+  const [recordForm, setRecordForm] = useState({
+    diagnosis: '',
+    treatment: '',
+    prescription: '',
+    notes: '',
+    record_date: new Date().toISOString().split('T')[0]
+  });
+
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       fetchMedicalInfo();
+      fetchMedicalRecords();
     }
   }, [isAuthenticated, user]);
 
@@ -180,6 +214,161 @@ export default function MedicalRecordsSection() {
     setMedicationsList(medicationsList.filter(m => m !== medication));
   };
 
+  // Fetch medical records from medical_records table
+  const fetchMedicalRecords = async () => {
+    if (!user?.id) return;
+    
+    setRecordsLoading(true);
+    try {
+      const response = await fetch(`/api/patient-medical-records?patient_id=${user.id}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setMedicalRecords(result.records || []);
+      } else {
+        throw new Error(result.error || 'Failed to fetch medical records');
+      }
+    } catch (error) {
+      console.error('Error fetching medical records:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch medical records",
+        variant: "destructive"
+      });
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
+
+  // Handle create/update medical record
+  const handleSaveRecord = async () => {
+    if (!user?.id) return;
+    
+    if (!recordForm.diagnosis || !recordForm.treatment) {
+      toast({
+        title: "Error",
+        description: "Diagnosis and treatment are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setRecordsLoading(true);
+    try {
+      const url = editingRecord 
+        ? '/api/patient-medical-records'
+        : '/api/patient-medical-records';
+      
+      const method = editingRecord ? 'PUT' : 'POST';
+      const body = editingRecord
+        ? {
+            record_id: editingRecord.id,
+            ...recordForm
+          }
+        : {
+            patient_id: user.id,
+            ...recordForm
+          };
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await fetchMedicalRecords();
+        setShowRecordDialog(false);
+        setEditingRecord(null);
+        setRecordForm({
+          diagnosis: '',
+          treatment: '',
+          prescription: '',
+          notes: '',
+          record_date: new Date().toISOString().split('T')[0]
+        });
+        toast({
+          title: "Success",
+          description: editingRecord ? "Medical record updated successfully" : "Medical record created successfully"
+        });
+      } else {
+        throw new Error(result.error || 'Failed to save medical record');
+      }
+    } catch (error: any) {
+      console.error('Error saving medical record:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save medical record",
+        variant: "destructive"
+      });
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
+
+  // Handle delete medical record
+  const handleDeleteRecord = async (recordId: string) => {
+    if (!confirm('Are you sure you want to delete this medical record?')) {
+      return;
+    }
+
+    setRecordsLoading(true);
+    try {
+      const response = await fetch(`/api/patient-medical-records?record_id=${recordId}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await fetchMedicalRecords();
+        toast({
+          title: "Success",
+          description: "Medical record deleted successfully"
+        });
+      } else {
+        throw new Error(result.error || 'Failed to delete medical record');
+      }
+    } catch (error: any) {
+      console.error('Error deleting medical record:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete medical record",
+        variant: "destructive"
+      });
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
+
+  // Open dialog for creating new record
+  const handleCreateRecord = () => {
+    setEditingRecord(null);
+    setRecordForm({
+      diagnosis: '',
+      treatment: '',
+      prescription: '',
+      notes: '',
+      record_date: new Date().toISOString().split('T')[0]
+    });
+    setShowRecordDialog(true);
+  };
+
+  // Open dialog for editing record
+  const handleEditRecord = (record: MedicalRecord) => {
+    setEditingRecord(record);
+    setRecordForm({
+      diagnosis: record.diagnosis || '',
+      treatment: record.treatment || '',
+      prescription: record.prescription || '',
+      notes: record.notes || '',
+      record_date: record.record_date || new Date().toISOString().split('T')[0]
+    });
+    setShowRecordDialog(true);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="w-full">
@@ -239,11 +428,12 @@ export default function MedicalRecordsSection() {
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
             <TabsTrigger value="allergies">{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
             <TabsTrigger value="medications">{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
             <TabsTrigger value="emergency">{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
+            <TabsTrigger value="records">{t('mr_tab_records') || 'Medical Records'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -452,8 +642,186 @@ export default function MedicalRecordsSection() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="records">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#4DBCC4]" />
+                    {t('mr_medical_records') || 'Medical Records'}
+                  </CardTitle>
+                  <Button onClick={handleCreateRecord} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    {t('mr_add_record') || 'Add Record'}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {recordsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4DBCC4]"></div>
+                    <p className="ml-3 text-muted-foreground">{t('mr_loading_records') || 'Loading records...'}</p>
+                  </div>
+                ) : medicalRecords.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">{t('mr_no_records') || 'No medical records found'}</p>
+                    <Button onClick={handleCreateRecord} className="mt-4" variant="outline">
+                      <Plus className="w-4 h-4 mr-2" />
+                      {t('mr_add_first_record') || 'Add Your First Record'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {medicalRecords.map((record) => (
+                      <Card key={record.id} className="border-l-4 border-l-[#4DBCC4]">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg mb-2">{record.diagnosis}</CardTitle>
+                              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                                {record.doctor && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="w-4 h-4" />
+                                    <span>Dr. {record.doctor.name}</span>
+                                    {record.doctor.specialty && (
+                                      <Badge variant="outline" className="ml-1">{record.doctor.specialty}</Badge>
+                                    )}
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-4 h-4" />
+                                  <span>{new Date(record.record_date).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditRecord(record)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteRecord(record.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}:</Label>
+                            <p className="text-foreground mt-1">{record.treatment}</p>
+                          </div>
+                          {record.prescription && (
+                            <div>
+                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}:</Label>
+                              <p className="text-foreground mt-1">{record.prescription}</p>
+                            </div>
+                          )}
+                          {record.notes && (
+                            <div>
+                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}:</Label>
+                              <p className="text-foreground mt-1 whitespace-pre-wrap">{record.notes}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       )}
+
+      {/* Create/Edit Medical Record Dialog */}
+      <Dialog open={showRecordDialog} onOpenChange={setShowRecordDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingRecord ? (t('mr_edit_record') || 'Edit Medical Record') : (t('mr_create_record') || 'Create Medical Record')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="record_date">{t('mr_record_date') || 'Record Date'}</Label>
+              <Input
+                id="record_date"
+                type="date"
+                value={recordForm.record_date}
+                onChange={(e) => setRecordForm(prev => ({ ...prev, record_date: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="diagnosis">{t('mr_diagnosis') || 'Diagnosis'} *</Label>
+              <Textarea
+                id="diagnosis"
+                value={recordForm.diagnosis}
+                onChange={(e) => setRecordForm(prev => ({ ...prev, diagnosis: e.target.value }))}
+                placeholder={t('mr_diagnosis_placeholder') || "Enter diagnosis"}
+                rows={3}
+                className="mt-1"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="treatment">{t('mr_treatment') || 'Treatment'} *</Label>
+              <Textarea
+                id="treatment"
+                value={recordForm.treatment}
+                onChange={(e) => setRecordForm(prev => ({ ...prev, treatment: e.target.value }))}
+                placeholder={t('mr_treatment_placeholder') || "Enter treatment details"}
+                rows={4}
+                className="mt-1"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="prescription">{t('mr_prescription') || 'Prescription'}</Label>
+              <Textarea
+                id="prescription"
+                value={recordForm.prescription}
+                onChange={(e) => setRecordForm(prev => ({ ...prev, prescription: e.target.value }))}
+                placeholder={t('mr_prescription_placeholder') || "Enter prescription details (optional)"}
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="notes">{t('mr_notes') || 'Additional Notes'}</Label>
+              <Textarea
+                id="notes"
+                value={recordForm.notes}
+                onChange={(e) => setRecordForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder={t('mr_notes_placeholder') || "Enter any additional notes (optional)"}
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRecordDialog(false);
+              setEditingRecord(null);
+            }}>
+              {t('mr_cancel') || 'Cancel'}
+            </Button>
+            <Button onClick={handleSaveRecord} disabled={recordsLoading}>
+              {recordsLoading ? (t('mr_saving') || 'Saving...') : (t('mr_save') || 'Save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

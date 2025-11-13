@@ -39,15 +39,31 @@ export async function GET(request: NextRequest) {
       if (review.patient_id) {
         const { data: patient } = await supabase
           .from('users')
-          .select('id, name, email, profile_picture')
+          .select('id, name, first_name, last_name, email, profile_picture')
           .eq('id', review.patient_id)
           .single();
-        patientInfo = patient;
+        
+        if (patient) {
+          // Resolve patient name: prioritize name, then first_name + last_name, then email prefix
+          let patientName = patient.name;
+          if (!patientName && (patient.first_name || patient.last_name)) {
+            patientName = [patient.first_name, patient.last_name].filter(Boolean).join(' ').trim();
+          }
+          if (!patientName && patient.email) {
+            patientName = patient.email.split('@')[0];
+          }
+          
+          patientInfo = {
+            ...patient,
+            name: patientName || 'Anonymous Patient'
+          };
+        }
       }
 
       enrichedReviews.push({
         ...review,
-        patient: patientInfo
+        patient: patientInfo,
+        patient_name: patientInfo?.name || 'Anonymous Patient'
       });
     }
 

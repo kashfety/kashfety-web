@@ -528,6 +528,44 @@ export default function DoctorDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // Fetch reviews when reviews tab is active
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (activeTab !== 'reviews') return;
+
+      setReviewsLoading(true);
+      try {
+        const storedUserStr = localStorage.getItem('auth_user');
+        const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
+        const doctorId = user?.id || storedUser?.id;
+
+        if (!doctorId) {
+          console.error('Doctor ID not found');
+          setReviewsLoading(false);
+          return;
+        }
+
+        const response = await fetch(`/api/doctor-reviews?doctor_id=${encodeURIComponent(doctorId)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Reviews fetched:', data.reviews?.length || 0);
+          setReviews(data.reviews || []);
+        } else {
+          console.error('Failed to fetch reviews:', response.status);
+          setReviews([]);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [activeTab, user?.id]);
+
   const fetchDoctorData = async () => {
     setLoading(true);
     try {
@@ -1929,7 +1967,9 @@ export default function DoctorDashboard() {
                           <div>
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                              {analytics?.analytics?.avgRating?.toFixed(2) || '0.00'}★
+                              {reviews.length > 0 
+                                ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(2)
+                                : '0.00'}★
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                               {reviews.length} {reviews.length === 1 ? (t('dd_review') || 'review') : (t('dd_reviews') || 'reviews')}
@@ -1944,17 +1984,19 @@ export default function DoctorDashboard() {
 
                     {/* Reviews List */}
                     <div className="space-y-4">
-                      {reviews.map((review) => (
+                      {reviews.map((review) => {
+                        const patientName = review.patient_name || review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient';
+                        return (
                         <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
                           <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
-                                  {review.patient?.name?.charAt(0)?.toUpperCase() || 'P'}
+                                  {patientName.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
                                   <p className="font-semibold text-gray-900 dark:text-white">
-                                    {review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient'}
+                                    {patientName}
                                   </p>
                                   <p className="text-sm text-gray-500 dark:text-gray-400">
                                     {new Date(review.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
@@ -1988,7 +2030,8 @@ export default function DoctorDashboard() {
                             )}
                           </CardContent>
                         </Card>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

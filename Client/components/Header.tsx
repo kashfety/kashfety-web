@@ -54,7 +54,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
                 console.error('🔘 onMenuToggle is undefined!');
               }
             }}
-            className="text-foreground/80 hover:text-[#4DBCC4] dark:hover:text-[#2a5f6b] transition-colors p-1.5 sm:p-2 z-[60] relative cursor-pointer"
+            className="text-foreground/80 transition-all duration-300 p-1.5 sm:p-2 z-[60] relative cursor-pointer hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg"
             aria-label="Toggle menu"
             type="button"
           >

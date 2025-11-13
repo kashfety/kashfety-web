@@ -1,129 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-const AUTH_FALLBACK_ENABLED = process.env.AUTH_FALLBACK_ENABLED !== '0';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ appointmentId: string }> }
 ) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader && !AUTH_FALLBACK_ENABLED) {
-      return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
-    }
-
+    console.log('🔄 [Doctor Appointment Status] PUT request received');
+    
     const body = await request.json();
     const { appointmentId } = await context.params;
+    
     if (!appointmentId) {
       return NextResponse.json({ error: 'appointmentId param is required' }, { status: 400 });
     }
 
-    // First try unified-auth endpoint if token provided
-    if (authHeader) {
-      try {
-        // First try unified-auth endpoint
-        let response = await fetch(`${BACKEND_URL}/api/auth/doctor/appointments/${appointmentId}/status`, {
-          method: 'PUT',
-          headers: {
-            Authorization: authHeader,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+    console.log('📋 [Doctor Appointment Status] Updating appointment:', appointmentId, 'with body:', body);
 
-        // If unified-auth rejects due to validation (400), try doctor-dashboard route as fallback
-        if (!response.ok && response.status === 400) {
-          let unifiedError: any = null;
-          try { unifiedError = await response.json(); } catch {}
-
-          const msg = (unifiedError?.message || unifiedError?.error || '').toString().toLowerCase();
-          if (msg.includes('valid status') || msg.includes('invalid status')) {
-            const alt = await fetch(`${BACKEND_URL}/api/doctor-dashboard/appointments/${appointmentId}/status`, {
-              method: 'PUT',
-              headers: {
-                Authorization: authHeader,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(body),
-            });
-            const altData = await alt.json().catch(() => ({}));
-            if (!alt.ok) {
-              return NextResponse.json(altData, { status: alt.status });
-            }
-            return NextResponse.json(altData);
-          }
-          // Not a validation-style error; pass through original
-          return NextResponse.json(unifiedError || { error: 'Bad Request' }, { status: 400 });
-        }
-
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          // If role/ownership forbidden, optionally fallback below
-          if (response.status === 403 && AUTH_FALLBACK_ENABLED) {
-            // Fall through to Supabase fallback below
-          } else {
-            return NextResponse.json(data, { status: response.status });
-          }
-        } else {
-          return NextResponse.json(data);
-        }
-      } catch (e) {
-        // fall through to Supabase fallback if enabled
-      }
-    }
-
-    // Supabase fallback path (DEV): requires doctor_id via query/body
-    if (!AUTH_FALLBACK_ENABLED) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
+    // Get doctor_id from query params or body
     const { searchParams } = new URL(request.url);
     const doctorId = searchParams.get('doctor_id') || body?.doctor_id;
     const status = body?.status;
+    const notes = body?.notes;
 
     if (!doctorId) {
-      return NextResponse.json({ error: 'doctor_id is required for fallback' }, { status: 400 });
+      return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     }
+
     if (!status || !['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'].includes(status)) {
-      return NextResponse.json({ error: 'Valid status required (scheduled, confirmed, completed, cancelled, no_show)' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Valid status required (scheduled, confirmed, completed, cancelled, no_show)' 
+      }, { status: 400 });
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.SUPABASE_SERVICE_ROLE_KEY as string
-    );
-
-    // Verify appointment belongs to doctor
-    const { data: appt, error: fetchError } = await supabase
+    // Verify appointment exists and belongs to doctor
+    const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
-      .select('id, doctor_id')
+      .select('id, doctor_id, status')
       .eq('id', appointmentId)
       .single();
 
-    if (fetchError || !appt) {
+    if (fetchError || !appointment) {
+      console.error('❌ [Doctor Appointment Status] Appointment not found:', fetchError);
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
     }
-    if (appt.doctor_id !== doctorId) {
+
+    if (appointment.doctor_id !== doctorId) {
+      console.error('❌ [Doctor Appointment Status] Access denied - doctor_id mismatch');
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    // Prepare update data
+    const updateData: any = {
+      status,
+      updated_at: new Date().toISOString()
+    };
+
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+
+    console.log('💾 [Doctor Appointment Status] Updating appointment with data:', updateData);
+
+    // Update appointment
     const { data: updated, error: updateError } = await supabase
       .from('appointments')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', appointmentId)
       .select('*')
       .single();
 
     if (updateError) {
-      console.error('Fallback update status error:', updateError);
-      return NextResponse.json({ error: 'Failed to update appointment status' }, { status: 500 });
+      console.error('❌ [Doctor Appointment Status] Update error:', updateError);
+      return NextResponse.json({ 
+        error: 'Failed to update appointment status',
+        details: updateError.message 
+      }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Appointment status updated successfully', appointment: updated });
-  } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/appointments/[appointmentId]/status PUT):', error);
-    return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
+    console.log('✅ [Doctor Appointment Status] Appointment updated successfully:', updated.id);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Appointment status updated successfully', 
+      appointment: updated 
+    });
+
+  } catch (error: any) {
+    console.error('❌ [Doctor Appointment Status] Error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error.message 
+    }, { status: 500 });
   }
 }

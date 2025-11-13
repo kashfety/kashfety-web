@@ -1731,7 +1731,7 @@ function Sidebar({
     <>
       <button
         type="button"
-        className={`lg:hidden fixed top-4 ${isRTL ? 'right-4' : 'left-4'} z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md border border-gray-200 dark:border-[#1F1F23]`}
+        className={`lg:hidden fixed top-4 ${isRTL ? 'right-4' : 'left-4'} z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md border border-gray-200 dark:border-[#1F1F23] transition-all duration-300 hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg`}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
         <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />

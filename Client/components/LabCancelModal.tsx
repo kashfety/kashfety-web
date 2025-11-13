@@ -40,6 +40,31 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
   const { t } = useLocale();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
 
+  // Check if cancellation is within 24 hours
+  const canCancel = () => {
+    if (!booking?.booking_date || !booking?.booking_time) return true; // Allow if date/time missing
+    
+    const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
+    const now = new Date();
+    const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    // Can cancel if more than 24 hours away, or if booking is in the past (though API will block past)
+    return hoursUntilBooking > 24 || hoursUntilBooking < 0;
+  };
+
+  const getTimeUntilBooking = () => {
+    if (!booking?.booking_date || !booking?.booking_time) return null;
+    
+    const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
+    const now = new Date();
+    const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursUntilBooking <= 24 && hoursUntilBooking > 0) {
+      return Math.ceil(hoursUntilBooking);
+    }
+    return null;
+  };
+
   const handleCancel = async () => {
     if (!booking) return;
 
@@ -101,6 +126,21 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
               </DialogHeader>
 
               <div className="space-y-4 mt-6">
+                {/* 24-hour restriction warning */}
+                {!canCancel() && (
+                  <div className="bg-red-100 border-2 border-red-400 rounded-lg p-4">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-red-900">
+                        <p className="font-bold mb-1">{t('cancel_24h_restriction_title') || 'Cancellation Not Allowed'}</p>
+                        <p>
+                          {t('cancel_24h_restriction_message') || `You cannot cancel this booking as it is scheduled within the next ${getTimeUntilBooking()} hours. Please contact support for assistance.`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Booking Details */}
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <h3 className="font-semibold text-red-900 mb-3">
@@ -130,20 +170,22 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                   </div>
                 </div>
 
-                {/* Warning Message */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                    <div className="text-yellow-800">
-                      <p className="font-medium text-sm">
-                                                {t("lab_cancel_warning_title") || "Cancellation Policy"}
-                      </p>
-                      <p className="text-xs mt-1">
-                        {t('cancel_warning_message') || 'Cancellations within 24 hours of the appointment may incur a fee. Please review our cancellation policy.'}
-                      </p>
+                {/* Warning Message - only show if can cancel */}
+                {canCancel() && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                      <div className="text-yellow-800">
+                        <p className="font-medium text-sm">
+                                                  {t("lab_cancel_warning_title") || "Cancellation Policy"}
+                        </p>
+                        <p className="text-xs mt-1">
+                          {t('cancel_warning_message') || 'Cancellations within 24 hours of the appointment may incur a fee. Please review our cancellation policy.'}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Reason Input */}
                 <div>
@@ -177,8 +219,8 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                 </Button>
                 <Button 
                   onClick={handleCancel} 
-                  disabled={loading}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  disabled={loading || !canCancel()}
+                  className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">

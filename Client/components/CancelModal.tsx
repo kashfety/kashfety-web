@@ -40,6 +40,31 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
   const { toast } = useToast();
   const { t } = useLocale();
 
+  // Check if cancellation is within 24 hours
+  const canCancel = () => {
+    if (!appointment?.date || !appointment?.time) return true; // Allow if date/time missing
+    
+    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+    const now = new Date();
+    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    // Can cancel if more than 24 hours away, or if appointment is in the past (though API will block past)
+    return hoursUntilAppointment > 24 || hoursUntilAppointment < 0;
+  };
+
+  const getTimeUntilAppointment = () => {
+    if (!appointment?.date || !appointment?.time) return null;
+    
+    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+    const now = new Date();
+    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
+      return Math.ceil(hoursUntilAppointment);
+    }
+    return null;
+  };
+
   const handleCancel = async () => {
     if (!appointment) return;
 
@@ -92,16 +117,33 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Warning */}
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-              <div className="text-sm text-red-800">
-                <p className="font-medium">{t('cancel_confirmation') || 'Are you sure?'}</p>
-                <p>{t('cancel_warning') || 'This action cannot be undone. Your appointment will be cancelled immediately.'}</p>
+          {/* 24-hour restriction warning */}
+          {!canCancel() && (
+            <div className="bg-red-100 border-2 border-red-400 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-900">
+                  <p className="font-bold mb-1">{t('cancel_24h_restriction_title') || 'Cancellation Not Allowed'}</p>
+                  <p>
+                    {t('cancel_24h_restriction_message') || `You cannot cancel this appointment as it is scheduled within the next ${getTimeUntilAppointment()} hours. Please contact support for assistance.`}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Warning */}
+          {canCancel() && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                <div className="text-sm text-red-800">
+                  <p className="font-medium">{t('cancel_confirmation') || 'Are you sure?'}</p>
+                  <p>{t('cancel_warning') || 'This action cannot be undone. Your appointment will be cancelled immediately.'}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Appointment Details */}
           <div className="bg-gray-50 p-3 rounded-lg">
@@ -145,8 +187,8 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
           </Button>
           <Button 
             onClick={handleCancel} 
-            disabled={loading}
-            className="bg-red-600 hover:bg-red-700"
+            disabled={loading || !canCancel()}
+            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (t('cancelling') || 'Cancelling...') : (t('cancel_appointment') || 'Cancel Appointment')}
           </Button>

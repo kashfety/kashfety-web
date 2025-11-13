@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
     // First, check if the appointment exists
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
-      .select('id, status, appointment_date')
+      .select('id, status, appointment_date, appointment_time')
       .eq('id', appointmentId)
       .single();
 
@@ -42,6 +42,36 @@ export async function PUT(request: NextRequest) {
         success: false, 
         message: 'Appointment is already cancelled' 
       }, { status: 400 });
+    }
+
+    // Check if cancellation is within 24 hours of appointment time
+    if (appointment.appointment_date && appointment.appointment_time) {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+      
+      console.log('⏰ [Appointment Cancel] Time check:', {
+        appointmentDateTime: appointmentDateTime.toISOString(),
+        now: now.toISOString(),
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2)
+      });
+
+      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
+        return NextResponse.json({ 
+          success: false, 
+          message: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          code: 'CANCELLATION_TOO_LATE'
+        }, { status: 400 });
+      }
+
+      // Also check if appointment is in the past
+      if (hoursUntilAppointment < 0) {
+        return NextResponse.json({ 
+          success: false, 
+          message: 'Cannot cancel a past appointment',
+          code: 'APPOINTMENT_IN_PAST'
+        }, { status: 400 });
+      }
     }
 
     // Update the appointment status to cancelled

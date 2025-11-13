@@ -855,22 +855,33 @@ export default function DoctorDashboard() {
 
   const handleUpdateAppointmentStatus = async (appointmentId: string, status: string) => {
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-
-      // Use the unified auth endpoint for consistency
       const storedUserStr = localStorage.getItem('auth_user');
       const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
       const doctorId = user?.id || storedUser?.id;
-      const response = await fetch(`/api/auth/doctor/appointments/${appointmentId}/status${doctorId ? `?doctor_id=${encodeURIComponent(doctorId)}` : ''}`, {
+      
+      if (!doctorId) {
+        toast({
+          title: "Error",
+          description: "Doctor ID not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Use the fallback route directly (works on Vercel)
+      console.log('🔄 Updating appointment status via fallback route:', { appointmentId, doctorId, status });
+      const response = await fetch(`/api/doctor-update-appointment-status?appointmentId=${encodeURIComponent(appointmentId)}&doctor_id=${encodeURIComponent(doctorId)}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status, doctor_id: doctorId })
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        console.log('✅ Appointment status updated successfully');
         toast({
           title: "Success",
           description: `Appointment status updated to ${status}`,
@@ -878,10 +889,10 @@ export default function DoctorDashboard() {
         // Refresh data to show updated status on both doctor and patient sides
         fetchDoctorData();
       } else {
-        const errorData = await response.json();
+        console.error('❌ Failed to update appointment status:', result);
         toast({
           title: "Error",
-          description: errorData.message || errorData.error || "Failed to update appointment status",
+          description: result.message || result.error || "Failed to update appointment status",
           variant: "destructive",
         });
       }

@@ -114,15 +114,56 @@ export async function GET(
     const requested = new Date(date);
     const dayOfWeek = requested.getDay();
 
-    // Query doctor_schedules for that day and center (if provided)
+    // Query doctor_schedules for that day
+    // Handle appointment_type: home_visit schedules typically have center_id matching home visit centers
+    // For clinic appointments, filter by center_id if provided
+    // For home visits, we need to find schedules where center name ends with "- Home Visit Schedule"
     let baseQuery = supabase
       .from('doctor_schedules')
-      .select('day_of_week, is_available, time_slots, consultation_fee, center_id')
+      .select(`
+        day_of_week, 
+        is_available, 
+        time_slots, 
+        consultation_fee, 
+        center_id,
+        centers(name)
+      `)
       .eq('doctor_id', doctorId)
       .eq('day_of_week', dayOfWeek)
       .eq('is_available', true);
-    if (centerId) baseQuery = baseQuery.eq('center_id', centerId);
-    const { data: schedule } = await baseQuery.single();
+    
+    // Fetch all matching schedules (don't use .single() as we may have multiple)
+    const { data: schedules, error: scheduleError } = await baseQuery;
+    
+    if (scheduleError) {
+      console.error('❌ Error fetching doctor schedules:', scheduleError);
+      return NextResponse.json({
+        success: true,
+        available_slots: [],
+        booked_slots: [],
+        date,
+        doctor_id: doctorId,
+        message: 'Failed to fetch doctor schedule'
+      }, { status: 200 });
+    }
+    
+    // Filter schedules based on appointment type and center
+    let schedule = null;
+    if (appointmentType === 'home_visit') {
+      // Find schedule for home visit (center name ends with "- Home Visit Schedule")
+      schedule = (schedules || []).find((s: any) => 
+        s.centers?.name && s.centers.name.endsWith('- Home Visit Schedule')
+      ) || null;
+    } else if (centerId) {
+      // For clinic, find schedule matching center_id
+      schedule = (schedules || []).find((s: any) => s.center_id === centerId) || null;
+    } else {
+      // If no center_id specified, use first available schedule (for legacy appointments)
+      // But exclude home visit schedules
+      schedule = (schedules || []).find((s: any) => 
+        !s.centers?.name || !s.centers.name.endsWith('- Home Visit Schedule')
+      ) || schedules?.[0] || null;
+    }
 
     if (!schedule || schedule.is_available === false) {
       return NextResponse.json({

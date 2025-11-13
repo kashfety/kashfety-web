@@ -102,22 +102,47 @@ export async function GET(request: NextRequest) {
       console.error('❌ Failed to fetch bookings:', bookingsError);
     }
 
-    const bookedTimes = new Set((bookings || []).map(b => b.booking_time));
+    const bookedTimes = new Set((bookings || []).map(b => {
+      // Normalize booking time to HH:MM format
+      const time = b.booking_time;
+      if (typeof time === 'string') {
+        // Remove seconds if present (HH:MM:SS -> HH:MM)
+        return time.slice(0, 5);
+      }
+      return time;
+    }));
     console.log('🔒 Booked times:', Array.from(bookedTimes));
 
     // Map slots to include availability
+    // Handle both string slots and object slots
     const availableSlots = timeSlots.map((slot: any) => {
-      const time = typeof slot === 'string' ? slot : slot.time;
-      const isBooked = bookedTimes.has(time) || bookedTimes.has(`${time}:00`);
+      let time: string;
+      if (typeof slot === 'string') {
+        time = slot;
+      } else if (slot.time) {
+        time = slot.time;
+      } else if (slot.start_time) {
+        time = slot.start_time;
+      } else {
+        console.warn('⚠️ Unknown slot format:', slot);
+        return null;
+      }
+      
+      // Normalize time to HH:MM format
+      time = time.slice(0, 5);
+      
+      // Check if this time is booked
+      const isBooked = bookedTimes.has(time);
       
       return {
         time,
         is_available: !isBooked,
         is_booked: isBooked
       };
-    });
+    }).filter((slot: any) => slot !== null); // Remove any null slots
 
     console.log('✅ [Lab Available Slots] Returning', availableSlots.length, 'slots');
+    console.log('📋 [Lab Available Slots] Sample slots:', availableSlots.slice(0, 3));
 
     return NextResponse.json({
       success: true,

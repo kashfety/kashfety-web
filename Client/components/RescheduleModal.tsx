@@ -163,11 +163,14 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       // Use the center-specific doctor available slots endpoint
       // Include center_id if present on appointment for center-aware availability
       // Include exclude_appointment_id to exclude the current appointment from booked slots (for rescheduling)
+      // Include appointment_type to filter schedules correctly (home_visit vs clinic)
       let apiUrl = `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}`;
       const maybeCenterId = (appointment as any)?.center_id;
       if (maybeCenterId) {
         apiUrl += `&center_id=${maybeCenterId}`;
       }
+      // Pass appointment_type to filter schedules correctly
+      apiUrl += `&appointment_type=${appointmentType}`;
       // Exclude current appointment from booked slots when rescheduling
       if (appointment?.id) {
         apiUrl += `&exclude_appointment_id=${encodeURIComponent(appointment.id)}`;

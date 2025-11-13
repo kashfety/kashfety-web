@@ -140,34 +140,84 @@ export async function PUT(request: NextRequest) {
     const centerId = user.center_id || user.id;
 
     // First, delete existing schedule for this test type
-    await supabase
+    const { error: deleteError } = await supabase
       .from('center_lab_schedules')
       .delete()
       .eq('center_id', centerId)
       .eq('lab_test_type_id', lab_test_type_id);
 
-    // Then insert the new schedule
-    if (schedule.length > 0) {
-      const scheduleInserts = schedule.map(day => ({
-        center_id: centerId,
-        lab_test_type_id,
-        day_of_week: day.day_of_week,
-        is_available: day.is_available,
-        time_slots: JSON.stringify(day.slots || []),
-        break_start: day.break_start,
-        break_end: day.break_end,
-        slot_duration: day.slot_duration || 30,
-        notes: day.notes
-      }));
+    if (deleteError) {
+      console.error('❌ Failed to delete existing schedule:', deleteError);
+      return NextResponse.json({ error: 'Failed to delete existing schedule', details: deleteError.message }, { status: 500 });
+    }
 
-      const { error } = await supabase
+    // Filter and prepare schedule inserts - only include available days with slots
+    const scheduleInserts = schedule
+      .filter((day: any) => {
+        // Only include days that are available and have valid slots
+        const hasSlots = Array.isArray(day.slots) && day.slots.length > 0;
+        const isAvailable = day.is_available !== false; // Default to true if not specified
+        return isAvailable && hasSlots;
+      })
+      .map((day: any) => {
+        // Format time_slots as array of objects with time and duration
+        // The slots from frontend are already in format: [{ time: string, duration: number }]
+        const timeSlots = day.slots
+          .map((slot: any) => {
+            // Handle both string and object formats
+            const time = typeof slot === 'string' 
+              ? slot 
+              : (slot.time || slot.start_time || slot.slot_time || '');
+            const duration = typeof slot === 'object' && slot.duration !== undefined
+              ? slot.duration
+              : (day.slot_duration || 30);
+            
+            return { time, duration };
+          })
+          .filter((slot: any) => slot.time); // Remove any invalid slots
+
+        // Validate day_of_week is between 0-6
+        const dayOfWeek = Number(day.day_of_week);
+        if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+          throw new Error(`Invalid day_of_week: ${day.day_of_week}. Must be between 0-6.`);
+        }
+
+        return {
+          center_id: centerId,
+          lab_test_type_id,
+          day_of_week: dayOfWeek,
+          is_available: true,
+          time_slots: timeSlots, // Pass as array, Supabase will handle jsonb conversion
+          break_start: day.break_start || null,
+          break_end: day.break_end || null,
+          slot_duration: day.slot_duration || 30,
+          notes: day.notes || null
+        };
+      });
+
+    console.log('💾 Preparing to insert', scheduleInserts.length, 'schedule entries');
+
+    // Insert the new schedule if there are any entries
+    if (scheduleInserts.length > 0) {
+      const { data, error } = await supabase
         .from('center_lab_schedules')
-        .insert(scheduleInserts);
+        .insert(scheduleInserts)
+        .select();
 
       if (error) {
-        console.error('Failed to save schedule:', error);
-        return NextResponse.json({ error: 'Failed to save schedule' }, { status: 500 });
+        console.error('❌ Failed to save schedule:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        return NextResponse.json({ 
+          error: 'Failed to save schedule', 
+          details: error.message,
+          code: error.code,
+          hint: error.hint
+        }, { status: 500 });
       }
+
+      console.log('✅ Successfully saved', data?.length || 0, 'schedule entries');
+    } else {
+      console.log('ℹ️ No schedule entries to insert (all days are unavailable or have no slots)');
     }
 
     return NextResponse.json({ success: true });

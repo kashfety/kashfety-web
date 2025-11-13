@@ -8,6 +8,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
+    const excludeBookingId = searchParams.get('exclude_booking_id'); // For rescheduling
     const { centerId, typeId } = await params;
 
     console.log('🔍 Lab available slots request:', { centerId, typeId, date });
@@ -50,13 +51,20 @@ export async function GET(
     }
 
     // Get existing bookings for this date, center, and test type
-    const { data: bookings, error: bookingsError } = await supabase
+    let bookingsQuery = supabase
       .from('lab_bookings')
-      .select('booking_time')
+      .select('id, booking_time')
       .eq('center_id', centerId)
       .eq('lab_test_type_id', typeId)
       .eq('booking_date', date)
       .in('status', ['scheduled', 'confirmed']);
+    
+    // Exclude the current booking if rescheduling
+    if (excludeBookingId) {
+      bookingsQuery = bookingsQuery.neq('id', excludeBookingId);
+    }
+    
+    const { data: bookings, error: bookingsError } = await bookingsQuery;
 
     if (bookingsError) {
       console.error('Failed to fetch lab bookings:', bookingsError);

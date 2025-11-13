@@ -91,7 +91,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const dateString = fmt(date);
       
-      const res = await labService.getAvailableSlots(booking.center.id, booking.type.id, dateString);
+      // Fetch available slots, excluding the current booking ID for rescheduling
+      const res = await labService.getAvailableSlots(booking.center.id, booking.type.id, dateString, booking.id);
       const data = (res as any)?.data || res;
       
       const availableSlots = data?.available_slots || [];

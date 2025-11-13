@@ -543,17 +543,24 @@ export const labService = {
       return frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-dates`, { params: range });
     }
   },
-  getAvailableSlots: async (centerId: string, typeId: string, date: string) => {
+  getAvailableSlots: async (centerId: string, typeId: string, date: string, excludeBookingId?: string) => {
     // Try fallback route first for Vercel compatibility
     try {
       console.log('🕐 Trying lab-available-slots route');
-      const params = { centerId, typeId, date };
+      const params: any = { centerId, typeId, date };
+      if (excludeBookingId) {
+        params.exclude_booking_id = excludeBookingId;
+      }
       const response = await frontendApi.get('/api/lab-available-slots', { params });
       console.log('✅ Lab slots fetched successfully');
       return response;
     } catch (error) {
       console.log('❌ Fallback failed, trying dynamic route');
-      return frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-slots`, { params: { date } });
+      const params: any = { date };
+      if (excludeBookingId) {
+        params.exclude_booking_id = excludeBookingId;
+      }
+      return frontendApi.get(`/api/auth/lab-tests/centers/${centerId}/types/${typeId}/available-slots`, { params });
     }
   },
   book: async (booking: { center_id: string; lab_test_type_id: string; booking_date: string; booking_time: string; notes?: string; duration?: number; fee?: number; }) => {

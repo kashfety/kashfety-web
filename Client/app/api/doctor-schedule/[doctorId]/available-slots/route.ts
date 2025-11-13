@@ -15,6 +15,7 @@ export async function GET(
     const date = searchParams.get('date');
     const centerId = searchParams.get('center_id');
     const appointmentType = searchParams.get('appointment_type') || undefined;
+    const excludeAppointmentId = searchParams.get('exclude_appointment_id'); // For rescheduling
 
     if (!date) {
       return NextResponse.json({ success: false, message: 'Missing required date parameter' }, { status: 400 });
@@ -37,12 +38,19 @@ export async function GET(
 
         // Enrich with server-side booked computation to guarantee correctness
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const { data: appts } = await supabase
+        let apptsQuery = supabase
           .from('appointments')
-          .select('appointment_time, status, center_id')
+          .select('id, appointment_time, status, center_id')
           .eq('doctor_id', doctorId)
           .eq('appointment_date', date)
           .in('status', ['scheduled', 'confirmed']);
+        
+        // Exclude the current appointment if rescheduling
+        if (excludeAppointmentId) {
+          apptsQuery = apptsQuery.neq('id', excludeAppointmentId);
+        }
+        
+        const { data: appts } = await apptsQuery;
 
         const toHHMM = (t: string | null | undefined): string | null => {
           if (!t) return null;
@@ -128,12 +136,19 @@ export async function GET(
     }
 
     // Get existing appointments for this date (block scheduled/confirmed)
-    const { data: appts } = await supabase
+    let apptsQuery = supabase
       .from('appointments')
-      .select('appointment_time, status, center_id')
+      .select('id, appointment_time, status, center_id')
       .eq('doctor_id', doctorId)
       .eq('appointment_date', date)
       .in('status', ['scheduled', 'confirmed']);
+    
+    // Exclude the current appointment if rescheduling
+    if (excludeAppointmentId) {
+      apptsQuery = apptsQuery.neq('id', excludeAppointmentId);
+    }
+    
+    const { data: appts } = await apptsQuery;
 
     const toHHMM = (t: string | null | undefined): string | null => {
       if (!t) return null;

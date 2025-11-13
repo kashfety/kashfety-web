@@ -156,10 +156,15 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       
       // Use the center-specific doctor available slots endpoint
       // Include center_id if present on appointment for center-aware availability
+      // Include exclude_appointment_id to exclude the current appointment from booked slots (for rescheduling)
       let apiUrl = `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}`;
       const maybeCenterId = (appointment as any)?.center_id;
       if (maybeCenterId) {
         apiUrl += `&center_id=${maybeCenterId}`;
+      }
+      // Exclude current appointment from booked slots when rescheduling
+      if (appointment?.id) {
+        apiUrl += `&exclude_appointment_id=${encodeURIComponent(appointment.id)}`;
       }
       const headers = {
         'Content-Type': 'application/json',
@@ -231,6 +236,10 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const maybeCenterId2 = (appointment as any)?.center_id;
       if (maybeCenterId2) {
         validationUrl += `&center_id=${maybeCenterId2}`;
+      }
+      // Exclude current appointment from booked slots when validating
+      if (appointment?.id) {
+        validationUrl += `&exclude_appointment_id=${encodeURIComponent(appointment.id)}`;
       }
       const validationResponse = await fetch(validationUrl);
       const validationResult = await validationResponse.json();
@@ -333,7 +342,13 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
     // Disable past dates
     if (date < today) return true;
     
-    // Disable if not in doctor's working days
+    // If we have available dates from API, use those (more accurate)
+    if (availableDates.length > 0) {
+      const dateString = date.toISOString().split('T')[0];
+      return !availableDates.includes(dateString);
+    }
+    
+    // Otherwise, disable if not in doctor's working days
     if (doctorWorkingDays.length > 0 && !doctorWorkingDays.includes(date.getDay())) {
       return true;
     }

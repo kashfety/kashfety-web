@@ -93,15 +93,43 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const startDate = today.toISOString().split('T')[0];
       const endDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
-      // Use the center-specific doctor working days endpoint
-      let workingDaysUrl = `/api/doctor-schedule/${doctorId}/working-days`;
-      // If appointment has a center/location context, include center_id for accuracy when available
+      // Get center_id if available
       const maybeCenterId = (appointment as any)?.center_id;
+      
+      // Try multiple route variants for Vercel compatibility (same as BookingModal)
+      const params = new URLSearchParams();
+      params.set('doctorId', doctorId);
       if (maybeCenterId) {
-        workingDaysUrl += `?center_id=${maybeCenterId}`;
+        params.set('center_id', maybeCenterId);
       }
-      const response = await fetch(workingDaysUrl);
-      const result = await response.json();
+      
+      const routes = [
+        `/api/doctor-working-days?${params.toString()}`,
+        `/api/doctor-schedule/${doctorId}/working-days${maybeCenterId ? `?center_id=${maybeCenterId}` : ''}`
+      ];
+
+      let result = null;
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`📅 Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await fetch(routes[i]);
+          if (response.ok) {
+            result = await response.json();
+            console.log('✅ Route worked:', routes[i]);
+            break;
+          }
+          console.log(`❌ Route failed: ${routes[i]}, status: ${response.status}`);
+        } catch (error) {
+          console.log(`❌ Route error: ${routes[i]}`, error);
+          if (i === routes.length - 1) {
+            throw error; // Rethrow on last attempt
+          }
+        }
+      }
+      
+      if (!result) {
+        throw new Error('All routes failed');
+      }
       
       // Accept either working_days or workingDays key
       const rawDays = Array.isArray(result.working_days) ? result.working_days : (Array.isArray(result.workingDays) ? result.workingDays : null);

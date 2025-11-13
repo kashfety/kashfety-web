@@ -307,6 +307,9 @@ function Sidebar({
                   <NavItem tab="analytics" icon={BarChart2} isActive={activeTab === "analytics"}>
                     {t('dd_analytics_tab') || t('analytics') || 'Analytics'}
                   </NavItem>
+                  <NavItem tab="reviews" icon={Star} isActive={activeTab === "reviews"}>
+                    {t('dd_reviews_tab') || 'Reviews'}
+                  </NavItem>
                 </div>
               </div>
 
@@ -472,6 +475,8 @@ export default function DoctorDashboard() {
   const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   // Pagination states
   const [showAllAppointments, setShowAllAppointments] = useState(false);
@@ -506,7 +511,7 @@ export default function DoctorDashboard() {
     try {
       const url = new URL(window.location.href);
       const initialTab = url.searchParams.get('tab');
-      if (initialTab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics'].includes(initialTab)) {
+      if (initialTab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics', 'reviews'].includes(initialTab)) {
         setActiveTab(initialTab);
       }
     } catch { }
@@ -517,7 +522,7 @@ export default function DoctorDashboard() {
   // React to query param changes without full remount (e.g., FAB switching tabs)
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics'].includes(tab) && tab !== activeTab) {
+    if (tab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics', 'reviews'].includes(tab) && tab !== activeTab) {
       setActiveTab(tab);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1107,7 +1112,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            {analytics?.analytics?.avgRating?.toFixed(1) || '0.0'}★
+                            {analytics?.analytics?.avgRating?.toFixed(2) || '0.00'}★
                           </p>
                         </div>
                         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
@@ -1280,7 +1285,7 @@ export default function DoctorDashboard() {
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                     <CardContent className="p-6">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Patient Satisfaction</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{(analytics?.analytics?.avgRating || 0).toFixed(1)}/5</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{(analytics?.analytics?.avgRating || 0).toFixed(2)}/5</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
@@ -1886,6 +1891,107 @@ export default function DoctorDashboard() {
                 <div className="scroll-animation" data-animation="slide-in-up">
                   <DoctorCenterManagement />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="reviews" className="p-6 h-full">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
+                    <div>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_reviews_title') || 'Reviews & Ratings'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_view_patient_reviews') || 'View all patient reviews and ratings'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {reviewsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                    <CardContent className="p-12 text-center">
+                      <Star className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        {t('dd_no_reviews') || 'No Reviews Yet'}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {t('dd_no_reviews_description') || 'You haven\'t received any reviews from patients yet.'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Average Rating Summary */}
+                    <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                              {analytics?.analytics?.avgRating?.toFixed(2) || '0.00'}★
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                              {reviews.length} {reviews.length === 1 ? (t('dd_review') || 'review') : (t('dd_reviews') || 'reviews')}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                            <Star className="w-8 h-8 text-yellow-600 dark:text-yellow-400 fill-yellow-600 dark:fill-yellow-400" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Reviews List */}
+                    <div className="space-y-4">
+                      {reviews.map((review) => (
+                        <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
+                                  {review.patient?.name?.charAt(0)?.toUpperCase() || 'P'}
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">
+                                    {review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient'}
+                                  </p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {new Date(review.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-5 h-5 ${
+                                      star <= (review.rating || 0)
+                                        ? 'text-yellow-500 fill-yellow-500'
+                                        : 'text-gray-300 dark:text-gray-600'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+                                  {review.rating?.toFixed(1)}
+                                </span>
+                              </div>
+                            </div>
+                            {review.comment && (
+                              <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
+                                {review.comment}
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="profile" className="p-6 h-full">

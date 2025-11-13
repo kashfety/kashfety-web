@@ -65,23 +65,25 @@ export async function GET(request: NextRequest) {
 
     const completionRate = thisMonthAppointments > 0 ? Math.round((completed / thisMonthAppointments) * 100) : 0;
 
-    // Average rating: prefer users.rating; else compute avg from reviews
+    // Average rating: calculate from reviews table and round to 2 decimal places
     let avgRating = 0;
-    const { data: docRow } = await supabase
-      .from('users')
+    const { data: ratings } = await supabase
+      .from('reviews')
       .select('rating')
-      .eq('id', doctorId)
-      .single();
-    if (docRow && typeof docRow.rating !== 'undefined' && docRow.rating !== null) {
-      avgRating = Number(docRow.rating) || 0;
+      .eq('doctor_id', doctorId);
+    
+    if (ratings && ratings.length > 0) {
+      const sum = ratings.reduce((s: number, r: any) => s + Number(r.rating || 0), 0);
+      avgRating = Math.round((sum / ratings.length) * 100) / 100; // Round to 2 decimal places
     } else {
-      const { data: ratings } = await supabase
-        .from('reviews')
+      // Fallback to users.rating if no reviews exist
+      const { data: docRow } = await supabase
+        .from('users')
         .select('rating')
-        .eq('doctor_id', doctorId);
-      if (ratings && ratings.length > 0) {
-        const sum = ratings.reduce((s: number, r: any) => s + Number(r.rating || 0), 0);
-        avgRating = sum / ratings.length;
+        .eq('id', doctorId)
+        .single();
+      if (docRow && typeof docRow.rating !== 'undefined' && docRow.rating !== null) {
+        avgRating = Math.round(Number(docRow.rating) * 100) / 100; // Round to 2 decimal places
       }
     }
 

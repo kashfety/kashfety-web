@@ -110,7 +110,7 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
+          <DialogTitle className="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
             <X className="w-5 h-5" />
             {t('cancel_appointment') || 'Cancel Appointment'}
           </DialogTitle>
@@ -119,10 +119,10 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
         <div className="space-y-4">
           {/* 24-hour restriction warning */}
           {!canCancel() && (
-            <div className="bg-red-100 border-2 border-red-400 rounded-lg p-4">
+            <div className="bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-500 rounded-lg p-4">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-red-900">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-900 dark:text-red-100">
                   <p className="font-bold mb-1">{t('cancel_24h_restriction_title') || 'Cancellation Not Allowed'}</p>
                   <p>
                     {t('cancel_24h_restriction_message') || `You cannot cancel this appointment as it is scheduled within the next ${getTimeUntilAppointment()} hours. Please contact support for assistance.`}
@@ -134,10 +134,10 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
 
           {/* Warning */}
           {canCancel() && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-                <div className="text-sm text-red-800">
+                <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
+                <div className="text-sm text-red-800 dark:text-red-200">
                   <p className="font-medium">{t('cancel_confirmation') || 'Are you sure?'}</p>
                   <p>{t('cancel_warning') || 'This action cannot be undone. Your appointment will be cancelled immediately.'}</p>
                 </div>
@@ -146,28 +146,28 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
           )}
 
           {/* Appointment Details */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <h3 className="font-semibold text-gray-900 mb-2">{t('appointment_details') || 'Appointment Details'}</h3>
+          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('appointment_details') || 'Appointment Details'}</h3>
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" />
-                <span className="font-medium">Dr. {appointment.doctorName}</span>
+                <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="font-medium text-gray-900 dark:text-gray-100">Dr. {appointment.doctorName}</span>
                 <Badge variant="outline" className="text-xs">{appointment.specialty}</Badge>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-600" />
-                <span>{appointment.date} at {appointment.time}</span>
+                <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-gray-900 dark:text-gray-100">{appointment.date} at {appointment.time}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-600" />
-                <span>{appointment.duration} {t('appointment') || 'appointment'}</span>
+                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-gray-900 dark:text-gray-100">{appointment.duration} {t('appointment') || 'appointment'}</span>
               </div>
             </div>
           </div>
 
           {/* Reason for Cancellation */}
           <div>
-            <Label htmlFor="cancel-reason" className="text-sm font-medium">
+            <Label htmlFor="cancel-reason" className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {t('cancel_reason_label') || 'Reason for Cancellation (Optional)'}
             </Label>
             <Textarea

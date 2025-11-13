@@ -71,8 +71,14 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       setBookedSlots([]);
       
       // Fetch doctor's working days and available dates when modal opens
-      if (appointment.doctor_id) {
-        fetchDoctorAvailability(appointment.doctor_id);
+      // Try to get doctor_id from various possible locations
+      const doctorId = appointment.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
+      
+      if (doctorId) {
+        console.log('📅 RescheduleModal - Fetching availability for doctor_id:', doctorId);
+        fetchDoctorAvailability(doctorId);
+      } else {
+        console.error('❌ RescheduleModal - No doctor_id found in appointment:', appointment);
       }
     }
   }, [isOpen, appointment]);
@@ -202,8 +208,21 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
     setSelectedDate(date);
     setSelectedTime("");
     
-    if (date && appointment?.doctor_id) {
-      await fetchAvailableSlots(appointment.doctor_id, date);
+    if (date) {
+      // Try to get doctor_id from various possible locations
+      const doctorId = appointment?.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
+      
+      if (doctorId) {
+        console.log('📅 RescheduleModal - Using doctor_id:', doctorId, 'for date:', date);
+        await fetchAvailableSlots(doctorId, date);
+      } else {
+        console.error('❌ RescheduleModal - No doctor_id found in appointment:', appointment);
+        showError(
+          t('reschedule_error_title') || "Error",
+          t('reschedule_error_no_doctor') || "Unable to find doctor information. Please try again."
+        );
+        setAvailableSlots([]);
+      }
     } else {
       setAvailableSlots([]);
     }

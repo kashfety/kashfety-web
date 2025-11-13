@@ -119,8 +119,8 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
               }}
             >
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2 text-red-600 dark:text-red-400">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
                   {t('cancel_lab_title') || 'Cancel Lab Test'}
                 </DialogTitle>
               </DialogHeader>
@@ -128,10 +128,10 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
               <div className="space-y-4 mt-6">
                 {/* 24-hour restriction warning */}
                 {!canCancel() && (
-                  <div className="bg-red-100 border-2 border-red-400 rounded-lg p-4">
+                  <div className="bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-500 rounded-lg p-4">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-red-900">
+                      <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-red-900 dark:text-red-100">
                         <p className="font-bold mb-1">{t('cancel_24h_restriction_title') || 'Cancellation Not Allowed'}</p>
                         <p>
                           {t('cancel_24h_restriction_message') || `You cannot cancel this booking as it is scheduled within the next ${getTimeUntilBooking()} hours. Please contact support for assistance.`}
@@ -142,28 +142,28 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                 )}
 
                 {/* Booking Details */}
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-red-900 mb-3">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                  <h3 className="font-semibold text-red-900 dark:text-red-100 mb-3">
                                         {t("lab_booking_to_cancel") || "Lab Test to Cancel"}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-red-600" />
-                      <span className="font-medium text-red-900">{booking.type?.name}</span>
-                      <Badge className="bg-red-100 text-red-800 text-xs">
+                      <Calendar className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <span className="font-medium text-red-900 dark:text-red-100">{booking.type?.name}</span>
+                      <Badge className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 text-xs">
                         {booking.type?.category?.toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-red-600" />
-                      <span className="text-red-900">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
+                      <Clock className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <span className="text-red-900 dark:text-red-100">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-red-600" />
-                      <span className="text-red-900">{booking.center?.name}</span>
+                      <MapPin className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <span className="text-red-900 dark:text-red-100">{booking.center?.name}</span>
                     </div>
                     {booking.fee && (
-                      <div className="text-red-700 font-medium">
+                      <div className="text-red-700 dark:text-red-300 font-medium">
                         Fee: ${booking.fee}
                       </div>
                     )}
@@ -172,10 +172,10 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
 
                 {/* Warning Message - only show if can cancel */}
                 {canCancel() && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                     <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                      <div className="text-yellow-800">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                      <div className="text-yellow-800 dark:text-yellow-200">
                         <p className="font-medium text-sm">
                                                   {t("lab_cancel_warning_title") || "Cancellation Policy"}
                         </p>
@@ -189,7 +189,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
 
                 {/* Reason Input */}
                 <div>
-                  <Label htmlFor="reason" className="text-base font-medium">
+                  <Label htmlFor="reason" className="text-base font-medium text-gray-900 dark:text-gray-100">
                     {t('lab_cancel_reason') || 'Reason for Cancellation (Optional)'}
                   </Label>
                   <Textarea
@@ -206,8 +206,8 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                 </div>
 
                 {/* Confirmation */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-700 text-center">
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 text-center">
                     {t('lab_cancel_confirmation') || 'Are you sure you want to cancel this lab test? This action cannot be undone.'}
                   </p>
                 </div>

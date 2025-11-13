@@ -63,37 +63,70 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   }, [booking, isOpen]);
 
   const fetchAvailableDates = async () => {
-    if (!booking?.center?.id || !booking?.type?.id) return;
+    // Try to get center_id and type_id from various possible locations
+    const centerId = booking?.center?.id || (booking as any)?.center_id || (booking as any)?.centers?.id;
+    const typeId = booking?.type?.id || (booking as any)?.lab_test_type_id || (booking as any)?.lab_test_type?.id;
+    
+    if (!centerId || !typeId) {
+      console.error('❌ LabRescheduleModal - Missing center_id or type_id for available dates:', { 
+        centerId, 
+        typeId, 
+        booking: booking 
+      });
+      return;
+    }
     
     try {
       const startDate = new Date();
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       
-      const res = await labService.getAvailableDates(booking.center.id, booking.type.id, { 
+      console.log('🔬 LabRescheduleModal - Fetching available dates for:', { centerId, typeId });
+      
+      const res = await labService.getAvailableDates(centerId, typeId, { 
         start_date: fmt(startDate), 
         end_date: fmt(endDate) 
       });
       
       const dates = (res as any)?.available_dates || (res as any)?.data?.available_dates || [];
+      console.log('🔬 LabRescheduleModal - Received available dates:', dates);
       setAvailableDates(dates.map((d: any) => d.date || d));
     } catch (e) {
-      console.error('Error fetching lab available dates:', e);
+      console.error('❌ Error fetching lab available dates:', e);
       setAvailableDates([]);
     }
   };
 
   const fetchAvailableSlots = async (date: Date) => {
-    if (!booking?.center?.id || !booking?.type?.id) return;
+    // Try to get center_id and type_id from various possible locations
+    const centerId = booking?.center?.id || (booking as any)?.center_id || (booking as any)?.centers?.id;
+    const typeId = booking?.type?.id || (booking as any)?.lab_test_type_id || (booking as any)?.lab_test_type?.id;
+    
+    if (!centerId || !typeId) {
+      console.error('❌ LabRescheduleModal - Missing center_id or type_id:', { 
+        centerId, 
+        typeId, 
+        booking: booking 
+      });
+      showError(
+        t('reschedule_error_title') || "Error",
+        t('reschedule_error_no_lab_info') || "Unable to find lab center or test type information. Please try again."
+      );
+      return;
+    }
 
     setLoadingAvailability(true);
     try {
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const dateString = fmt(date);
       
+      console.log('🔬 LabRescheduleModal - Fetching slots for:', { centerId, typeId, dateString, bookingId: booking?.id });
+      
       // Fetch available slots, excluding the current booking ID for rescheduling
-      const res = await labService.getAvailableSlots(booking.center.id, booking.type.id, dateString, booking.id);
+      const res = await labService.getAvailableSlots(centerId, typeId, dateString, booking.id);
       const data = (res as any)?.data || res;
+      
+      console.log('🔬 LabRescheduleModal - Received slots data:', data);
       
       const availableSlots = data?.available_slots || [];
       setAvailableSlots(availableSlots.map((slot: any) => ({
@@ -102,7 +135,11 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
         is_booked: !slot.is_available
       })));
     } catch (e) {
-      console.error('Error fetching lab available slots:', e);
+      console.error('❌ Error fetching lab available slots:', e);
+      showError(
+        t('reschedule_error_title') || "Error",
+        t('reschedule_error_fetch_slots') || "Failed to fetch available time slots. Please try again."
+      );
       setAvailableSlots([]);
     } finally {
       setLoadingAvailability(false);

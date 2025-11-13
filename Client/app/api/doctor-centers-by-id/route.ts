@@ -14,22 +14,13 @@ interface Center {
   center_type?: string;
 }
 
-interface DoctorCenter {
-  center_id: string;
-  created_at: string;
-  centers: Center;
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ doctorId: string }> | { doctorId: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    // Handle both Promise and synchronous params (Next.js 14 vs 15)
-    const resolvedParams = params instanceof Promise ? await params : params;
-    const { doctorId } = resolvedParams;
     const { searchParams } = new URL(request.url);
+    const doctorId = searchParams.get('doctor_id') || searchParams.get('doctorId');
     const visitType = searchParams.get('visit_type'); // 'clinic' or 'home'
+
+    console.log('🏥 [Doctor Centers By ID] Request:', { doctorId, visitType });
 
     if (!doctorId) {
       return NextResponse.json({
@@ -39,8 +30,6 @@ export async function GET(
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    console.log('🔍 [Doctor Centers] Fetching centers for doctor:', doctorId, 'visitType:', visitType);
 
     // Get centers associated with this doctor
     const { data: doctorCenters, error } = await supabase
@@ -61,21 +50,17 @@ export async function GET(
       `)
       .eq('doctor_id', doctorId);
 
-    console.log('📊 [Doctor Centers] Raw doctor_centers query result:', {
-      count: doctorCenters?.length || 0,
-      error: error?.message,
-      data: doctorCenters
-    });
-
     if (error) {
-      console.error('Error fetching doctor centers:', error);
+      console.error('❌ [Doctor Centers By ID] Error fetching doctor centers:', error);
       return NextResponse.json({
         success: false,
-        error: 'Failed to fetch doctor centers'
+        error: 'Failed to fetch doctor centers',
+        details: error.message
       }, { status: 500 });
     }
 
     if (!doctorCenters || doctorCenters.length === 0) {
+      console.log('⚠️ [Doctor Centers By ID] No centers found for doctor:', doctorId);
       return NextResponse.json({
         success: true,
         centers: [],
@@ -90,7 +75,7 @@ export async function GET(
     filteredCenters = typedDoctorCenters.filter(dc => {
       // Only include approved centers
       if (dc.centers?.approval_status !== 'approved') {
-        console.log('🚫 [Doctor Centers] Filtering out unapproved center:', dc.centers?.name, 'status:', dc.centers?.approval_status);
+        console.log('🚫 [Doctor Centers By ID] Filtering out unapproved center:', dc.centers?.name, 'status:', dc.centers?.approval_status);
         return false;
       }
       
@@ -106,21 +91,25 @@ export async function GET(
       return true;
     });
 
-    console.log('✅ [Doctor Centers] Filtered centers:', filteredCenters.length, 'for visit type:', visitType);
+    console.log('✅ [Doctor Centers By ID] Filtered centers:', filteredCenters.length, 'for visit type:', visitType);
 
     // Get doctor's schedules for each center
     const centerIds = filteredCenters.map(dc => dc.center_id);
     
     let schedules: any[] = [];
     if (centerIds.length > 0) {
-      const { data: scheduleData } = await supabase
+      const { data: scheduleData, error: scheduleError } = await supabase
         .from('doctor_schedules')
         .select('center_id, day_of_week, time_slots, consultation_fee, is_available')
         .eq('doctor_id', doctorId)
         .in('center_id', centerIds)
         .eq('is_available', true);
       
-      schedules = scheduleData || [];
+      if (scheduleError) {
+        console.error('⚠️ [Doctor Centers By ID] Error fetching schedules:', scheduleError);
+      } else {
+        schedules = scheduleData || [];
+      }
     }
 
     // Group schedules by center
@@ -150,6 +139,8 @@ export async function GET(
         : (dc.centers?.services ? JSON.parse(dc.centers.services as string) : [])
     }));
 
+    console.log('✅ [Doctor Centers By ID] Returning', enhancedCenters.length, 'centers');
+
     return NextResponse.json({
       success: true,
       centers: enhancedCenters,
@@ -157,11 +148,13 @@ export async function GET(
       centers_with_schedule: enhancedCenters.filter(c => c.has_schedule).length
     });
 
-  } catch (error) {
-    console.error('Error fetching doctor centers:', error);
+  } catch (error: any) {
+    console.error('❌ [Doctor Centers By ID] Error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
+      details: error.message
     }, { status: 500 });
   }
 }
+

@@ -451,21 +451,45 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
   const fetchDoctorCenters = async (doctorId: string, visitType: "clinic" | "home") => {
     setLoading(true);
     try {
-      console.log('Fetching centers for doctor:', doctorId, 'visitType:', visitType);
+      console.log('🏥 [BookingModal] Fetching centers for doctor:', doctorId, 'visitType:', visitType);
 
-      const response = await fetch(`/api/doctors/${doctorId}/centers?visit_type=${visitType}`);
-      const result = await response.json();
+      // Try fallback route first (works better on Vercel)
+      let response: Response;
+      let result: any;
+      
+      try {
+        console.log('🔄 [BookingModal] Trying doctor-centers-by-id fallback route');
+        response = await fetch(`/api/doctor-centers-by-id?doctor_id=${encodeURIComponent(doctorId)}&visit_type=${visitType}`);
+        result = await response.json();
+        
+        if (response.ok && result && result.success) {
+          console.log('✅ [BookingModal] Fallback route worked, found', result.centers?.length || 0, 'centers');
+          const centers = result.centers || [];
+          setDoctorCenters(centers);
+          setLoading(false);
+          return;
+        } else {
+          console.log('⚠️ [BookingModal] Fallback route returned but no valid data, trying dynamic route');
+        }
+      } catch (fallbackError: any) {
+        console.log('❌ [BookingModal] Fallback failed:', fallbackError?.message || fallbackError);
+      }
+
+      // Fallback to dynamic route
+      console.log('🔄 [BookingModal] Trying dynamic route');
+      response = await fetch(`/api/doctors/${doctorId}/centers?visit_type=${visitType}`);
+      result = await response.json();
 
       if (result && result.success) {
         const centers = result.centers || [];
         setDoctorCenters(centers);
-        console.log('Found centers for doctor:', centers.length);
+        console.log('✅ [BookingModal] Found centers for doctor:', centers.length);
       } else {
-        console.error('Failed to fetch doctor centers:', result);
+        console.error('❌ [BookingModal] Failed to fetch doctor centers:', result);
         setDoctorCenters([]);
       }
     } catch (error) {
-      console.error('Error fetching doctor centers:', error);
+      console.error('❌ [BookingModal] Error fetching doctor centers:', error);
       setDoctorCenters([]);
     } finally {
       setLoading(false);

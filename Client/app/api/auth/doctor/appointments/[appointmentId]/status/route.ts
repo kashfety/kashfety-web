@@ -8,13 +8,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ appointmentId: string }> }
+  { params }: { params: Promise<{ appointmentId: string }> | { appointmentId: string } }
 ) {
   try {
     console.log('🔄 [Doctor Appointment Status] PUT request received');
     
     const body = await request.json();
-    const { appointmentId } = await context.params;
+    // Handle both Promise and synchronous params (Next.js 14 vs 15)
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const { appointmentId } = resolvedParams;
     
     if (!appointmentId) {
       return NextResponse.json({ error: 'appointmentId param is required' }, { status: 400 });

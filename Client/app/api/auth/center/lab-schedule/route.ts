@@ -1,76 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { getUserFromAuth } from '../utils/jwt-auth';
 
-// Helper function to get user from auth header with backend-first approach
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  console.log('🔐 Lab Schedule Auth - Header present:', !!authHeader);
-  
-  if (!authHeader?.startsWith('Bearer ')) {
-    console.log('❌ No Bearer token found');
-    return null;
-  }
-  
-  const token = authHeader.replace('Bearer ', '');
-  console.log('🎫 Lab Schedule Token extracted:', token.substring(0, 20) + '...');
-  
-  try {
-    // First try backend approach
-    console.log('🌐 Attempting backend authentication...');
-    const backendResponse = await fetch('http://localhost:5000/api/center-dashboard/verify-auth', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-    console.log('🏗️ Backend response status:', backendResponse.status);
-    
-    if (backendResponse.ok) {
-      const backendResult = await backendResponse.json();
-      console.log('✅ Backend auth success:', { userId: backendResult.user?.id, centerId: backendResult.user?.center_id });
-      
-      if (backendResult.user?.role === 'center') {
-        return {
-          id: backendResult.user.id,
-          role: backendResult.user.role,
-          center_id: backendResult.user.center_id
-        };
-      }
-    }
-  } catch (backendError) {
-    console.log('⚠️ Backend auth failed, trying Supabase fallback:', (backendError as Error).message);
-  }
-
-  // Fallback to Supabase direct lookup
-  try {
-    console.log('🔄 Trying Supabase center user lookup...');
-    
-    // Get all center users and find the first one (for development)
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, role, center_id')
-      .eq('role', 'center');
-
-    if (error || !users || users.length === 0) {
-      console.error('❌ Failed to fetch center users:', error);
-      return null;
-    }
-    
-    // For development, return the first center user
-    const user = users[0];
-    console.log('✅ Supabase fallback user found:', { id: user.id, center_id: user.center_id });
-    return { 
-      id: user.id, 
-      role: user.role, 
-      center_id: user.center_id
-    };
-  } catch (fallbackError) {
-    console.error('❌ Fallback verification failed:', fallbackError);
-    return null;
-  }
-}
+// Use service role key for admin operations
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function GET(request: NextRequest) {
   try {
@@ -126,18 +62,40 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('📝 [Lab Schedule PUT] Request received');
+    
     const user = await getUserFromAuth(request);
+    console.log('👤 [Lab Schedule PUT] User from auth:', { 
+      id: user?.id, 
+      role: user?.role, 
+      center_id: user?.center_id 
+    });
+    
     if (!user || user.role !== 'center') {
+      console.error('❌ [Lab Schedule PUT] Unauthorized - user:', user);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { lab_test_type_id, schedule } = await request.json();
+    const body = await request.json();
+    console.log('📦 [Lab Schedule PUT] Request body:', { 
+      lab_test_type_id: body.lab_test_type_id,
+      schedule_length: body.schedule?.length,
+      schedule: body.schedule
+    });
+    
+    const { lab_test_type_id, schedule } = body;
     
     if (!lab_test_type_id || !Array.isArray(schedule)) {
+      console.error('❌ [Lab Schedule PUT] Invalid request data:', { 
+        has_lab_test_type_id: !!lab_test_type_id,
+        is_array: Array.isArray(schedule),
+        schedule_type: typeof schedule
+      });
       return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
 
     const centerId = user.center_id || user.id;
+    console.log('🏢 [Lab Schedule PUT] Using center_id:', centerId);
 
     // First, delete existing schedule for this test type
     const { error: deleteError } = await supabase
@@ -195,18 +153,23 @@ export async function PUT(request: NextRequest) {
         };
       });
 
-    console.log('💾 Preparing to insert', scheduleInserts.length, 'schedule entries');
+    console.log('💾 [Lab Schedule PUT] Preparing to insert', scheduleInserts.length, 'schedule entries');
+    console.log('💾 [Lab Schedule PUT] Schedule inserts data:', JSON.stringify(scheduleInserts, null, 2));
 
     // Insert the new schedule if there are any entries
     if (scheduleInserts.length > 0) {
+      console.log('📤 [Lab Schedule PUT] Inserting into center_lab_schedules table...');
       const { data, error } = await supabase
         .from('center_lab_schedules')
         .insert(scheduleInserts)
         .select();
 
       if (error) {
-        console.error('❌ Failed to save schedule:', error);
-        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        console.error('❌ [Lab Schedule PUT] Failed to save schedule:', error);
+        console.error('❌ [Lab Schedule PUT] Error details:', JSON.stringify(error, null, 2));
+        console.error('❌ [Lab Schedule PUT] Error code:', error.code);
+        console.error('❌ [Lab Schedule PUT] Error message:', error.message);
+        console.error('❌ [Lab Schedule PUT] Error hint:', error.hint);
         return NextResponse.json({ 
           error: 'Failed to save schedule', 
           details: error.message,
@@ -215,14 +178,31 @@ export async function PUT(request: NextRequest) {
         }, { status: 500 });
       }
 
-      console.log('✅ Successfully saved', data?.length || 0, 'schedule entries');
+      console.log('✅ [Lab Schedule PUT] Successfully saved', data?.length || 0, 'schedule entries');
+      console.log('✅ [Lab Schedule PUT] Inserted data:', JSON.stringify(data, null, 2));
     } else {
-      console.log('ℹ️ No schedule entries to insert (all days are unavailable or have no slots)');
+      console.warn('⚠️ [Lab Schedule PUT] No schedule entries to insert (all days are unavailable or have no slots)');
+      console.warn('⚠️ [Lab Schedule PUT] Original schedule array length:', schedule.length);
+      console.warn('⚠️ [Lab Schedule PUT] Filtered schedule:', schedule.map((d: any) => ({
+        day_of_week: d.day_of_week,
+        is_available: d.is_available,
+        slots_count: d.slots?.length || 0,
+        slots: d.slots
+      })));
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Schedule save error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      success: true, 
+      message: `Successfully saved ${scheduleInserts.length} schedule entries`,
+      entries_saved: scheduleInserts.length
+    });
+  } catch (error: any) {
+    console.error('💥 [Lab Schedule PUT] Schedule save error:', error);
+    console.error('💥 [Lab Schedule PUT] Error stack:', error.stack);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, { status: 500 });
   }
 }

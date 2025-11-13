@@ -458,13 +458,13 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       <AnimatePresence>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden border bg-white">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.3 }}
-                className="max-h-[85vh] overflow-y-auto"
+                className="max-h-[85vh] overflow-y-auto bg-white dark:bg-gray-900"
               >
                 <div className="space-y-6 p-6">
                   {/* Header Section - Matching BookingModal */}
@@ -483,7 +483,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
                   >
-                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-0 shadow-md">
+                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-800 shadow-md">
                       <CardContent className="p-4">
                         <motion.h3 
                           initial={{ opacity: 0 }}
@@ -505,15 +505,15 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-2"
                           >
-                            <User className="w-4 h-4 text-blue-600" />
-                            <span className="font-medium text-black">{appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}</span>
+                            <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}</span>
                             {appointment.specialty && (
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
                               >
-                                <Badge variant="outline" className="text-xs text-black border-gray-300">{appointment.specialty}</Badge>
+                                <Badge variant="outline" className="text-xs text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">{appointment.specialty}</Badge>
                               </motion.div>
                             )}
                           </motion.div>
@@ -523,8 +523,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             transition={{ delay: 0.1 }}
                             className="flex items-center gap-2"
                           >
-                            <CalendarIcon className="w-4 h-4 text-blue-600" />
-                            <span className="text-black">
+                            <CalendarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-gray-900 dark:text-gray-100">
                               {appointment.appointment_date || appointment.date || t('reschedule_date_tbd') || 'Date TBD'} {t('reschedule_at') || 'at'}{' '}
                               {appointment.appointment_time?.substring(0, 5) || appointment.time || t('reschedule_time_tbd') || 'Time TBD'}
                             </span>
@@ -535,8 +535,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             transition={{ delay: 0.2 }}
                             className="flex items-center gap-2"
                           >
-                            <Clock className="w-4 h-4 text-blue-600" />
-                            <span className="text-black">
+                            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-gray-900 dark:text-gray-100">
                               {appointment.duration ? `${appointment.duration} ${t('reschedule_min') || 'min'}` : `30 ${t('reschedule_min') || 'min'}`} - {appointment.type || t('reschedule_consultation') || 'Consultation'}
                             </span>
                           </motion.div>
@@ -546,8 +546,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             transition={{ delay: 0.3 }}
                             className="flex items-center gap-2"
                           >
-                            <MapPin className="w-4 h-4 text-blue-600" />
-                            <span className="text-black">{appointment.location || appointment.address || t('reschedule_medical_center') || 'Medical Center'}</span>
+                            <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-gray-900 dark:text-gray-100">{appointment.location || appointment.address || t('reschedule_medical_center') || 'Medical Center'}</span>
                           </motion.div>
                           {appointment.phone && (
                             <motion.div 
@@ -556,8 +556,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               transition={{ delay: 0.4 }}
                               className="flex items-center gap-2"
                             >
-                              <span className="w-4 h-4 text-blue-600">📞</span>
-                              <span className="text-black">{appointment.phone}</span>
+                              <span className="w-4 h-4 text-blue-600 dark:text-blue-400">📞</span>
+                              <span className="text-gray-900 dark:text-gray-100">{appointment.phone}</span>
                             </motion.div>
                           )}
                           {appointment.notes && appointment.notes !== 'No additional notes' && appointment.notes.trim() !== '' && (
@@ -565,7 +565,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.5 }}
-                              className="mt-2 p-2 bg-gray-100 rounded text-sm text-black"
+                              className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100"
                             >
                               <strong>{t('reschedule_notes') || 'Notes'}:</strong> {appointment.notes}
                             </motion.div>
@@ -740,14 +740,14 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                   </div>
                 </div>
 
-                <DialogFooter className="gap-2 p-6 -mb-6 bg-gray-50 dark:bg-gray-800/50">
-                  <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold">
+                <DialogFooter className="gap-2 p-6 -mb-6 bg-white dark:bg-gray-900 border-t-2 border-gray-200 dark:border-gray-700">
+                  <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold">
                     {t('reschedule_cancel') || 'Cancel'}
                   </Button>
                   <Button 
                     onClick={handleReschedule} 
                     disabled={!selectedDate || !selectedTime || loading}
-                    className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                    className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] dark:from-[#4DBCC4] dark:to-[#3da8b0] dark:hover:from-[#3da8b0] dark:hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">

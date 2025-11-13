@@ -8,7 +8,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Proxy to backend available slots endpoint. Uses public backend route to avoid requiring auth in the modal.
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ doctorId: string }> }
+  context: { params: Promise<{ doctorId: string }> | { doctorId: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -21,13 +21,16 @@ export async function GET(
       return NextResponse.json({ success: false, message: 'Missing required date parameter' }, { status: 400 });
     }
 
+    // Handle both Promise and synchronous params (Next.js 14 vs 15)
+    const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
+    const { doctorId } = resolvedParams;
+
     const qs = new URLSearchParams();
     qs.set('date', date);
     if (centerId) qs.set('center_id', centerId);
     if (appointmentType) qs.set('appointment_type', appointmentType);
 
     // Prefer the backend doctors public route (no auth required)
-    const { doctorId } = await context.params;
     const url = `${BACKEND_URL}/api/doctors/${doctorId}/available-slots?${qs.toString()}`;
 
     try {

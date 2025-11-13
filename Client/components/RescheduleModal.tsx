@@ -188,44 +188,81 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       
       console.log('🔍 Fetching available slots for reschedule - Doctor:', doctorId, 'Date:', dateString, 'Type:', appointmentType);
       
-      // Use the center-specific doctor available slots endpoint
-      // Include center_id if present on appointment for center-aware availability
-      // Include exclude_appointment_id to exclude the current appointment from booked slots (for rescheduling)
-      // Include appointment_type to filter schedules correctly (home_visit vs clinic)
-      let apiUrl = `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}`;
+      // Get center_id if available
       const maybeCenterId = (appointment as any)?.center_id;
+      
+      // Build query parameters for fallback route
+      const params = new URLSearchParams();
+      params.set('doctorId', doctorId);
+      params.set('date', dateString);
+      params.set('appointment_type', appointmentType);
       if (maybeCenterId) {
-        apiUrl += `&center_id=${maybeCenterId}`;
+        params.set('center_id', maybeCenterId);
       }
-      // Pass appointment_type to filter schedules correctly
-      apiUrl += `&appointment_type=${appointmentType}`;
-      // Exclude current appointment from booked slots when rescheduling
       if (appointment?.id) {
-        apiUrl += `&exclude_appointment_id=${encodeURIComponent(appointment.id)}`;
+        params.set('exclude_appointment_id', appointment.id);
       }
-      const headers = {
-        'Content-Type': 'application/json',
-      };
       
-      console.log('🔗 Making API request to:', apiUrl);
-      const response = await fetch(apiUrl, { headers });
-      
-      const result = await response.json();
-      
-      if (result.success && result.available_slots) {
-        // Handle new slot structure with status flags (same as BookingModal)
-        const slots = result.available_slots || [];
-        console.log('📅 RESCHEDULE MODAL - Available slots from API:', slots);
-        console.log('📅 RESCHEDULE MODAL - Slot structure:', slots[0]);
-        console.log('📅 RESCHEDULE MODAL - Final available slots:', slots);
-        
-        setAvailableSlots(slots);
-        setBookedSlots(result.booked_slots || []);
-      } else {
-        console.log('❌ No slots available for this date:', result.message || 'Unknown reason');
-        setAvailableSlots([]);
-        setBookedSlots([]);
+      // Try multiple route variants for Vercel compatibility (same pattern as working-days)
+      const routes = [
+        `/api/doctor-available-slots?${params.toString()}`,
+        `/api/doctor-schedule/${doctorId}/available-slots?date=${dateString}${maybeCenterId ? `&center_id=${maybeCenterId}` : ''}&appointment_type=${appointmentType}${appointment?.id ? `&exclude_appointment_id=${encodeURIComponent(appointment.id)}` : ''}`
+      ];
+
+      let result = null;
+      for (let i = 0; i < routes.length; i++) {
+        try {
+          console.log(`🕐 Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
+          const response = await fetch(routes[i], {
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          if (response.ok) {
+            result = await response.json();
+            console.log('✅ Route worked:', routes[i]);
+            break;
+          }
+          console.log(`❌ Route failed: ${routes[i]}, status: ${response.status}`);
+        } catch (error) {
+          console.log(`❌ Route error: ${routes[i]}`, error);
+          if (i === routes.length - 1) {
+            throw error; // Rethrow on last attempt
+          }
+        }
       }
+      
+      if (!result) {
+        throw new Error('All routes failed');
+      }
+      
+      // Handle different response formats
+      const slots = result.available_slots || result.slots || [];
+      const bookedSlotsList = result.booked_slots || [];
+      
+      console.log('📅 RESCHEDULE MODAL - Available slots from API:', slots);
+      console.log('📅 RESCHEDULE MODAL - Slot structure:', slots[0]);
+      
+      // Normalize slots to expected format
+      const normalizedSlots = slots.map((slot: any) => {
+        if (typeof slot === 'string') {
+          return {
+            time: slot,
+            is_available: true,
+            is_booked: false
+          };
+        }
+        return {
+          time: slot.time || slot.start_time || slot.slot_time,
+          is_available: slot.is_available !== false,
+          is_booked: slot.is_booked === true || slot.is_booked === false ? slot.is_booked : false
+        };
+      }).filter((slot: any) => slot.time);
+      
+      console.log('📅 RESCHEDULE MODAL - Final normalized slots:', normalizedSlots);
+      
+      setAvailableSlots(normalizedSlots);
+      setBookedSlots(bookedSlotsList);
     } catch (error) {
       console.error('Error fetching available slots:', error);
       setAvailableSlots([]);

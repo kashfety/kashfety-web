@@ -466,41 +466,32 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                 transition={{ duration: 0.3 }}
                 className="max-h-[85vh] overflow-y-auto"
               >
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
-                  className="bg-white p-6 text-black -m-6 mb-6 border-b"
-                >
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-center text-black flex items-center justify-center gap-2">
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <CalendarIcon className="w-6 h-6" />
-                      </motion.div>
-                      {t('reschedule_title') || 'Reschedule Appointment'}
-                    </DialogTitle>
-                  </DialogHeader>
-                </motion.div>
+                <div className="space-y-6 p-6">
+                  {/* Header Section - Matching BookingModal */}
+                  <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('reschedule_title') || 'Reschedule Appointment'}</h3>
+                      <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
+                        {t('reschedule_with') || 'with'} {appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}
+                      </p>
+                    </div>
+                  </div>
 
-                <div className="space-y-6 p-6 -mt-6">
                   {/* Current Appointment Info */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
                   >
-                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-md">
+                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-0 shadow-md">
                       <CardContent className="p-4">
                         <motion.h3 
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
-                          className="font-semibold text-black mb-3 flex items-center gap-2"
+                          className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2"
                         >
-                          <Clock className="w-4 h-4 text-blue-600" />
+                          <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           {t('reschedule_current_appointment') || 'Current Appointment'}
                         </motion.h3>
                         <motion.div 
@@ -584,257 +575,190 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                     </Card>
                   </motion.div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.4 }}
-                    className="grid lg:grid-cols-2 gap-6"
-                  >
-                    <div className="flex flex-col items-center">
-                      <motion.h3 
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.7 }}
-                        className="text-lg font-semibold mb-4 flex items-center text-black self-start"
-                      >
-                        <motion.div
-                          animate={{ rotate: [0, 5, -5, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
-                        </motion.div>
-                        {t('reschedule_select_new_date') || 'Select New Date'}
-                      </motion.h3>
-                      <motion.div 
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.8, duration: 0.4 }}
-                        className="flex justify-center"
-                      >
+                  {/* Show loading message if doctor working days not loaded yet */}
+                  {doctorWorkingDays.length === 0 && (
+                    <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-yellow-600"></div>
+                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                          {t('booking_loading_availability') || 'Loading doctor availability...'}
+                        </p>
+                      </div>
+                      <p className="text-base text-gray-700 dark:text-gray-300">
+                        {t('booking_please_wait_schedule') || 'Please wait while we fetch the schedule.'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Only show calendar and time slots when ready */}
+                  {doctorWorkingDays.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6, duration: 0.4 }}
+                      className="grid lg:grid-cols-2 gap-6"
+                    >
+                      {/* Calendar */}
+                      <div className="flex flex-col">
+                        <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+                          <CalendarIcon className="w-6 h-6 mr-2 text-[#4DBCC4]" />
+                          {t('reschedule_select_new_date') || 'Select New Date'}
+                        </h4>
+                        {doctorWorkingDays.length > 0 && (
+                          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+                            <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
+                              <strong className="text-[#4DBCC4]">{appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
+                              <span className="font-semibold">
+                                {doctorWorkingDays.map(day => {
+                                  const dayNames = [
+                                    t('booking_day_sunday') || 'Sunday',
+                                    t('booking_day_monday') || 'Monday',
+                                    t('booking_day_tuesday') || 'Tuesday',
+                                    t('booking_day_wednesday') || 'Wednesday',
+                                    t('booking_day_thursday') || 'Thursday',
+                                    t('booking_day_friday') || 'Friday',
+                                    t('booking_day_saturday') || 'Saturday'
+                                  ];
+                                  return dayNames[day];
+                                }).join(', ')}
+                              </span>
+                            </p>
+                          </div>
+                        )}
                         <Calendar
                           mode="single"
                           selected={selectedDate}
                           onSelect={handleDateSelect}
                           disabled={isDateDisabled}
-                          className="rounded-lg border-0 shadow-md bg-white/50 backdrop-blur-sm"
+                          className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 bg-white dark:bg-gray-800 w-full"
                         />
-                      </motion.div>
-                      {doctorWorkingDays.length > 0 && (
-                        <motion.p 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.9 }}
-                          className="text-sm text-black mt-2 text-center"
-                        >
-                          {t('reschedule_available_on') || 'Available on'}: {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                            .filter((_, index) => doctorWorkingDays.includes(index))
-                            .join(', ')}
-                        </motion.p>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Enhanced Time Selection */}
-                    <div className="w-full">
-                      <AnimatePresence>
-                        {selectedDate && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="w-full"
-                          >
-                            <motion.h3 
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: 0.1 }}
-                              className="text-lg font-semibold mb-4 flex items-center text-black"
-                            >
-                              <motion.div
-                                animate={{ rotate: [0, 360] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                              >
-                                <Clock className="h-5 w-5 mr-2 text-blue-600" />
-                              </motion.div>
-                              {t('reschedule_select_new_time') || 'Select New Time'}
-                            </motion.h3>
-                            
-                            {loadingAvailability ? (
-                              <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center py-8"
-                              >
-                                <motion.div
-                                  animate={{ rotate: 360 }}
-                                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                  className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto"
-                                />
-                                <p className="mt-2 text-gray-900">{t('reschedule_loading_times') || 'Loading available times...'}</p>
-                              </motion.div>
-                            ) : availableSlots.length > 0 ? (
-                              <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.2 }}
-                                className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
-                              >
+                      {/* Time Slots */}
+                      <div>
+                        <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+                          <Clock className="w-6 h-6 mr-2 text-[#4DBCC4]" />
+                          {t('reschedule_select_new_time') || 'Select New Time'}
+                        </h4>
+                        {selectedDate ? (
+                          loadingAvailability ? (
+                            <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex flex-col items-center gap-3">
+                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
+                                <span className="text-base text-gray-900 dark:text-gray-100 font-medium">{t('booking_loading_times') || 'Loading available times...'}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
                                 {availableSlots.map((slot, index) => (
                                   <motion.div
                                     key={slot.time}
-                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                                    transition={{ delay: index * 0.03 }}
                                     whileHover={slot.is_available && !slot.is_booked ? { scale: 1.05, y: -2 } : {}}
                                     whileTap={slot.is_available && !slot.is_booked ? { scale: 0.95 } : {}}
                                   >
-                                    <Card
-                                      className={`transition-all duration-300 ${
-                                        slot.is_booked || !slot.is_available
-                                          ? 'bg-gray-200 cursor-not-allowed opacity-60 border-gray-300'
-                                          : selectedTime === slot.time 
-                                            ? 'cursor-pointer ring-2 ring-emerald-500 bg-emerald-50 shadow-lg hover:shadow-lg' 
-                                            : 'cursor-pointer hover:ring-1 hover:ring-emerald-300 bg-white/80 backdrop-blur-sm hover:shadow-lg'
-                                      }`}
-                                      onClick={() => {
-                                        if (slot.is_available && !slot.is_booked) {
-                                          setSelectedTime(slot.time);
-                                        }
-                                      }}
+                                    <Button
+                                      variant={selectedTime === slot.time ? "default" : "outline"}
+                                      size="lg"
+                                      onClick={() => setSelectedTime(slot.time)}
+                                      disabled={slot.is_booked || !slot.is_available}
+                                      className={`
+                                w-full font-bold text-base py-6
+                                ${slot.is_booked || !slot.is_available
+                                          ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
+                                          : selectedTime === slot.time
+                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
+                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                              `}
                                     >
-                                      <CardContent className="p-3 text-center">
-                                        <div className={`text-sm font-medium ${
-                                          slot.is_booked || !slot.is_available
-                                            ? 'text-gray-500'
-                                            : selectedTime === slot.time 
-                                              ? 'text-emerald-700' 
-                                              : 'text-gray-700'
-                                        }`}>
-                                          {slot.time}
-                                          {slot.is_booked && (
-                                            <span className="block text-xs text-gray-400 mt-1">({t('reschedule_booked') || 'Booked'})</span>
-                                          )}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
+                                      {slot.time}
+                                      {slot.is_booked && (
+                                        <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
+                                      )}
+                                    </Button>
                                   </motion.div>
                                 ))}
-                              </motion.div>
-                            ) : (
-                              <motion.div 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-center py-8"
-                              >
-                                <motion.div
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ type: "spring", stiffness: 200 }}
-                                >
-                                  <AlertCircle className="h-12 w-12 text-gray-600 mx-auto mb-2" />
-                                </motion.div>
-                                <p className="text-gray-900">{t('reschedule_no_slots') || 'No available time slots for this date.'}</p>
-                                <p className="text-sm text-gray-600">{t('reschedule_select_different_date') || 'Please select a different date.'}</p>
-                              </motion.div>
-                            )}
+                              </div>
 
-                            {actualConsultationFee > 0 && (
-                              <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="mt-4 p-3 bg-emerald-50/80 backdrop-blur-sm rounded-lg border border-emerald-200"
-                              >
-                                <p className="text-sm text-emerald-700">
-                                  <span className="font-medium">{t('reschedule_consultation_fee') || 'Consultation Fee'}:</span> ₱{actualConsultationFee}
-                                </p>
-                              </motion.div>
-                            )}
-                          </motion.div>
+                              {availableSlots.length === 0 && (
+                                <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
+                                  <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Clock className="w-8 h-8 text-red-500" />
+                                  </div>
+                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
+                                    {t('booking_no_slots_date') || 'No available time slots for this date'}
+                                  </p>
+                                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                    {t('booking_try_another_date') || 'Please select another date'}
+                                  </p>
+                                  {doctorWorkingDays.length > 0 && (
+                                    <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium">
+                                      {t('booking_doctor_available_hint') || 'Available days are highlighted in the calendar'}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        ) : (
+                          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                            <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_select_date_first') || 'Please select a date first'}</p>
+                          </div>
                         )}
-                      </AnimatePresence>
-                    </div>
-                  </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
 
-                  {/* Reason for Rescheduling */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.0, duration: 0.4 }}
-                  >
-                    <Label htmlFor="reason" className="text-base font-medium text-gray-800">
-                      {t('reschedule_reason_label') || 'Reason for Rescheduling (Optional)'}
-                    </Label>
-                    <motion.div
-                      whileFocus={{ scale: 1.02 }}
-                      transition={{ duration: 0.2 }}
-                    >
+                  {/* Consultation Fee Display */}
+                  {actualConsultationFee > 0 && (
+                    <div className="p-4 bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 rounded-lg border-2 border-[#4DBCC4]/30">
+                      <p className="text-base text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold text-[#4DBCC4]">{t('reschedule_consultation_fee') || 'Consultation Fee'}:</span> ₱{actualConsultationFee}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Reason for Rescheduling Section */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="reason" className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 block">
+                        {t('reschedule_reason_label') || 'Reason for Rescheduling (Optional)'}
+                      </Label>
                       <Textarea
                         id="reason"
                         placeholder={t('reschedule_reason_placeholder') || "Please provide a reason for rescheduling..."}
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                        className="mt-2 bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-400 focus:ring-blue-400"
+                        className="mt-2 border-2 border-gray-300 dark:border-gray-600 focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/20 text-gray-900 dark:text-gray-100"
                         rows={3}
                       />
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Warning */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.2, duration: 0.4 }}
-                    className="bg-yellow-50/80 backdrop-blur-sm border border-yellow-200 rounded-lg p-3"
-                  >
-                    <div className="flex items-start gap-2">
-                      <motion.div
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                      </motion.div>
-                      <div className="text-sm text-yellow-800">
-                        <p className="font-medium">{t('reschedule_warning_title') || 'Important'}:</p>
-                        <p>{t('reschedule_warning_message') || 'Rescheduling may affect your doctor\'s availability. Please ensure the new time works for you.'}</p>
-                      </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.4, duration: 0.4 }}
-                >
-                  <DialogFooter className="gap-2 p-6 -mb-6 bg-gray-50/80 backdrop-blur-sm">
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button variant="outline" onClick={onClose} disabled={loading} className="hover:shadow-md transition-all">
-                        {t('reschedule_cancel') || 'Cancel'}
-                      </Button>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button 
-                        onClick={handleReschedule} 
-                        disabled={!selectedDate || !selectedTime || loading}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg transition-all"
-                      >
-                        {loading ? (
-                          <motion.div className="flex items-center gap-2">
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                            />
-                            {t('reschedule_rescheduling') || 'Rescheduling...'}
-                          </motion.div>
-                        ) : (
-                          t('reschedule_button') || "Reschedule Appointment"
-                        )}
-                      </Button>
-                    </motion.div>
-                  </DialogFooter>
-                </motion.div>
+                <DialogFooter className="gap-2 p-6 -mb-6 bg-gray-50 dark:bg-gray-800/50">
+                  <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold">
+                    {t('reschedule_cancel') || 'Cancel'}
+                  </Button>
+                  <Button 
+                    onClick={handleReschedule} 
+                    disabled={!selectedDate || !selectedTime || loading}
+                    className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        {t('reschedule_rescheduling') || 'Rescheduling...'}
+                      </div>
+                    ) : (
+                      t('reschedule_button') || "Reschedule Appointment"
+                    )}
+                  </Button>
+                </DialogFooter>
               </motion.div>
             </DialogContent>
           </Dialog>

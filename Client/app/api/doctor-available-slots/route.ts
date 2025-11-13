@@ -134,7 +134,6 @@ export async function GET(request: NextRequest) {
     // Get booked appointments for this date
     // Also check for exclude_appointment_id parameter (for rescheduling)
     const excludeAppointmentId = searchParams.get('exclude_appointment_id');
-    const appointmentType = searchParams.get('appointment_type');
     
     let appointmentsQuery = supabase
       .from('appointments')

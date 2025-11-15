@@ -17,10 +17,13 @@ function verifyToken(token: string) {
   }
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');

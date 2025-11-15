@@ -109,25 +109,32 @@ export default function AuditLogs() {
 
             const data = await response.json();
 
-            // Transform the audit log data to match our AuditLog interface
-            const transformedLogs: AuditLog[] = data.data.logs.map((log: any) => ({
-                id: log.id,
-                timestamp: log.created_at,
-                user: {
-                    id: log.user?.id || log.user_id || 'unknown',
-                    name: log.user?.name || 'Unknown User',
-                    role: log.user?.role || 'unknown'
-                },
-                action: log.action,
-                resource: log.resource_type,
-                resourceId: log.resource_id,
-                details: log.details || formatLogDetails(log),
-                status: determineLogStatus(log.action),
-                ipAddress: log.ip_address || 'Unknown',
-                userAgent: log.user_agent || 'Unknown'
-            }));
+            // Check if audit logs exist
+            if (data.success && data.data && data.data.logs && Array.isArray(data.data.logs)) {
+                // Transform the audit log data to match our AuditLog interface
+                const transformedLogs: AuditLog[] = data.data.logs.map((log: any) => ({
+                    id: log.id,
+                    timestamp: log.created_at,
+                    user: {
+                        id: log.user?.id || log.user_id || 'unknown',
+                        name: log.user?.name || 'Unknown User',
+                        role: log.user?.role || 'unknown'
+                    },
+                    action: log.action,
+                    resource: log.resource_type,
+                    resourceId: log.resource_id,
+                    details: log.details || formatLogDetails(log),
+                    status: determineLogStatus(log.action),
+                    ipAddress: log.ip_address || 'Unknown',
+                    userAgent: log.user_agent || 'Unknown'
+                }));
 
-            setLogs(transformedLogs);
+                setLogs(transformedLogs);
+            } else {
+                // No audit logs - set empty array
+                console.log('ℹ️ No audit logs available yet');
+                setLogs([]);
+            }
         } catch (error) {
             console.error('Error fetching audit logs:', error)
             toast({

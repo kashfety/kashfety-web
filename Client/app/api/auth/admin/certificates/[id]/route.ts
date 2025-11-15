@@ -154,6 +154,16 @@ export async function PUT(
   }
 }
 
+// POST handler - same as PUT (Vercel workaround)
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  console.log('🚀 Certificate approval POST endpoint hit (using POST as PUT workaround)');
+  // Call the same logic as PUT
+  return PUT(request, context);
+}
+
 // Add a simple GET handler to test if route is working
 export async function GET(
   request: NextRequest,
@@ -164,6 +174,6 @@ export async function GET(
   return NextResponse.json({ 
     message: 'Certificate approval route is working',
     certificateId: params.id,
-    availableMethods: ['PUT']
+    availableMethods: ['PUT', 'POST']
   });
 }

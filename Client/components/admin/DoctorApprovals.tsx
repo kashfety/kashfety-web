@@ -85,11 +85,12 @@ export default function DoctorApprovals() {
             };
             
             // Call the [id]/route.ts directly (without /review suffix)
+            // Using POST instead of PUT (Vercel serverless workaround)
             const endpoint = `/api/auth/admin/certificates/${certificateId}`;
             console.log(` [Doctor Approvals] Calling:`, endpoint);
             
             const response = await fetch(endpoint, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'

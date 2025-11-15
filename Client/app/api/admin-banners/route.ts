@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
         file_size: file.size,
         mime_type: file.type,
         display_order: displayOrder ? parseInt(displayOrder) : 0,
-        is_active: isActive === 'true',
+        is_active: isActive === 'false' ? false : true, // Default to true
         target_audience: targetAudience || 'all',
         click_url: clickUrl || null,
         start_date: startDate || null,

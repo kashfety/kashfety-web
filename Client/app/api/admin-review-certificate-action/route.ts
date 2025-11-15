@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { certificateId, status, rejection_reason, admin_notes } = body;
+    const { certificateId, status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = body;
 
     console.log('📝 Admin: Reviewing certificate ID:', certificateId, 'Status:', status);
     console.log('📦 Request body:', body);
@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
         reviewed_at: new Date().toISOString(),
         reviewed_by: decoded.id,
         rejection_reason: status === 'rejected' ? rejection_reason : null,
+        resubmission_requirements: status === 'resubmission_required' ? resubmission_requirements : null,
+        resubmission_deadline: status === 'resubmission_required' ? resubmission_deadline : null,
         admin_notes,
         updated_at: new Date().toISOString()
       })

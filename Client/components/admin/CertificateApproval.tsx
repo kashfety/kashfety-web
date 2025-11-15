@@ -59,19 +59,16 @@ interface CertificateSubmission {
     reviewed_at?: string;
     reviewed_by?: string;
     rejection_reason?: string;
-    certificate_comments?: string;
-    certificate_resubmission_requirements?: string;
-    certificate_resubmission_deadline?: string;
-    certificate_resubmission_requested_at?: string;
+    resubmission_requirements?: string;
+    resubmission_deadline?: string;
     admin_notes?: string;
 }
 
 interface CertificateFormData {
     status: string;
     rejection_reason: string;
-    certificate_comments: string;
-    certificate_resubmission_requirements: string;
-    certificate_resubmission_deadline: string;
+    resubmission_requirements: string;
+    resubmission_deadline: string;
     admin_notes: string;
 }
 
@@ -91,9 +88,8 @@ export default function CertificateApproval() {
     const [formData, setFormData] = useState<CertificateFormData>({
         status: '',
         rejection_reason: '',
-        certificate_comments: '',
-        certificate_resubmission_requirements: '',
-        certificate_resubmission_deadline: '',
+        resubmission_requirements: '',
+        resubmission_deadline: '',
         admin_notes: ''
     });
 
@@ -418,9 +414,8 @@ export default function CertificateApproval() {
         setFormData({
             status: certificate.certificate_status,
             rejection_reason: certificate.rejection_reason || '',
-            certificate_comments: certificate.certificate_comments || '',
-            certificate_resubmission_requirements: certificate.certificate_resubmission_requirements || '',
-            certificate_resubmission_deadline: certificate.certificate_resubmission_deadline || '',
+            resubmission_requirements: certificate.resubmission_requirements || '',
+            resubmission_deadline: certificate.resubmission_deadline || '',
             admin_notes: certificate.admin_notes || ''
         });
         setShowReviewDialog(true);
@@ -442,8 +437,8 @@ export default function CertificateApproval() {
                                 ...formData,
                                 status: 'approved',
                                 rejection_reason: '',
-                                certificate_resubmission_requirements: '',
-                                certificate_resubmission_deadline: ''
+                                resubmission_requirements: '',
+                                resubmission_deadline: ''
                             });
                             reviewCertificate(certificate.id, { status: 'approved' });
                         }}
@@ -708,7 +703,7 @@ export default function CertificateApproval() {
                             </div>
 
                             {/* Review Information */}
-                            {(selectedCertificate.rejection_reason || selectedCertificate.certificate_comments || selectedCertificate.certificate_resubmission_requirements) && (
+                            {(selectedCertificate.rejection_reason || selectedCertificate.resubmission_requirements) && (
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <h3 className="font-semibold mb-2">{t('admin_review_information') || 'Review Information'}</h3>
                                     <div className="space-y-3">
@@ -718,22 +713,16 @@ export default function CertificateApproval() {
                                                 <p className="text-sm text-muted-foreground mt-1">{selectedCertificate.rejection_reason}</p>
                                             </div>
                                         )}
-                                        {selectedCertificate.certificate_comments && (
-                                            <div>
-                                                <strong className="text-sm">{t('admin_comments') || 'Comments'}:</strong>
-                                                <p className="text-sm text-muted-foreground mt-1">{selectedCertificate.certificate_comments}</p>
-                                            </div>
-                                        )}
-                                        {selectedCertificate.certificate_resubmission_requirements && (
+                                        {selectedCertificate.resubmission_requirements && (
                                             <div>
                                                 <strong className="text-sm">{t('admin_resubmission_requirements') || 'Resubmission Requirements'}:</strong>
-                                                <p className="text-sm text-muted-foreground mt-1">{selectedCertificate.certificate_resubmission_requirements}</p>
+                                                <p className="text-sm text-muted-foreground mt-1">{selectedCertificate.resubmission_requirements}</p>
                                             </div>
                                         )}
-                                        {selectedCertificate.certificate_resubmission_deadline && (
+                                        {selectedCertificate.resubmission_deadline && (
                                             <div>
                                                 <strong className="text-sm">{t('admin_resubmission_deadline') || 'Resubmission Deadline'}:</strong>
-                                                <p className="text-sm text-muted-foreground mt-1">{formatDate(selectedCertificate.certificate_resubmission_deadline)}</p>
+                                                <p className="text-sm text-muted-foreground mt-1">{formatDate(selectedCertificate.resubmission_deadline)}</p>
                                             </div>
                                         )}
                                     </div>
@@ -791,8 +780,8 @@ export default function CertificateApproval() {
                                     <div className={isRTL ? 'text-right' : 'text-left'}>
                                         <label className="text-sm font-medium">{t('admin_resubmission_requirements') || 'Resubmission Requirements'} *</label>
                                         <Textarea
-                                            value={formData.certificate_resubmission_requirements}
-                                            onChange={(e) => setFormData({ ...formData, certificate_resubmission_requirements: e.target.value })}
+                                            value={formData.resubmission_requirements}
+                                            onChange={(e) => setFormData({ ...formData, resubmission_requirements: e.target.value })}
                                             placeholder={t('admin_specify_resubmission') || 'Specify what needs to be adjusted or resubmitted...'}
                                             rows={3}
                                         />
@@ -801,22 +790,12 @@ export default function CertificateApproval() {
                                         <label className="text-sm font-medium">{t('admin_resubmission_deadline') || 'Resubmission Deadline'}</label>
                                         <Input
                                             type="date"
-                                            value={formData.certificate_resubmission_deadline}
-                                            onChange={(e) => setFormData({ ...formData, certificate_resubmission_deadline: e.target.value })}
+                                            value={formData.resubmission_deadline}
+                                            onChange={(e) => setFormData({ ...formData, resubmission_deadline: e.target.value })}
                                         />
                                     </div>
                                 </>
                             )}
-
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <label className="text-sm font-medium">{t('admin_comments') || 'Comments'}</label>
-                                <Textarea
-                                    value={formData.certificate_comments}
-                                    onChange={(e) => setFormData({ ...formData, certificate_comments: e.target.value })}
-                                    placeholder={t('admin_add_comments') || 'Add any additional comments...'}
-                                    rows={2}
-                                />
-                            </div>
 
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <label className="text-sm font-medium">{t('admin_admin_notes') || 'Admin Notes'}</label>

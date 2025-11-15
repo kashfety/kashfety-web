@@ -132,7 +132,11 @@ export default function DoctorApprovals() {
         try {
             console.log(`🔄 Attempting to ${action} certificate:`, certificateId);
             
-            const response = await fetch(`/api/auth/admin/certificates/${certificateId}`, {
+            // Use the backend API URL like other working features
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+            
+            const response = await fetch(`${baseUrl}/auth/admin/certificates/${certificateId}/review`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,

@@ -84,9 +84,8 @@ export default function DoctorApprovals() {
                 admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
             };
             
-            // Call the [id]/route.ts directly (without /review suffix)
-            // Using POST instead of PUT (Vercel serverless workaround)
-            const endpoint = `/api/auth/admin/certificates/${certificateId}`;
+            // Use dedicated action endpoint (no dynamic routes - Vercel compatible)
+            const endpoint = `/api/admin-review-certificate-action`;
             console.log(` [Doctor Approvals] Calling:`, endpoint);
             
             const response = await fetch(endpoint, {
@@ -95,7 +94,10 @@ export default function DoctorApprovals() {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    certificateId,
+                    ...requestBody
+                })
             });
 
             console.log(` [Doctor Approvals] Response:`, response.status);

@@ -106,14 +106,14 @@ export async function POST(request: NextRequest) {
     // Upload file to Supabase Storage
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `banners/${fileName}`;
+    const filePath = fileName; // Just the filename, banners bucket is already at root level
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     const { data: uploadData, error: uploadError } = await supabase
       .storage
-      .from('public-files')
+      .from('banners')
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: false
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     // Get public URL
     const { data: urlData } = supabase
       .storage
-      .from('public-files')
+      .from('banners')
       .getPublicUrl(filePath);
 
     const fileUrl = urlData.publicUrl;
@@ -270,7 +270,7 @@ export async function DELETE(request: NextRequest) {
     if (banner?.file_path) {
       await supabase
         .storage
-        .from('public-files')
+        .from('banners')
         .remove([banner.file_path]);
     }
 

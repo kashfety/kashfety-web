@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -38,15 +39,28 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
-    console.log('🔓 Token decoded:', !!decoded, 'User ID:', decoded?.userId);
+    console.log('🔓 Token decoded:', decoded);
 
-    if (!decoded || !decoded.userId) {
+    if (!decoded) {
       console.log('❌ Invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
       );
     }
+
+    // Extract user ID - it might be userId or id depending on token structure
+    const userId = decoded.userId || decoded.id || decoded.sub;
+    
+    if (!userId) {
+      console.log('❌ No user ID in token. Token structure:', Object.keys(decoded));
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token structure' },
+        { status: 401 }
+      );
+    }
+    
+    console.log('👤 User ID from token:', userId);
 
     // Check if user is admin or super_admin
     if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
@@ -61,7 +75,7 @@ export async function GET(request: NextRequest) {
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('id', decoded.userId)
+      .eq('id', userId)
       .single();
 
     if (userError) {
@@ -127,9 +141,19 @@ export async function PUT(request: NextRequest) {
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
 
-    if (!decoded || !decoded.userId) {
+    if (!decoded) {
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Extract user ID
+    const userId = decoded.userId || decoded.id || decoded.sub;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token structure' },
         { status: 401 }
       );
     }
@@ -158,7 +182,6 @@ export async function PUT(request: NextRequest) {
     
     // If password is being changed, hash it
     if (password) {
-      const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password_hash = hashedPassword;
     }
@@ -169,7 +192,7 @@ export async function PUT(request: NextRequest) {
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
       .update(updateData)
-      .eq('id', decoded.userId)
+      .eq('id', userId)
       .select()
       .single();
 

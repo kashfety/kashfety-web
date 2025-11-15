@@ -69,85 +69,149 @@ export async function GET(request: NextRequest) {
 
     console.log('📝 Fetching admin activities - Page:', page, 'Limit:', limit, 'Filters:', { search, action_type, admin_id, start_date, end_date });
 
-    // Check if audit_logs table exists, if not use the aggregation approach like admin-audit-logs
-    let activities: any[] = [];
-    
-    // Try to fetch from audit_logs table first
-    let query = supabase
-      .from('audit_logs')
-      .select(`
-        *,
-        user:users!audit_logs_user_id_fkey(id, name, email, role)
-      `)
-      .in('user:users!audit_logs_user_id_fkey.role', ['admin', 'super_admin'])
+    // Use aggregation approach - fetch all admin/super_admin actions from various tables
+    let allActivities: any[] = [];
+
+    // Get all admin and super_admin users
+    const { data: adminUsers, error: adminUsersError } = await supabase
+      .from('users')
+      .select('id, name, email, role, created_at, updated_at, approval_status')
+      .in('role', ['admin', 'super_admin'])
       .order('created_at', { ascending: false });
 
+    if (!adminUsersError && adminUsers) {
+      adminUsers.forEach((admin: any) => {
+        // Admin account creation
+        allActivities.push({
+          id: `admin_created_${admin.id}`,
+          adminId: admin.id,
+          adminName: admin.name || admin.email,
+          adminRole: admin.role,
+          actionType: 'admin_created',
+          targetType: 'admin',
+          targetId: admin.id,
+          actionDetails: {
+            message: `Admin account created: ${admin.name || admin.email}`
+          },
+          ipAddress: 'system',
+          userAgent: 'system',
+          sessionId: null,
+          createdAt: admin.created_at
+        });
+
+        // If admin was approved
+        if (admin.approval_status === 'approved' && admin.updated_at !== admin.created_at) {
+          allActivities.push({
+            id: `admin_approved_${admin.id}`,
+            adminId: 'system',
+            adminName: 'System Admin',
+            adminRole: 'super_admin',
+            actionType: 'admin_approved',
+            targetType: 'admin',
+            targetId: admin.id,
+            actionDetails: {
+              message: `Admin ${admin.name || admin.email} was approved`
+            },
+            ipAddress: 'system',
+            userAgent: 'system',
+            sessionId: null,
+            createdAt: admin.updated_at
+          });
+        }
+      });
+    }
+
+    // Get user actions performed by admins (from users table)
+    const { data: allUsers, error: usersError } = await supabase
+      .from('users')
+      .select('id, name, email, role, created_at, updated_at, approval_status')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (!usersError && allUsers) {
+      allUsers.forEach((user: any) => {
+        if (user.approval_status === 'approved' && user.updated_at !== user.created_at) {
+          allActivities.push({
+            id: `user_approved_${user.id}`,
+            adminId: 'system',
+            adminName: 'Admin',
+            adminRole: 'admin',
+            actionType: 'user_approved',
+            targetType: 'user',
+            targetId: user.id,
+            actionDetails: {
+              message: `User ${user.name || user.email} was approved`
+            },
+            ipAddress: 'admin',
+            userAgent: 'admin',
+            sessionId: null,
+            createdAt: user.updated_at
+          });
+        }
+      });
+    }
+
+    // Get certificate reviews
+    const { data: certificates, error: certError } = await supabase
+      .from('doctor_certificates')
+      .select('id, doctor_id, status, submitted_at, reviewed_at, reviewed_by')
+      .order('submitted_at', { ascending: false })
+      .limit(50);
+
+    if (!certError && certificates) {
+      certificates.forEach((cert: any) => {
+        if (cert.reviewed_at && cert.reviewed_by) {
+          allActivities.push({
+            id: `cert_review_${cert.id}`,
+            adminId: cert.reviewed_by,
+            adminName: 'Admin',
+            adminRole: 'admin',
+            actionType: cert.status === 'approved' ? 'certificate_approved' : 'certificate_rejected',
+            targetType: 'certificate',
+            targetId: cert.id,
+            actionDetails: {
+              message: `Certificate ${cert.status}`
+            },
+            ipAddress: 'admin',
+            userAgent: 'admin',
+            sessionId: null,
+            createdAt: cert.reviewed_at
+          });
+        }
+      });
+    }
+
+    // Sort all activities by date
+    allActivities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
     // Apply filters
+    let filteredActivities = allActivities;
+
     if (action_type && action_type !== 'all') {
-      query = query.eq('action', action_type);
+      filteredActivities = filteredActivities.filter(log => log.actionType === action_type);
     }
 
     if (admin_id && admin_id !== 'all') {
-      query = query.eq('user_id', admin_id);
+      filteredActivities = filteredActivities.filter(log => log.adminId === admin_id);
     }
 
     if (start_date) {
-      query = query.gte('created_at', start_date);
+      filteredActivities = filteredActivities.filter(log => new Date(log.createdAt) >= new Date(start_date));
     }
 
     if (end_date) {
-      query = query.lte('created_at', end_date);
+      filteredActivities = filteredActivities.filter(log => new Date(log.createdAt) <= new Date(end_date));
     }
 
     if (search) {
-      query = query.or(`details.ilike.%${search}%,action.ilike.%${search}%`);
+      filteredActivities = filteredActivities.filter(log => 
+        log.actionDetails.message?.toLowerCase().includes(search.toLowerCase()) ||
+        log.actionType.toLowerCase().includes(search.toLowerCase())
+      );
     }
 
-    // Get total count
-    const countQuery = supabase
-      .from('audit_logs')
-      .select('*', { count: 'exact', head: true })
-      .in('user:users!audit_logs_user_id_fkey.role', ['admin', 'super_admin']);
-
-    if (action_type && action_type !== 'all') {
-      countQuery.eq('action', action_type);
-    }
-    if (admin_id && admin_id !== 'all') {
-      countQuery.eq('user_id', admin_id);
-    }
-    if (start_date) {
-      countQuery.gte('created_at', start_date);
-    }
-    if (end_date) {
-      countQuery.lte('created_at', end_date);
-    }
-
-    const [{ data: logs, error: logsError }, { count, error: countError }] = await Promise.all([
-      query.range(offset, offset + limit - 1),
-      countQuery
-    ]);
-
-    if (!logsError && logs) {
-      // Transform to AdminActivityLog format
-      activities = logs.map((log: any) => ({
-        id: log.id,
-        adminId: log.user_id,
-        adminName: log.user?.name || 'Unknown Admin',
-        adminRole: log.user?.role || 'admin',
-        actionType: log.action,
-        targetType: log.resource_type,
-        targetId: log.resource_id,
-        actionDetails: {
-          message: log.details
-        },
-        ipAddress: log.ip_address,
-        userAgent: log.user_agent,
-        sessionId: null,
-        createdAt: log.created_at
-      }));
-    }
-
-    const total = count || 0;
+    const total = filteredActivities.length;
+    const activities = filteredActivities.slice(offset, offset + limit);
 
     console.log(`✅ Super Admin: Retrieved ${activities.length} admin activities (${total} total)`);
 

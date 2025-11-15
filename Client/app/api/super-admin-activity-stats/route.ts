@@ -53,23 +53,73 @@ export async function GET(request: NextRequest) {
 
     console.log('📊 Calculating activity stats...');
 
-    // Get all admin activity logs
-    const { data: allLogs, error: logsError } = await supabase
-      .from('audit_logs')
-      .select(`
-        *,
-        user:users!audit_logs_user_id_fkey(id, name, email, role)
-      `)
-      .in('user:users!audit_logs_user_id_fkey.role', ['admin', 'super_admin'])
-      .order('created_at', { ascending: false })
-      .limit(1000); // Get recent 1000 activities for stats
+    // Use aggregation approach - fetch all admin/super_admin actions from various tables
+    let allActivities: any[] = [];
 
-    if (logsError) {
-      console.error('❌ Error fetching logs:', logsError);
-      throw logsError;
+    // Get all admin and super_admin users
+    const { data: adminUsers, error: adminUsersError } = await supabase
+      .from('users')
+      .select('id, name, email, role, created_at, updated_at, approval_status')
+      .in('role', ['admin', 'super_admin'])
+      .order('created_at', { ascending: false });
+
+    if (!adminUsersError && adminUsers) {
+      adminUsers.forEach((admin: any) => {
+        // Admin account creation
+        allActivities.push({
+          actionType: 'admin_created',
+          adminName: admin.name || admin.email,
+          createdAt: admin.created_at
+        });
+
+        // If admin was approved
+        if (admin.approval_status === 'approved' && admin.updated_at !== admin.created_at) {
+          allActivities.push({
+            actionType: 'admin_approved',
+            adminName: 'System Admin',
+            createdAt: admin.updated_at
+          });
+        }
+      });
     }
 
-    const logs = allLogs || [];
+    // Get user actions performed by admins
+    const { data: allUsers, error: usersError } = await supabase
+      .from('users')
+      .select('id, name, email, role, created_at, updated_at, approval_status')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (!usersError && allUsers) {
+      allUsers.forEach((user: any) => {
+        if (user.approval_status === 'approved' && user.updated_at !== user.created_at) {
+          allActivities.push({
+            actionType: 'user_approved',
+            adminName: 'Admin',
+            createdAt: user.updated_at
+          });
+        }
+      });
+    }
+
+    // Get certificate reviews
+    const { data: certificates, error: certError } = await supabase
+      .from('doctor_certificates')
+      .select('id, status, submitted_at, reviewed_at, reviewed_by')
+      .order('submitted_at', { ascending: false })
+      .limit(100);
+
+    if (!certError && certificates) {
+      certificates.forEach((cert: any) => {
+        if (cert.reviewed_at && cert.reviewed_by) {
+          allActivities.push({
+            actionType: cert.status === 'approved' ? 'certificate_approved' : 'certificate_rejected',
+            adminName: 'Admin',
+            createdAt: cert.reviewed_at
+          });
+        }
+      });
+    }
 
     // Calculate stats
     const now = new Date();
@@ -81,16 +131,15 @@ export async function GET(request: NextRequest) {
     let actionsToday = 0;
     let actionsThisWeek = 0;
 
-    logs.forEach((log: any) => {
-      const createdAt = new Date(log.created_at);
+    allActivities.forEach((activity: any) => {
+      const createdAt = new Date(activity.createdAt);
       
       // Count by action type
-      const action = log.action || 'unknown';
+      const action = activity.actionType || 'unknown';
       actionsByType[action] = (actionsByType[action] || 0) + 1;
 
       // Count by admin
-      const adminId = log.user_id;
-      const adminName = log.user?.name || log.user?.email || adminId;
+      const adminName = activity.adminName || 'Unknown';
       actionsByAdmin[adminName] = (actionsByAdmin[adminName] || 0) + 1;
 
       // Count today's actions
@@ -115,13 +164,13 @@ export async function GET(request: NextRequest) {
       .slice(0, 5);
 
     const stats = {
-      totalActions: logs.length,
+      totalActions: allActivities.length,
       actionsByType,
       actionsByAdmin,
       actionsToday,
       actionsThisWeek,
       topAdmins,
-      recentActions: Math.min(logs.length, 50)
+      recentActions: Math.min(allActivities.length, 50)
     };
 
     console.log('✅ Activity stats calculated:', {

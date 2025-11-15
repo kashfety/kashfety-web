@@ -388,9 +388,9 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         const rows: ScheduleData[] = response.data.schedule || [];
         setSchedule(rows);
         
-        // On initial mount, always fetch from DB and populate forms
-        // During session, only update if center hasn't been initialized
-        const shouldUpdateFromDB = isInitialMount || !initializedCenters.has(selectedCenterId);
+        // Always load from DB if center hasn't been initialized yet in this session
+        // This ensures first visit to each center loads from database
+        const shouldUpdateFromDB = !initializedCenters.has(selectedCenterId);
         
         if (shouldUpdateFromDB) {
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
@@ -399,16 +399,16 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
             [selectedCenterId]: newConfigs
           }));
           setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
-          
-          // Mark initial mount as complete after first fetch
-          if (isInitialMount) {
-            setIsInitialMount(false);
-          }
         }
         
         setLastFetchedCenterId(selectedCenterId);
         setHomeVisitsAvailable(response.data.home_visits_available || false);
         setDefaultConsultationFee(response.data.default_consultation_fee || 0);
+        
+        // Mark initial mount as complete after any fetch
+        if (isInitialMount) {
+          setIsInitialMount(false);
+        }
       }
     } catch (error: any) {
       console.error('Fetch schedule error:', error);
@@ -534,13 +534,15 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           const slots = generateSlotsForDay(day.value);
           
           return {
-            day: day.value,
-            slots: slots,
+            day_of_week: day.value,
+            is_available: true,
+            time_slots: slots,
             break_start: config?.breakStart || null,
-            break_end: config?.breakEnd || null
+            break_end: config?.breakEnd || null,
+            notes: config?.notes || null
           };
         })
-        .filter(day => day.slots.length > 0); // Only include days with actual slots
+        .filter(day => day.time_slots.length > 0); // Only include days with actual slots
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,

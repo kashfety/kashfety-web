@@ -1522,24 +1522,14 @@ export default function DoctorDashboard() {
                                 )}
                                 <div className="flex items-center gap-1">
                                   {appointment.status === 'scheduled' && (
-                                    <>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                                      >
-                                        <CheckCircle className="w-4 h-4 mr-1" />
-                                        {t('dd_confirm') || 'Confirm'}
-                                      </Button>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleStartConsultation(appointment)}
-                                      >
-                                        <Stethoscope className="w-4 h-4 mr-1" />
-                                        {t('start') || 'Start'}
-                                      </Button>
-                                    </>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      {t('dd_confirm') || 'Confirm'}
+                                    </Button>
                                   )}
                                   {appointment.status === 'confirmed' && (
                                     <Button

@@ -394,14 +394,28 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
         setSchedule(rows);
-        // Force UI to reflect DB configs for this center
-        const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
-        setCenterFormStates(prev => ({
-          ...prev,
-          [selectedCenterId]: newConfigs
-        }));
-        setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
-  setLastFetchedCenterId(selectedCenterId);
+        
+        // Check if we have persisted form state for this center
+        const hasPersistedConfig = centerFormStates[selectedCenterId] && 
+          Object.keys(centerFormStates[selectedCenterId]).length > 0;
+        
+        // Only update form configs from server if:
+        // 1. This center hasn't been initialized yet, AND
+        // 2. We don't have persisted form state for this center
+        // This preserves user edits when switching between centers
+        if (!initializedCenters.has(selectedCenterId) && !hasPersistedConfig) {
+          const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
+          setCenterFormStates(prev => ({
+            ...prev,
+            [selectedCenterId]: newConfigs
+          }));
+          setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+        } else if (hasPersistedConfig) {
+          // Mark as initialized if we have persisted config
+          setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+        }
+        
+        setLastFetchedCenterId(selectedCenterId);
         setHomeVisitsAvailable(response.data.home_visits_available || false);
         setDefaultConsultationFee(response.data.default_consultation_fee || 0);
       }
@@ -420,14 +434,49 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const refreshSchedule = async () => {
     if (!selectedCenterId) return;
     
-    // Remove center from initialized set to force re-initialization
-    setInitializedCenters(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(selectedCenterId);
-      return newSet;
-    });
-    
-    await fetchSchedule();
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      
+      const response = await axios.get(
+        `/api/doctor-dashboard/schedule?center_id=${selectedCenterId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        const rows: ScheduleData[] = response.data.schedule || [];
+        setSchedule(rows);
+        
+        // Force update form configs from server when explicitly refreshing
+        const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
+        setCenterFormStates(prev => ({
+          ...prev,
+          [selectedCenterId]: newConfigs
+        }));
+        
+        // Keep the center as initialized
+        setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+        setLastFetchedCenterId(selectedCenterId);
+        setHomeVisitsAvailable(response.data.home_visits_available || false);
+        setDefaultConsultationFee(response.data.default_consultation_fee || 0);
+        
+        toast({
+          title: t('success') || 'Success',
+          description: t('dd_schedule_refreshed') || 'Schedule refreshed from server',
+        });
+      }
+    } catch (error: any) {
+      console.error('Refresh schedule error:', error);
+      toast({
+        title: t('error') || 'Error',
+        description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateDayConfig = (day: number, field: string, value: any) => {

@@ -53,35 +53,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if doctor already has any certificate records
-    const { data: existingCerts } = await supabase
-      .from('doctor_certificates')
-      .select('id, status')
-      .eq('doctor_id', userId);
-
-    // If no certificate records exist, create a placeholder record to indicate they skipped
-    if (!existingCerts || existingCerts.length === 0) {
-      const { error: insertError } = await supabase
-        .from('doctor_certificates')
-        .insert({
-          doctor_id: userId,
-          certificate_type: 'medical_license',
-          certificate_file_name: 'pending_upload',
-          certificate_file_url: null,
-          status: 'pending',
-          admin_notes: 'Doctor skipped certificate upload during registration'
-        });
-
-      if (insertError) {
-        console.error('Error creating certificate placeholder:', insertError);
-        return NextResponse.json(
-          { error: 'Failed to mark certificate as skipped' },
-          { status: 500 }
-        );
-      }
-    }
-
-    // Update user's approval status to pending
+    // Don't create any certificate record - just let the absence of records indicate they skipped
+    // The login route will check if no certificates exist and allow login with certificate_status: 'not_uploaded'
+    
+    // Update user's approval status to pending (waiting for certificate upload)
     const { error: updateError } = await supabase
       .from('users')
       .update({

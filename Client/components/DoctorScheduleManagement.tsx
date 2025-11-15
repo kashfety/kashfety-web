@@ -123,22 +123,15 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   // Track which center's schedule was last fetched from server
   const [lastFetchedCenterId, setLastFetchedCenterId] = useState<string | null>(null);
 
-  // Persistence keys per doctor
-  const storageKey = doctorId ? `dr_schedule_form_${doctorId}` : '';
+  // Persistence key for selected center per doctor
   const selectionKey = doctorId ? `dr_schedule_selected_center_${doctorId}` : '';
+  // Track if this is initial mount (to force DB fetch)
+  const [isInitialMount, setIsInitialMount] = useState(true);
 
-  // Load persisted form state and selected center on mount/doctor change
+  // Load selected center on mount/doctor change, but always fetch fresh data from DB
   useEffect(() => {
     if (!doctorId) return;
     try {
-      const persisted = storageKey ? localStorage.getItem(storageKey) : null;
-      if (persisted) {
-        const parsed = JSON.parse(persisted);
-        if (parsed && typeof parsed === 'object') {
-          setCenterFormStates(parsed);
-          // Do NOT mark initialized based on persisted state; allow server data to initialize UI
-        }
-      }
       const persistedSelection = selectionKey ? localStorage.getItem(selectionKey) : null;
       if (persistedSelection) {
         setSelectedCenterId(persistedSelection);
@@ -395,24 +388,22 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         const rows: ScheduleData[] = response.data.schedule || [];
         setSchedule(rows);
         
-        // Check if we have persisted form state for this center
-        const hasPersistedConfig = centerFormStates[selectedCenterId] && 
-          Object.keys(centerFormStates[selectedCenterId]).length > 0;
+        // On initial mount, always fetch from DB and populate forms
+        // During session, only update if center hasn't been initialized
+        const shouldUpdateFromDB = isInitialMount || !initializedCenters.has(selectedCenterId);
         
-        // Only update form configs from server if:
-        // 1. This center hasn't been initialized yet, AND
-        // 2. We don't have persisted form state for this center
-        // This preserves user edits when switching between centers
-        if (!initializedCenters.has(selectedCenterId) && !hasPersistedConfig) {
+        if (shouldUpdateFromDB) {
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
           setCenterFormStates(prev => ({
             ...prev,
             [selectedCenterId]: newConfigs
           }));
           setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
-        } else if (hasPersistedConfig) {
-          // Mark as initialized if we have persisted config
-          setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+          
+          // Mark initial mount as complete after first fetch
+          if (isInitialMount) {
+            setIsInitialMount(false);
+          }
         }
         
         setLastFetchedCenterId(selectedCenterId);
@@ -494,20 +485,17 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     }));
   };
 
-  // Persist form states and selected center whenever they change
+  // Persist selected center whenever it changes
   useEffect(() => {
     if (!doctorId) return;
     try {
-      if (storageKey) {
-        localStorage.setItem(storageKey, JSON.stringify(centerFormStates));
-      }
       if (selectionKey && selectedCenterId) {
         localStorage.setItem(selectionKey, selectedCenterId);
       }
     } catch (e) {
       // ignore storage errors
     }
-  }, [doctorId, centerFormStates, selectedCenterId]);
+  }, [doctorId, selectedCenterId]);
 
   const generateSlotsForDay = (day: number): TimeSlot[] => {
     const config = getDayConfig(day);

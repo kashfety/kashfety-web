@@ -130,27 +130,42 @@ export default function DoctorApprovals() {
 
     const handleApproval = async (certificateId: string, action: 'approve' | 'reject') => {
         try {
-            console.log(`🔄 Attempting to ${action} certificate:`, certificateId);
+            console.log(`🔄 [Doctor Approvals] Attempting to ${action} certificate:`, certificateId);
             
             // Use the backend API URL like other working features
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+            const endpoint = `${baseUrl}/auth/admin/certificates/${certificateId}/review`;
             
-            const response = await fetch(`${baseUrl}/auth/admin/certificates/${certificateId}/review`, {
+            console.log(`📍 [Doctor Approvals] Full endpoint URL:`, endpoint);
+            console.log(`🔑 [Doctor Approvals] Auth token present:`, !!localStorage.getItem('auth_token'));
+            
+            const requestBody = {
+                status: action === 'approve' ? 'approved' : 'rejected',
+                admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
+            };
+            
+            console.log(`📦 [Doctor Approvals] Request body:`, requestBody);
+            
+            const response = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    status: action === 'approve' ? 'approved' : 'rejected',
-                    admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
-                })
+                body: JSON.stringify(requestBody)
             });
 
+            console.log(`📡 [Doctor Approvals] Response status:`, response.status, response.statusText);
+
             if (!response.ok) {
-                throw new Error(`Failed to ${action} doctor`);
+                const errorData = await response.json().catch(() => ({}));
+                console.error(`❌ [Doctor Approvals] Error response:`, errorData);
+                throw new Error(`Failed to ${action} doctor: ${errorData.error || response.statusText}`);
             }
+            
+            const responseData = await response.json();
+            console.log(`✅ [Doctor Approvals] Success response:`, responseData);
 
             // Refresh the list
             fetchDoctorApprovals();
@@ -231,7 +246,7 @@ export default function DoctorApprovals() {
                                             <Button
                                                 size="sm"
                                                 onClick={() => handleApproval(doctor.id, 'approve')}
-                                                className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90"
+                                                className="bg-green-600 hover:bg-green-700 text-white"
                                             >
                                                 <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                                 {t('admin_approve') || 'Approve'}

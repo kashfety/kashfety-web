@@ -223,8 +223,8 @@ export default function BannerManagement() {
             uploadFormData.append('display_order', formData.display_order.toString());
             console.log('📦 FormData created with file:', selectedFile.name);
 
-            console.log('🌐 Sending request to:', `${process.env.NEXT_PUBLIC_API_URL}/api/admin/banners/upload`);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/banners/upload`, {
+            console.log('🌐 Sending request to: /api/admin-banners');
+            const response = await fetch('/api/admin-banners', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

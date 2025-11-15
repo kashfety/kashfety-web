@@ -84,7 +84,8 @@ export default function DoctorApprovals() {
                 admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
             };
             
-            const endpoint = `/api/auth/admin/certificates/${certificateId}/review`;
+            // Call the [id]/route.ts directly (without /review suffix)
+            const endpoint = `/api/auth/admin/certificates/${certificateId}`;
             console.log(` [Doctor Approvals] Calling:`, endpoint);
             
             const response = await fetch(endpoint, {

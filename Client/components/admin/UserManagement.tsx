@@ -790,11 +790,7 @@ export default function UserManagement() {
                                                         <span className={hasPassword ? `text-green-600 ${isRTL ? 'mr-1' : 'ml-1'}` : `text-red-600 ${isRTL ? 'mr-1' : 'ml-1'}`}>
                                                             {hasPassword ? '✅ ' + (t('admin_password_set') || 'Password Set') : '❌ ' + (t('admin_no_password_set') || 'No Password Set')}
                                                         </span>
-                                                        {hasPassword ? (
-                                                            <div className="text-xs text-gray-500 mt-1 font-mono bg-gray-100 dark:bg-gray-800 p-1 rounded">
-                                                                <strong>{t('admin_hash') || 'Hash'}:</strong> {selectedUser.user.password_hash.substring(0, 30)}...
-                                                            </div>
-                                                        ) : (
+                                                        {!hasPassword && (
                                                             <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                                                                 ⚠️ {t('admin_user_needs_password') || 'User needs to set a password or admin can set one via edit'}
                                                             </div>
@@ -954,20 +950,6 @@ export default function UserManagement() {
                                 )}
                             </div>
 
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <label className="text-sm font-medium">{t('admin_account_status') || 'Account Status'}</label>
-                                <Select value={editForm.approval_status} onValueChange={(value) => setEditForm({ ...editForm, approval_status: value })}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="approved">{t('admin_approved') || 'Approved'}</SelectItem>
-                                        <SelectItem value="pending">{t('admin_pending') || 'Pending'}</SelectItem>
-                                        <SelectItem value="rejected">{t('admin_rejected') || 'Rejected'}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
                             {/* Password Fields */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
@@ -997,11 +979,6 @@ export default function UserManagement() {
                                 <div className={`bg-blue-50 p-3 rounded-md ${isRTL ? 'text-right' : 'text-left'}`}>
                                     <div className="text-sm text-blue-700">
                                         <strong>{t('admin_current_password_status') || 'Current Password Status'}:</strong> {editingUser.password_hash && editingUser.password_hash !== null && editingUser.password_hash !== '' ? (t('admin_password_is_set') || 'Password is set') : (t('admin_no_password_set') || 'No password set')}
-                                        {editingUser.password_hash && (
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {t('admin_current_hash') || 'Current Hash'}: {editingUser.password_hash}
-                                            </div>
-                                        )}
                                     </div>
                                     <p className="text-sm text-blue-600 mt-1">
                                         {t('admin_password_instructions') || 'Leave password fields empty to keep the current password. Fill both fields to change the password.'}

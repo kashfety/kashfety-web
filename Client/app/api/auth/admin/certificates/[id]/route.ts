@@ -21,13 +21,11 @@ export const dynamic = 'force-dynamic';
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   console.log('🚀 Certificate approval PUT endpoint hit!');
   console.log('📍 Request URL:', request.url);
   console.log('📝 Request method:', request.method);
-  
-  const params = await context.params;
   console.log('🆔 Certificate ID from params:', params.id);
   
   try {
@@ -155,9 +153,8 @@ export async function PUT(
 // Add a simple GET handler to test if route is working
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await context.params;
   console.log('✅ GET endpoint working! Certificate ID:', params.id);
   return NextResponse.json({ 
     message: 'Certificate approval route is working',

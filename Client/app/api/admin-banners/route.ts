@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     // Parse multipart form data
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('banner') as File || formData.get('file') as File;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const displayOrder = formData.get('display_order') as string;
@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
     const clickUrl = formData.get('click_url') as string;
     const startDate = formData.get('start_date') as string;
     const endDate = formData.get('end_date') as string;
+
+    console.log('📋 FormData entries:', Array.from(formData.keys()));
 
     if (!file) {
       return NextResponse.json({ 

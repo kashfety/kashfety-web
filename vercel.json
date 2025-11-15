@@ -1,3 +1,14 @@
 {
-  "rewrites": []
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd Client && npm install && npm run build",
+  "devCommand": "cd Client && npm run dev",
+  "installCommand": "cd Client && npm install",
+  "framework": null,
+  "outputDirectory": "Client/.next",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
 }

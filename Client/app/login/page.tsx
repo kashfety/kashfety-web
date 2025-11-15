@@ -90,7 +90,19 @@ export default function LoginPage() {
         setShowCertificatePrompt(true)
       }
     } catch (err: any) {
-      setError(err.message || t('auth_invalid_credentials') || 'Invalid email or password')
+      // Check if error is about certificate requirement
+      if (err.message?.includes('certificate') || err.message?.includes('Certificate')) {
+        // Store token if available for certificate upload
+        const authToken = localStorage.getItem('auth_token')
+        if (authToken) {
+          setDoctorToken(authToken)
+        }
+        // Show certificate prompt modal instead of error
+        setShowCertificatePrompt(true)
+        setError('') // Clear any error
+      } else {
+        setError(err.message || t('auth_invalid_credentials') || 'Invalid email or password')
+      }
     } finally {
       setIsLoading(false)
     }

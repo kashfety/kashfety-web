@@ -193,6 +193,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         const errorMessage = result.error || result.message || `Login failed with status ${response.status}`
         console.error('Login failed:', errorMessage)
+        
+        // If doctor needs to upload certificate, store a temporary marker
+        if (result.requires_certificate_upload && result.certificate_status === 'not_uploaded') {
+          localStorage.setItem('doctor_certificate_status', 'not_uploaded')
+          // Note: We don't store the token here since login didn't succeed
+          // The doctor will need to upload certificate and then login again
+        }
+        
         throw new Error(errorMessage)
       }
 

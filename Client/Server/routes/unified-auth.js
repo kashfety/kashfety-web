@@ -533,6 +533,15 @@ router.post('/login', async (req, res) => {
         certificateStatus = 'not_uploaded';
       }
 
+      // Block login if no certificate uploaded at all
+      if (certificateStatus === 'not_uploaded') {
+        return res.status(403).json({
+          error: 'You must upload your medical certificate before you can login.',
+          requires_certificate_upload: true,
+          certificate_status: 'not_uploaded'
+        });
+      }
+
       // If certificate is pending or rejected, prevent login but allow if approved
       if (hasCertificate && certificateStatus !== 'approved') {
         let message = '';
@@ -552,11 +561,6 @@ router.post('/login', async (req, res) => {
           requires_approval: true,
           certificate_status: certificateStatus
         });
-      }
-      
-      // If no certificate uploaded, allow login but flag it
-      if (!hasCertificate) {
-        certificateStatus = 'not_uploaded';
       }
     }
 

@@ -92,7 +92,19 @@ export async function POST(request: NextRequest) {
         certificateStatus = 'not_uploaded';
       }
 
-      // Only block login if they have uploaded a certificate that's not approved yet
+      // Block login if no certificate uploaded at all
+      if (certificateStatus === 'not_uploaded') {
+        return NextResponse.json(
+          {
+            error: 'You must upload your medical certificate before you can login.',
+            requires_certificate_upload: true,
+            certificate_status: 'not_uploaded'
+          },
+          { status: 403 }
+        );
+      }
+
+      // Also block login if they have uploaded a certificate that's not approved yet
       if (hasCertificate && certificateStatus !== 'approved') {
         let message = '';
         switch (certificateStatus) {

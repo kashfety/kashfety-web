@@ -505,25 +505,35 @@ router.post('/login', async (req, res) => {
     // For doctors, check certificate status
     let certificateStatus = null;
     let hasCertificate = false;
+    let requiresCertificateUpload = false;
     
     if (user.role === 'doctor') {
       // Check if doctor has uploaded any certificates
       const { data: certificates } = await supabase
         .from('doctor_certificates')
-        .select('id, status')
+        .select('id, status, certificate_file_url')
         .eq('doctor_id', user.id)
         .order('submitted_at', { ascending: false })
         .limit(1);
 
       if (certificates && certificates.length > 0) {
-        hasCertificate = true;
-        certificateStatus = certificates[0].status;
+        const cert = certificates[0];
+        // Check if it's a real certificate or just a placeholder from skipping
+        if (cert.certificate_file_url) {
+          hasCertificate = true;
+          certificateStatus = cert.status;
+        } else {
+          // No file uploaded yet - doctor skipped during signup
+          requiresCertificateUpload = true;
+          certificateStatus = 'not_uploaded';
+        }
       } else {
-        // Check if user has certificate_status field
-        certificateStatus = user.certificate_status || 'not_uploaded';
+        // No certificate record at all
+        requiresCertificateUpload = true;
+        certificateStatus = 'not_uploaded';
       }
 
-      // If certificate is pending or rejected, prevent login
+      // If certificate is pending or rejected, prevent login but allow if approved
       if (hasCertificate && certificateStatus !== 'approved') {
         let message = '';
         switch (certificateStatus) {

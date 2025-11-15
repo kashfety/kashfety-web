@@ -12,10 +12,12 @@ import { useLocale } from '@/components/providers/locale-provider'
 import { useTheme } from 'next-themes'
 import CertificateUploadPromptModal from '@/components/CertificateUploadPromptModal'
 import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
+import { useCustomAlert } from '@/hooks/use-custom-alert'
 
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuth()
+  const { showAlert } = useCustomAlert()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [email, setEmail] = useState('')
@@ -90,17 +92,20 @@ export default function LoginPage() {
         setShowCertificatePrompt(true)
       }
     } catch (err: any) {
-      // Check if error is about certificate requirement
-      if (err.message?.includes('certificate') || err.message?.includes('Certificate')) {
+      // Check if error is specifically about needing to upload certificate
+      if (err.message?.includes('must upload your medical certificate')) {
         // Get temporary token for certificate upload
         const tempToken = localStorage.getItem('temp_doctor_token')
         if (tempToken) {
           setDoctorToken(tempToken)
           console.log('Using temporary token for certificate upload')
         }
-        // Show certificate prompt modal instead of error
+        // Show certificate prompt modal for upload
         setShowCertificatePrompt(true)
         setError('') // Clear any error
+      } else if (err.message?.includes('pending') || err.message?.includes('rejected') || err.message?.includes('under review')) {
+        // Certificate is uploaded but waiting for approval or rejected
+        setError(err.message)
       } else {
         setError(err.message || t('auth_invalid_credentials') || 'Invalid email or password')
       }
@@ -136,7 +141,10 @@ export default function LoginPage() {
     // Show success message and redirect to login to try again
     setEmail('')
     setPassword('')
-    alert(t('cert_upload_success_login') || 'Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.')
+    showAlert(
+      t('cert_upload_success_login') || 'Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.',
+      'success'
+    )
   }
 
   const handleCertificateUploadModalClose = () => {

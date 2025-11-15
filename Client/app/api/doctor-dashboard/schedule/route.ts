@@ -69,6 +69,10 @@ export async function PUT(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   const body = await request.json();
+  
+  console.log('📅 [Schedule PUT] Request received');
+  console.log('📅 [Schedule PUT] Body:', JSON.stringify(body, null, 2));
+  
   if (authHeader) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/doctor-dashboard/schedule`, {
@@ -79,7 +83,7 @@ export async function PUT(request: NextRequest) {
       const data = await response.json();
       if (response.ok) return NextResponse.json(data);
     } catch (e) {
-      // continue fallback
+      console.log('📅 [Schedule PUT] Backend proxy failed, using fallback');
     }
   }
 
@@ -97,42 +101,89 @@ export async function PUT(request: NextRequest) {
       }
     }
     const centerId = searchParams.get('center_id') || body?.center_id;
+    
+    console.log('📅 [Schedule PUT] Doctor ID:', doctorId);
+    console.log('📅 [Schedule PUT] Center ID:', centerId);
+    
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
     if (!Array.isArray(body?.schedule || body)) return NextResponse.json({ error: 'schedule array required' }, { status: 400 });
+    
     const scheduleArray = Array.isArray(body) ? body : body.schedule;
+    console.log('📅 [Schedule PUT] Schedule array length:', scheduleArray.length);
+    console.log('📅 [Schedule PUT] Schedule data:', JSON.stringify(scheduleArray, null, 2));
+    
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
     // Verify assignment
+    console.log('📅 [Schedule PUT] Verifying doctor-center assignment...');
     const { data: assignment, error: aErr } = await supabase
       .from('doctor_centers')
       .select('center_id')
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .single();
-    if (aErr || !assignment) return NextResponse.json({ error: 'You are not assigned to this center' }, { status: 403 });
-    // Replace per center
+    
+    if (aErr || !assignment) {
+      console.error('📅 [Schedule PUT] Assignment verification failed:', aErr);
+      return NextResponse.json({ error: 'You are not assigned to this center' }, { status: 403 });
+    }
+    console.log('📅 [Schedule PUT] Assignment verified ✅');
+    
+    // Delete existing schedules for this doctor and center
+    console.log('📅 [Schedule PUT] Deleting existing schedules for doctor:', doctorId, 'center:', centerId);
     const { error: delErr } = await supabase
       .from('doctor_schedules')
       .delete()
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId);
-    if (delErr) throw delErr;
-    const rows = scheduleArray.map((r: any) => ({
-      doctor_id: doctorId,
+    
+    if (delErr) {
+      console.error('📅 [Schedule PUT] Delete error:', delErr);
+      throw delErr;
+    }
+    console.log('📅 [Schedule PUT] Existing schedules deleted ✅');
+    
+    // Build rows to insert
+    const rows = scheduleArray.map((r: any) => {
+      const row = {
+        doctor_id: doctorId,
+        center_id: centerId,
+        day_of_week: r.day_of_week,
+        is_available: r.is_available !== false,
+        time_slots: r.time_slots || [],
+        consultation_fee: r.consultation_fee ?? null,
+        break_start: r.break_start ?? null,
+        break_end: r.break_end ?? null,
+        notes: r.notes ?? null,
+      };
+      console.log('📅 [Schedule PUT] Row to insert:', JSON.stringify(row, null, 2));
+      return row;
+    });
+    
+    console.log('📅 [Schedule PUT] Inserting', rows.length, 'schedule rows...');
+    const { data: insertedData, error: insErr } = await supabase
+      .from('doctor_schedules')
+      .insert(rows)
+      .select();
+    
+    if (insErr) {
+      console.error('📅 [Schedule PUT] Insert error:', insErr);
+      console.error('📅 [Schedule PUT] Insert error details:', JSON.stringify(insErr, null, 2));
+      throw insErr;
+    }
+    
+    console.log('📅 [Schedule PUT] Insert successful ✅');
+    console.log('📅 [Schedule PUT] Inserted data:', JSON.stringify(insertedData, null, 2));
+    
+    return NextResponse.json({ 
+      success: true, 
       center_id: centerId,
-      day_of_week: r.day_of_week,
-      is_available: r.is_available !== false,
-      time_slots: r.time_slots || [],
-      consultation_fee: r.consultation_fee ?? null,
-      break_start: r.break_start ?? null,
-      break_end: r.break_end ?? null,
-      notes: r.notes ?? null,
-    }));
-    const { error: insErr } = await supabase.from('doctor_schedules').insert(rows);
-    if (insErr) throw insErr;
-    return NextResponse.json({ success: true, center_id: centerId });
+      schedule: insertedData 
+    });
   } catch (e: any) {
-    console.error('schedule PUT fallback error:', e);
+    console.error('📅 [Schedule PUT] Fallback error:', e);
+    console.error('📅 [Schedule PUT] Error stack:', e.stack);
     return NextResponse.json({ error: e.message || 'Failed to save schedule' }, { status: 500 });
   }
 }

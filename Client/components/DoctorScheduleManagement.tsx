@@ -526,12 +526,26 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         return;
       }
       
+      console.log('📅 [Save Schedule] Starting save for center:', selectedCenterId);
+      console.log('📅 [Save Schedule] Current form states:', centerFormStates);
+      
       // Build schedule array for API - only include days that are marked as available
       const scheduleData = DAYS_OF_WEEK
-        .filter(day => getDayConfig(day.value).isAvailable) // Only include available days
+        .filter(day => {
+          const config = getDayConfig(day.value);
+          console.log(`📅 [Save Schedule] Day ${day.value} (${day.labelKey}):`, {
+            isAvailable: config.isAvailable,
+            startTime: config.startTime,
+            endTime: config.endTime,
+            duration: config.duration
+          });
+          return config.isAvailable;
+        })
         .map(day => {
           const config = getDayConfig(day.value);
           const slots = generateSlotsForDay(day.value);
+          
+          console.log(`📅 [Save Schedule] Generated ${slots.length} slots for day ${day.value}`);
           
           return {
             day_of_week: day.value,
@@ -542,7 +556,16 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
             notes: config?.notes || null
           };
         })
-        .filter(day => day.time_slots.length > 0); // Only include days with actual slots
+        .filter(day => {
+          const hasSlots = day.time_slots.length > 0;
+          if (!hasSlots) {
+            console.log(`⚠️ [Save Schedule] Day ${day.day_of_week} excluded - no time slots generated`);
+          }
+          return hasSlots;
+        });
+
+      console.log('📅 [Save Schedule] Final schedule data to send:', JSON.stringify(scheduleData, null, 2));
+      console.log('📅 [Save Schedule] Number of days with schedules:', scheduleData.length);
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,
@@ -554,6 +577,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+      
+      console.log('📅 [Save Schedule] Response:', response.data);
 
       if (response.data.success) {
         // Update the schedule state with the response data

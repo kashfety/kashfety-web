@@ -132,14 +132,6 @@ export default function DoctorApprovals() {
         try {
             console.log(`🔄 [Doctor Approvals] Attempting to ${action} certificate:`, certificateId);
             
-            // Use the backend API URL like other working features
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const endpoint = `${baseUrl}/auth/admin/certificates/${certificateId}/review`;
-            
-            console.log(`📍 [Doctor Approvals] Full endpoint URL:`, endpoint);
-            console.log(`🔑 [Doctor Approvals] Auth token present:`, !!localStorage.getItem('auth_token'));
-            
             const requestBody = {
                 status: action === 'approve' ? 'approved' : 'rejected',
                 admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
@@ -147,25 +139,63 @@ export default function DoctorApprovals() {
             
             console.log(`📦 [Doctor Approvals] Request body:`, requestBody);
             
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            console.log(`📡 [Doctor Approvals] Response status:`, response.status, response.statusText);
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error(`❌ [Doctor Approvals] Error response:`, errorData);
-                throw new Error(`Failed to ${action} doctor: ${errorData.error || response.statusText}`);
-            }
+            // Try fallback proxy route first for Vercel compatibility
+            let response;
+            let responseData;
             
-            const responseData = await response.json();
-            console.log(`✅ [Doctor Approvals] Success response:`, responseData);
+            try {
+                console.log('📜 [Doctor Approvals] Trying admin-review-certificate fallback proxy route');
+                const fallbackEndpoint = `/api/admin-review-certificate?certificateId=${certificateId}`;
+                console.log(`📍 [Doctor Approvals] Fallback endpoint:`, fallbackEndpoint);
+                
+                response = await fetch(fallbackEndpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log(`📡 [Doctor Approvals] Fallback response status:`, response.status, response.statusText);
+                
+                if (response.ok) {
+                    responseData = await response.json();
+                    console.log(`✅ [Doctor Approvals] Fallback route worked! Response:`, responseData);
+                } else {
+                    throw new Error('Fallback route failed');
+                }
+            } catch (fallbackError) {
+                console.log('⚠️ [Doctor Approvals] Fallback failed, trying backend route directly');
+                
+                // Fallback to backend route
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+                const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+                const endpoint = `${baseUrl}/auth/admin/certificates/${certificateId}/review`;
+                
+                console.log(`📍 [Doctor Approvals] Backend endpoint:`, endpoint);
+                console.log(`� [Doctor Approvals] Auth token present:`, !!localStorage.getItem('auth_token'));
+                
+                response = await fetch(endpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                console.log(`📡 [Doctor Approvals] Backend response status:`, response.status, response.statusText);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error(`❌ [Doctor Approvals] Error response:`, errorData);
+                    throw new Error(`Failed to ${action} doctor: ${errorData.error || response.statusText}`);
+                }
+                
+                responseData = await response.json();
+                console.log(`✅ [Doctor Approvals] Backend route success:`, responseData);
+            }
 
             // Refresh the list
             fetchDoctorApprovals();

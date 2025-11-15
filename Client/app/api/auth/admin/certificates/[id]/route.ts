@@ -23,11 +23,20 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  console.log('🚀 Certificate approval PUT endpoint hit!');
+  console.log('📍 Request URL:', request.url);
+  console.log('📝 Request method:', request.method);
+  
   const params = await context.params;
+  console.log('🆔 Certificate ID from params:', params.id);
+  
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');
+    console.log('🔑 Auth header present:', !!authHeader);
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ No valid authorization header');
       return NextResponse.json(
         { error: 'Unauthorized - No token provided' },
         { status: 401 }
@@ -36,8 +45,10 @@ export async function PUT(
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
+    console.log('🔓 Token decoded:', !!decoded, 'Role:', decoded?.role);
 
     if (!decoded) {
+      console.log('❌ Invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
@@ -46,6 +57,7 @@ export async function PUT(
 
     // Check if user is admin or super_admin
     if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
+      console.log('❌ User is not admin/super_admin, role:', decoded.role);
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -57,6 +69,7 @@ export async function PUT(
     const { status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = body;
 
     console.log('📝 Admin: Reviewing certificate ID:', id, 'Status:', status);
+    console.log('📦 Request body:', body);
 
     // Validate status
     const validStatuses = ['pending', 'approved', 'rejected', 'resubmission_required'];
@@ -128,6 +141,7 @@ export async function PUT(
 
   } catch (error: any) {
     console.error('❌ Admin certificate review endpoint error:', error);
+    console.error('❌ Error stack:', error.stack);
     return NextResponse.json(
       { 
         error: 'Failed to review certificate',
@@ -136,4 +150,18 @@ export async function PUT(
       { status: 500 }
     );
   }
+}
+
+// Add a simple GET handler to test if route is working
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
+  console.log('✅ GET endpoint working! Certificate ID:', params.id);
+  return NextResponse.json({ 
+    message: 'Certificate approval route is working',
+    certificateId: params.id,
+    availableMethods: ['PUT']
+  });
 }

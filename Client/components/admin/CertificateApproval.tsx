@@ -273,20 +273,32 @@ export default function CertificateApproval() {
 
     const reviewCertificate = async (certificateId: string, reviewData: any) => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/certificates/${certificateId}/review`, {
-                method: 'PUT',
+            // Use static API route (Vercel-compatible, no dynamic [id] in URL)
+            const endpoint = '/api/admin-review-certificate-action';
+            console.log('📝 [Certificate Approval] Calling:', endpoint, 'for certificate:', certificateId);
+            
+            const response = await fetch(endpoint, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(reviewData)
+                body: JSON.stringify({
+                    certificateId,
+                    ...reviewData
+                })
             });
 
+            console.log('📡 [Certificate Approval] Response status:', response.status);
+
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('❌ [Certificate Approval] Error:', errorData);
                 throw new Error('Failed to review certificate');
             }
+
+            const responseData = await response.json();
+            console.log('✅ [Certificate Approval] Success:', responseData);
 
             toast({
                 title: t('admin_success') || "Success",

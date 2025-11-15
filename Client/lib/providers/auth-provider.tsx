@@ -201,11 +201,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_token', result.token)
         localStorage.setItem('auth_user', JSON.stringify(result.user))
 
+        // Store certificate status if doctor
+        if (result.user.role === 'doctor' && result.certificate_status) {
+          localStorage.setItem('doctor_certificate_status', result.certificate_status)
+        }
+
         setToken(result.token)
         setUser(result.user)
         setIsAuthenticated(true)
 
         console.log('Login successful, user role:', result.user.role)
+        if (result.user.role === 'doctor') {
+          console.log('Doctor certificate status:', result.certificate_status)
+        }
 
         // Redirect based on user role
         const dashboardPath = getDashboardPath(result.user.role)

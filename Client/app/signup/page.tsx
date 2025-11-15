@@ -482,9 +482,28 @@ export default function SignupPage() {
     }, 3000);
   }
 
-  const handleCertificateUploadSkip = () => {
+  const handleCertificateUploadSkip = async () => {
+    try {
+      // Mark certificate as skipped in the backend
+      if (registeredDoctor?.token) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
+        
+        await fetch(`${baseUrl}/auth/doctor/skip-certificate`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${registeredDoctor.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error marking certificate as skipped:', error);
+      // Continue anyway - user can still upload later
+    }
+    
     setShowDoctorCertificateForm(false);
-    setSuccess('Registration completed! You can upload certificates later from your dashboard. Note that your account will remain pending until certificates are approved.');
+    setSuccess('Registration completed! You can upload certificates later. Note: You must upload and get approval before you can login.');
     setTimeout(() => {
       router.push('/login');
     }, 3000);

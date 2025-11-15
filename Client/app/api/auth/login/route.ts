@@ -64,40 +64,77 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if doctor is approved (for doctors only)
-    if (user.role === 'doctor' && user.approval_status !== 'approved') {
-      let message = '';
-      switch (user.approval_status) {
-        case 'pending':
-          message = 'Your account is pending admin approval. Please wait for certificate verification.';
-          break;
-        case 'rejected':
-          message = 'Your account has been rejected. Please contact support for more information.';
-          break;
-        default:
-          message = 'Your account is not approved. Please contact support.';
+    // For doctors, check certificate status
+    let certificateStatus = null;
+    let hasCertificate = false;
+    
+    if (user.role === 'doctor') {
+      // Check if doctor has uploaded any certificates
+      const { data: certificates } = await supabase
+        .from('doctor_certificates')
+        .select('id, status, certificate_file_url')
+        .eq('doctor_id', user.id)
+        .order('submitted_at', { ascending: false })
+        .limit(1);
+
+      if (certificates && certificates.length > 0) {
+        const cert = certificates[0];
+        // Check if it's a real certificate or just a placeholder from skipping
+        if (cert.certificate_file_url) {
+          hasCertificate = true;
+          certificateStatus = cert.status;
+        } else {
+          // No file uploaded yet - doctor skipped during signup
+          certificateStatus = 'not_uploaded';
+        }
+      } else {
+        // No certificate record at all
+        certificateStatus = 'not_uploaded';
       }
-      return NextResponse.json(
-        {
-          error: message,
-          approval_status: user.approval_status,
-          requires_approval: true
-        },
-        { status: 403 }
-      );
+
+      // Only block login if they have uploaded a certificate that's not approved yet
+      if (hasCertificate && certificateStatus !== 'approved') {
+        let message = '';
+        switch (certificateStatus) {
+          case 'pending':
+            message = 'Your certificate is pending admin approval. Please wait for verification.';
+            break;
+          case 'rejected':
+            message = 'Your certificate has been rejected. Please upload a new certificate or contact support.';
+            break;
+          default:
+            message = 'Your certificate is under review. Please wait for admin approval.';
+        }
+        return NextResponse.json(
+          {
+            error: message,
+            approval_status: certificateStatus,
+            requires_approval: true,
+            certificate_status: certificateStatus
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Remove sensitive fields and generate JWT token
     const { password_hash, ...userWithoutPassword } = user;
     const token = generateToken(user);
 
-    return NextResponse.json({
+    const response: any = {
       message: 'Login successful',
       success: true,
       user: userWithoutPassword,
       token,
       expiresIn: '24h'
-    });
+    };
+
+    // Add certificate status to response for doctors
+    if (user.role === 'doctor') {
+      response.certificate_status = certificateStatus;
+    }
+
+    return NextResponse.json(response);
 
   } catch (error: any) {
     console.error('Login error:', error);

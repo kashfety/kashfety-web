@@ -4,6 +4,23 @@
 let cachedApp = null;
 
 export default async function handler(req, res) {
+  const url = req.url || '';
+  
+  // Skip this handler for Next.js API routes - let Next.js handle them
+  // Next.js API routes are in /Client/app/api/* 
+  if (url.startsWith('/api/auth/admin/') || 
+      url.startsWith('/api/admin-') ||
+      url.includes('/api/auth/doctor/') ||
+      url.includes('/api/auth/login') ||
+      url.includes('/api/auth/verify')) {
+    // Return 404 to let Next.js routing take over
+    res.status(404).json({ 
+      error: 'Route handled by Next.js',
+      message: 'This is a Next.js API route, not Express'
+    });
+    return;
+  }
+  
   // Add CORS headers for Vercel serverless function
   const origin = req.headers.origin;
   const allowedOrigins = [

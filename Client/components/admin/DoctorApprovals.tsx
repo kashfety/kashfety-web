@@ -132,7 +132,7 @@ export default function DoctorApprovals() {
         try {
             console.log(`🔄 Attempting to ${action} certificate:`, certificateId);
             
-            const response = await fetch(`/api/auth/admin/certificates/${certificateId}/review`, {
+            const response = await fetch(`/api/auth/admin/certificates/${certificateId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,

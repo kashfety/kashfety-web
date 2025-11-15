@@ -1446,8 +1446,8 @@ router.get('/certificates/:id', async (req, res) => {
     }
 });
 
-// Review/approve certificate
-router.put('/certificates/:id/review', async (req, res) => {
+// Review/approve certificate handler (shared logic)
+const handleCertificateReview = async (req, res) => {
     try {
         const { id } = req.params;
         const { status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = req.body;
@@ -1510,7 +1510,11 @@ router.put('/certificates/:id/review', async (req, res) => {
             details: error.message
         });
     }
-});
+};
+
+// Support both route patterns for certificate review
+router.put('/certificates/:id/review', handleCertificateReview);
+router.put('/certificates/:id', handleCertificateReview);
 
 // Get audit logs - aggregate from various sources
 router.get('/audit-logs', async (req, res) => {

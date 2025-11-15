@@ -371,7 +371,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       setLoading(true);
       const token = localStorage.getItem('auth_token');
       
+      console.log('📅 [Fetch Schedule] Starting fetch for center:', selectedCenterId);
+      console.log('📅 [Fetch Schedule] Initialized centers:', Array.from(initializedCenters));
+      
       if (!selectedCenterId) {
+        console.log('📅 [Fetch Schedule] No center selected, skipping fetch');
         setSchedule([]);
         setLoading(false);
         return;
@@ -384,21 +388,42 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }
       );
 
+      console.log('📅 [Fetch Schedule] Response received:', response.data);
+
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
+        console.log('📅 [Fetch Schedule] Schedule rows from DB:', rows.length);
+        console.log('📅 [Fetch Schedule] Raw schedule data:', JSON.stringify(rows, null, 2));
+        
         setSchedule(rows);
         
         // Always load from DB if center hasn't been initialized yet in this session
         // This ensures first visit to each center loads from database
         const shouldUpdateFromDB = !initializedCenters.has(selectedCenterId);
+        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
         
         if (shouldUpdateFromDB) {
+          console.log('📅 [Fetch Schedule] Building configs from schedule...');
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
-          setCenterFormStates(prev => ({
-            ...prev,
-            [selectedCenterId]: newConfigs
-          }));
-          setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+          console.log('📅 [Fetch Schedule] Built configs:', JSON.stringify(newConfigs, null, 2));
+          
+          setCenterFormStates(prev => {
+            const updated = {
+              ...prev,
+              [selectedCenterId]: newConfigs
+            };
+            console.log('📅 [Fetch Schedule] Updated form states:', JSON.stringify(updated, null, 2));
+            return updated;
+          });
+          
+          setInitializedCenters(prev => {
+            const updated = new Set([...prev, selectedCenterId]);
+            console.log('📅 [Fetch Schedule] Updated initialized centers:', Array.from(updated));
+            return updated;
+          });
+        } else {
+          console.log('📅 [Fetch Schedule] Center already initialized, using existing form state');
+          console.log('📅 [Fetch Schedule] Existing config:', JSON.stringify(centerFormStates[selectedCenterId], null, 2));
         }
         
         setLastFetchedCenterId(selectedCenterId);
@@ -407,11 +432,13 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         
         // Mark initial mount as complete after any fetch
         if (isInitialMount) {
+          console.log('📅 [Fetch Schedule] Marking initial mount as complete');
           setIsInitialMount(false);
         }
       }
     } catch (error: any) {
-      console.error('Fetch schedule error:', error);
+      console.error('📅 [Fetch Schedule] Error:', error);
+      console.error('📅 [Fetch Schedule] Error response:', error.response?.data);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),

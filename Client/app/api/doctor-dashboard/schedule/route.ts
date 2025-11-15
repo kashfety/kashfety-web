@@ -9,6 +9,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as strin
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
+  
+  console.log('📅 [Schedule GET] Request received');
+  console.log('📅 [Schedule GET] Query params:', searchParams.toString());
+  
   if (authHeader) {
     try {
       const qs = searchParams.toString();
@@ -20,9 +24,12 @@ export async function GET(request: NextRequest) {
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
       });
       const data = await response.json();
-      if (response.ok) return NextResponse.json(data);
+      if (response.ok) {
+        console.log('📅 [Schedule GET] Backend proxy success');
+        return NextResponse.json(data);
+      }
     } catch (e) {
-      // continue fallback
+      console.log('📅 [Schedule GET] Backend proxy failed, using fallback');
     }
   }
 
@@ -40,27 +47,54 @@ export async function GET(request: NextRequest) {
       }
     }
     const centerId = searchParams.get('center_id');
+    
+    console.log('📅 [Schedule GET] Doctor ID:', doctorId);
+    console.log('📅 [Schedule GET] Center ID:', centerId);
+    
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
+    
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
     // Verify assignment
+    console.log('📅 [Schedule GET] Verifying doctor-center assignment...');
     const { data: assignment, error: aErr } = await supabase
       .from('doctor_centers')
       .select('center_id')
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .single();
-    if (aErr || !assignment) return NextResponse.json({ error: 'You are not assigned to this center' }, { status: 403 });
+    
+    if (aErr || !assignment) {
+      console.error('📅 [Schedule GET] Assignment verification failed:', aErr);
+      return NextResponse.json({ error: 'You are not assigned to this center' }, { status: 403 });
+    }
+    console.log('📅 [Schedule GET] Assignment verified ✅');
+    
+    console.log('📅 [Schedule GET] Fetching schedules...');
     const { data, error } = await supabase
       .from('doctor_schedules')
-      .select('day_of_week, is_available, time_slots, consultation_fee, center_id')
+      .select('day_of_week, is_available, time_slots, consultation_fee, center_id, break_start, break_end, notes')
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .order('day_of_week', { ascending: true });
-    if (error) throw error;
-    return NextResponse.json({ success: true, schedule: data || [], home_visits_available: false, default_consultation_fee: null });
+    
+    if (error) {
+      console.error('📅 [Schedule GET] Fetch error:', error);
+      throw error;
+    }
+    
+    console.log('📅 [Schedule GET] Found', data?.length || 0, 'schedule entries');
+    console.log('📅 [Schedule GET] Schedule data:', JSON.stringify(data, null, 2));
+    
+    return NextResponse.json({ 
+      success: true, 
+      schedule: data || [], 
+      home_visits_available: false, 
+      default_consultation_fee: null 
+    });
   } catch (e: any) {
-    console.error('schedule GET fallback error:', e);
+    console.error('📅 [Schedule GET] Fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to load schedule' }, { status: 500 });
   }
 }

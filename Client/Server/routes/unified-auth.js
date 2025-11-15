@@ -535,10 +535,14 @@ router.post('/login', async (req, res) => {
 
       // Block login if no certificate uploaded at all
       if (certificateStatus === 'not_uploaded') {
+        // Generate a temporary token for certificate upload only
+        const tempToken = generateToken(user);
+        
         return res.status(403).json({
           error: 'You must upload your medical certificate before you can login.',
           requires_certificate_upload: true,
-          certificate_status: 'not_uploaded'
+          certificate_status: 'not_uploaded',
+          temp_token: tempToken
         });
       }
 

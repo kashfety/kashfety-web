@@ -93,12 +93,17 @@ export async function POST(request: NextRequest) {
       }
 
       // Block login if no certificate uploaded at all
+      // But provide a temporary token for certificate upload
       if (certificateStatus === 'not_uploaded') {
+        const tempToken = generateToken(user);
+        
         return NextResponse.json(
           {
             error: 'You must upload your medical certificate before you can login.',
             requires_certificate_upload: true,
-            certificate_status: 'not_uploaded'
+            certificate_status: 'not_uploaded',
+            temp_token: tempToken, // Temporary token for certificate upload only
+            user_id: user.id
           },
           { status: 403 }
         );

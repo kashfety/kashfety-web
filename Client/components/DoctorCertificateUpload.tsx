@@ -136,6 +136,9 @@ export default function DoctorCertificateUpload({
                 throw new Error(result.error || 'Failed to upload certificate');
             }
 
+            // Clear temporary token after successful upload
+            localStorage.removeItem('temp_doctor_token');
+            
             toast({
                 title: t('success') || "Success!",
                 description: t('dc_upload_success') || "Certificate uploaded successfully. Please wait for admin approval.",

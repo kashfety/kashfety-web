@@ -92,10 +92,11 @@ export default function LoginPage() {
     } catch (err: any) {
       // Check if error is about certificate requirement
       if (err.message?.includes('certificate') || err.message?.includes('Certificate')) {
-        // Store token if available for certificate upload
-        const authToken = localStorage.getItem('auth_token')
-        if (authToken) {
-          setDoctorToken(authToken)
+        // Get temporary token for certificate upload
+        const tempToken = localStorage.getItem('temp_doctor_token')
+        if (tempToken) {
+          setDoctorToken(tempToken)
+          console.log('Using temporary token for certificate upload')
         }
         // Show certificate prompt modal instead of error
         setShowCertificatePrompt(true)

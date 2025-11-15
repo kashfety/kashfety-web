@@ -1,0 +1,208 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Verify JWT token and extract user info
+function verifyToken(token: string) {
+  try {
+    return jwt.verify(token, JWT_SECRET) as any;
+  } catch (error) {
+    return null;
+  }
+}
+
+export const dynamic = 'force-dynamic';
+
+// GET - Get current admin's profile
+export async function GET(request: NextRequest) {
+  console.log('👤 Admin profile endpoint hit!');
+  
+  try {
+    // Get authorization token
+    const authHeader = request.headers.get('authorization');
+    console.log('🔑 Auth header present:', !!authHeader);
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ No valid authorization header');
+      return NextResponse.json(
+        { error: 'Unauthorized - No token provided' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+    console.log('🔓 Token decoded:', !!decoded, 'User ID:', decoded?.userId);
+
+    if (!decoded || !decoded.userId) {
+      console.log('❌ Invalid token');
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin or super_admin
+    if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
+      console.log('❌ User is not admin/super_admin, role:', decoded.role);
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    // Fetch admin profile from database
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', decoded.userId)
+      .single();
+
+    if (userError) {
+      console.error('❌ Error fetching admin profile:', userError);
+      throw userError;
+    }
+
+    if (!user) {
+      console.log('❌ Admin profile not found');
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ Admin profile fetched successfully:', user.email);
+
+    return NextResponse.json({
+      success: true,
+      admin: {
+        id: user.id,
+        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        profile_picture: user.profile_picture,
+        approval_status: user.approval_status
+      }
+    });
+
+  } catch (error: any) {
+    console.error('❌ Admin profile endpoint error:', error);
+    console.error('❌ Error stack:', error.stack);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch profile',
+        details: error.message 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update current admin's profile
+export async function PUT(request: NextRequest) {
+  console.log('✏️ Admin profile update endpoint hit!');
+  
+  try {
+    // Get authorization token
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized - No token provided' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+
+    if (!decoded || !decoded.userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin or super_admin
+    if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, first_name, last_name, email, phone, password, currentPassword } = body;
+
+    console.log('📝 Update data:', { name, first_name, last_name, email, phone, hasPassword: !!password });
+
+    // Prepare update data
+    const updateData: any = {};
+    
+    if (name !== undefined) updateData.name = name;
+    if (first_name !== undefined) updateData.first_name = first_name;
+    if (last_name !== undefined) updateData.last_name = last_name;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    
+    // If password is being changed, hash it
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password_hash = hashedPassword;
+    }
+
+    updateData.updated_at = new Date().toISOString();
+
+    // Update admin profile
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', decoded.userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('❌ Error updating admin profile:', updateError);
+      throw updateError;
+    }
+
+    console.log('✅ Admin profile updated successfully');
+
+    return NextResponse.json({
+      success: true,
+      message: 'Profile updated successfully',
+      admin: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        updated_at: updatedUser.updated_at
+      }
+    });
+
+  } catch (error: any) {
+    console.error('❌ Admin profile update error:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to update profile',
+        details: error.message 
+      },
+      { status: 500 }
+    );
+  }
+}

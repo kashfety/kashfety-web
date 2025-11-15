@@ -87,10 +87,7 @@ export default function AdminProfileSettings({
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-
-      const response = await fetch(`${baseUrl}/auth/admin/profile`, {
+      const response = await fetch('/api/admin-profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -190,14 +187,13 @@ export default function AdminProfileSettings({
       setSaving(true);
       const token = localStorage.getItem('auth_token');
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-
       // Build full name from first_name and last_name
       const fullName = `${formData.first_name.trim()} ${formData.last_name.trim()}`.trim();
 
       const requestData = {
         name: fullName,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone
       };
@@ -205,11 +201,10 @@ export default function AdminProfileSettings({
       console.log('🔄 Saving admin profile:', {
         formData,
         requestData,
-        url: `${baseUrl}/auth/admin/profile`,
         token: token ? 'present' : 'missing'
       });
 
-      const response = await fetch(`${baseUrl}/auth/admin/profile`, {
+      const response = await fetch('/api/admin-profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -274,18 +269,15 @@ export default function AdminProfileSettings({
       setSaving(true);
       const token = localStorage.getItem('auth_token');
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-
-      const response = await fetch(`${baseUrl}/auth/admin/change-password`, {
+      const response = await fetch('/api/admin-profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
+          password: passwordData.newPassword,
+          currentPassword: passwordData.currentPassword
         })
       });
 

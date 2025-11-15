@@ -164,13 +164,18 @@ export async function PUT(request: NextRequest) {
     }
     console.log('📅 [Schedule PUT] Assignment verified ✅');
     
-    // Delete existing schedules for this doctor and center
-    console.log('📅 [Schedule PUT] Deleting existing schedules for doctor:', doctorId, 'center:', centerId);
+    // Build list of days we're about to insert
+    const daysToInsert = scheduleArray.map((r: any) => r.day_of_week);
+    console.log('📅 [Schedule PUT] Days to insert:', daysToInsert);
+    
+    // Delete existing schedules for this doctor and these specific days (across all centers)
+    // This is a workaround for the DB constraint being on (doctor_id, day_of_week) instead of (doctor_id, day_of_week, center_id)
+    console.log('📅 [Schedule PUT] Deleting existing schedules for doctor:', doctorId, 'days:', daysToInsert);
     const { error: delErr } = await supabase
       .from('doctor_schedules')
       .delete()
       .eq('doctor_id', doctorId)
-      .eq('center_id', centerId);
+      .in('day_of_week', daysToInsert);
     
     if (delErr) {
       console.error('📅 [Schedule PUT] Delete error:', delErr);

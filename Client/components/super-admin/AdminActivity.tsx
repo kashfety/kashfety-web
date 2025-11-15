@@ -197,11 +197,8 @@ export default function AdminActivity() {
                 ...(dateRange?.to && { end_date: dateRange.to.toISOString() })
             });
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            
-            // Use the correct super-admin activity endpoint
-            const response = await fetch(`${baseUrl}/super-admin/activity?${params}`, {
+            // Use the Next.js API route
+            const response = await fetch(`/api/super-admin-activity?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
@@ -238,11 +235,8 @@ export default function AdminActivity() {
 
     const fetchActivityStats = async () => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            
-            // Use the correct super-admin activity stats endpoint
-            const response = await fetch(`${baseUrl}/super-admin/activity/stats`, {
+            // Use the Next.js API route
+            const response = await fetch('/api/super-admin-activity-stats', {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'

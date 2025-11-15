@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
     let hasCertificate = false;
     
     if (user.role === 'doctor') {
-      // Check if doctor has uploaded any certificates
+      // Check if doctor has uploaded any certificates - fetch all relevant fields
       const { data: certificates } = await supabase
         .from('doctor_certificates')
-        .select('id, status, certificate_file_url')
+        .select('id, status, certificate_file_url, rejection_reason, resubmission_requirements, resubmission_deadline')
         .eq('doctor_id', user.id)
         .order('submitted_at', { ascending: false })
         .limit(1);
@@ -83,6 +83,12 @@ export async function POST(request: NextRequest) {
         if (cert.certificate_file_url) {
           hasCertificate = true;
           certificateStatus = cert.status;
+          // Store certificate details for rejection/resubmission messages
+          if (cert.status === 'rejected' || cert.status === 'resubmission_required') {
+            user.certificate_rejection_reason = cert.rejection_reason;
+            user.certificate_resubmission_requirements = cert.resubmission_requirements;
+            user.certificate_resubmission_deadline = cert.resubmission_deadline;
+          }
         } else {
           // No file uploaded yet - doctor skipped during signup
           certificateStatus = 'not_uploaded';
@@ -112,25 +118,42 @@ export async function POST(request: NextRequest) {
       // Also block login if they have uploaded a certificate that's not approved yet
       if (hasCertificate && certificateStatus !== 'approved') {
         let message = '';
+        const responseData: any = {
+          approval_status: certificateStatus,
+          requires_approval: true,
+          certificate_status: certificateStatus
+        };
+        
         switch (certificateStatus) {
           case 'pending':
             message = 'Your certificate is pending admin approval. Please wait for verification.';
             break;
           case 'rejected':
-            message = 'Your certificate has been rejected. Please upload a new certificate or contact support.';
+            message = 'Your certificate has been rejected.';
+            if (user.certificate_rejection_reason) {
+              message += ` Reason: ${user.certificate_rejection_reason}`;
+              responseData.rejection_reason = user.certificate_rejection_reason;
+            }
+            message += ' Please upload a new certificate or contact support.';
+            break;
+          case 'resubmission_required':
+            message = 'Please resubmit your certificate.';
+            if (user.certificate_resubmission_requirements) {
+              message += ` Requirements: ${user.certificate_resubmission_requirements}`;
+              responseData.resubmission_requirements = user.certificate_resubmission_requirements;
+            }
+            if (user.certificate_resubmission_deadline) {
+              message += ` Deadline: ${new Date(user.certificate_resubmission_deadline).toLocaleDateString()}`;
+              responseData.resubmission_deadline = user.certificate_resubmission_deadline;
+            }
             break;
           default:
             message = 'Your certificate is under review. Please wait for admin approval.';
         }
-        return NextResponse.json(
-          {
-            error: message,
-            approval_status: certificateStatus,
-            requires_approval: true,
-            certificate_status: certificateStatus
-          },
-          { status: 403 }
-        );
+        
+        responseData.error = message;
+        
+        return NextResponse.json(responseData, { status: 403 });
       }
     }
 

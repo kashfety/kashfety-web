@@ -12,6 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Calendar, Clock, Save, RotateCcw } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const DAYS = [
   { value: 0, label: 'Sun' }, { value: 1, label: 'Mon' }, { value: 2, label: 'Tue' },
@@ -27,6 +36,9 @@ export default function CenterScheduleManagement() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dayConfigs, setDayConfigs] = useState<Record<number, { isAvailable: boolean; start?: string; end?: string; slot?: number; breakStart?: string; breakEnd?: string; notes?: string }>>({});
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictDetails, setConflictDetails] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -122,8 +134,32 @@ export default function CenterScheduleManagement() {
 
       await centerService.saveLabSchedule(selectedType, schedule as any);
       toast({ title: t('success') || 'Success', description: t('dd_schedule_updated') || 'Schedule updated successfully' });
-    } catch (e: any) {
-      toast({ title: t('error') || 'Error', description: e?.message || 'Failed to save schedule', variant: 'destructive' });
+    } catch (error: any) {
+      console.error('Save schedule error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      // Handle schedule conflict (409) with detailed message
+      if (error.response?.status === 409) {
+        console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
+        const conflictData = error.response.data;
+        
+        // Set conflict message and details
+        const message = conflictData.message || 'You cannot have overlapping time slots on the same day for different test types.';
+        const conflicts = conflictData.conflicts || [];
+        
+        setConflictMessage(message);
+        setConflictDetails(conflicts);
+        setShowConflictDialog(true);
+      } else {
+        // Generic error handling
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || error?.message || 'Failed to save schedule';
+        toast({ 
+          title: t('error') || 'Error', 
+          description: errorMessage, 
+          variant: 'destructive' 
+        });
+      }
     } finally { setSaving(false); }
   };
 
@@ -237,6 +273,49 @@ export default function CenterScheduleManagement() {
           </CardContent>
         </Card>
       )}
+
+      {/* Conflict Alert Dialog */}
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{t('schedule_conflict') || 'Schedule Conflict'}</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="text-gray-700 dark:text-gray-300">{conflictMessage}</p>
+              
+              {conflictDetails.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                    {t('conflict_details') || 'Conflict Details:'}
+                  </p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                    {conflictDetails.map((conflict, index) => (
+                      <div key={index} className="flex items-start gap-2 text-sm">
+                        <span className="text-red-500 mt-0.5">•</span>
+                        <span className="text-gray-700 dark:text-gray-300">{conflict}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t('center_schedule_conflict_instruction') || 'Please adjust your schedule to avoid overlapping time slots on the same day for different test types.'}
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setShowConflictDialog(false)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {t('understood') || 'Understood'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

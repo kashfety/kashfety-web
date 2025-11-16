@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+// Add a GET handler to verify the route exists
+export async function GET(request: NextRequest) {
+    return NextResponse.json({
+        success: true,
+        message: 'Super admin delete route is active',
+        methods: ['DELETE']
+    });
+}
+
 export async function DELETE(request: NextRequest) {
     try {
         console.log('🗑️ [Super Admin Delete Proxy] Request received');

@@ -16,6 +16,7 @@ import { useTheme } from "next-themes";
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
@@ -1948,6 +1949,10 @@ export default function CenterDashboardPage() {
   // Services management state (like doctor-dashboard centers)
   const [serviceStates, setServiceStates] = useState<Record<string, { active: boolean; fee?: string }>>({});
 
+  // Batch selection state
+  const [selectedTestTypes, setSelectedTestTypes] = useState<Set<string>>(new Set());
+  const [batchFee, setBatchFee] = useState('');
+
   // Create lab test type dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -2545,6 +2550,86 @@ export default function CenterDashboardPage() {
     } finally {
       setServicesSaving(false);
     }
+  };
+
+  // Batch selection handlers
+  const toggleTestTypeSelection = (testTypeId: string) => {
+    setSelectedTestTypes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(testTypeId)) {
+        newSet.delete(testTypeId);
+      } else {
+        newSet.add(testTypeId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllTestTypes = () => {
+    setSelectedTestTypes(new Set(allTestTypes.map((t: any) => t.id)));
+  };
+
+  const deselectAllTestTypes = () => {
+    setSelectedTestTypes(new Set());
+  };
+
+  const handleBatchEnable = () => {
+    console.log('📦 [Batch] Enabling', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          active: true,
+          fee: updated[typeId]?.fee || batchFee || ''
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${selectedTestTypes.size} ${t('test_types_enabled') || 'test types enabled'}` 
+    });
+  };
+
+  const handleBatchDisable = () => {
+    console.log('📦 [Batch] Disabling', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          active: false
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${selectedTestTypes.size} ${t('test_types_disabled') || 'test types disabled'}` 
+    });
+  };
+
+  const handleBatchSetFee = () => {
+    if (!batchFee) {
+      toast({ title: t('error') || 'Error', description: t('please_enter_fee') || 'Please enter a fee', variant: 'destructive' });
+      return;
+    }
+    console.log('📦 [Batch] Setting fee', batchFee, 'for', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          fee: batchFee
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${t('fee_set_for') || 'Fee set for'} ${selectedTestTypes.size} ${t('test_types') || 'test types'}` 
+    });
   };
 
   // Create new lab test type
@@ -3183,12 +3268,87 @@ export default function CenterDashboardPage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        {/* Batch Actions Toolbar */}
+                        {allTestTypes.length > 0 && (
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-col gap-4">
+                              {/* Selection Controls */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {selectedTestTypes.size} {t('selected') || 'selected'}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={selectAllTestTypes}
+                                  >
+                                    {t('select_all') || 'Select All'}
+                                  </Button>
+                                  {selectedTestTypes.size > 0 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={deselectAllTestTypes}
+                                    >
+                                      {t('deselect_all') || 'Deselect All'}
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Batch Actions */}
+                              {selectedTestTypes.size > 0 && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleBatchEnable}
+                                    className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    {t('enable_selected') || 'Enable Selected'}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleBatchDisable}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    {t('disable_selected') || 'Disable Selected'}
+                                  </Button>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="number"
+                                      placeholder={t('fee') || 'Fee'}
+                                      value={batchFee}
+                                      onChange={(e) => setBatchFee(e.target.value)}
+                                      className="w-32"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={handleBatchSetFee}
+                                    >
+                                      {t('set_fee') || 'Set Fee'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         {allTestTypes.map((testType: any) => {
                           const state = serviceStates[testType.id] || { active: false, fee: '' };
+                          const isSelected = selectedTestTypes.has(testType.id);
                           return (
-                            <div key={testType.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors">
+                            <div key={testType.id} className={`p-4 border rounded-lg transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600'}`}>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleTestTypeSelection(testType.id)}
+                                  />
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900 dark:to-emerald-800 flex items-center justify-center">
                                     <TestTube className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                                   </div>

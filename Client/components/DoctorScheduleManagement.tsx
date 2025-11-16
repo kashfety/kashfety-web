@@ -622,11 +622,29 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     } catch (error: any) {
       console.error('Save schedule error:', error);
       console.error('Error response:', error.response?.data);
-      toast({
-        title: t('error') || 'Error',
-        description: error.response?.data?.error || (t('dd_save_schedule_failed') || 'Failed to save schedule'),
-        variant: "destructive"
-      });
+      
+      // Handle schedule conflict (409) with detailed message
+      if (error.response?.status === 409 && error.response?.data?.conflicts) {
+        const conflictData = error.response.data;
+        const conflictList = conflictData.conflicts.slice(0, 3); // Show first 3 conflicts
+        const moreConflicts = conflictData.conflicts.length > 3 ? ` (and ${conflictData.conflicts.length - 3} more conflicts)` : '';
+        
+        const conflictMessage = `${conflictData.message}\n\nConflicts:\n• ${conflictList.join('\n• ')}${moreConflicts}`;
+        
+        toast({
+          title: t('schedule_conflict') || '⚠️ Schedule Conflict Detected',
+          description: conflictMessage,
+          variant: "destructive",
+          duration: 10000, // Show for 10 seconds
+        });
+      } else {
+        // Generic error handling
+        toast({
+          title: t('error') || 'Error',
+          description: error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule'),
+          variant: "destructive"
+        });
+      }
     } finally {
       setSaving(false);
     }

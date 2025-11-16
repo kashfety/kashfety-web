@@ -55,6 +55,16 @@ import {
     AlertDescription,
     AlertTitle,
 } from '@/components/ui/alert';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface AdminUser {
     id: string;
@@ -104,6 +114,8 @@ export default function AdminManagement() {
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [adminToDelete, setAdminToDelete] = useState<AdminUser | null>(null);
     const [formData, setFormData] = useState<AdminFormData>({
         name: '',
         email: '',
@@ -127,7 +139,7 @@ export default function AdminManagement() {
             // Try fallback route first for Vercel compatibility
             let response;
             let data;
-            
+
             try {
                 console.log('👑 Trying super-admin-admins fallback route');
                 // Add cache-busting timestamp to ensure fresh data
@@ -139,7 +151,7 @@ export default function AdminManagement() {
                         'Cache-Control': 'no-cache'
                     }
                 });
-                
+
                 if (response.ok) {
                     data = await response.json();
                     if (data.success && data.data?.admins) {
@@ -153,11 +165,11 @@ export default function AdminManagement() {
                 }
             } catch (fallbackError) {
                 console.log('❌ Fallback failed, trying backend route');
-                
+
                 // Fallback to backend route
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
                 const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-                
+
                 response = await fetch(`${baseUrl}/super-admin/admins?${params}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -171,7 +183,7 @@ export default function AdminManagement() {
 
                 data = await response.json();
             }
-            
+
             // Transform the data from the super-admin endpoint
             console.log('📊 [AdminManagement] Raw data received:', data);
             const adminUsers = (data.data?.admins || data.admins || [])
@@ -185,7 +197,7 @@ export default function AdminManagement() {
                     } else if (user.email) {
                         displayName = user.email.split('@')[0];
                     }
-                    
+
                     const transformed = {
                         id: user.id,
                         uid: user.uid || `admin-${user.id}`,
@@ -215,28 +227,28 @@ export default function AdminManagement() {
                         console.log('🔍 [AdminManagement] Transformed user:', transformed);
                         console.log('🔍 [AdminManagement] Original user data:', user);
                     }
-                    
+
                     // Log name resolution for debugging (only for specific user to avoid console spam)
                     if (user.email === 'm.ismail.official23@gmail.com' || !user.name) {
                         console.log(`👤 [AdminManagement] User ${user.id || user.email}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
                     }
-                    
+
                     return transformed;
                 });
-            
+
             console.log('📊 [AdminManagement] Setting admins:', adminUsers.length, 'admins');
-            console.log('📊 [AdminManagement] Admin names:', adminUsers.map(a => ({ id: a.id, name: a.name, email: a.email })));
+            console.log('📊 [AdminManagement] Admin names:', adminUsers.map((a: AdminUser) => ({ id: a.id, name: a.name, email: a.email })));
             setAdmins(adminUsers);
             setTotalPages(data.data?.pagination?.totalPages || data.pagination?.totalPages || 1);
         } catch (error) {
             console.error('Error fetching admins:', error);
-            
+
             toast({
                 title: "Error",
                 description: "Failed to fetch admin users. Please check your connection and try again.",
                 variant: "destructive"
             });
-            
+
             setAdmins([]);
             setTotalPages(1);
         } finally {
@@ -251,10 +263,10 @@ export default function AdminManagement() {
     const createAdmin = async () => {
         try {
             console.log('🚀 Creating admin with data:', formData);
-            
+
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            
+
             // Prepare data for backend - only send necessary fields
             const adminData = {
                 name: formData.name,
@@ -309,7 +321,7 @@ export default function AdminManagement() {
     const updateAdmin = async (adminId: string, formData: AdminFormData) => {
         try {
             console.log('🔄 Updating admin with data:', formData);
-            
+
             // Prepare data for backend - only send editable fields
             const updateData = {
                 name: formData.name,
@@ -321,7 +333,7 @@ export default function AdminManagement() {
             // Try fallback route first for Vercel compatibility
             let response;
             let result;
-            
+
             try {
                 console.log('👑 Trying super-admin-update-admin fallback route');
                 response = await fetch(`/api/super-admin-update-admin?adminId=${adminId}`, {
@@ -332,7 +344,7 @@ export default function AdminManagement() {
                     },
                     body: JSON.stringify(updateData)
                 });
-                
+
                 if (response.ok) {
                     result = await response.json();
                     if (result.success) {
@@ -346,11 +358,11 @@ export default function AdminManagement() {
                 }
             } catch (fallbackError) {
                 console.log('❌ Fallback failed, trying backend route');
-                
+
                 // Fallback to backend route
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
                 const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-                
+
                 console.log('📤 Sending update request to:', `${baseUrl}/super-admin/admins/${adminId}`);
                 console.log('📤 Update data:', updateData);
 
@@ -385,7 +397,7 @@ export default function AdminManagement() {
             setShowEditDialog(false);
             setEditingAdmin(null);
             resetFormData();
-            
+
             // Refresh the admin list with a small delay to ensure DB is updated
             // Don't use setCurrentPage as it triggers useEffect which could cause loops
             setTimeout(() => {
@@ -404,10 +416,6 @@ export default function AdminManagement() {
     };
 
     const deleteAdmin = async (adminId: string) => {
-        if (!confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
-            return;
-        }
-
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
@@ -436,6 +444,20 @@ export default function AdminManagement() {
                 description: "Failed to delete admin",
                 variant: "destructive"
             });
+        } finally {
+            setShowDeleteDialog(false);
+            setAdminToDelete(null);
+        }
+    };
+
+    const handleDeleteClick = (admin: AdminUser) => {
+        setAdminToDelete(admin);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDelete = async () => {
+        if (adminToDelete) {
+            await deleteAdmin(adminToDelete.id);
         }
     };
 
@@ -679,7 +701,7 @@ export default function AdminManagement() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
-                                                    onClick={() => deleteAdmin(admin.id)}
+                                                    onClick={() => handleDeleteClick(admin)}
                                                     className="text-red-600"
                                                     disabled={admin.role === 'super_admin'}
                                                 >
@@ -883,7 +905,7 @@ export default function AdminManagement() {
                         {editingAdmin && (
                             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                                 <p className="text-sm text-blue-700">
-                                    <strong>Note:</strong> Password will remain unchanged when editing admin details. 
+                                    <strong>Note:</strong> Password will remain unchanged when editing admin details.
                                     To change password, please use a separate password reset process.
                                 </p>
                             </div>
@@ -897,12 +919,12 @@ export default function AdminManagement() {
                             }}>
                                 Cancel
                             </Button>
-                            <Button 
+                            <Button
                                 onClick={(e) => {
                                     e.preventDefault();
                                     console.log('🔘 Create Admin button clicked');
                                     console.log('📝 Current form data:', formData);
-                                    
+
                                     // Validation
                                     if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
                                         console.log('❌ Validation failed: Missing required fields');
@@ -952,6 +974,28 @@ export default function AdminManagement() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Admin Account</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete <strong>{adminToDelete?.name}</strong> ({adminToDelete?.email})?
+                            This action cannot be undone and will permanently remove this admin account.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete Admin
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

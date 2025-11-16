@@ -419,14 +419,9 @@ export default function AdminManagement() {
         try {
             console.log('🗑️ [AdminManagement] Deleting admin:', adminId);
 
-            // For production, directly use the backend API
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-            const backendUrl = `${baseUrl}/super-admin/admins/${adminId}`;
-
-            console.log('🔄 Using backend URL:', backendUrl);
-
-            const response = await fetch(backendUrl, {
+            // Try fallback route first (query param pattern for Vercel)
+            console.log('🗑️ Trying super-admin-delete-admin fallback route');
+            const response = await fetch(`/api/super-admin-delete-admin?adminId=${adminId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -436,13 +431,12 @@ export default function AdminManagement() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Delete error:', response.status, errorData);
-                const errorMsg = errorData.error || errorData.message || errorData.details || 'Failed to delete admin';
-                throw new Error(errorMsg);
+                console.error('❌ Fallback route error:', response.status, errorData);
+                throw new Error(errorData.error || errorData.message || 'Failed to delete admin');
             }
 
             const data = await response.json();
-            console.log('✅ Admin deleted successfully:', data);
+            console.log('✅ Fallback route worked! Admin deleted:', data);
 
             toast({
                 title: "Success",

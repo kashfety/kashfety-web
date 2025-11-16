@@ -20,7 +20,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import Link from "next/link";
-import CenterServicesManagement from "@/components/CenterServicesManagement";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Calendar,
   Clock,
@@ -1918,6 +1926,16 @@ export default function CenterDashboardPage() {
   // Services management state (like doctor-dashboard centers)
   const [serviceStates, setServiceStates] = useState<Record<string, { active: boolean; fee?: string }>>({});
 
+  // Create lab test type dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newTestType, setNewTestType] = useState({
+    code: '',
+    name: '',
+    category: 'lab' as 'lab' | 'imaging',
+    default_fee: ''
+  });
+
   // Schedule management state (like doctor-dashboard schedule)
   const [dayConfigs, setDayConfigs] = useState<Record<number, {
     isAvailable: boolean;
@@ -2505,6 +2523,53 @@ export default function CenterDashboardPage() {
     }
   };
 
+  // Create new lab test type
+  const handleCreateTestType = async () => {
+    if (!newTestType.code || !newTestType.name) {
+      toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
+      return;
+    }
+    
+    setCreating(true);
+    try {
+      const response = await labService.createLabTestType({
+        code: newTestType.code,
+        name: newTestType.name,
+        category: newTestType.category,
+        default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
+      });
+      
+      const newType = response.data;
+      
+      // Add to types list
+      setAllTestTypes(prev => [...prev, newType]);
+      
+      // Auto-enable in services with default fee
+      setServiceStates(prev => ({
+        ...prev,
+        [newType.id]: {
+          active: true,
+          fee: newTestType.default_fee || ''
+        }
+      }));
+      
+      toast({ title: 'Success', description: 'Lab test type created successfully' });
+      
+      // Reset form and close dialog
+      setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
+      setShowCreateDialog(false);
+    } catch (error: any) {
+      console.error('Failed to create lab test type:', error);
+      toast({ 
+        title: 'Error', 
+        description: error.response?.data?.error || 'Failed to create lab test type',
+        variant: 'destructive' 
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   // Schedule management functions (like doctor schedule management)
   const generateSlots = (start: string, end: string, duration: number): Array<{ time: string; duration: number }> => {
     if (!start || !end || !duration) return [];
@@ -3010,19 +3075,86 @@ export default function CenterDashboardPage() {
                   </div>
                 </div>
 
-                {/* Use CenterServicesManagement Component */}
-                <CenterServicesManagement />
-
-                {/* Keep old Available Services Card for backwards compatibility */}
-                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card d-none">
+                {/* Available Services Card */}
+                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
-                      {t('available_services') || 'Available Lab Services'}
-                    </CardTitle>
-                    <CardDescription>
-                      {t('services_description') || 'Enable or disable lab test services and set pricing'}
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="w-5 h-5" />
+                          {t('available_services') || 'Available Lab Services'}
+                        </CardTitle>
+                        <CardDescription>
+                          {t('services_description') || 'Enable or disable lab test services and set pricing'}
+                        </CardDescription>
+                      </div>
+                      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            {t('add_new_type') || 'Add New Type'}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>{t('create_lab_test_type') || 'Create Lab Test Type'}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="code">{t('code') || 'Code'} *</Label>
+                              <Input
+                                id="code"
+                                value={newTestType.code}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, code: e.target.value }))}
+                                placeholder="e.g., CBC, MRI"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="name">{t('name') || 'Name'} *</Label>
+                              <Input
+                                id="name"
+                                value={newTestType.name}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="e.g., Complete Blood Count"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="category">{t('category') || 'Category'} *</Label>
+                              <Select
+                                value={newTestType.category}
+                                onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
+                              >
+                                <SelectTrigger id="category">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
+                                  <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="default_fee">{t('default_fee') || 'Default Fee (Optional)'}</Label>
+                              <Input
+                                id="default_fee"
+                                type="number"
+                                value={newTestType.default_fee}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, default_fee: e.target.value }))}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
+                              {t('cancel') || 'Cancel'}
+                            </Button>
+                            <Button onClick={handleCreateTestType} disabled={creating}>
+                              {creating ? (t('creating') || 'Creating...') : (t('create') || 'Create')}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {servicesLoading ? (

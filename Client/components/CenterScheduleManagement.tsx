@@ -57,16 +57,61 @@ export default function CenterScheduleManagement() {
 
   useEffect(() => {
     (async () => {
-      if (!selectedType) return;
+      if (!selectedType) {
+        // Reset config when no test type is selected
+        setDayConfigs({});
+        return;
+      }
+      
       try {
+        // Reset config first to show loading state
+        setDayConfigs({});
+        
         const res = await centerService.getLabSchedule(selectedType);
         const schedule = res?.schedule || [];
         const cfg: Record<number, any> = {};
+        
         for (const s of schedule) {
-          cfg[s.day_of_week] = { isAvailable: !!s.is_available, start: undefined, end: undefined, slot: s.slot_duration || 30, breakStart: s.break_start || '', breakEnd: s.break_end || '', notes: s.notes || '' };
+          // Extract start and end times from time_slots if available
+          let startTime = undefined;
+          let endTime = undefined;
+          
+          if (s.time_slots && Array.isArray(s.time_slots) && s.time_slots.length > 0) {
+            // Get first slot's time as start
+            const firstSlot = s.time_slots[0];
+            startTime = typeof firstSlot === 'string' ? firstSlot : firstSlot?.time;
+            
+            // Calculate end time from last slot + duration
+            const lastSlot = s.time_slots[s.time_slots.length - 1];
+            const lastSlotTime = typeof lastSlot === 'string' ? lastSlot : lastSlot?.time;
+            const duration = typeof lastSlot === 'object' ? (lastSlot.duration || s.slot_duration || 30) : (s.slot_duration || 30);
+            
+            if (lastSlotTime) {
+              const [hours, minutes] = lastSlotTime.split(':').map(Number);
+              const totalMinutes = hours * 60 + minutes + duration;
+              const endHours = Math.floor(totalMinutes / 60);
+              const endMinutes = totalMinutes % 60;
+              endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+            }
+          }
+          
+          cfg[s.day_of_week] = { 
+            isAvailable: !!s.is_available, 
+            start: startTime, 
+            end: endTime, 
+            slot: s.slot_duration || 30, 
+            breakStart: s.break_start || '', 
+            breakEnd: s.break_end || '', 
+            notes: s.notes || '' 
+          };
         }
+        
         setDayConfigs(cfg);
-      } catch {}
+      } catch (error) {
+        console.error('Failed to load schedule:', error);
+        // Reset to empty on error
+        setDayConfigs({});
+      }
     })();
   }, [selectedType]);
 

@@ -51,9 +51,13 @@ export async function PUT(request: NextRequest) {
       const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
       console.log('⏰ [Appointment Cancel] Time check:', {
+        appointmentDate: appointment.appointment_date,
+        appointmentTime: appointment.appointment_time,
         appointmentDateTime: appointmentDateTime.toISOString(),
         now: now.toISOString(),
-        hoursUntilAppointment: hoursUntilAppointment.toFixed(2)
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
+        willBlock24h: hoursUntilAppointment < 24,
+        willBlockPast: hoursUntilAppointment < 0
       });
 
       // Check if appointment is in the past
@@ -69,7 +73,7 @@ export async function PUT(request: NextRequest) {
       if (hoursUntilAppointment < 24) {
         return NextResponse.json({
           success: false,
-          message: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          message: `Cannot cancel appointment within 24 hours of the scheduled time. Appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
           code: 'CANCELLATION_TOO_LATE'
         }, { status: 400 });
       }

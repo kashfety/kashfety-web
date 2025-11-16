@@ -207,8 +207,8 @@ export async function PUT(request: NextRequest) {
       console.log('⚠️ Empty schedule received, clearing doctor schedule for this center');
     }
     
-    // Use the database function to set up the schedule (same as backend)
-    console.log('� Calling setup_doctor_weekly_schedule function...');
+    // Try to use the database function first (if it exists)
+    console.log('📡 Attempting to call setup_doctor_weekly_schedule function...');
     const { error: funcError } = await supabase
       .rpc('setup_doctor_weekly_schedule', {
         p_doctor_id: doctorId,
@@ -216,9 +216,52 @@ export async function PUT(request: NextRequest) {
         p_center_id: centerId
       });
     
+    // If RPC function doesn't exist or fails, use manual insert approach
     if (funcError) {
-      console.error('❌ Database function error:', funcError);
-      throw funcError;
+      console.log('⚠️ RPC function not available, using manual insert approach');
+      console.log('RPC Error:', funcError);
+      
+      // Delete existing schedules for this doctor and center
+      const { error: delErr } = await supabase
+        .from('doctor_schedules')
+        .delete()
+        .eq('doctor_id', doctorId)
+        .eq('center_id', centerId);
+      
+      if (delErr) {
+        console.error('❌ Delete error:', delErr);
+        throw delErr;
+      }
+      console.log('✅ Existing schedules deleted for center:', centerId);
+      
+      // Build rows to insert - ensure all required fields are present
+      const rows = scheduleArray.map((item: any) => ({
+        doctor_id: doctorId,
+        center_id: centerId,
+        day_of_week: item.day_of_week,
+        is_available: item.is_available !== false,
+        time_slots: item.time_slots || [],
+        consultation_fee: item.consultation_fee ?? null,
+        break_start: item.break_start ?? null,
+        break_end: item.break_end ?? null,
+        notes: item.notes ?? null,
+      }));
+      
+      console.log('📅 Inserting', rows.length, 'schedule rows manually...');
+      console.log('Rows to insert:', JSON.stringify(rows, null, 2));
+      
+      // Insert new schedules
+      const { error: insErr } = await supabase
+        .from('doctor_schedules')
+        .insert(rows);
+      
+      if (insErr) {
+        console.error('❌ Insert error:', insErr);
+        throw insErr;
+      }
+      console.log('✅ Manual insert successful');
+    } else {
+      console.log('✅ RPC function completed successfully');
     }
     
     console.log('✅ Schedule updated successfully for center:', centerId);

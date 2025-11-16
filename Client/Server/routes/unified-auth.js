@@ -23,7 +23,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Generate unique ID for users
 function generateUserId(role) {
   // Generate a proper UUID v4 format
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = Math.random() * 16 | 0;
     const v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
@@ -444,7 +444,7 @@ router.post('/doctor/skip-certificate', authenticateToken, async (req, res) => {
     // Update user's certificate status to 'not_uploaded'
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
-      .update({ 
+      .update({
         certificate_status: 'not_uploaded',
         updated_at: new Date().toISOString()
       })
@@ -506,7 +506,7 @@ router.post('/login', async (req, res) => {
     let certificateStatus = null;
     let hasCertificate = false;
     let requiresCertificateUpload = false;
-    
+
     if (user.role === 'doctor') {
       // Check if doctor has uploaded any certificates
       const { data: certificates } = await supabase
@@ -537,7 +537,7 @@ router.post('/login', async (req, res) => {
       if (certificateStatus === 'not_uploaded') {
         // Generate a temporary token for certificate upload only
         const tempToken = generateToken(user);
-        
+
         return res.status(403).json({
           error: 'You must upload your medical certificate before you can login.',
           requires_certificate_upload: true,
@@ -600,7 +600,7 @@ router.post('/login', async (req, res) => {
 router.post('/register-verified', async (req, res) => {
   try {
     console.log('📥 Register-verified request body:', req.body);
-    
+
     const {
       first_name,
       last_name,
@@ -642,7 +642,7 @@ router.post('/register-verified', async (req, res) => {
       // Generate JWT token for existing user
       const token = generateToken(existingUserByEmail);
       const { password_hash: _, ...userResponse } = existingUserByEmail;
-      
+
       return res.status(200).json({
         message: 'User already exists',
         success: true,
@@ -662,7 +662,7 @@ router.post('/register-verified', async (req, res) => {
 
       if (existingUserById) {
         console.log('User already exists by Supabase ID, updating with new signup data');
-        
+
         // Update existing user with new signup information
         const updateData = {
           first_name,
@@ -699,7 +699,7 @@ router.post('/register-verified', async (req, res) => {
         // Generate JWT token for updated user
         const token = generateToken(updatedUser);
         const { password_hash: _, ...userResponse } = updatedUser;
-        
+
         return res.status(200).json({
           message: 'User updated successfully',
           success: true,
@@ -717,7 +717,7 @@ router.post('/register-verified', async (req, res) => {
 
     // Get Supabase user ID from request body (from OTP verification)
     const supabaseUserId = req.body.supabase_user_id;
-    
+
     // Use Supabase user ID if available, otherwise generate a new UUID
     let userId;
     if (supabaseUserId && typeof supabaseUserId === 'string' && supabaseUserId.length > 0) {
@@ -765,23 +765,23 @@ router.post('/register-verified', async (req, res) => {
 
     if (insertError) {
       console.error('User creation error:', insertError);
-      
+
       // Handle duplicate key error (user already exists)
       if (insertError.code === '23505' && insertError.message.includes('users_pkey')) {
         console.log('Duplicate user detected, attempting to fetch existing user');
-        
+
         // Try to fetch the existing user by email
         const { data: existingUser } = await supabase
           .from('users')
           .select('*')
           .eq('email', email)
           .single();
-        
+
         if (existingUser) {
           console.log('Found existing user, returning with token');
           const token = generateToken(existingUser);
           const { password_hash: _, ...userResponse } = existingUser;
-          
+
           return res.status(200).json({
             message: 'User already exists',
             success: true,
@@ -791,7 +791,7 @@ router.post('/register-verified', async (req, res) => {
           });
         }
       }
-      
+
       throw new Error(insertError.message || 'Failed to create user');
     }
 
@@ -2217,6 +2217,44 @@ router.put('/appointments/:appointmentId/cancel', authenticateToken, async (req,
   try {
     const { appointmentId } = req.params;
     const { reason } = req.body;
+
+    // First, fetch the appointment to check timing
+    const { data: appointment, error: fetchError } = await supabase
+      .from('appointments')
+      .select('id, status, appointment_date, appointment_time')
+      .eq('id', appointmentId)
+      .single();
+
+    if (fetchError || !appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Check if appointment is already cancelled
+    if (appointment.status === 'cancelled') {
+      return res.status(400).json({ error: 'Appointment is already cancelled' });
+    }
+
+    // Check if cancellation is within 24 hours of appointment time
+    if (appointment.appointment_date && appointment.appointment_time) {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
+        return res.status(400).json({
+          error: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          code: 'CANCELLATION_TOO_LATE'
+        });
+      }
+
+      // Check if appointment is in the past
+      if (hoursUntilAppointment < 0) {
+        return res.status(400).json({
+          error: 'Cannot cancel a past appointment',
+          code: 'APPOINTMENT_IN_PAST'
+        });
+      }
+    }
 
     const { data: updatedAppointment, error } = await supabase
       .from('appointments')

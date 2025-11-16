@@ -48,8 +48,7 @@ export async function GET(
     }
 
     const { data: appointments, error } = await appointmentsQuery
-      .order('appointment_date', { ascending: false })
-      .order('appointment_time', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('📋 [Appointments API] Error:', error);

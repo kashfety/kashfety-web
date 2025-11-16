@@ -45,8 +45,7 @@ export async function GET(
     }
 
     const { data: appointments, error } = await appointmentsQuery
-      .order('appointment_date', { ascending: false })
-      .order('appointment_time', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       return NextResponse.json({ success: false, message: 'Failed to fetch appointments', error: error.message }, { status: 500 });

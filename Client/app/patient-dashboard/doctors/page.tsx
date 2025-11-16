@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner"
 import Header from "@/components/Header"
 import Sidebar from "@/components/Sidebar"
+import BookingModal from "@/components/BookingModal"
 
 interface Doctor {
     id: string
@@ -80,6 +81,7 @@ export default function PatientDoctorsPage() {
     const [showDetailsModal, setShowDetailsModal] = useState(false)
     const [loadingDetails, setLoadingDetails] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
     const toggleSidebar = () => {
         setSidebarOpen(prev => !prev)
@@ -177,7 +179,7 @@ export default function PatientDoctorsPage() {
 
     const handleBookAppointment = (doctorId: string) => {
         setShowDetailsModal(false)
-        router.push(`/?doctor=${doctorId}&openBooking=true`)
+        setIsBookingModalOpen(true)
     }
 
     const getDoctorInitials = (doctor: Doctor) => {
@@ -331,7 +333,7 @@ export default function PatientDoctorsPage() {
                                                 {/* Avatar */}
                                                 <Avatar className="w-20 h-20 mb-4 border-4 border-blue-100 dark:border-blue-900">
                                                     <AvatarImage src={doctor.profile_picture} alt={doctor.name} />
-                                                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-semibold">
+                                                    <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
                                                         {getDoctorInitials(doctor)}
                                                     </AvatarFallback>
                                                 </Avatar>
@@ -366,7 +368,7 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Action Button */}
                                                 <Button
-                                                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                                                    className="w-full bg-blue-600 hover:bg-blue-700"
                                                     onClick={(e) => {
                                                         e.stopPropagation()
                                                         fetchDoctorDetails(doctor.id)
@@ -447,7 +449,7 @@ export default function PatientDoctorsPage() {
                                         <div className="flex items-start gap-4">
                                             <Avatar className="w-20 h-20 border-4 border-blue-100 dark:border-blue-900">
                                                 <AvatarImage src={selectedDoctor.profile_picture} alt={selectedDoctor.name} />
-                                                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xl font-semibold">
+                                                <AvatarFallback className="bg-blue-600 text-white text-xl font-semibold">
                                                     {getDoctorInitials(selectedDoctor)}
                                                 </AvatarFallback>
                                             </Avatar>
@@ -598,7 +600,7 @@ export default function PatientDoctorsPage() {
                                         </Button>
                                         <Button
                                             onClick={() => handleBookAppointment(selectedDoctor.id)}
-                                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700"
                                         >
                                             <Calendar className="w-4 h-4 mr-2" />
                                             {t('book_appointment') || 'Book Appointment'}
@@ -608,6 +610,13 @@ export default function PatientDoctorsPage() {
                             ) : null}
                         </DialogContent>
                     </Dialog>
+
+                    {/* Booking Modal */}
+                    <BookingModal
+                        isOpen={isBookingModalOpen}
+                        onClose={() => setIsBookingModalOpen(false)}
+                        initialMode="doctor"
+                    />
                 </div>
             </div>
         </div>

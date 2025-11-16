@@ -10,10 +10,14 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { LocaleSwitcher } from '@/components/ui/locale-switcher'
 import { useLocale } from '@/components/providers/locale-provider'
 import { useTheme } from 'next-themes'
+import CertificateUploadPromptModal from '@/components/CertificateUploadPromptModal'
+import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
+import { useCustomAlert } from '@/hooks/use-custom-alert'
 
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuth()
+  const { showAlert } = useCustomAlert()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [email, setEmail] = useState('')
@@ -21,6 +25,9 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false)
+  const [showCertificateUploadModal, setShowCertificateUploadModal] = useState(false)
+  const [doctorToken, setDoctorToken] = useState<string>('')
   const { t } = useLocale()
   const { theme } = useTheme()
 
@@ -74,11 +81,78 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
+      
+      // After successful login, check if doctor needs to upload certificate
+      const certificateStatus = localStorage.getItem('doctor_certificate_status')
+      const authToken = localStorage.getItem('auth_token')
+      
+      if (certificateStatus === 'not_uploaded' && authToken) {
+        // Store the token for certificate upload
+        setDoctorToken(authToken)
+        setShowCertificatePrompt(true)
+      }
     } catch (err: any) {
-      setError(err.message || t('auth_invalid_credentials') || 'Invalid email or password')
+      // Check if error is specifically about needing to upload certificate
+      if (err.message?.includes('must upload your medical certificate')) {
+        // Get temporary token for certificate upload
+        const tempToken = localStorage.getItem('temp_doctor_token')
+        if (tempToken) {
+          setDoctorToken(tempToken)
+          console.log('Using temporary token for certificate upload')
+        }
+        // Show certificate prompt modal for upload
+        setShowCertificatePrompt(true)
+        setError('') // Clear any error
+      } else if (err.message?.includes('pending') || err.message?.includes('rejected') || err.message?.includes('under review')) {
+        // Certificate is uploaded but waiting for approval or rejected
+        setError(err.message)
+      } else {
+        setError(err.message || t('auth_invalid_credentials') || 'Invalid email or password')
+      }
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleNavigateToUpload = () => {
+    setShowCertificatePrompt(false)
+    router.push('/doctor-dashboard') // Will show certificate upload in dashboard
+  }
+
+  const handleCloseCertificatePrompt = () => {
+    setShowCertificatePrompt(false)
+    // Logout the doctor since they can't use the system without certificate
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+    localStorage.removeItem('doctor_certificate_status')
+    setError(t('cert_upload_required') || 'You must upload your certificate to continue')
+  }
+
+  const handleNavigateToCertificateUpload = () => {
+    // Close the prompt and open the certificate upload modal
+    setShowCertificatePrompt(false)
+    setShowCertificateUploadModal(true)
+  }
+
+  const handleCertificateUploadComplete = () => {
+    setShowCertificateUploadModal(false)
+    localStorage.removeItem('doctor_certificate_status')
+    setError('')
+    // Show success message and redirect to login to try again
+    setEmail('')
+    setPassword('')
+    showAlert(
+      t('cert_upload_success_login') || 'Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.',
+      'success'
+    )
+  }
+
+  const handleCertificateUploadModalClose = () => {
+    setShowCertificateUploadModal(false)
+    // Logout the doctor since they closed the modal without uploading
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+    localStorage.removeItem('doctor_certificate_status')
   }
 
   return (
@@ -316,6 +390,52 @@ export default function LoginPage() {
           </motion.form>
         </div>
       </motion.div>
+
+      {/* Certificate Upload Prompt Modal */}
+      <CertificateUploadPromptModal
+        isOpen={showCertificatePrompt}
+        onClose={handleCloseCertificatePrompt}
+        onNavigateToUpload={handleNavigateToCertificateUpload}
+      />
+
+      {/* Certificate Upload Modal */}
+      <AnimatePresence>
+        {showCertificateUploadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={handleCertificateUploadModalClose}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {t('dc_upload_certificate') || 'Upload Medical Certificates'}
+                </h2>
+                <p className="text-gray-300">
+                  {t('dc_upload_description_login') || 'Please upload your medical certificates and licenses for verification. Your account will be pending approval until these documents are reviewed by our admin team.'}
+                </p>
+              </div>
+
+              <DoctorCertificateUpload
+                onUploadComplete={handleCertificateUploadComplete}
+                onSkip={handleCertificateUploadModalClose}
+                doctorToken={doctorToken}
+                showSkipOption={true}
+                isModal={true}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

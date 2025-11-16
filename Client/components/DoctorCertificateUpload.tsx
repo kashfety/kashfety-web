@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useLocale } from '@/components/providers/locale-provider';
 import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { useCustomAlert } from '@/hooks/use-custom-alert';
 
 interface DoctorCertificateUploadProps {
     onUploadComplete: () => void;
@@ -35,6 +36,7 @@ export default function DoctorCertificateUpload({
     isModal = false 
 }: DoctorCertificateUploadProps) {
     const { toast } = useToast();
+    const { showAlert } = useCustomAlert();
     const { t } = useLocale();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<CertificateFormData>({
@@ -136,11 +138,13 @@ export default function DoctorCertificateUpload({
                 throw new Error(result.error || 'Failed to upload certificate');
             }
 
-            toast({
-                title: t('success') || "Success!",
-                description: t('dc_upload_success') || "Certificate uploaded successfully. Please wait for admin approval.",
-                variant: "default"
-            });
+            // Clear temporary token after successful upload
+            localStorage.removeItem('temp_doctor_token');
+            
+            showAlert(
+                t('dc_upload_success') || "Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.",
+                'success'
+            );
 
             onUploadComplete();
 

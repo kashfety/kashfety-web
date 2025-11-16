@@ -686,19 +686,6 @@ export default function CenterManagement() {
                                                     <Edit className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                                     {t('admin_edit_center') || 'Edit Center'}
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => toggleCenterStatus(center.id, center.is_active ?? true)}>
-                                                    {center.is_active ? (
-                                                        <>
-                                                            <Clock className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                                            {t('admin_deactivate') || 'Deactivate'}
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <CheckCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                                            {t('admin_activate') || 'Activate'}
-                                                        </>
-                                                    )}
-                                                </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={() => deleteCenter(center.id)}
                                                     className="text-red-600"
@@ -781,10 +768,9 @@ export default function CenterManagement() {
                                     </div>
                                 </div>
                                 <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <h3 className="font-semibold mb-2">{t('admin_location_hours') || 'Location & Hours'}</h3>
+                                    <h3 className="font-semibold mb-2">{t('admin_location') || 'Location'}</h3>
                                     <div className="space-y-2 text-sm">
                                         <div><strong>{t('admin_address') || 'Address'}:</strong> {selectedCenter.address}</div>
-                                        <div><strong>{t('admin_operating_hours') || 'Operating Hours'}:</strong> {selectedCenter.operating_hours}</div>
                                     </div>
                                 </div>
                             </div>
@@ -838,14 +824,6 @@ export default function CenterManagement() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Admin Notes */}
-                            {selectedCenter.admin_notes && (
-                                <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <h3 className="font-semibold mb-2">{t('admin_admin_notes') || 'Admin Notes'}</h3>
-                                    <p className="text-sm text-muted-foreground">{selectedCenter.admin_notes}</p>
-                                </div>
-                            )}
                         </div>
                     )}
                 </DialogContent>
@@ -933,29 +911,12 @@ export default function CenterManagement() {
                             />
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <label className="text-sm font-medium">{t('admin_operating_hours') || 'Operating Hours'}</label>
-                            <Input
-                                value={formData.operating_hours}
-                                onChange={(e) => setFormData({ ...formData, operating_hours: e.target.value })}
-                                placeholder={t('admin_operating_hours_example') || 'e.g., Mon-Fri 9AM-6PM, Sat 9AM-2PM'}
-                            />
-                        </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
                             <label className="text-sm font-medium">{t('admin_description') || 'Description'}</label>
                             <Textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 placeholder={t('admin_enter_center_description') || 'Enter center description'}
                                 rows={3}
-                            />
-                        </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <label className="text-sm font-medium">{t('admin_admin_notes') || 'Admin Notes'}</label>
-                            <Textarea
-                                value={formData.admin_notes}
-                                onChange={(e) => setFormData({ ...formData, admin_notes: e.target.value })}
-                                placeholder={t('admin_add_admin_notes') || 'Add any admin notes...'}
-                                rows={2}
                             />
                         </div>
                         <div className={`flex ${isRTL ? 'justify-start space-x-reverse space-x-2' : 'justify-end space-x-2'}`}>

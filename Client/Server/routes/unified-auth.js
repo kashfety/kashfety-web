@@ -433,6 +433,47 @@ router.post('/doctor/upload-certificate', authenticateToken, certificateUpload.s
   }
 });
 
+// Skip certificate upload - mark doctor as skipped
+router.post('/doctor/skip-certificate', authenticateToken, async (req, res) => {
+  try {
+    // Verify user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ error: 'Only doctors can skip certificate upload' });
+    }
+
+    // Update user's certificate status to 'not_uploaded'
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        certificate_status: 'not_uploaded',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    console.log('✅ Doctor skipped certificate upload:', req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Certificate upload skipped. You can upload later from your dashboard.',
+      certificate_status: 'not_uploaded'
+    });
+
+  } catch (error) {
+    console.error('Skip certificate error:', error);
+
+    res.status(500).json({
+      error: error.message || 'Failed to skip certificate upload',
+      success: false
+    });
+  }
+});
+
 // Login with email and password - JWT Only (No Supabase Auth)
 router.post('/login', async (req, res) => {
   try {
@@ -461,37 +502,90 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Check if doctor is approved (for doctors only)
-    if (user.role === 'doctor' && user.approval_status !== 'approved') {
-      let message = '';
-      switch (user.approval_status) {
-        case 'pending':
-          message = 'Your account is pending admin approval. Please wait for certificate verification.';
-          break;
-        case 'rejected':
-          message = 'Your account has been rejected. Please contact support for more information.';
-          break;
-        default:
-          message = 'Your account is not approved. Please contact support.';
+    // For doctors, check certificate status
+    let certificateStatus = null;
+    let hasCertificate = false;
+    let requiresCertificateUpload = false;
+    
+    if (user.role === 'doctor') {
+      // Check if doctor has uploaded any certificates
+      const { data: certificates } = await supabase
+        .from('doctor_certificates')
+        .select('id, status, certificate_file_url')
+        .eq('doctor_id', user.id)
+        .order('submitted_at', { ascending: false })
+        .limit(1);
+
+      if (certificates && certificates.length > 0) {
+        const cert = certificates[0];
+        // Check if it's a real certificate or just a placeholder from skipping
+        if (cert.certificate_file_url) {
+          hasCertificate = true;
+          certificateStatus = cert.status;
+        } else {
+          // No file uploaded yet - doctor skipped during signup
+          requiresCertificateUpload = true;
+          certificateStatus = 'not_uploaded';
+        }
+      } else {
+        // No certificate record at all
+        requiresCertificateUpload = true;
+        certificateStatus = 'not_uploaded';
       }
-      return res.status(403).json({
-        error: message,
-        approval_status: user.approval_status,
-        requires_approval: true
-      });
+
+      // Block login if no certificate uploaded at all
+      if (certificateStatus === 'not_uploaded') {
+        // Generate a temporary token for certificate upload only
+        const tempToken = generateToken(user);
+        
+        return res.status(403).json({
+          error: 'You must upload your medical certificate before you can login.',
+          requires_certificate_upload: true,
+          certificate_status: 'not_uploaded',
+          temp_token: tempToken
+        });
+      }
+
+      // If certificate is pending or rejected, prevent login but allow if approved
+      if (hasCertificate && certificateStatus !== 'approved') {
+        let message = '';
+        switch (certificateStatus) {
+          case 'pending':
+            message = 'Your certificate is pending admin approval. Please wait for verification.';
+            break;
+          case 'rejected':
+            message = 'Your certificate has been rejected. Please upload a new certificate or contact support.';
+            break;
+          default:
+            message = 'Your certificate is under review. Please wait for admin approval.';
+        }
+        return res.status(403).json({
+          error: message,
+          approval_status: certificateStatus,
+          requires_approval: true,
+          certificate_status: certificateStatus
+        });
+      }
     }
 
     // Remove sensitive fields and generate JWT token
     const { password_hash, ...userWithoutPassword } = user;
     const token = generateToken(user);
 
-    res.json({
+    // Add certificate status to response for doctors
+    const response = {
       message: 'Login successful',
       success: true,
       user: userWithoutPassword,
       token,
       expiresIn: '24h'
-    });
+    };
+
+    if (user.role === 'doctor') {
+      response.certificate_status = certificateStatus;
+    }
+
+    res.json(response);
 
   } catch (error) {
     console.error('Login error:', error);

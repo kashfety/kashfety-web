@@ -1073,7 +1073,7 @@ export const adminService = {
   // Get audit logs
   getAuditLogs: async (params?: { page?: number; limit?: number; user_id?: string; action?: string; start_date?: string; end_date?: string }) => {
     try {
-      const response = await api.get('/api/auth/admin/audit-logs', { params });
+      const response = await api.get('/api/admin-audit-logs', { params });
       return response;
     } catch (error) {
       console.error('Get audit logs failed:', error);

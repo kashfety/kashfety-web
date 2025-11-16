@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,36 +33,89 @@ export default function DoctorApprovals() {
         try {
             setLoading(true)
 
-            console.log(' Fetching doctor approvals');
-            const response = await fetch('/api/admin-doctor-certificates?status=pending', {
+            // Try fallback route first for Vercel compatibility
+            let response;
+            let data;
+            
+            try {
+                console.log('📜 Trying admin-doctor-certificates fallback route');
+                response = await fetch('/api/admin-doctor-certificates?status=pending', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    data = await response.json();
+                    console.log('📜 [Doctor Approvals] Response data:', data);
+                    
+                    if (data.success && data.data?.certificates) {
+                        console.log('✅ Fallback route worked for doctor certificates, found:', data.data.certificates.length, 'certificates');
+                        
+                        // Transform the certificate data to match our DoctorApproval interface
+                        const approvals: DoctorApproval[] = data.data.certificates
+                            .filter((cert: any) => cert.status === 'pending' || !cert.status) // Only show pending certificates
+                            .map((cert: any) => ({
+                                id: cert.id,
+                                name: cert.doctor?.name || 'Unknown',
+                                email: cert.doctor?.email || '',
+                                specialty: cert.doctor?.specialty || 'General',
+                                experience_years: cert.doctor?.experience_years || 0,
+                                status: cert.status || 'pending',
+                                created_at: cert.submitted_at || cert.created_at,
+                                certificate_type: cert.certificate_type,
+                                certificate_number: cert.certificate_number,
+                                issuing_authority: cert.issuing_authority,
+                                certificate_file_url: cert.certificate_file_url
+                            }));
+
+                        console.log('📜 [Doctor Approvals] Transformed approvals:', approvals.length);
+                        setApprovals(approvals);
+                        return;
+                    } else {
+                        console.warn('⚠️ [Doctor Approvals] Response missing certificates data:', data);
+                    }
+                } else {
+                    console.warn('⚠️ [Doctor Approvals] Response not OK:', response.status, response.statusText);
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying backend route');
+            }
+
+            // Fallback to backend route
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+
+            response = await fetch(`${baseUrl}/auth/admin/certificates?status=pending`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch doctor approvals');
             }
 
-            const data = await response.json();
-            console.log(' [Doctor Approvals] Response:', data);
-            
-            if (data.success && data.data?.certificates) {
-                const approvals: DoctorApproval[] = data.data.certificates
-                    .filter((cert: any) => cert.status === 'pending' || !cert.status)
-                    .map((cert: any) => ({
-                        id: cert.id,
-                        name: cert.doctor?.name || 'Unknown',
-                        email: cert.doctor?.email || '',
-                        specialty: cert.doctor?.specialty || 'General',
-                        experience_years: cert.doctor?.experience_years || 0,
-                        status: cert.status || 'pending',
-                        created_at: cert.submitted_at || cert.created_at
-                    }));
+            data = await response.json();
 
-                setApprovals(approvals);
-            }
+            // Transform the certificate data to match our DoctorApproval interface
+            const approvals: DoctorApproval[] = data.data.certificates.map((cert: any) => ({
+                id: cert.id,
+                name: cert.doctor.name,
+                email: cert.doctor.email,
+                specialty: cert.doctor.specialty || 'General',
+                experience_years: cert.doctor.experience_years || 0,
+                status: 'pending',
+                created_at: cert.submitted_at,
+                certificate_type: cert.certificate_type,
+                certificate_number: cert.certificate_number,
+                issuing_authority: cert.issuing_authority,
+                certificate_file_url: cert.certificate_file_url
+            }));
+
+            setApprovals(approvals);
         } catch (error) {
             console.error('Error fetching doctor approvals:', error)
             toast({
@@ -77,40 +130,74 @@ export default function DoctorApprovals() {
 
     const handleApproval = async (certificateId: string, action: 'approve' | 'reject') => {
         try {
-            console.log(` [Doctor Approvals] ${action} certificate:`, certificateId);
+            console.log(`🔄 [Doctor Approvals] Attempting to ${action} certificate:`, certificateId);
             
             const requestBody = {
                 status: action === 'approve' ? 'approved' : 'rejected',
                 admin_notes: action === 'approve' ? 'Certificate approved' : 'Certificate rejected'
             };
             
-            // Use dedicated action endpoint (no dynamic routes - Vercel compatible)
-            const endpoint = `/api/admin-review-certificate-action`;
-            console.log(` [Doctor Approvals] Calling:`, endpoint);
+            console.log(`📦 [Doctor Approvals] Request body:`, requestBody);
             
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    certificateId,
-                    ...requestBody
-                })
-            });
+            // Try fallback proxy route first for Vercel compatibility
+            let response;
+            let responseData;
+            
+            try {
+                console.log('📜 [Doctor Approvals] Trying admin-review-certificate fallback proxy route');
+                const fallbackEndpoint = `/api/admin-review-certificate?certificateId=${certificateId}`;
+                console.log(`📍 [Doctor Approvals] Fallback endpoint:`, fallbackEndpoint);
+                
+                response = await fetch(fallbackEndpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log(`📡 [Doctor Approvals] Fallback response status:`, response.status, response.statusText);
+                
+                if (response.ok) {
+                    responseData = await response.json();
+                    console.log(`✅ [Doctor Approvals] Fallback route worked! Response:`, responseData);
+                } else {
+                    throw new Error('Fallback route failed');
+                }
+            } catch (fallbackError) {
+                console.log('⚠️ [Doctor Approvals] Fallback failed, trying backend route directly');
+                
+                // Fallback to backend route
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+                const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
+                const endpoint = `${baseUrl}/auth/admin/certificates/${certificateId}/review`;
+                
+                console.log(`📍 [Doctor Approvals] Backend endpoint:`, endpoint);
+                console.log(`� [Doctor Approvals] Auth token present:`, !!localStorage.getItem('auth_token'));
+                
+                response = await fetch(endpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
-            console.log(` [Doctor Approvals] Response:`, response.status);
+                console.log(`📡 [Doctor Approvals] Backend response status:`, response.status, response.statusText);
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error(` [Doctor Approvals] Error:`, errorData);
-                throw new Error(`Failed to ${action} doctor`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error(`❌ [Doctor Approvals] Error response:`, errorData);
+                    throw new Error(`Failed to ${action} doctor: ${errorData.error || response.statusText}`);
+                }
+                
+                responseData = await response.json();
+                console.log(`✅ [Doctor Approvals] Backend route success:`, responseData);
             }
-            
-            const responseData = await response.json();
-            console.log(` [Doctor Approvals] Success:`, responseData);
 
+            // Refresh the list
             fetchDoctorApprovals();
 
             toast({
@@ -180,7 +267,7 @@ export default function DoctorApprovals() {
                                         </div>
                                         <p className="text-sm text-muted-foreground">{doctor.email}</p>
                                         <p className="text-sm">
-                                            {localizeSpecialty(locale, doctor.specialty)}  {doctor.experience_years} {t('admin_years_experience') || 'years experience'}
+                                            {localizeSpecialty(locale, doctor.specialty)} • {doctor.experience_years} {t('admin_years_experience') || 'years experience'}
                                         </p>
                                     </div>
 

@@ -123,22 +123,15 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   // Track which center's schedule was last fetched from server
   const [lastFetchedCenterId, setLastFetchedCenterId] = useState<string | null>(null);
 
-  // Persistence keys per doctor
-  const storageKey = doctorId ? `dr_schedule_form_${doctorId}` : '';
+  // Persistence key for selected center per doctor
   const selectionKey = doctorId ? `dr_schedule_selected_center_${doctorId}` : '';
+  // Track if this is initial mount (to force DB fetch)
+  const [isInitialMount, setIsInitialMount] = useState(true);
 
-  // Load persisted form state and selected center on mount/doctor change
+  // Load selected center on mount/doctor change, but always fetch fresh data from DB
   useEffect(() => {
     if (!doctorId) return;
     try {
-      const persisted = storageKey ? localStorage.getItem(storageKey) : null;
-      if (persisted) {
-        const parsed = JSON.parse(persisted);
-        if (parsed && typeof parsed === 'object') {
-          setCenterFormStates(parsed);
-          // Do NOT mark initialized based on persisted state; allow server data to initialize UI
-        }
-      }
       const persistedSelection = selectionKey ? localStorage.getItem(selectionKey) : null;
       if (persistedSelection) {
         setSelectedCenterId(persistedSelection);
@@ -378,7 +371,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       setLoading(true);
       const token = localStorage.getItem('auth_token');
       
+      console.log('📅 [Fetch Schedule] Starting fetch for center:', selectedCenterId);
+      console.log('📅 [Fetch Schedule] Initialized centers:', Array.from(initializedCenters));
+      
       if (!selectedCenterId) {
+        console.log('📅 [Fetch Schedule] No center selected, skipping fetch');
         setSchedule([]);
         setLoading(false);
         return;
@@ -391,22 +388,57 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }
       );
 
+      console.log('📅 [Fetch Schedule] Response received:', response.data);
+
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
+        console.log('📅 [Fetch Schedule] Schedule rows from DB:', rows.length);
+        console.log('📅 [Fetch Schedule] Raw schedule data:', JSON.stringify(rows, null, 2));
+        
         setSchedule(rows);
-        // Force UI to reflect DB configs for this center
-        const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
-        setCenterFormStates(prev => ({
-          ...prev,
-          [selectedCenterId]: newConfigs
-        }));
-        setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
-  setLastFetchedCenterId(selectedCenterId);
+        
+        // Always load from DB if center hasn't been initialized yet in this session
+        // This ensures first visit to each center loads from database
+        const shouldUpdateFromDB = !initializedCenters.has(selectedCenterId);
+        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
+        
+        if (shouldUpdateFromDB) {
+          console.log('📅 [Fetch Schedule] Building configs from schedule...');
+          const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
+          console.log('📅 [Fetch Schedule] Built configs:', JSON.stringify(newConfigs, null, 2));
+          
+          setCenterFormStates(prev => {
+            const updated = {
+              ...prev,
+              [selectedCenterId]: newConfigs
+            };
+            console.log('📅 [Fetch Schedule] Updated form states:', JSON.stringify(updated, null, 2));
+            return updated;
+          });
+          
+          setInitializedCenters(prev => {
+            const updated = new Set([...prev, selectedCenterId]);
+            console.log('📅 [Fetch Schedule] Updated initialized centers:', Array.from(updated));
+            return updated;
+          });
+        } else {
+          console.log('📅 [Fetch Schedule] Center already initialized, using existing form state');
+          console.log('📅 [Fetch Schedule] Existing config:', JSON.stringify(centerFormStates[selectedCenterId], null, 2));
+        }
+        
+        setLastFetchedCenterId(selectedCenterId);
         setHomeVisitsAvailable(response.data.home_visits_available || false);
         setDefaultConsultationFee(response.data.default_consultation_fee || 0);
+        
+        // Mark initial mount as complete after any fetch
+        if (isInitialMount) {
+          console.log('📅 [Fetch Schedule] Marking initial mount as complete');
+          setIsInitialMount(false);
+        }
       }
     } catch (error: any) {
-      console.error('Fetch schedule error:', error);
+      console.error('📅 [Fetch Schedule] Error:', error);
+      console.error('📅 [Fetch Schedule] Error response:', error.response?.data);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),
@@ -420,14 +452,49 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const refreshSchedule = async () => {
     if (!selectedCenterId) return;
     
-    // Remove center from initialized set to force re-initialization
-    setInitializedCenters(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(selectedCenterId);
-      return newSet;
-    });
-    
-    await fetchSchedule();
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      
+      const response = await axios.get(
+        `/api/doctor-dashboard/schedule?center_id=${selectedCenterId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        const rows: ScheduleData[] = response.data.schedule || [];
+        setSchedule(rows);
+        
+        // Force update form configs from server when explicitly refreshing
+        const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
+        setCenterFormStates(prev => ({
+          ...prev,
+          [selectedCenterId]: newConfigs
+        }));
+        
+        // Keep the center as initialized
+        setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
+        setLastFetchedCenterId(selectedCenterId);
+        setHomeVisitsAvailable(response.data.home_visits_available || false);
+        setDefaultConsultationFee(response.data.default_consultation_fee || 0);
+        
+        toast({
+          title: t('success') || 'Success',
+          description: t('dd_schedule_refreshed') || 'Schedule refreshed from server',
+        });
+      }
+    } catch (error: any) {
+      console.error('Refresh schedule error:', error);
+      toast({
+        title: t('error') || 'Error',
+        description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateDayConfig = (day: number, field: string, value: any) => {
@@ -445,20 +512,17 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     }));
   };
 
-  // Persist form states and selected center whenever they change
+  // Persist selected center whenever it changes
   useEffect(() => {
     if (!doctorId) return;
     try {
-      if (storageKey) {
-        localStorage.setItem(storageKey, JSON.stringify(centerFormStates));
-      }
       if (selectionKey && selectedCenterId) {
         localStorage.setItem(selectionKey, selectedCenterId);
       }
     } catch (e) {
       // ignore storage errors
     }
-  }, [doctorId, centerFormStates, selectedCenterId]);
+  }, [doctorId, selectedCenterId]);
 
   const generateSlotsForDay = (day: number): TimeSlot[] => {
     const config = getDayConfig(day);
@@ -489,21 +553,46 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         return;
       }
       
+      console.log('📅 [Save Schedule] Starting save for center:', selectedCenterId);
+      console.log('📅 [Save Schedule] Current form states:', centerFormStates);
+      
       // Build schedule array for API - only include days that are marked as available
       const scheduleData = DAYS_OF_WEEK
-        .filter(day => getDayConfig(day.value).isAvailable) // Only include available days
+        .filter(day => {
+          const config = getDayConfig(day.value);
+          console.log(`📅 [Save Schedule] Day ${day.value} (${day.labelKey}):`, {
+            isAvailable: config.isAvailable,
+            startTime: config.startTime,
+            endTime: config.endTime,
+            duration: config.duration
+          });
+          return config.isAvailable;
+        })
         .map(day => {
           const config = getDayConfig(day.value);
           const slots = generateSlotsForDay(day.value);
           
+          console.log(`📅 [Save Schedule] Generated ${slots.length} slots for day ${day.value}`);
+          
           return {
-            day: day.value,
-            slots: slots,
+            day_of_week: day.value,
+            is_available: true,
+            time_slots: slots,
             break_start: config?.breakStart || null,
-            break_end: config?.breakEnd || null
+            break_end: config?.breakEnd || null,
+            notes: config?.notes || null
           };
         })
-        .filter(day => day.slots.length > 0); // Only include days with actual slots
+        .filter(day => {
+          const hasSlots = day.time_slots.length > 0;
+          if (!hasSlots) {
+            console.log(`⚠️ [Save Schedule] Day ${day.day_of_week} excluded - no time slots generated`);
+          }
+          return hasSlots;
+        });
+
+      console.log('📅 [Save Schedule] Final schedule data to send:', JSON.stringify(scheduleData, null, 2));
+      console.log('📅 [Save Schedule] Number of days with schedules:', scheduleData.length);
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,
@@ -515,6 +604,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+      
+      console.log('📅 [Save Schedule] Response:', response.data);
 
       if (response.data.success) {
         // Update the schedule state with the response data

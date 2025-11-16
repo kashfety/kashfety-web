@@ -193,6 +193,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         const errorMessage = result.error || result.message || `Login failed with status ${response.status}`
         console.error('Login failed:', errorMessage)
+        
+        // If doctor needs to upload certificate, store temporary token for upload
+        if (result.requires_certificate_upload && result.certificate_status === 'not_uploaded') {
+          localStorage.setItem('doctor_certificate_status', 'not_uploaded')
+          // Store temporary token for certificate upload
+          if (result.temp_token) {
+            localStorage.setItem('temp_doctor_token', result.temp_token)
+            console.log('Stored temporary token for certificate upload')
+          }
+        }
+        
         throw new Error(errorMessage)
       }
 
@@ -201,11 +212,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_token', result.token)
         localStorage.setItem('auth_user', JSON.stringify(result.user))
 
+        // Store certificate status if doctor
+        if (result.user.role === 'doctor' && result.certificate_status) {
+          localStorage.setItem('doctor_certificate_status', result.certificate_status)
+        }
+
         setToken(result.token)
         setUser(result.user)
         setIsAuthenticated(true)
 
         console.log('Login successful, user role:', result.user.role)
+        if (result.user.role === 'doctor') {
+          console.log('Doctor certificate status:', result.certificate_status)
+        }
 
         // Redirect based on user role
         const dashboardPath = getDashboardPath(result.user.role)

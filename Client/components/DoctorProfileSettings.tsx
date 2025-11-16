@@ -520,6 +520,18 @@ export default function DoctorProfileSettings({
               Existing scheduled appointments will keep their original pricing.
             </p>
           </div>
+
+          {/* Save Consultation Fee Button */}
+          <div className="flex justify-end mt-4">
+            <Button 
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {saving ? "Saving..." : "Save Consultation Fee"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

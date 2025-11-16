@@ -55,17 +55,32 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // In production, allow requests from your frontend domain
-    // You can specify allowed origins here or use environment variable
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',')
-      : [true]; // If no env var, allow all (for development)
+    // List of allowed origins including Vercel preview deployments
+    const allowedOrigins = [
+      'https://kashfety-web-git-develop-kashfetys-projects.vercel.app',
+      'https://kashfety-web.vercel.app',
+      'https://kashfety-fxlohki19-kashfetys-projects.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5000',
+    ];
 
-    if (allowedOrigins.includes(true) || allowedOrigins.includes(origin)) {
+    // Also check environment variable for additional origins
+    if (process.env.ALLOWED_ORIGINS) {
+      const envOrigins = process.env.ALLOWED_ORIGINS.split(',');
+      allowedOrigins.push(...envOrigins);
+    }
+
+    // Check if origin matches any allowed pattern (including Vercel preview URLs)
+    const isAllowed = allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', ''))) 
+      || origin.endsWith('.vercel.app')
+      || origin.includes('kashfety');
+
+    if (isAllowed || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Allow all for now, but log the origin
       console.log('CORS request from origin:', origin);
+      callback(null, true); // Allow all for now to prevent blocking
     }
   },
   credentials: true,

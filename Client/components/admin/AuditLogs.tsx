@@ -61,9 +61,6 @@ export default function AuditLogs() {
         try {
             setLoading(true)
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-
             const params = new URLSearchParams({
                 page: '1',
                 limit: '50'
@@ -77,38 +74,67 @@ export default function AuditLogs() {
                 params.append('action', actionFilter);
             }
 
-            const response = await fetch(`${baseUrl}/auth/admin/audit-logs?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            // Try multiple route variants for Vercel compatibility
+            const routes = [
+                `/api/admin-audit-logs?${params}`,
+                `/api/auth/admin/audit-logs?${params}`
+            ];
 
-            if (!response.ok) {
+            let response = null;
+            for (let i = 0; i < routes.length; i++) {
+                try {
+                    console.log(`🎨 Trying audit-logs route ${i + 1}/${routes.length}: ${routes[i]}`);
+                    response = await fetch(routes[i], {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        console.log('✅ Route worked for audit-logs:', routes[i]);
+                        break;
+                    }
+                    console.log(`❌ Route failed: ${routes[i]} - Status: ${response.status}`);
+                } catch (error) {
+                    console.log(`❌ Route error: ${routes[i]}`, error);
+                    if (i === routes.length - 1) {
+                        throw error; // Rethrow on last attempt
+                    }
+                }
+            }
+
+            if (!response || !response.ok) {
                 throw new Error('Failed to fetch audit logs');
             }
 
             const data = await response.json();
 
-            // Transform the audit log data to match our AuditLog interface
-            const transformedLogs: AuditLog[] = data.data.logs.map((log: any) => ({
-                id: log.id,
-                timestamp: log.created_at,
-                user: {
-                    id: log.user?.id || log.user_id || 'unknown',
-                    name: log.user?.name || 'Unknown User',
-                    role: log.user?.role || 'unknown'
-                },
-                action: log.action,
-                resource: log.resource_type,
-                resourceId: log.resource_id,
-                details: log.details || formatLogDetails(log),
-                status: determineLogStatus(log.action),
-                ipAddress: log.ip_address || 'Unknown',
-                userAgent: log.user_agent || 'Unknown'
-            }));
+            // Check if audit logs exist
+            if (data.success && data.data && data.data.logs && Array.isArray(data.data.logs)) {
+                // Transform the audit log data to match our AuditLog interface
+                const transformedLogs: AuditLog[] = data.data.logs.map((log: any) => ({
+                    id: log.id,
+                    timestamp: log.created_at,
+                    user: {
+                        id: log.user?.id || log.user_id || 'unknown',
+                        name: log.user?.name || 'Unknown User',
+                        role: log.user?.role || 'unknown'
+                    },
+                    action: log.action,
+                    resource: log.resource_type,
+                    resourceId: log.resource_id,
+                    details: log.details || formatLogDetails(log),
+                    status: determineLogStatus(log.action),
+                    ipAddress: log.ip_address || 'Unknown',
+                    userAgent: log.user_agent || 'Unknown'
+                }));
 
-            setLogs(transformedLogs);
+                setLogs(transformedLogs);
+            } else {
+                // No audit logs - set empty array
+                console.log('ℹ️ No audit logs available yet');
+                setLogs([]);
+            }
         } catch (error) {
             console.error('Error fetching audit logs:', error)
             toast({

@@ -8,19 +8,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
         success: true,
         message: 'Admin update user route is active',
-        methods: ['PUT']
+        methods: ['POST']
     });
 }
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
         console.log('✏️ [Admin Update User Proxy] Request received');
 
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        // Get the request body
+        const body = await request.json();
+        const { userId, ...updates } = body;
 
         if (!userId) {
-            console.error('❌ Missing userId parameter');
+            console.error('❌ Missing userId in request body');
             return NextResponse.json({
                 success: false,
                 error: 'User ID is required'
@@ -39,9 +40,7 @@ export async function PUT(request: NextRequest) {
             }, { status: 401 });
         }
 
-        // Get the request body
-        const body = await request.json();
-        console.log('📝 [Admin Update User Proxy] Update data:', body);
+        console.log('📝 [Admin Update User Proxy] Update data:', updates);
 
         // Forward the request to the backend API
         const backendUrl = 'https://kashfety.com';
@@ -55,7 +54,7 @@ export async function PUT(request: NextRequest) {
                 'Authorization': authHeader,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(updates)
         });
 
         const responseData = await backendResponse.json().catch(() => ({}));

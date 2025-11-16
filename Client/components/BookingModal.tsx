@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
+import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
@@ -100,6 +100,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [selectedLabType, setSelectedLabType] = useState<LabTestType | null>(null);
   const [labAvailableDates, setLabAvailableDates] = useState<string[]>([]);
   const [labCenters, setLabCenters] = useState<Center[]>([]); // All centers for lab mode step 1
+  const [labCenterFilter, setLabCenterFilter] = useState(""); // Search filter for lab centers
 
   // Schedule-related state
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string, is_available: boolean, is_booked: boolean }>>([]);
@@ -2085,6 +2086,28 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       </div>
                     </div>
 
+                    {/* Search Filter */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder={t('booking_search_centers') || 'Search by center name or location...'}
+                          value={labCenterFilter}
+                          onChange={(e) => setLabCenterFilter(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#4DBCC4] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {labCenterFilter && (
+                          <button
+                            onClick={() => setLabCenterFilter("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                          >
+                            <XCircle className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     {loading ? (
                       <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
@@ -2092,47 +2115,67 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       </div>
                     ) : (
                       <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
-                        {labCenters.length > 0 ? (
-                          labCenters.map((center) => (
-                            <Card
-                              key={center.id}
-                              className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
-                              onClick={() => handleLabCenterSelect(center)}
-                            >
-                              <CardContent className="p-6 bg-white dark:bg-gray-800">
-                                <div className="flex items-start gap-4">
-                                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] flex items-center justify-center shadow-md">
-                                    <MapPin className="w-6 h-6 text-white" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
-                                      <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-                                      <span>{center.address}</span>
-                                    </p>
-                                    {center.phone && (
-                                      <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                        <span className="text-gray-500 dark:text-gray-400">📞</span>
-                                        <span className="font-medium">{center.phone}</span>
+                        {(() => {
+                          // Filter centers based on search
+                          const filterQuery = (labCenterFilter || '').toLowerCase();
+                          const filteredCenters = labCenters.filter(center => {
+                            if (!filterQuery) return true;
+                            return (
+                              center.name.toLowerCase().includes(filterQuery) ||
+                              center.address?.toLowerCase().includes(filterQuery)
+                            );
+                          });
+
+                          return filteredCenters.length > 0 ? (
+                            filteredCenters.map((center) => (
+                              <Card
+                                key={center.id}
+                                className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
+                                onClick={() => handleLabCenterSelect(center)}
+                              >
+                                <CardContent className="p-6 bg-white dark:bg-gray-800">
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] flex items-center justify-center shadow-md">
+                                      <MapPin className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
+                                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <span>{center.address}</span>
                                       </p>
-                                    )}
-                                  </div>
-                                  <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 rounded-full bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 flex items-center justify-center">
-                                      <ChevronLeft className="w-5 h-5 text-[#4DBCC4] rotate-180" />
+                                      {center.phone && (
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                          <span className="text-gray-500 dark:text-gray-400">📞</span>
+                                          <span className="font-medium">{center.phone}</span>
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                      <div className="w-8 h-8 rounded-full bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 flex items-center justify-center">
+                                        <ChevronLeft className="w-5 h-5 text-[#4DBCC4] rotate-180" />
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))
-                        ) : (
-                          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_no_centers_available') || 'No centers available'}</p>
-                            <p className="text-gray-600 dark:text-gray-400 mt-2">{t('booking_lab_services_unavailable') || 'Lab services are not currently available. Please check back later.'}</p>
-                          </div>
-                        )}
+                                </CardContent>
+                              </Card>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">
+                                {labCenterFilter
+                                  ? (t('booking_no_centers_match_search') || 'No centers match your search')
+                                  : (t('booking_no_centers_available') || 'No centers available')}
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                {labCenterFilter
+                                  ? (t('booking_try_different_search') || 'Try a different search term')
+                                  : (t('booking_lab_services_unavailable') || 'Lab services are not currently available. Please check back later.')}
+                              </p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>

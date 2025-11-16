@@ -31,7 +31,7 @@ export async function GET(
         patient:users!fk_appointments_patient (id, name, phone, email),
         center:centers!fk_appointments_center (id, name, address, phone, email)
       `);
-    
+
     // Filter by role
     if (role === 'super_admin' || role === 'admin') {
       console.log('Admin/Super Admin - fetching all appointments');
@@ -40,10 +40,10 @@ export async function GET(
     } else {
       appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
     }
-    
+
     const { data: appointments, error } = await appointmentsQuery
-      .order('appointment_date', { ascending: true })
-      .order('appointment_time', { ascending: true });
+      .order('appointment_date', { ascending: false })
+      .order('appointment_time', { ascending: false });
 
     if (error) {
       console.error('Error fetching appointments:', error);

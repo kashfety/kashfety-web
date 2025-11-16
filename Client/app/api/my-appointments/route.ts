@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 export async function GET(request: NextRequest) {
   try {
     console.log('📋 [My Appointments API] Request received');
-    
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const role = searchParams.get('role') || 'patient';
@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     console.log('📋 [My Appointments API] User ID:', userId, 'Role:', role);
 
     if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'User ID is required as query parameter' 
+      return NextResponse.json({
+        success: false,
+        message: 'User ID is required as query parameter'
       }, { status: 400 });
     }
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         patient:users!fk_appointments_patient (id, name, phone, email),
         center:centers!fk_appointments_center (id, name, address, phone, email)
       `);
-    
+
     // Filter by role
     if (role === 'super_admin' || role === 'admin') {
       console.log('📋 Admin - fetching all');
@@ -40,17 +40,17 @@ export async function GET(request: NextRequest) {
     } else {
       appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
     }
-    
+
     const { data: appointments, error } = await appointmentsQuery
-      .order('appointment_date', { ascending: true })
-      .order('appointment_time', { ascending: true });
+      .order('appointment_date', { ascending: false })
+      .order('appointment_time', { ascending: false });
 
     if (error) {
       console.error('📋 Error:', error);
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Failed to fetch appointments', 
-        error: error.message 
+      return NextResponse.json({
+        success: false,
+        message: 'Failed to fetch appointments',
+        error: error.message
       }, { status: 500 });
     }
 
@@ -77,10 +77,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, appointments: enriched });
   } catch (err: any) {
     console.error('📋 Error:', err);
-    return NextResponse.json({ 
-      success: false, 
-      message: 'Internal server error', 
-      error: err.message 
+    return NextResponse.json({
+      success: false,
+      message: 'Internal server error',
+      error: err.message
     }, { status: 500 });
   }
 }

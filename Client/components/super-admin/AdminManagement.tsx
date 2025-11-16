@@ -419,40 +419,30 @@ export default function AdminManagement() {
         try {
             console.log('🗑️ [AdminManagement] Deleting admin:', adminId);
 
-            // Try fallback route first for Vercel compatibility
-            let response;
-            try {
-                console.log('🗑️ Trying super-admin-delete-admin fallback route');
-                response = await fetch(`/api/super-admin-delete-admin?adminId=${adminId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+            // For production, directly use the backend API
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
+            const backendUrl = `${baseUrl}/super-admin/admins/${adminId}`;
 
-                if (response.ok) {
-                    console.log('✅ Fallback route worked for admin deletion');
-                } else {
-                    throw new Error('Fallback route failed');
+            console.log('🔄 Using backend URL:', backendUrl);
+
+            const response = await fetch(backendUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                    'Content-Type': 'application/json'
                 }
-            } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying dynamic route');
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-                const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-                response = await fetch(`${baseUrl}/super-admin/admins/${adminId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
+            });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Failed to delete admin');
+                console.error('❌ Delete error:', response.status, errorData);
+                const errorMsg = errorData.error || errorData.message || errorData.details || 'Failed to delete admin';
+                throw new Error(errorMsg);
             }
+
+            const data = await response.json();
+            console.log('✅ Admin deleted successfully:', data);
 
             toast({
                 title: "Success",

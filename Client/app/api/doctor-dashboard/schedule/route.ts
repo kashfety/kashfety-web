@@ -88,13 +88,74 @@ export async function GET(request: NextRequest) {
     
     if (error) {
       console.error('📅 [Schedule GET] Fetch error:', error);
-      throw error;
+      console.error('📅 [Schedule GET] Error details:', JSON.stringify(error, null, 2));
+      
+      // Try a simpler query without joins as fallback
+      console.log('📅 [Schedule GET] Trying fallback query without joins...');
+      let fallbackQuery = supabase
+        .from('doctor_schedules')
+        .select('*')
+        .eq('doctor_id', doctorId);
+      
+      if (centerId) {
+        fallbackQuery = fallbackQuery.eq('center_id', centerId);
+      }
+      
+      fallbackQuery = fallbackQuery.order('day_of_week', { ascending: true });
+      
+      const { data: scheduleSimple, error: simpleError } = await fallbackQuery;
+      
+      if (simpleError) {
+        console.error('📅 [Schedule GET] Fallback query also failed:', simpleError);
+        throw error; // Throw original error
+      }
+      
+      console.log('📅 [Schedule GET] Fallback query succeeded');
+      // Use the simple query results instead
+      const scheduleWithFallback = scheduleSimple;
+      
+      // Continue with the fallback data
+      console.log('📅 [Schedule GET] Found', scheduleWithFallback?.length || 0, 'schedule entries (fallback)');
+      
+      // Get doctor info and return
+      const { data: doctor } = await supabase
+        .from('users')
+        .select('home_visits_available, consultation_fee')
+        .eq('id', doctorId)
+        .single();
+      
+      return NextResponse.json({ 
+        success: true, 
+        schedule: scheduleWithFallback || [],
+        home_visits_available: doctor?.home_visits_available || false, 
+        default_consultation_fee: doctor?.consultation_fee || null,
+        center_specific: !!centerId
+      });
     }
     
     console.log('📅 [Schedule GET] Found', schedule?.length || 0, 'schedule entries');
-    console.log('📅 [Schedule GET] Schedule data:', JSON.stringify(schedule, null, 2));
+    
+    // Ensure schedule is an array and has proper structure
+    const scheduleArray = Array.isArray(schedule) ? schedule : [];
+    
+    // Log detailed schedule data for debugging
+    if (scheduleArray.length > 0) {
+      console.log('📅 [Schedule GET] Schedule data:', JSON.stringify(scheduleArray, null, 2));
+      scheduleArray.forEach((item: any, idx: number) => {
+        console.log(`📅 [Schedule GET] Item ${idx}:`, {
+          day_of_week: item.day_of_week,
+          is_available: item.is_available,
+          slots_count: item.time_slots?.length || 0,
+          has_break: !!(item.break_start && item.break_end),
+          center_id: item.center_id
+        });
+      });
+    } else {
+      console.log('📅 [Schedule GET] No schedule entries found - returning empty array');
+    }
     
     // Get doctor's home visit availability and consultation fee
+    console.log('📅 [Schedule GET] Fetching doctor profile...');
     const { data: doctor, error: doctorError } = await supabase
       .from('users')
       .select('home_visits_available, consultation_fee')
@@ -103,12 +164,18 @@ export async function GET(request: NextRequest) {
     
     if (doctorError) {
       console.error('📅 [Schedule GET] Doctor fetch error:', doctorError);
+    } else {
+      console.log('📅 [Schedule GET] Doctor profile:', {
+        home_visits_available: doctor?.home_visits_available,
+        consultation_fee: doctor?.consultation_fee
+      });
     }
     
     // Group schedule by center if no specific center requested
     let groupedSchedule: any = {};
     if (!centerId) {
-      schedule?.forEach((item: any) => {
+      console.log('📅 [Schedule GET] Grouping schedules by center...');
+      scheduleArray.forEach((item: any) => {
         const cid = item.center_id || 'general';
         const centerName = item.centers?.name || 'General Schedule';
         
@@ -122,15 +189,25 @@ export async function GET(request: NextRequest) {
         }
         groupedSchedule[cid].schedule.push(item);
       });
+      console.log('📅 [Schedule GET] Grouped into', Object.keys(groupedSchedule).length, 'centers');
     }
     
-    return NextResponse.json({ 
+    const responseData = {
       success: true, 
-      schedule: centerId ? (schedule || []) : Object.values(groupedSchedule),
+      schedule: centerId ? scheduleArray : Object.values(groupedSchedule),
       home_visits_available: doctor?.home_visits_available || false, 
       default_consultation_fee: doctor?.consultation_fee || null,
       center_specific: !centerId
+    };
+    
+    console.log('📅 [Schedule GET] Response:', {
+      success: responseData.success,
+      schedule_count: centerId ? scheduleArray.length : Object.keys(groupedSchedule).length,
+      home_visits_available: responseData.home_visits_available,
+      default_consultation_fee: responseData.default_consultation_fee
     });
+    
+    return NextResponse.json(responseData);
   } catch (e: any) {
     console.error('📅 [Schedule GET] Fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to load schedule' }, { status: 500 });

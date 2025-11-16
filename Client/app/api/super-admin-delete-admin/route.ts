@@ -28,10 +28,11 @@ export async function DELETE(request: NextRequest) {
         }
 
         // Forward the request to the backend API
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kashfety.com';
+        // Use the serverless function at /api/ which wraps the Express backend
+        const backendUrl = 'https://kashfety.com';
         const apiUrl = `${backendUrl}/api/super-admin/admins/${adminId}`;
 
-        console.log('🔄 [Super Admin Delete Proxy] Forwarding to:', apiUrl);
+        console.log('🔄 [Super Admin Delete Proxy] Forwarding to backend Express API:', apiUrl);
 
         const backendResponse = await fetch(apiUrl, {
             method: 'DELETE',
@@ -39,9 +40,7 @@ export async function DELETE(request: NextRequest) {
                 'Authorization': authHeader,
                 'Content-Type': 'application/json',
             }
-        });
-
-        const responseData = await backendResponse.json().catch(() => ({}));
+        }); const responseData = await backendResponse.json().catch(() => ({}));
 
         console.log('📥 [Super Admin Delete Proxy] Backend response:', {
             status: backendResponse.status,

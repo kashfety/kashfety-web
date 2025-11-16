@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   // Next.js API routes are in /Client/app/api/* 
   if (url.startsWith('/api/auth/admin/') ||
     url.startsWith('/api/admin-') ||
+    url.startsWith('/api/super-admin-') ||  // Let Next.js handle super-admin- routes
     url.includes('/api/auth/doctor/') ||
     url.includes('/api/auth/login') ||
     url.includes('/api/auth/verify')) {

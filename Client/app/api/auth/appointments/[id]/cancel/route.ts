@@ -58,22 +58,25 @@ export async function PUT(
 
     // Check if cancellation is within 24 hours of appointment time
     if (appointment.appointment_date && appointment.appointment_time) {
+      // Parse appointment date and time correctly
       const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const now = new Date();
-      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const millisecondsUntilAppointment = appointmentDateTime.getTime() - now.getTime();
+      const hoursUntilAppointment = millisecondsUntilAppointment / (1000 * 60 * 60);
 
       console.log('🔍 [Cancel Check]', {
         appointmentDate: appointment.appointment_date,
         appointmentTime: appointment.appointment_time,
         appointmentDateTime: appointmentDateTime.toISOString(),
         now: now.toISOString(),
+        millisecondsUntil: millisecondsUntilAppointment,
         hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
         willBlock24h: hoursUntilAppointment < 24,
-        willBlockPast: hoursUntilAppointment < 0
+        willBlockPast: hoursUntilAppointment <= 0
       });
 
       // Check if appointment is in the past
-      if (hoursUntilAppointment < 0) {
+      if (hoursUntilAppointment <= 0) {
         return NextResponse.json({
           success: false,
           message: 'Cannot cancel a past appointment',
@@ -85,8 +88,9 @@ export async function PUT(
       if (hoursUntilAppointment < 24) {
         return NextResponse.json({
           success: false,
-          message: `Cannot cancel appointment within 24 hours of the scheduled time. Appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
-          code: 'CANCELLATION_TOO_LATE'
+          message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
+          code: 'CANCELLATION_TOO_LATE',
+          hoursRemaining: hoursUntilAppointment
         }, { status: 400 });
       }
     }

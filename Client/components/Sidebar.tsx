@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/providers/auth-provider";
 import { useLocale } from "@/components/providers/locale-provider";
-import { 
-  Home, 
-  Calendar, 
+import {
+  Home,
+  Calendar,
   TestTube,
-  Users, 
-  Star, 
-  Settings, 
+  Users,
+  Star,
+  Settings,
   Info,
   Heart,
   ChevronLeft,
@@ -61,12 +61,18 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       icon: Users,
       label: t('header_doctors') || 'Doctors',
       action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/#doctors');
+        // If user is a patient, navigate to patient dashboard doctors page
+        if (user && user.role === 'patient') {
+          router.push('/patient-dashboard/doctors');
         } else {
-          const doctorsSection = document.getElementById('doctors');
-          if (doctorsSection) {
-            doctorsSection.scrollIntoView({ behavior: 'smooth' });
+          // For non-patients, scroll to doctors section on homepage
+          if (window.location.pathname !== '/') {
+            router.push('/#doctors');
+          } else {
+            const doctorsSection = document.getElementById('doctors');
+            if (doctorsSection) {
+              doctorsSection.scrollIntoView({ behavior: 'smooth' });
+            }
           }
         }
       }
@@ -135,14 +141,13 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         initial={{ x: isRTL ? 280 : -280 }}
         animate={{ x: isOpen ? 0 : (isRTL ? 280 : -280) }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`fixed top-0 h-full w-[280px] bg-background/95 backdrop-blur-lg border border-border z-50 lg:z-30 shadow-xl lg:shadow-none ${
-          isRTL ? 'sidebar-rtl right-0 border-l' : 'sidebar-ltr left-0 border-r'
-        }`}
+        className={`fixed top-0 h-full w-[280px] bg-background/95 backdrop-blur-lg border border-border z-50 lg:z-30 shadow-xl lg:shadow-none ${isRTL ? 'sidebar-rtl right-0 border-l' : 'sidebar-ltr left-0 border-r'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between p-4 sm:p-6 border-b border-border`}>
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0 }}
               animate={{ opacity: isOpen ? 1 : 0 }}
               transition={{ delay: isOpen ? 0.1 : 0 }}

@@ -36,11 +36,26 @@ export default function CenterScheduleManagement() {
   const [loading, setLoading] = useState(true);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [dayConfigs, setDayConfigs] = useState<Record<number, { isAvailable: boolean; start?: string; end?: string; slot?: number; breakStart?: string; breakEnd?: string; notes?: string }>>({});
+  
+  // Store schedule configs for each test type separately (like doctor dashboard does for centers)
+  const [testTypeFormStates, setTestTypeFormStates] = useState<Record<string, Record<number, { 
+    isAvailable: boolean; 
+    start?: string; 
+    end?: string; 
+    slot?: number; 
+    breakStart?: string; 
+    breakEnd?: string; 
+    notes?: string 
+  }>>>({});
+  
+  const [initializedTestTypes, setInitializedTestTypes] = useState<Set<string>>(new Set());
+  
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
   const [conflictDetails, setConflictDetails] = useState<string[]>([]);
-  const [reloadTrigger, setReloadTrigger] = useState(0); // Force reload counter
+
+  // Get configs for currently selected test type
+  const dayConfigs = testTypeFormStates[selectedType] || {};
 
   useEffect(() => {
     (async () => {
@@ -59,24 +74,22 @@ export default function CenterScheduleManagement() {
 
   // Load schedule whenever selectedType changes
   useEffect(() => {
-    console.log('⚡ useEffect triggered:', { selectedType, reloadTrigger });
-    
     const loadSchedule = async () => {
       if (!selectedType) {
-        // Reset config when no test type is selected
-        console.log('❌ No test type selected, clearing config');
-        setDayConfigs({});
         setLoadingSchedule(false);
         return;
       }
       
+      // Check if already initialized - if so, skip loading
+      if (initializedTestTypes.has(selectedType)) {
+        console.log('✅ Test type already initialized:', selectedType);
+        return;
+      }
+      
       try {
-        console.log('🔄 Loading schedule for test type:', selectedType, 'trigger:', reloadTrigger);
+        console.log('🔄 Loading schedule for test type:', selectedType);
         setLoadingSchedule(true);
-        // Reset config first to show loading state
-        setDayConfigs({});
         
-        // Add timestamp to prevent caching
         const res = await centerService.getLabSchedule(selectedType);
         const schedule = res?.schedule || [];
         console.log('📋 Loaded schedule:', schedule.length, 'days configured');
@@ -117,20 +130,25 @@ export default function CenterScheduleManagement() {
           };
         }
         
-        setDayConfigs(cfg);
-        console.log('✅ Schedule loaded and configured');
+        // Store config for this test type
+        setTestTypeFormStates(prev => ({
+          ...prev,
+          [selectedType]: cfg
+        }));
+        
+        // Mark as initialized
+        setInitializedTestTypes(prev => new Set([...prev, selectedType]));
+        
+        console.log('✅ Schedule loaded and configured for:', selectedType);
       } catch (error) {
         console.error('❌ Failed to load schedule:', error);
-        // Reset to empty on error
-        setDayConfigs({});
       } finally {
         setLoadingSchedule(false);
       }
     };
 
-    // Always call loadSchedule when selectedType or reloadTrigger changes
     loadSchedule();
-  }, [selectedType, reloadTrigger]);
+  }, [selectedType]);
 
   const generateSlots = (start: string, end: string, duration: number): Array<{ time: string; duration: number }> => {
     if (!start || !end || !duration) return [];
@@ -226,7 +244,17 @@ export default function CenterScheduleManagement() {
   };
 
   const setCfg = (day: number, key: string, value: any) => {
-    setDayConfigs(prev => ({ ...prev, [day]: { ...prev[day], [key]: value } }));
+    if (!selectedType) return;
+    setTestTypeFormStates(prev => ({
+      ...prev,
+      [selectedType]: {
+        ...prev[selectedType],
+        [day]: {
+          ...(prev[selectedType]?.[day] || {}),
+          [key]: value
+        }
+      }
+    }));
   };
 
   return (
@@ -263,11 +291,6 @@ export default function CenterScheduleManagement() {
                       onClick={() => {
                         console.log('🔀 Test type button clicked:', { current: selectedType, clicked: testTypeId });
                         setSelectedType(testTypeId);
-                        setReloadTrigger(prev => {
-                          const newTrigger = prev + 1;
-                          console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
-                          return newTrigger;
-                        });
                       }}
                     >
                       <div className="font-semibold text-left">{service.lab_test_types?.name || 'Unnamed Test'}</div>
@@ -299,7 +322,7 @@ export default function CenterScheduleManagement() {
       </Card>
 
       {selectedType && (
-        <Card key={`${selectedType}-${reloadTrigger}`}>
+        <Card key={selectedType}>
           <CardHeader><CardTitle><Clock className="inline h-5 w-5 mr-2" />{t('dd_weekly_schedule_for') || 'Weekly Schedule for'} {services.find((s:any)=>s.lab_test_types?.id===selectedType || s.lab_test_type_id===selectedType)?.lab_test_types?.name || 'Selected Test'}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             {DAYS.map(d => {

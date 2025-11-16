@@ -1254,49 +1254,61 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
   // Handle test type selection with auto-save (like doctor-dashboard center switching)
   const handleTypeSelection = async (newTypeId: string) => {
+    console.log('🔄 [CenterSchedule] Switching test type from', selectedTestType, 'to', newTypeId);
+    
     // If switching away from a previously selected type, auto-save current schedule
     if (selectedTestType && selectedTestType !== newTypeId) {
       try {
         // Only auto-save if there are actual changes to save
         const hasChanges = DAYS_OF_WEEK.some(d => getDayConfig(d.value).isAvailable);
+        console.log('💾 [CenterSchedule] Auto-saving previous type:', selectedTestType, 'hasChanges:', hasChanges);
         if (hasChanges) {
           await saveSchedule();
         }
       } catch (error) {
-        console.error('Auto-save failed:', error);
+        console.error('❌ [CenterSchedule] Auto-save failed:', error);
         // Continue with type selection even if auto-save fails
       }
     }
 
     setSelectedTestType(newTypeId);
 
-    // Load existing config for the new type
-    if (newTypeId && !initializedTypes.has(newTypeId)) {
+    // Always load from server (like refresh button) to get latest data
+    if (newTypeId) {
+      console.log('🔄 [CenterSchedule] Loading schedule from server for test type:', newTypeId);
       await loadScheduleForType(newTypeId);
-      setInitializedTypes(prev => new Set([...prev, newTypeId]));
-    } else if (newTypeId && typeFormStates[newTypeId]) {
-      // Load from local state
-      setScheduleConfig(typeFormStates[newTypeId]);
+      
+      // Mark as initialized after loading
+      if (!initializedTypes.has(newTypeId)) {
+        console.log('✅ [CenterSchedule] Marking test type as initialized:', newTypeId);
+        setInitializedTypes(prev => new Set([...prev, newTypeId]));
+      }
     } else {
       // Clear current config
+      console.log('🧹 [CenterSchedule] Clearing schedule config (no test type selected)');
       setScheduleConfig({});
     }
   };
 
   const loadScheduleForType = async (testTypeId: string) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('⚠️ [CenterSchedule] Cannot load schedule - no user ID');
+      return;
+    }
 
+    console.log('🔍 [CenterSchedule] Loading schedule for test type:', testTypeId, 'center:', user.id);
     setLoading(true);
     try {
-      console.log('🔍 [CenterSchedule] Loading schedule for test type:', testTypeId, 'center:', user.id);
       const response = await centerService.getLabSchedule(testTypeId);
       console.log('📅 [CenterSchedule] Schedule response:', response);
 
       if (response?.schedule) {
+        console.log('✅ [CenterSchedule] Found', response.schedule.length, 'day schedules');
         // Convert server schedule format to component format
         const newConfig: ScheduleConfig = {};
 
         response.schedule.forEach((daySchedule: any) => {
+          console.log('📆 [CenterSchedule] Processing day', daySchedule.day_of_week, ':', daySchedule);
           const hasSlots = Array.isArray(daySchedule?.time_slots) && daySchedule.time_slots.length > 0;
           newConfig[daySchedule.day_of_week] = {
             isAvailable: daySchedule.is_available ?? (hasSlots ? true : false),
@@ -1317,7 +1329,17 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         });
 
         console.log('✅ [CenterSchedule] Converted schedule config:', newConfig);
+        console.log('✅ [CenterSchedule] Setting schedule config state for test type:', testTypeId);
         setScheduleConfig(newConfig);
+        
+        // Also update typeFormStates to persist the loaded config
+        setTypeFormStates(prev => ({
+          ...prev,
+          [testTypeId]: newConfig
+        }));
+        console.log('✅ [CenterSchedule] Updated typeFormStates for test type:', testTypeId);
+      } else {
+        console.log('⚠️ [CenterSchedule] No schedule data in response');
       }
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to load schedule:', error);

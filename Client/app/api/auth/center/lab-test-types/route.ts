@@ -70,3 +70,79 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
     }, { status: 500 });
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const user = await getUserFromAuth(request);
+    if (!user || user.role !== 'center') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { code, name, category, default_fee } = body;
+
+    // Validate required fields
+    if (!code || !name || !category) {
+      return NextResponse.json({
+        error: 'Missing required fields',
+        details: 'code, name, and category are required'
+      }, { status: 400 });
+    }
+
+    // Validate category
+    if (category !== 'lab' && category !== 'imaging') {
+      return NextResponse.json({
+        error: 'Invalid category',
+        details: 'category must be either "lab" or "imaging"'
+      }, { status: 400 });
+    }
+
+    // Check if test type with same code already exists
+    const { data: existing, error: checkError } = await supabase
+      .from('lab_test_types')
+      .select('id, code')
+      .eq('code', code.toUpperCase())
+      .single();
+
+    if (existing) {
+      return NextResponse.json({
+        error: 'Test type already exists',
+        details: `A test type with code "${code.toUpperCase()}" already exists`
+      }, { status: 409 });
+    }
+
+    // Create new lab test type
+    const { data: newTestType, error: insertError } = await supabase
+      .from('lab_test_types')
+      .insert({
+        code: code.toUpperCase(),
+        name: name.trim(),
+        category,
+        default_fee: default_fee ? Number(default_fee) : null,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Failed to create lab test type:', insertError);
+      return NextResponse.json({
+        error: 'Failed to create lab test type',
+        details: insertError.message
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Lab test type created successfully',
+      data: newTestType
+    }, { status: 201 });
+
+  } catch (error: any) {
+    console.error('Create lab test type API error:', error);
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: error.message
+    }, { status: 500 });
+  }
+}

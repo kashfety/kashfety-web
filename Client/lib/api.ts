@@ -613,7 +613,9 @@ export const labService = {
   updateStatus: async (bookingId: string, status: string, notes?: string) =>
     frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/status`, { status, notes }),
   attachResult: async (bookingId: string, payload: { result_file_url?: string; result_notes?: string }) =>
-    frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/result`, payload)
+    frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/result`, payload),
+  createLabTestType: async (payload: { code: string; name: string; category: 'lab' | 'imaging'; default_fee?: number }) =>
+    frontendApi.post('/api/auth/center/lab-test-types', payload)
 };
 
 // Center admin service

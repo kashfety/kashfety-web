@@ -975,7 +975,10 @@ export const adminService = {
   // Delete user
   deleteUser: async (id: string) => {
     try {
-      const response = await api.delete(`/api/auth/admin/users/${id}`);
+      console.log('🗑️ Deleting user:', id);
+      console.log('🗑️ Using admin-delete-user route with POST method');
+      const response = await api.post('/api/admin-delete-user', { userId: id });
+      console.log('✅ User deleted successfully');
       return response;
     } catch (error) {
       console.error('Delete user failed:', error);

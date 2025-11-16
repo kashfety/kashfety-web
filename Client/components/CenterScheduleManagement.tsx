@@ -72,82 +72,92 @@ export default function CenterScheduleManagement() {
     })();
   }, []);
 
-  // Load schedule whenever selectedType changes
+  // Fetch schedule whenever selectedType changes (ALWAYS fetch, like doctor dashboard)
   useEffect(() => {
-    const loadSchedule = async () => {
+    const fetchSchedule = async () => {
       if (!selectedType) {
         setLoadingSchedule(false);
         return;
       }
       
-      // Check if already initialized - if so, skip loading
-      if (initializedTestTypes.has(selectedType)) {
-        console.log('✅ Test type already initialized:', selectedType);
-        return;
-      }
-      
       try {
-        console.log('🔄 Loading schedule for test type:', selectedType);
+        console.log('📅 [Fetch Schedule] Starting fetch for test type:', selectedType);
+        console.log('� [Fetch Schedule] Initialized test types:', Array.from(initializedTestTypes));
+        
         setLoadingSchedule(true);
         
         const res = await centerService.getLabSchedule(selectedType);
-        const schedule = res?.schedule || [];
-        console.log('📋 Loaded schedule:', schedule.length, 'days configured');
-        const cfg: Record<number, any> = {};
+        const scheduleRows = res?.schedule || [];
+        console.log('� [Fetch Schedule] Schedule rows from DB:', scheduleRows.length);
         
-        for (const s of schedule) {
-          // Extract start and end times from time_slots if available
-          let startTime = undefined;
-          let endTime = undefined;
+        // Always fetch from DB, but only update form state if not initialized
+        const shouldUpdateFromDB = !initializedTestTypes.has(selectedType);
+        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
+        
+        if (shouldUpdateFromDB) {
+          console.log('📅 [Fetch Schedule] Building configs from schedule...');
+          const cfg: Record<number, any> = {};
           
-          if (s.time_slots && Array.isArray(s.time_slots) && s.time_slots.length > 0) {
-            // Get first slot's time as start
-            const firstSlot = s.time_slots[0];
-            startTime = typeof firstSlot === 'string' ? firstSlot : firstSlot?.time;
+          for (const s of scheduleRows) {
+            // Extract start and end times from time_slots if available
+            let startTime = undefined;
+            let endTime = undefined;
             
-            // Calculate end time from last slot + duration
-            const lastSlot = s.time_slots[s.time_slots.length - 1];
-            const lastSlotTime = typeof lastSlot === 'string' ? lastSlot : lastSlot?.time;
-            const duration = typeof lastSlot === 'object' ? (lastSlot.duration || s.slot_duration || 30) : (s.slot_duration || 30);
-            
-            if (lastSlotTime) {
-              const [hours, minutes] = lastSlotTime.split(':').map(Number);
-              const totalMinutes = hours * 60 + minutes + duration;
-              const endHours = Math.floor(totalMinutes / 60);
-              const endMinutes = totalMinutes % 60;
-              endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+            if (s.time_slots && Array.isArray(s.time_slots) && s.time_slots.length > 0) {
+              // Get first slot's time as start
+              const firstSlot = s.time_slots[0];
+              startTime = typeof firstSlot === 'string' ? firstSlot : firstSlot?.time;
+              
+              // Calculate end time from last slot + duration
+              const lastSlot = s.time_slots[s.time_slots.length - 1];
+              const lastSlotTime = typeof lastSlot === 'string' ? lastSlot : lastSlot?.time;
+              const duration = typeof lastSlot === 'object' ? (lastSlot.duration || s.slot_duration || 30) : (s.slot_duration || 30);
+              
+              if (lastSlotTime) {
+                const [hours, minutes] = lastSlotTime.split(':').map(Number);
+                const totalMinutes = hours * 60 + minutes + duration;
+                const endHours = Math.floor(totalMinutes / 60);
+                const endMinutes = totalMinutes % 60;
+                endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+              }
             }
+            
+            cfg[s.day_of_week] = { 
+              isAvailable: !!s.is_available, 
+              start: startTime, 
+              end: endTime, 
+              slot: s.slot_duration || 30, 
+              breakStart: s.break_start || '', 
+              breakEnd: s.break_end || '', 
+              notes: s.notes || '' 
+            };
           }
           
-          cfg[s.day_of_week] = { 
-            isAvailable: !!s.is_available, 
-            start: startTime, 
-            end: endTime, 
-            slot: s.slot_duration || 30, 
-            breakStart: s.break_start || '', 
-            breakEnd: s.break_end || '', 
-            notes: s.notes || '' 
-          };
+          console.log('📅 [Fetch Schedule] Built configs:', cfg);
+          
+          // Store config for this test type
+          setTestTypeFormStates(prev => ({
+            ...prev,
+            [selectedType]: cfg
+          }));
+          
+          // Mark as initialized
+          setInitializedTestTypes(prev => new Set([...prev, selectedType]));
+          
+          console.log('✅ [Fetch Schedule] Test type initialized:', selectedType);
+        } else {
+          console.log('✅ [Fetch Schedule] Test type already initialized, using existing form state');
+          console.log('📅 [Fetch Schedule] Existing config:', testTypeFormStates[selectedType]);
         }
-        
-        // Store config for this test type
-        setTestTypeFormStates(prev => ({
-          ...prev,
-          [selectedType]: cfg
-        }));
-        
-        // Mark as initialized
-        setInitializedTestTypes(prev => new Set([...prev, selectedType]));
-        
-        console.log('✅ Schedule loaded and configured for:', selectedType);
       } catch (error) {
-        console.error('❌ Failed to load schedule:', error);
+        console.error('❌ [Fetch Schedule] Failed to load schedule:', error);
       } finally {
         setLoadingSchedule(false);
       }
     };
 
-    loadSchedule();
+    // ALWAYS fetch when selectedType changes (just like doctor dashboard)
+    fetchSchedule();
   }, [selectedType]);
 
   const generateSlots = (start: string, end: string, duration: number): Array<{ time: string; duration: number }> => {

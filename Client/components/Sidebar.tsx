@@ -50,7 +50,15 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     ...(user ? [{
       icon: TestTube,
       label: t('my_labs_title') || 'My Labs',
-      action: () => router.push('/labs')
+      action: () => {
+        // If user is a patient, navigate to patient dashboard labs page
+        if (user.role === 'patient') {
+          router.push('/patient-dashboard/labs');
+        } else {
+          // For non-patients, navigate to labs page
+          router.push('/labs');
+        }
+      }
     }] : []),
     ...(user ? [{
       icon: Heart,

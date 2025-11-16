@@ -240,7 +240,7 @@ export default function CenterServicesManagement() {
             ))}
           </div>
           <div className="flex justify-end">
-            <Button onClick={save} disabled={saving || !anyChanged} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button onClick={handleSave} disabled={saving || !anyChanged} className="bg-emerald-600 hover:bg-emerald-700 text-white">
               {saving ? (t('saving') || 'Saving...') : (t('save') || 'Save')}
             </Button>
           </div>

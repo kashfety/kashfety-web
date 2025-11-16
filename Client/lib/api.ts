@@ -961,7 +961,9 @@ export const adminService = {
   // Update user profile
   updateUser: async (id: string, updates: any) => {
     try {
-      const response = await api.put(`/api/auth/admin/users/${id}`, updates);
+      console.log('✏️ Trying admin-update-user fallback route');
+      const response = await api.put(`/api/admin-update-user?userId=${id}`, updates);
+      console.log('✅ Fallback route worked for user update');
       return response;
     } catch (error) {
       console.error('Update user failed:', error);

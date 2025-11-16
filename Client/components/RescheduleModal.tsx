@@ -49,15 +49,15 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // Enhanced state for comprehensive schedule handling (like BookingModal)
-  const [availableSlots, setAvailableSlots] = useState<Array<{time: string, is_available: boolean, is_booked: boolean}>>([]);
+  const [availableSlots, setAvailableSlots] = useState<Array<{ time: string, is_available: boolean, is_booked: boolean }>>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [doctorWorkingDays, setDoctorWorkingDays] = useState<number[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [actualConsultationFee, setActualConsultationFee] = useState<number>(0);
-  
+
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
 
@@ -69,11 +69,11 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       setReason("");
       setAvailableSlots([]);
       setBookedSlots([]);
-      
+
       // Fetch doctor's working days and available dates when modal opens
       // Try to get doctor_id from various possible locations
       const doctorId = appointment.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
-      
+
       if (doctorId) {
         console.log('📅 RescheduleModal - Fetching availability for doctor_id:', doctorId);
         fetchDoctorAvailability(doctorId);
@@ -87,22 +87,22 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   const fetchDoctorAvailability = async (doctorId: string) => {
     try {
       console.log('🔍 Fetching doctor availability for reschedule:', doctorId);
-      
+
       // Calculate date range for next 30 days
       const today = new Date();
       const startDate = today.toISOString().split('T')[0];
       const endDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
+
       // Get center_id if available
       const maybeCenterId = (appointment as any)?.center_id;
-      
+
       // Try multiple route variants for Vercel compatibility (same as BookingModal)
       const params = new URLSearchParams();
       params.set('doctorId', doctorId);
       if (maybeCenterId) {
         params.set('center_id', maybeCenterId);
       }
-      
+
       const routes = [
         `/api/doctor-working-days?${params.toString()}`,
         `/api/doctor-schedule/${doctorId}/working-days${maybeCenterId ? `?center_id=${maybeCenterId}` : ''}`
@@ -126,11 +126,11 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           }
         }
       }
-      
+
       if (!result) {
         throw new Error('All routes failed');
       }
-      
+
       // Accept either working_days or workingDays key
       const rawDays = Array.isArray(result.working_days) ? result.working_days : (Array.isArray(result.workingDays) ? result.workingDays : null);
       if (result.success && Array.isArray(rawDays)) {
@@ -139,21 +139,21 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         const workingDays = rawDays.map((d: any) => Number(d)) || [1, 2, 3, 4, 5];
         setDoctorWorkingDays(workingDays);
         console.log('📅 Doctor working days:', workingDays);
-        
+
         // Generate available dates for the next 30 days based on working days
         const availableDates = [];
         const today = new Date();
-        
+
         for (let i = 0; i < 30; i++) {
           const date = new Date(today);
           date.setDate(today.getDate() + i);
           const dayOfWeek = date.getDay();
-          
+
           if (workingDays.includes(dayOfWeek)) {
             availableDates.push(date.toISOString().split('T')[0]);
           }
         }
-        
+
         // Set available dates from generated list
         setAvailableDates(availableDates);
         console.log('📅 Available dates for reschedule:', availableDates);
@@ -185,12 +185,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
       const dateString = formatDateForAPI(date);
       const appointmentType = appointment?.isHomeVisit ? "home_visit" : "clinic";
-      
+
       console.log('🔍 Fetching available slots for reschedule - Doctor:', doctorId, 'Date:', dateString, 'Type:', appointmentType);
-      
+
       // Get center_id if available
       const maybeCenterId = (appointment as any)?.center_id;
-      
+
       // Build query parameters for fallback route
       const params = new URLSearchParams();
       params.set('doctorId', doctorId);
@@ -202,7 +202,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       if (appointment?.id) {
         params.set('exclude_appointment_id', appointment.id);
       }
-      
+
       // Try multiple route variants for Vercel compatibility (same pattern as working-days)
       const routes = [
         `/api/doctor-available-slots?${params.toString()}`,
@@ -231,18 +231,18 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           }
         }
       }
-      
+
       if (!result) {
         throw new Error('All routes failed');
       }
-      
+
       // Handle different response formats
       const slots = result.available_slots || result.slots || [];
       const bookedSlotsList = result.booked_slots || [];
-      
+
       console.log('📅 RESCHEDULE MODAL - Available slots from API:', slots);
       console.log('📅 RESCHEDULE MODAL - Slot structure:', slots[0]);
-      
+
       // Normalize slots to expected format
       const normalizedSlots = slots.map((slot: any) => {
         if (typeof slot === 'string') {
@@ -258,9 +258,9 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           is_booked: slot.is_booked === true || slot.is_booked === false ? slot.is_booked : false
         };
       }).filter((slot: any) => slot.time);
-      
+
       console.log('📅 RESCHEDULE MODAL - Final normalized slots:', normalizedSlots);
-      
+
       setAvailableSlots(normalizedSlots);
       setBookedSlots(bookedSlotsList);
     } catch (error) {
@@ -275,11 +275,11 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   const handleDateSelect = async (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedTime("");
-    
+
     if (date) {
       // Try to get doctor_id from various possible locations
       const doctorId = appointment?.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
-      
+
       if (doctorId) {
         console.log('📅 RescheduleModal - Using doctor_id:', doctorId, 'for date:', date);
         await fetchAvailableSlots(doctorId, date);
@@ -306,7 +306,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
     }
 
     setLoading(true);
-    
+
     // Helper function for date formatting
     const formatDateForAPI = (date: Date): string => {
       const year = date.getFullYear();
@@ -314,31 +314,60 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     };
-    
+
     try {
       // ENHANCED: Pre-reschedule validation - check if the slot is still available
       console.log('🔍 Performing pre-reschedule slot validation...');
       const dateString = formatDateForAPI(selectedDate);
-      let validationUrl = `/api/doctor-schedule/${appointment.doctor_id}/available-slots?date=${dateString}`;
       const maybeCenterId2 = (appointment as any)?.center_id;
+
+      // Build validation URL with fallback pattern (try multiple routes)
+      const validationParams = new URLSearchParams();
+      if (appointment.doctor_id) validationParams.set('doctorId', appointment.doctor_id);
+      validationParams.set('date', dateString);
+      validationParams.set('appointment_type', (appointment as any)?.appointment_type || 'clinic');
       if (maybeCenterId2) {
-        validationUrl += `&center_id=${maybeCenterId2}`;
+        validationParams.set('center_id', maybeCenterId2);
       }
-      // Exclude current appointment from booked slots when validating
       if (appointment?.id) {
-        validationUrl += `&exclude_appointment_id=${encodeURIComponent(appointment.id)}`;
+        validationParams.set('exclude_appointment_id', appointment.id);
       }
-      const validationResponse = await fetch(validationUrl);
-      const validationResult = await validationResponse.json();
-      
-      if (validationResult.success && validationResult.available_slots) {
+
+      // Try fallback route first (this one works according to logs)
+      const validationUrls = [
+        `/api/doctor-available-slots?${validationParams.toString()}`,
+        `/api/doctor-schedule/${appointment.doctor_id}/available-slots?${validationParams.toString()}`
+      ];
+
+      let validationResult: any = null;
+      let validationSuccess = false;
+
+      for (const url of validationUrls) {
+        try {
+          console.log('🕐 Trying validation route:', url);
+          const validationResponse = await fetch(url);
+          if (validationResponse.ok) {
+            validationResult = await validationResponse.json();
+            validationSuccess = true;
+            console.log('✅ Validation route worked:', url);
+            break;
+          }
+        } catch (err) {
+          console.log('❌ Validation route failed:', url);
+          continue;
+        }
+      }
+
+      if (!validationSuccess || !validationResult) {
+        console.warn('⚠️ Could not validate slot availability, proceeding with reschedule...');
+      } else if (validationResult.success && validationResult.available_slots) {
         const availableSlotTimes = validationResult.available_slots
           .filter((slot: any) => slot.is_available && !slot.is_booked)
           .map((slot: any) => slot.time);
-        
+
         console.log('🔍 Current available slots:', availableSlotTimes);
         console.log('🔍 Selected time:', selectedTime);
-        
+
         if (!availableSlotTimes.includes(selectedTime)) {
           console.error('❌ Selected slot is no longer available for reschedule');
           showError(
@@ -355,12 +384,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           setLoading(false);
           return;
         }
-        
+
         console.log('✅ Pre-reschedule validation passed - slot is still available');
       } else {
         console.warn('⚠️ Could not validate slot availability, proceeding with reschedule...');
       }
-      
+
       // Prepare reschedule data
       const rescheduleData = {
         appointment_date: formatDateForAPI(selectedDate), // Fixed timezone issue
@@ -380,7 +409,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       });
 
       await appointmentService.rescheduleAppointment(appointment.id, rescheduleData);
-      
+
       // Create updated appointment object for parent component
       const updatedAppointment: Appointment = {
         ...appointment,
@@ -390,7 +419,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         appointment_time: selectedTime,
         status: 'rescheduled' // Update status to reflect the change
       };
-      
+
       // Immediately update parent and close the modal
       if (onReschedule) {
         onReschedule(updatedAppointment);
@@ -398,20 +427,20 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       onSuccess();
       onClose();
       // Show a non-blocking toast confirmation
-      toast({ 
-        title: t('reschedule_success_title') || "Appointment Rescheduled", 
-        description: t('reschedule_success_message') || "Your appointment was rescheduled successfully." 
+      toast({
+        title: t('reschedule_success_title') || "Appointment Rescheduled",
+        description: t('reschedule_success_message') || "Your appointment was rescheduled successfully."
       });
     } catch (error: any) {
       console.error('Error rescheduling appointment:', error);
       let errorMessage = t('reschedule_error_default') || "Failed to reschedule appointment. Please try again.";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       showError(
         t('reschedule_error_title') || "Error",
         errorMessage
@@ -425,21 +454,21 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Disable past dates
     if (date < today) return true;
-    
+
     // If we have available dates from API, use those (more accurate)
     if (availableDates.length > 0) {
       const dateString = date.toISOString().split('T')[0];
       return !availableDates.includes(dateString);
     }
-    
+
     // Otherwise, disable if not in doctor's working days
     if (doctorWorkingDays.length > 0 && !doctorWorkingDays.includes(date.getDay())) {
       return true;
     }
-    
+
     return false;
   };
 
@@ -485,7 +514,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                   >
                     <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-800 shadow-md">
                       <CardContent className="p-4">
-                        <motion.h3 
+                        <motion.h3
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
@@ -494,13 +523,13 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           {t('reschedule_current_appointment') || 'Current Appointment'}
                         </motion.h3>
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4, staggerChildren: 0.1 }}
                           className="space-y-2"
                         >
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-2"
@@ -517,7 +546,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               </motion.div>
                             )}
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.1 }}
@@ -529,7 +558,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               {appointment.appointment_time?.substring(0, 5) || appointment.time || t('reschedule_time_tbd') || 'Time TBD'}
                             </span>
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
@@ -540,7 +569,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               {appointment.duration ? `${appointment.duration} ${t('reschedule_min') || 'min'}` : `30 ${t('reschedule_min') || 'min'}`} - {appointment.type || t('reschedule_consultation') || 'Consultation'}
                             </span>
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
@@ -550,7 +579,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             <span className="text-gray-900 dark:text-gray-100">{appointment.location || appointment.address || t('reschedule_medical_center') || 'Medical Center'}</span>
                           </motion.div>
                           {appointment.phone && (
-                            <motion.div 
+                            <motion.div
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.4 }}
@@ -561,7 +590,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             </motion.div>
                           )}
                           {appointment.notes && appointment.notes !== 'No additional notes' && appointment.notes.trim() !== '' && (
-                            <motion.div 
+                            <motion.div
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.5 }}
@@ -744,8 +773,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                   <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold">
                     {t('reschedule_cancel') || 'Cancel'}
                   </Button>
-                  <Button 
-                    onClick={handleReschedule} 
+                  <Button
+                    onClick={handleReschedule}
                     disabled={!selectedDate || !selectedTime || loading}
                     className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] dark:from-[#4DBCC4] dark:to-[#3da8b0] dark:hover:from-[#3da8b0] dark:hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                   >

@@ -515,20 +515,21 @@ export const cancelAppointment = async (req, res) => {
       const now = new Date();
       const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
-          code: 'CANCELLATION_TOO_LATE'
-        });
-      }
-
       // Check if appointment is in the past
       if (hoursUntilAppointment < 0) {
         return res.status(400).json({
           success: false,
           error: 'Cannot cancel a past appointment',
           code: 'APPOINTMENT_IN_PAST'
+        });
+      }
+
+      // Block cancellation if less than 24 hours away
+      if (hoursUntilAppointment < 24) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          code: 'CANCELLATION_TOO_LATE'
         });
       }
     }

@@ -142,8 +142,8 @@ export const translations = {
     header_login_signup: "Login / Sign up",
     header_logout: "Logout",
     header_hello: "Hello,",
-    header_my_appointments: "My Appointments",
-    my_labs_title: "My Labs",
+    header_my_appointments: "My Doctor Appointments",
+    my_labs_title: "My Lab Appointments",
 
     // Common small words/phrases
     or: "or",
@@ -1337,8 +1337,8 @@ export const translations = {
     header_login_signup: "تسجيل الدخول / إنشاء حساب",
     header_logout: "تسجيل الخروج",
     header_hello: "مرحباً،",
-    header_my_appointments: "مواعيدي",
-    my_labs_title: "المختبرات",
+    header_my_appointments: "حجوزات الاطباء",
+    my_labs_title: " حجوزات المختبرات",
 
     // Common small words/phrases
     or: "أو",

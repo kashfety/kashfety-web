@@ -44,32 +44,60 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
   const canCancel = () => {
     if (!appointment?.date || !appointment?.time) return true; // Allow if date/time missing
 
-    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
-    const now = new Date();
-    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    try {
+      // Parse the formatted date and time
+      // Date format: "November 25, 2025"
+      // Time format: "3:30 PM"
+      const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
 
-    console.log('🔍 [CancelModal] Can cancel check:', {
-      date: appointment.date,
-      time: appointment.time,
-      hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
-      canCancel: hoursUntilAppointment >= 24
-    });
+      // Check if date is valid
+      if (isNaN(appointmentDateTime.getTime())) {
+        console.error('❌ [CancelModal] Invalid date format:', { date: appointment.date, time: appointment.time });
+        return true; // Allow cancellation if we can't parse the date
+      }
 
-    // Can cancel if 24 hours or more away (not if appointment is in the past)
-    return hoursUntilAppointment >= 24;
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      console.log('🔍 [CancelModal] Can cancel check:', {
+        date: appointment.date,
+        time: appointment.time,
+        parsedDateTime: appointmentDateTime.toISOString(),
+        now: now.toISOString(),
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
+        canCancel: hoursUntilAppointment >= 24
+      });
+
+      // Can cancel if 24 hours or more away (not if appointment is in the past)
+      return hoursUntilAppointment >= 24;
+    } catch (error) {
+      console.error('❌ [CancelModal] Error parsing date:', error);
+      return true; // Allow cancellation if parsing fails
+    }
   };
 
   const getTimeUntilAppointment = () => {
     if (!appointment?.date || !appointment?.time) return null;
 
-    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
-    const now = new Date();
-    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    try {
+      // Parse the formatted date and time
+      const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
 
-    if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
-      return Math.ceil(hoursUntilAppointment);
+      // Check if date is valid
+      if (isNaN(appointmentDateTime.getTime())) {
+        return null;
+      }
+
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
+        return Math.ceil(hoursUntilAppointment);
+      }
+      return null;
+    } catch (error) {
+      return null;
     }
-    return null;
   };
 
   const handleCancel = async () => {

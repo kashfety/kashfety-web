@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, Clock, Save, RotateCcw } from "lucide-react";
+import { Calendar, Clock, Save, RotateCcw, CheckCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -250,42 +250,40 @@ export default function CenterScheduleManagement() {
         <CardHeader><CardTitle>{t('selectTest') || 'Select Test/Service'}</CardTitle></CardHeader>
         <CardContent>
           {services.length > 0 ? (
-            <Select 
-              value={selectedType} 
-              onValueChange={(value) => {
-                console.log('🔀 Test type selection changed:', { from: selectedType, to: value });
-                
-                // Clear selection first if selecting same value to force reload
-                if (value === selectedType) {
-                  console.log('⚠️ Same value selected, clearing first');
-                  setSelectedType('');
-                  // Use setTimeout to ensure state updates
-                  setTimeout(() => {
-                    setSelectedType(value);
-                    setReloadTrigger(prev => prev + 1);
-                  }, 0);
-                } else {
-                  setSelectedType(value);
-                  setReloadTrigger(prev => {
-                    const newTrigger = prev + 1;
-                    console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
-                    return newTrigger;
-                  });
-                }
-              }}
-            >
-              <SelectTrigger><SelectValue placeholder={t('chooseTestType') || 'Choose test type'} /></SelectTrigger>
-              <SelectContent>
-                {services.map((service: any) => (
-                  <SelectItem key={service.lab_test_types?.id || service.id} value={service.lab_test_types?.id || service.lab_test_type_id}>
-                    {service.lab_test_types?.name || 'Unnamed Test'}
-                    <span className="ml-2 text-xs text-gray-500">
-                      (${service.base_fee || service.lab_test_types?.default_fee || 'No price'})
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {services.map((service: any) => {
+                  const testTypeId = service.lab_test_types?.id || service.lab_test_type_id;
+                  const isSelected = selectedType === testTypeId;
+                  return (
+                    <Button
+                      key={testTypeId}
+                      variant={isSelected ? "default" : "outline"}
+                      className="h-auto py-4 px-4 flex flex-col items-start gap-2 relative"
+                      onClick={() => {
+                        console.log('🔀 Test type button clicked:', { current: selectedType, clicked: testTypeId });
+                        setSelectedType(testTypeId);
+                        setReloadTrigger(prev => {
+                          const newTrigger = prev + 1;
+                          console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
+                          return newTrigger;
+                        });
+                      }}
+                    >
+                      <div className="font-semibold text-left">{service.lab_test_types?.name || 'Unnamed Test'}</div>
+                      <div className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
+                        ${service.base_fee || service.lab_test_types?.default_fee || 'No price'}
+                      </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle className="h-4 w-4" />
+                        </div>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8">
               <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />

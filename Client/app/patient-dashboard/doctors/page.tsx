@@ -82,6 +82,7 @@ export default function PatientDoctorsPage() {
     const [loadingDetails, setLoadingDetails] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+    const [bookingDoctorId, setBookingDoctorId] = useState<string | undefined>(undefined)
 
     const toggleSidebar = () => {
         setSidebarOpen(prev => !prev)
@@ -179,6 +180,7 @@ export default function PatientDoctorsPage() {
 
     const handleBookAppointment = (doctorId: string) => {
         setShowDetailsModal(false)
+        setBookingDoctorId(doctorId)
         setIsBookingModalOpen(true)
     }
 
@@ -614,8 +616,12 @@ export default function PatientDoctorsPage() {
                     {/* Booking Modal */}
                     <BookingModal
                         isOpen={isBookingModalOpen}
-                        onClose={() => setIsBookingModalOpen(false)}
+                        onClose={() => {
+                            setIsBookingModalOpen(false)
+                            setBookingDoctorId(undefined)
+                        }}
                         initialMode="doctor"
+                        preSelectedDoctorId={bookingDoctorId}
                     />
                 </div>
             </div>

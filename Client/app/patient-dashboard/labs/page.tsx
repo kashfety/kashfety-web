@@ -72,6 +72,7 @@ export default function PatientLabsPage() {
     const [loadingDetails, setLoadingDetails] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+    const [bookingCenterId, setBookingCenterId] = useState<string | undefined>(undefined)
 
     const toggleSidebar = () => {
         setSidebarOpen(prev => !prev)
@@ -159,6 +160,9 @@ export default function PatientLabsPage() {
     }
 
     const handleBookLabTest = () => {
+        if (selectedCenter) {
+            setBookingCenterId(selectedCenter.id)
+        }
         setShowDetailsModal(false)
         setIsBookingModalOpen(true)
     }
@@ -599,8 +603,12 @@ export default function PatientLabsPage() {
                     {/* Booking Modal */}
                     <BookingModal
                         isOpen={isBookingModalOpen}
-                        onClose={() => setIsBookingModalOpen(false)}
+                        onClose={() => {
+                            setIsBookingModalOpen(false)
+                            setBookingCenterId(undefined)
+                        }}
                         initialMode="lab"
+                        preSelectedCenterId={bookingCenterId}
                     />
                 </div>
             </div>

@@ -16,7 +16,8 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  Microscope
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -50,15 +51,12 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     ...(user ? [{
       icon: TestTube,
       label: t('my_labs_title') || 'My Labs',
-      action: () => {
-        // If user is a patient, navigate to patient dashboard labs page
-        if (user.role === 'patient') {
-          router.push('/patient-dashboard/labs');
-        } else {
-          // For non-patients, navigate to labs page
-          router.push('/labs');
-        }
-      }
+      action: () => router.push('/labs')
+    }] : []),
+    ...(user && user.role === 'patient' ? [{
+      icon: Microscope,
+      label: t('labs') || 'Labs',
+      action: () => router.push('/patient-dashboard/labs')
     }] : []),
     ...(user ? [{
       icon: Heart,

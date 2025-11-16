@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Frontend API Base URL for public endpoints (Next.js server)
 // Use relative path in browser, or environment variable if set
-const FRONTEND_API_BASE_URL = typeof window !== 'undefined' 
+const FRONTEND_API_BASE_URL = typeof window !== 'undefined'
   ? '' // Use relative paths in browser (same origin)
   : (process.env.NEXT_PUBLIC_FRONTEND_API_URL || 'http://localhost:3000'); // Only use absolute URL for SSR
 
@@ -35,17 +35,17 @@ frontendApiClient.interceptors.request.use(
       try {
         // Get current JWT token from localStorage
         const token = localStorage.getItem('auth_token');
-        
+
         // Add token for protected endpoints (auth/, center-dashboard/, or download routes)
         if (token && config.headers && config.url && (
-          config.url.includes('/api/auth/') || 
+          config.url.includes('/api/auth/') ||
           config.url.includes('/api/center-dashboard/') ||
           config.url.includes('/download-lab-result/')
         )) {
           config.headers.Authorization = `Bearer ${token}`;
           console.log('✅ Adding auth token to frontend request:', config.url);
         } else if (config.url && (
-          config.url.includes('/api/auth/') || 
+          config.url.includes('/api/auth/') ||
           config.url.includes('/api/center-dashboard/') ||
           config.url.includes('/download-lab-result/')
         )) {
@@ -67,7 +67,7 @@ frontendApiClient.interceptors.response.use(
     // Handle specific error codes
     if (error.response) {
       const status = error.response.status;
-      
+
       // Handle auth errors
       if (status === 401) {
         // Only run on client-side
@@ -76,7 +76,7 @@ frontendApiClient.interceptors.response.use(
             // Check if this is a request to a protected endpoint
             const requestUrl = error.config?.url || '';
             const isProtectedEndpoint = requestUrl.includes('/api/auth/');
-            
+
             if (isProtectedEndpoint) {
               // Clear auth data and redirect to login
               localStorage.removeItem('auth_token');
@@ -394,7 +394,7 @@ export const appointmentService = {
       }
 
       const user = JSON.parse(storedUser);
-      
+
       // Try multiple route variants for Vercel compatibility
       const routes = [
         `/api/my-appointments?userId=${user.id}&role=${user.role}`,
@@ -402,7 +402,7 @@ export const appointmentService = {
         `/api/appointments/user/${user.id}?role=${user.role}`,
         `/api/auth/appointments/user/${user.id}?role=${user.role}`
       ];
-      
+
       for (let i = 0; i < routes.length; i++) {
         try {
           console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
@@ -417,7 +417,7 @@ export const appointmentService = {
           // Continue to next route
         }
       }
-      
+
       throw new Error('All appointment routes failed');
     } catch (error) {
       console.error('Get appointments failed:', error);
@@ -477,11 +477,25 @@ export const appointmentService = {
   // Reschedule appointment (alternative method with reschedule data object)
   rescheduleAppointment: async (id: string, rescheduleData: { appointment_date: string; appointment_time: string; reason?: string }) => {
     try {
-      const response = await api.put(`/api/auth/appointments/${id}/reschedule`, {
-        new_date: rescheduleData.appointment_date,
-        new_time: rescheduleData.appointment_time
-      });
-      return response;
+      // Try fallback route first for Vercel compatibility
+      try {
+        console.log('📅 Trying appointment-reschedule route');
+        const response = await api.put(`/api/appointment-reschedule?appointmentId=${id}`, {
+          new_date: rescheduleData.appointment_date,
+          new_time: rescheduleData.appointment_time,
+          reason: rescheduleData.reason
+        });
+        console.log('✅ Appointment rescheduled successfully');
+        return response;
+      } catch (fallbackError) {
+        console.log('❌ Fallback failed, trying dynamic route');
+        const response = await api.put(`/api/auth/appointments/${id}/reschedule`, {
+          new_date: rescheduleData.appointment_date,
+          new_time: rescheduleData.appointment_time,
+          reason: rescheduleData.reason
+        });
+        return response;
+      }
     } catch (error) {
       console.error('Reschedule appointment failed:', error);
       throw error;
@@ -516,7 +530,7 @@ export const appointmentService = {
 // Lab/Imaging service
 export const labService = {
   getTypes: async () => frontendApi.get('/api/public/lab-tests/types'),
-  getCenters: async (params?: { lab_test_type_id?: string; category?: 'lab'|'imaging' }) =>
+  getCenters: async (params?: { lab_test_type_id?: string; category?: 'lab' | 'imaging' }) =>
     frontendApi.get('/api/public/lab-tests/centers', { params }),
   getCenterServices: async (centerId: string) => {
     // Try fallback route first for Vercel compatibility
@@ -574,7 +588,7 @@ export const labService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     if (!userStr) throw new Error('No user found. Please log in.');
     const user = JSON.parse(userStr);
-    
+
     // Try fallback route first for Vercel compatibility
     try {
       console.log('🔬 Trying my-lab-bookings route');
@@ -623,72 +637,72 @@ export const centerService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/profile', { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.get('/api/auth/center/profile', {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   updateProfile: async (updates: any) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.put('/api/auth/center/profile', updates, { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.put('/api/auth/center/profile', updates, {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   upcomingBookings: async () => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    console.log('🔄 centerService.upcomingBookings called with user:', { 
-      userId: user?.id, 
-      centerId, 
-      role: user?.role 
+
+    console.log('🔄 centerService.upcomingBookings called with user:', {
+      userId: user?.id,
+      centerId,
+      role: user?.role
     });
-    
-    return frontendApi.get('/api/auth/lab-tests/center/today', { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.get('/api/auth/lab-tests/center/today', {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   listServices: async () => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/lab-services', { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.get('/api/auth/center/lab-services', {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   saveServices: async (services: Array<{ lab_test_type_id: string; base_fee?: number; is_active?: boolean }>) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.put('/api/auth/center/lab-services', { services }, { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.put('/api/auth/center/lab-services', { services }, {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   getLabSchedule: async (lab_test_type_id?: string) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/lab-schedule', { 
-      params: { 
+
+    return frontendApi.get('/api/auth/center/lab-schedule', {
+      params: {
         ...(lab_test_type_id ? { lab_test_type_id } : {}),
         ...(centerId ? { center_id: centerId } : {})
-      } 
+      }
     });
   },
   saveLabSchedule: async (lab_test_type_id: string, schedule: Array<{ day_of_week: number; is_available: boolean; slots: Array<{ time: string; duration?: number }>; break_start?: string; break_end?: string; notes?: string; slot_duration?: number }>) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.put('/api/auth/center/lab-schedule', { lab_test_type_id, schedule }, { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.put('/api/auth/center/lab-schedule', { lab_test_type_id, schedule }, {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   uploadResult: async (bookingId: string, file: File, result_notes?: string) => {
@@ -698,7 +712,7 @@ export const centerService = {
     if (result_notes) {
       form.append('result_notes', result_notes);
     }
-    
+
     // Try fallback route first for Vercel compatibility (avoids proxy loop)
     try {
       console.log('📤 Trying center-upload-lab-result fallback route');
@@ -712,26 +726,26 @@ export const centerService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/patients', { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.get('/api/auth/center/patients', {
+      params: centerId ? { center_id: centerId } : {}
     });
   },
   getPatientDetails: async (patientId: string) => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
+
     // Try fallback route first for Vercel compatibility
     try {
       console.log('🏥 Trying center-patient-details fallback route');
-      return await frontendApi.get(`/api/center-patient-details`, { 
-        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      return await frontendApi.get(`/api/center-patient-details`, {
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) }
       });
     } catch (fallbackError) {
       console.log('❌ Fallback failed, trying dynamic route');
-      return frontendApi.get(`/api/auth/center/patients/${patientId}`, { 
-        params: centerId ? { center_id: centerId } : {} 
+      return frontendApi.get(`/api/auth/center/patients/${patientId}`, {
+        params: centerId ? { center_id: centerId } : {}
       });
     }
   },
@@ -739,17 +753,17 @@ export const centerService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
+
     // Try fallback route first for Vercel compatibility
     try {
       console.log('🩺 Trying center-patient-medical-records fallback route');
-      return await frontendApi.get(`/api/center-patient-medical-records`, { 
-        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      return await frontendApi.get(`/api/center-patient-medical-records`, {
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) }
       });
     } catch (fallbackError) {
       console.log('❌ Fallback failed, trying dynamic route');
-      return frontendApi.get(`/api/auth/center/patients/${patientId}/medical-records`, { 
-        params: centerId ? { center_id: centerId } : {} 
+      return frontendApi.get(`/api/auth/center/patients/${patientId}/medical-records`, {
+        params: centerId ? { center_id: centerId } : {}
       });
     }
   },
@@ -757,17 +771,17 @@ export const centerService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
+
     // Try fallback route first for Vercel compatibility
     try {
       console.log('🔬 Trying center-patient-lab-history fallback route');
-      return await frontendApi.get(`/api/center-patient-lab-history`, { 
-        params: { patientId, ...(centerId ? { center_id: centerId } : {}) } 
+      return await frontendApi.get(`/api/center-patient-lab-history`, {
+        params: { patientId, ...(centerId ? { center_id: centerId } : {}) }
       });
     } catch (fallbackError) {
       console.log('❌ Fallback failed, trying dynamic route');
-      return frontendApi.get(`/api/auth/center/patients/${patientId}/lab-history`, { 
-        params: centerId ? { center_id: centerId } : {} 
+      return frontendApi.get(`/api/auth/center/patients/${patientId}/lab-history`, {
+        params: centerId ? { center_id: centerId } : {}
       });
     }
   },
@@ -775,21 +789,21 @@ export const centerService = {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/bookings', { 
-      params: { 
+
+    return frontendApi.get('/api/auth/center/bookings', {
+      params: {
         ...(params || {}),
         ...(centerId ? { center_id: centerId } : {})
-      } 
+      }
     });
   },
   getAnalytics: async () => {
     const userStr = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
     const user = userStr ? JSON.parse(userStr) : null;
     const centerId = user?.center_id || user?.id;
-    
-    return frontendApi.get('/api/auth/center/analytics', { 
-      params: centerId ? { center_id: centerId } : {} 
+
+    return frontendApi.get('/api/auth/center/analytics', {
+      params: centerId ? { center_id: centerId } : {}
     });
   }
 };
@@ -861,18 +875,18 @@ export const adminService = {
   getAllUsers: async (params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) => {
     try {
       console.log('🔄 Fetching users with params:', params);
-      
+
       // Try fallback route first for Vercel compatibility
       try {
         console.log('👥 Trying admin-users fallback route');
         const response = await api.get('/api/admin-users', { params });
         console.log('👥 Fallback response status:', response.status, 'data keys:', Object.keys(response.data || {}));
-        
+
         // Check if response has users data (multiple possible formats)
-        const hasUsers = response.data?.users || 
-                        response.data?.data?.users || 
-                        (Array.isArray(response.data) && response.data.length > 0);
-        
+        const hasUsers = response.data?.users ||
+          response.data?.data?.users ||
+          (Array.isArray(response.data) && response.data.length > 0);
+
         // If response has users data, use it (status check is optional since axios throws on non-2xx)
         if (hasUsers || response.data?.success || response.data?.pagination) {
           console.log('✅ Fallback route worked, using response');
@@ -884,7 +898,7 @@ export const adminService = {
         console.log('❌ Fallback failed:', fallbackError?.response?.status || fallbackError?.status, fallbackError?.message || fallbackError);
         // Continue to try dynamic route
       }
-      
+
       // Fallback to original route
       console.log('🔄 Trying original dynamic route');
       const response = await api.get('/api/auth/admin/users', { params });
@@ -899,20 +913,20 @@ export const adminService = {
   getUserById: async (id: string) => {
     try {
       console.log('👤 [API Service] Fetching user details for:', id);
-      
+
       // Try fallback route first for Vercel compatibility
       try {
         console.log('👤 [API Service] Trying admin-user-details fallback route');
         const response = await api.get('/api/admin-user-details', { params: { userId: id } });
         console.log('👤 [API Service] Fallback response received, data keys:', Object.keys(response.data || {}));
-        
+
         // Check if response has user data (multiple possible formats)
-        const hasUserData = response.data?.success || 
-                           response.data?.data?.user || 
-                           response.data?.data?.appointments ||
-                           response.data?.user ||
-                           response.data?.appointments;
-        
+        const hasUserData = response.data?.success ||
+          response.data?.data?.user ||
+          response.data?.data?.appointments ||
+          response.data?.user ||
+          response.data?.appointments;
+
         if (hasUserData) {
           console.log('✅ [API Service] Fallback route worked for user details');
           return response;
@@ -922,7 +936,7 @@ export const adminService = {
       } catch (fallbackError: any) {
         console.log('❌ [API Service] Fallback failed for user details:', fallbackError?.response?.status || fallbackError?.status, fallbackError?.message);
       }
-      
+
       // Fallback to original route
       console.log('🔄 [API Service] Trying original dynamic route for user details');
       const response = await api.get(`/api/auth/admin/users/${id}`);
@@ -970,13 +984,13 @@ export const adminService = {
   getAllCenters: async (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
     try {
       console.log('🏥 Fetching centers with params:', params);
-      
+
       // Try fallback route first for Vercel compatibility
       try {
         console.log('🏥 Trying admin-centers fallback route');
         const response = await api.get('/api/admin-centers', { params });
         console.log('🏥 Fallback response data keys:', Object.keys(response.data || {}));
-        
+
         // Check if response has centers data
         if (response.data?.success || response.data?.data || response.data?.centers) {
           console.log('✅ Fallback route worked for centers');
@@ -985,7 +999,7 @@ export const adminService = {
       } catch (fallbackError: any) {
         console.log('❌ Fallback failed for centers:', fallbackError?.response?.status || fallbackError?.status);
       }
-      
+
       // Fallback to original route
       console.log('🔄 Trying original dynamic route for centers');
       const response = await api.get('/api/auth/admin/centers', { params });
@@ -1044,13 +1058,13 @@ export const adminService = {
   getAnalytics: async (params?: { start_date?: string; end_date?: string; type?: string }) => {
     try {
       console.log('📊 Fetching analytics with params:', params);
-      
+
       // Try fallback route first for Vercel compatibility
       try {
         console.log('📊 Trying admin-analytics fallback route');
         const response = await api.get('/api/admin-analytics', { params });
         console.log('📊 Fallback response data keys:', Object.keys(response.data || {}));
-        
+
         // Check if response has analytics data
         if (response.data?.success || response.data?.data || response.data?.appointments || response.data?.revenue) {
           console.log('✅ Fallback route worked for analytics');
@@ -1059,7 +1073,7 @@ export const adminService = {
       } catch (fallbackError: any) {
         console.log('❌ Fallback failed for analytics:', fallbackError?.response?.status || fallbackError?.status);
       }
-      
+
       // Fallback to original route
       console.log('🔄 Trying original dynamic route for analytics');
       const response = await api.get('/api/auth/admin/analytics', { params });

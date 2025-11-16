@@ -298,18 +298,29 @@ export async function PUT(request: NextRequest) {
       console.log('⚠️ RPC function not available, using manual insert approach');
       console.log('RPC Error:', funcError);
       
-      // Delete existing schedules for this doctor and center
-      const { error: delErr } = await supabase
-        .from('doctor_schedules')
-        .delete()
-        .eq('doctor_id', doctorId)
-        .eq('center_id', centerId);
+      // IMPORTANT: Database has unique constraint on (doctor_id, day_of_week)
+      // NOT (doctor_id, day_of_week, center_id)
+      // So we need to delete based on the specific days we're about to insert
       
-      if (delErr) {
-        console.error('❌ Delete error:', delErr);
-        throw delErr;
+      // Extract the days we're about to insert
+      const daysToInsert = scheduleArray.map((item: any) => item.day_of_week);
+      console.log('📅 Days to insert:', daysToInsert);
+      
+      if (daysToInsert.length > 0) {
+        // Delete existing schedules for this doctor and these specific days
+        console.log('🗑️ Deleting existing schedules for doctor:', doctorId, 'days:', daysToInsert);
+        const { error: delErr } = await supabase
+          .from('doctor_schedules')
+          .delete()
+          .eq('doctor_id', doctorId)
+          .in('day_of_week', daysToInsert);
+        
+        if (delErr) {
+          console.error('❌ Delete error:', delErr);
+          throw delErr;
+        }
+        console.log('✅ Existing schedules deleted for days:', daysToInsert);
       }
-      console.log('✅ Existing schedules deleted for center:', centerId);
       
       // Build rows to insert - ensure all required fields are present
       const rows = scheduleArray.map((item: any) => ({

@@ -622,9 +622,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     } catch (error: any) {
       console.error('Save schedule error:', error);
       console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       
       // Handle schedule conflict (409) with detailed message
       if (error.response?.status === 409) {
+        console.log('🚨 DETECTED 409 CONFLICT - SHOWING TOAST');
         const conflictData = error.response.data;
         
         // Build a simple, readable message
@@ -640,19 +642,36 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           }
         }
         
+        console.log('📢 Toast message:', message);
+        
+        // Try toast first
         toast({
           title: '⚠️ Schedule Conflict',
           description: message,
           variant: "destructive",
           duration: 10000,
         });
+        
+        // Also try alert as backup
+        setTimeout(() => {
+          alert(`⚠️ Schedule Conflict\n\n${message}`);
+        }, 100);
       } else {
+        console.log('🚨 NON-409 ERROR - SHOWING GENERIC TOAST');
         // Generic error handling
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule');
+        console.log('📢 Error message:', errorMessage);
+        
         toast({
           title: t('error') || 'Error',
-          description: error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule'),
+          description: errorMessage,
           variant: "destructive"
         });
+        
+        // Also try alert as backup
+        setTimeout(() => {
+          alert(`Error\n\n${errorMessage}`);
+        }, 100);
       }
     } finally {
       setSaving(false);

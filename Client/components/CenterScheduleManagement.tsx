@@ -59,16 +59,19 @@ export default function CenterScheduleManagement() {
 
   // Load schedule whenever selectedType changes
   useEffect(() => {
+    console.log('⚡ useEffect triggered:', { selectedType, reloadTrigger });
+    
     const loadSchedule = async () => {
       if (!selectedType) {
         // Reset config when no test type is selected
+        console.log('❌ No test type selected, clearing config');
         setDayConfigs({});
         setLoadingSchedule(false);
         return;
       }
       
       try {
-        console.log('🔄 Loading schedule for test type:', selectedType);
+        console.log('🔄 Loading schedule for test type:', selectedType, 'trigger:', reloadTrigger);
         setLoadingSchedule(true);
         // Reset config first to show loading state
         setDayConfigs({});
@@ -250,9 +253,14 @@ export default function CenterScheduleManagement() {
             <Select 
               value={selectedType} 
               onValueChange={(value) => {
+                console.log('🔀 Test type selection changed:', { from: selectedType, to: value });
                 setSelectedType(value);
                 // Increment reload trigger to force schedule reload even if selecting same test type
-                setReloadTrigger(prev => prev + 1);
+                setReloadTrigger(prev => {
+                  const newTrigger = prev + 1;
+                  console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
+                  return newTrigger;
+                });
               }}
             >
               <SelectTrigger><SelectValue placeholder={t('chooseTestType') || 'Choose test type'} /></SelectTrigger>

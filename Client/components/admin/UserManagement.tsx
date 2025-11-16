@@ -48,6 +48,16 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface User {
     id: string;
@@ -96,6 +106,8 @@ export default function UserManagement() {
     const [showUserDetails, setShowUserDetails] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [editForm, setEditForm] = useState({
         first_name: '',
         last_name: '',
@@ -279,10 +291,6 @@ export default function UserManagement() {
     };
 
     const deleteUser = async (userId: string) => {
-        if (!confirm(t('admin_confirm_delete_user') || 'Are you sure you want to delete this user? This action cannot be undone.')) {
-            return;
-        }
-
         try {
             console.log('🔄 Deleting user:', userId);
 
@@ -303,6 +311,20 @@ export default function UserManagement() {
                 description: t('admin_failed_to_delete_user') || "Failed to delete user. Please try again.",
                 variant: "destructive"
             });
+        } finally {
+            setShowDeleteDialog(false);
+            setUserToDelete(null);
+        }
+    };
+
+    const handleDeleteClick = (user: User) => {
+        setUserToDelete(user);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDelete = async () => {
+        if (userToDelete) {
+            await deleteUser(userToDelete.id);
         }
     };
 
@@ -639,8 +661,8 @@ export default function UserManagement() {
 
                                                     return (
                                                         <span className={`text-xs px-1.5 py-0.5 rounded ${hasPassword
-                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                                                                : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                            : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
                                                             }`}>
                                                             {hasPassword ? '🔐 ' + (t('admin_password') || 'Password') : '❌ ' + (t('admin_no_password') || 'No Password')}
                                                         </span>
@@ -699,7 +721,7 @@ export default function UserManagement() {
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() => deleteUser(user.id)}
+                                                    onClick={() => handleDeleteClick(user)}
                                                     className="text-red-600"
                                                 >
                                                     <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -997,6 +1019,28 @@ export default function UserManagement() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin_delete_user_title') || 'Delete User Account'}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('admin_delete_user_confirm') || 'Are you sure you want to delete'} <strong>{userToDelete?.name}</strong> ({userToDelete?.email})?
+                            {t('admin_delete_user_warning') || 'This action cannot be undone and will permanently remove this user account.'}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('admin_cancel') || 'Cancel'}</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {t('admin_delete_user') || 'Delete User'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

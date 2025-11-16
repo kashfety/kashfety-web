@@ -110,7 +110,15 @@ export default function PatientDoctorsPage() {
                 ...(specialtyFilter && { specialty: specialtyFilter })
             })
 
-            const response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`)
+            // Try fallback route first for Vercel compatibility
+            let response = await fetch(`/api/doctors-list?${queryParams}`)
+
+            // If fallback fails, try the original dynamic route
+            if (!response.ok) {
+                console.log('Fallback route failed, trying original route')
+                response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`)
+            }
+
             const data = await response.json()
 
             if (response.ok && data.success) {
@@ -132,6 +140,24 @@ export default function PatientDoctorsPage() {
         try {
             setLoadingDetails(true)
 
+            // Try fallback route first for Vercel compatibility
+            try {
+                console.log('🔍 Trying doctor-details fallback route for:', doctorId)
+                const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`)
+                const data = await response.json()
+
+                if (response.ok && data.success) {
+                    console.log('✅ Doctor details fetched successfully via fallback')
+                    setSelectedDoctor(data.doctor)
+                    setShowDetailsModal(true)
+                    setLoadingDetails(false)
+                    return
+                }
+            } catch (fallbackError) {
+                console.log('❌ Fallback failed, trying dynamic route')
+            }
+
+            // Fallback to dynamic route
             const response = await fetch(`/api/patient-dashboard/doctors/${doctorId}`)
             const data = await response.json()
 
@@ -199,16 +225,18 @@ export default function PatientDoctorsPage() {
                 }}
             >
                 {/* Header */}
-                <Header onMenuToggle={toggleSidebar} />
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+                    <Header onMenuToggle={toggleSidebar} />
+                </div>
 
                 {/* Page Content */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* Header */}
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Page Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-3xl font-bold text-foreground">
                             {t('find_doctors') || 'Find Doctors'}
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-muted-foreground mt-1">
                             {t('browse_doctors_desc') || 'Browse our network of qualified healthcare professionals'}
                         </p>
                     </div>

@@ -40,7 +40,9 @@ export async function DELETE(request: NextRequest) {
                 'Authorization': authHeader,
                 'Content-Type': 'application/json',
             }
-        }); const responseData = await backendResponse.json().catch(() => ({}));
+        });
+
+        const responseData = await backendResponse.json().catch(() => ({}));
 
         console.log('📥 [Super Admin Delete Proxy] Backend response:', {
             status: backendResponse.status,

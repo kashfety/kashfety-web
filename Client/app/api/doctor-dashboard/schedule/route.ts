@@ -284,6 +284,81 @@ export async function PUT(request: NextRequest) {
       console.log('⚠️ Empty schedule received, clearing doctor schedule for this center');
     }
     
+    // ============================================
+    // TIME CONFLICT VALIDATION (Pre-check)
+    // ============================================
+    // Check for time conflicts BEFORE attempting any saves
+    console.log('🔍 Pre-checking for time conflicts with other centers...');
+    
+    const daysToCheck = scheduleArray.map((item: any) => item.day_of_week);
+    
+    if (daysToCheck.length > 0) {
+      const { data: existingSchedules, error: existingError } = await supabase
+        .from('doctor_schedules')
+        .select('day_of_week, time_slots, center_id, centers:center_id(name)')
+        .eq('doctor_id', doctorId)
+        .in('day_of_week', daysToCheck)
+        .neq('center_id', centerId);
+      
+      if (!existingError && existingSchedules && existingSchedules.length > 0) {
+        console.log('📅 Found', existingSchedules.length, 'existing schedules at other centers to check');
+        
+        const conflicts: any[] = [];
+        
+        for (const newScheduleItem of scheduleArray) {
+          const dayOfWeek = newScheduleItem.day_of_week;
+          const newTimeSlots = newScheduleItem.time_slots || [];
+          
+          const existingForDay = existingSchedules.filter((s: any) => s.day_of_week === dayOfWeek);
+          
+          for (const existing of existingForDay) {
+            const existingTimeSlots = existing.time_slots || [];
+            const centerName = existing.centers?.name || 'Unknown Center';
+            
+            for (const newSlot of newTimeSlots) {
+              const newStart = new Date(`2000-01-01T${newSlot.time}:00`);
+              const newEnd = new Date(newStart.getTime() + (newSlot.duration || 30) * 60000);
+              
+              for (const existingSlot of existingTimeSlots) {
+                const existingStart = new Date(`2000-01-01T${existingSlot.time}:00`);
+                const existingEnd = new Date(existingStart.getTime() + (existingSlot.duration || 30) * 60000);
+                
+                if (newStart < existingEnd && newEnd > existingStart) {
+                  conflicts.push({
+                    day: dayOfWeek,
+                    newSlot: newSlot.time,
+                    existingSlot: existingSlot.time,
+                    conflictingCenter: centerName,
+                    conflictingCenterId: existing.center_id
+                  });
+                }
+              }
+            }
+          }
+        }
+        
+        if (conflicts.length > 0) {
+          console.error('⚠️ Time conflicts detected:', conflicts);
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const conflictMessages = conflicts.map(c => 
+            `${dayNames[c.day]} at ${c.newSlot} conflicts with existing schedule at ${c.conflictingCenter}`
+          );
+          
+          return NextResponse.json({ 
+            error: 'Schedule conflict detected',
+            message: 'You cannot have overlapping time slots on the same day at different centers.',
+            conflicts: conflictMessages,
+            details: conflicts
+          }, { status: 409 });
+        }
+        
+        console.log('✅ No time conflicts detected');
+      }
+    }
+    // ============================================
+    // END TIME CONFLICT VALIDATION
+    // ============================================
+    
     // Try to use the database function first (if it exists)
     console.log('📡 Attempting to call setup_doctor_weekly_schedule function...');
     const { error: funcError } = await supabase
@@ -306,6 +381,7 @@ export async function PUT(request: NextRequest) {
       const daysToInsert = scheduleArray.map((item: any) => item.day_of_week);
       console.log('📅 Days to insert:', daysToInsert);
       
+      // Conflict check already done at the top, proceed with deletion and insertion
       if (daysToInsert.length > 0) {
         // Delete existing schedules for this doctor and these specific days
         console.log('🗑️ Deleting existing schedules for doctor:', doctorId, 'days:', daysToInsert);

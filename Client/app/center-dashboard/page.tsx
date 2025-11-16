@@ -20,6 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuIte
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import Link from "next/link";
+import CenterServicesManagement from "@/components/CenterServicesManagement";
 import {
   Calendar,
   Clock,
@@ -3009,8 +3010,11 @@ export default function CenterDashboardPage() {
                   </div>
                 </div>
 
-                {/* Available Services Card */}
-                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                {/* Use CenterServicesManagement Component */}
+                <CenterServicesManagement />
+
+                {/* Keep old Available Services Card for backwards compatibility */}
+                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card d-none">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="w-5 h-5" />

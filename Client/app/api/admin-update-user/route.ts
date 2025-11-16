@@ -3,6 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+// Test handler to verify route exists
+export async function GET(request: NextRequest) {
+    return NextResponse.json({
+        success: true,
+        message: 'Admin update user route is active',
+        methods: ['PUT']
+    });
+}
+
 export async function PUT(request: NextRequest) {
     try {
         console.log('✏️ [Admin Update User Proxy] Request received');

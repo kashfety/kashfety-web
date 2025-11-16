@@ -8,19 +8,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
         success: true,
         message: 'Super admin delete route is active',
-        methods: ['DELETE']
+        methods: ['POST']
     });
 }
 
-export async function DELETE(request: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
         console.log('🗑️ [Super Admin Delete Proxy] Request received');
 
-        const { searchParams } = new URL(request.url);
-        const adminId = searchParams.get('adminId');
+        // Get adminId from request body
+        const body = await request.json();
+        const { adminId } = body;
 
         if (!adminId) {
-            console.error('❌ Missing adminId parameter');
+            console.error('❌ Missing adminId in request body');
             return NextResponse.json({
                 success: false,
                 error: 'Admin ID is required'

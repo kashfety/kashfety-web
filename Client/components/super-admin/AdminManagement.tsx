@@ -330,34 +330,34 @@ export default function AdminManagement() {
                 role: formData.role
             };
 
-            // Try fallback route first for Vercel compatibility
+            // Use POST method with adminId in body (Vercel-compatible)
             let response;
             let result;
 
             try {
-                console.log('👑 Trying super-admin-update-admin fallback route');
-                response = await fetch(`/api/super-admin-update-admin?adminId=${adminId}`, {
-                    method: 'PUT',
+                console.log('👑 Using super-admin-update-admin route with POST method');
+                response = await fetch('/api/super-admin-update-admin', {
+                    method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(updateData)
+                    body: JSON.stringify({ adminId, ...updateData })
                 });
 
                 if (response.ok) {
                     result = await response.json();
                     if (result.success) {
-                        console.log('✅ Fallback route worked for updating admin');
+                        console.log('✅ Admin updated successfully');
                         // Continue with success handling below
                     } else {
                         throw new Error(result.error || 'Update failed');
                     }
                 } else {
-                    throw new Error('Fallback route failed');
+                    throw new Error('Update request failed');
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
+                console.log('❌ API route failed, trying backend route');
 
                 // Fallback to backend route
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -419,24 +419,25 @@ export default function AdminManagement() {
         try {
             console.log('🗑️ [AdminManagement] Deleting admin:', adminId);
 
-            // Try fallback route first (query param pattern for Vercel)
-            console.log('🗑️ Trying super-admin-delete-admin fallback route');
-            const response = await fetch(`/api/super-admin-delete-admin?adminId=${adminId}`, {
-                method: 'DELETE',
+            // Use POST method with adminId in body (Vercel-compatible)
+            console.log('🗑️ Using super-admin-delete-admin route with POST method');
+            const response = await fetch('/api/super-admin-delete-admin', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ adminId })
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Fallback route error:', response.status, errorData);
+                console.error('❌ Delete admin error:', response.status, errorData);
                 throw new Error(errorData.error || errorData.message || 'Failed to delete admin');
             }
 
             const data = await response.json();
-            console.log('✅ Fallback route worked! Admin deleted:', data);
+            console.log('✅ Admin deleted successfully:', data);
 
             toast({
                 title: "Success",

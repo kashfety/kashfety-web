@@ -4,18 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     console.log('👑 [Super Admin Update Admin] Request received');
-    const { searchParams } = new URL(request.url);
-    const adminId = searchParams.get('adminId');
+
+    const body = await request.json();
+    const { adminId, name, email, phone, role } = body;
 
     if (!adminId) {
       return NextResponse.json({ success: false, error: 'Admin ID is required' }, { status: 400 });
     }
-
-    const body = await request.json();
-    const { name, email, phone, role } = body;
 
     console.log('👑 [Super Admin Update Admin] Updating admin:', adminId, 'with data:', { name, email, phone, role });
 
@@ -56,7 +54,7 @@ export async function PUT(request: NextRequest) {
         .eq('email', email)
         .neq('id', adminId)
         .single();
-      
+
       if (emailUser) {
         return NextResponse.json({ success: false, error: 'Email already in use' }, { status: 409 });
       }
@@ -80,10 +78,10 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) {
       console.error('❌ Failed to update admin:', updateError);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to update admin',
-        details: updateError.message 
+        details: updateError.message
       }, { status: 500 });
     }
 
@@ -114,10 +112,10 @@ export async function PUT(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Super admin update admin API error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

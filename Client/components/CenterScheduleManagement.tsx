@@ -34,11 +34,13 @@ export default function CenterScheduleManagement() {
   const [services, setServices] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dayConfigs, setDayConfigs] = useState<Record<number, { isAvailable: boolean; start?: string; end?: string; slot?: number; breakStart?: string; breakEnd?: string; notes?: string }>>({});
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
   const [conflictDetails, setConflictDetails] = useState<string[]>([]);
+  const [reloadTrigger, setReloadTrigger] = useState(0); // Force reload counter
 
   useEffect(() => {
     (async () => {
@@ -55,20 +57,26 @@ export default function CenterScheduleManagement() {
     })();
   }, []);
 
+  // Load schedule whenever selectedType changes
   useEffect(() => {
-    (async () => {
+    const loadSchedule = async () => {
       if (!selectedType) {
         // Reset config when no test type is selected
         setDayConfigs({});
+        setLoadingSchedule(false);
         return;
       }
       
       try {
+        console.log('🔄 Loading schedule for test type:', selectedType);
+        setLoadingSchedule(true);
         // Reset config first to show loading state
         setDayConfigs({});
         
+        // Add timestamp to prevent caching
         const res = await centerService.getLabSchedule(selectedType);
         const schedule = res?.schedule || [];
+        console.log('📋 Loaded schedule:', schedule.length, 'days configured');
         const cfg: Record<number, any> = {};
         
         for (const s of schedule) {
@@ -107,13 +115,19 @@ export default function CenterScheduleManagement() {
         }
         
         setDayConfigs(cfg);
+        console.log('✅ Schedule loaded and configured');
       } catch (error) {
-        console.error('Failed to load schedule:', error);
+        console.error('❌ Failed to load schedule:', error);
         // Reset to empty on error
         setDayConfigs({});
+      } finally {
+        setLoadingSchedule(false);
       }
-    })();
-  }, [selectedType]);
+    };
+
+    // Always call loadSchedule when selectedType or reloadTrigger changes
+    loadSchedule();
+  }, [selectedType, reloadTrigger]);
 
   const generateSlots = (start: string, end: string, duration: number): Array<{ time: string; duration: number }> => {
     if (!start || !end || !duration) return [];
@@ -233,7 +247,14 @@ export default function CenterScheduleManagement() {
         <CardHeader><CardTitle>{t('selectTest') || 'Select Test/Service'}</CardTitle></CardHeader>
         <CardContent>
           {services.length > 0 ? (
-            <Select value={selectedType} onValueChange={setSelectedType}>
+            <Select 
+              value={selectedType} 
+              onValueChange={(value) => {
+                setSelectedType(value);
+                // Increment reload trigger to force schedule reload even if selecting same test type
+                setReloadTrigger(prev => prev + 1);
+              }}
+            >
               <SelectTrigger><SelectValue placeholder={t('chooseTestType') || 'Choose test type'} /></SelectTrigger>
               <SelectContent>
                 {services.map((service: any) => (

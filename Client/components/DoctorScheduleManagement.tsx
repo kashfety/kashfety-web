@@ -624,18 +624,27 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       console.error('Error response:', error.response?.data);
       
       // Handle schedule conflict (409) with detailed message
-      if (error.response?.status === 409 && error.response?.data?.conflicts) {
+      if (error.response?.status === 409) {
         const conflictData = error.response.data;
-        const conflictList = conflictData.conflicts.slice(0, 3); // Show first 3 conflicts
-        const moreConflicts = conflictData.conflicts.length > 3 ? ` (and ${conflictData.conflicts.length - 3} more conflicts)` : '';
         
-        const conflictMessage = `${conflictData.message}\n\nConflicts:\n• ${conflictList.join('\n• ')}${moreConflicts}`;
+        // Build a simple, readable message
+        let message = conflictData.message || 'You cannot have overlapping time slots on the same day at different centers.';
+        
+        if (conflictData.conflicts && Array.isArray(conflictData.conflicts) && conflictData.conflicts.length > 0) {
+          const firstConflict = conflictData.conflicts[0];
+          const totalConflicts = conflictData.conflicts.length;
+          message += ` Found ${totalConflicts} conflict${totalConflicts > 1 ? 's' : ''}: ${firstConflict}`;
+          
+          if (totalConflicts > 1) {
+            message += ` (and ${totalConflicts - 1} more)`;
+          }
+        }
         
         toast({
-          title: t('schedule_conflict') || '⚠️ Schedule Conflict Detected',
-          description: conflictMessage,
+          title: '⚠️ Schedule Conflict',
+          description: message,
           variant: "destructive",
-          duration: 10000, // Show for 10 seconds
+          duration: 10000,
         });
       } else {
         // Generic error handling

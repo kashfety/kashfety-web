@@ -2198,6 +2198,7 @@ export default function CenterDashboardPage() {
 
       // Set lab test types with their current service settings
       if (labTestTypesRes?.success && Array.isArray(labTestTypesRes.labTestTypes)) {
+        console.log('📋 [Frontend] Received lab test types:', labTestTypesRes.labTestTypes.map((t: any) => ({ id: t.id, name: t.name, code: t.code, category: t.category, is_active: t.is_active })));
         setAllTestTypes(labTestTypesRes.labTestTypes);
 
         // Initialize service states from the loaded data
@@ -2210,12 +2211,13 @@ export default function CenterDashboardPage() {
         });
         setServiceStates(newServiceStates);
 
-        console.log('✅ Loaded lab test types with services:', {
+        console.log('✅ [Frontend] Loaded lab test types with services:', {
           totalTypes: labTestTypesRes.labTestTypes.length,
-          activeServices: labTestTypesRes.activeServices
+          activeServices: labTestTypesRes.activeServices,
+          testTypes: labTestTypesRes.labTestTypes.map((t: any) => t.name)
         });
       } else {
-        console.warn('Failed to load lab test types:', labTestTypesRes);
+        console.warn('❌ [Frontend] Failed to load lab test types:', labTestTypesRes);
         setAllTestTypes([]);
       }
 
@@ -2562,24 +2564,17 @@ export default function CenterDashboardPage() {
       });
       
       const newType = response.data;
-      
-      // Add to types list
-      setAllTestTypes(prev => [...prev, newType]);
-      
-      // Auto-enable in services with default fee
-      setServiceStates(prev => ({
-        ...prev,
-        [newType.id]: {
-          active: true,
-          fee: newTestType.default_fee || ''
-        }
-      }));
+      console.log('✅ [Frontend] Created new lab test type:', newType);
       
       toast({ title: 'Success', description: 'Lab test type created successfully' });
       
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
       setShowCreateDialog(false);
+      
+      // Reload all data from server to get the fresh list with the new test type
+      console.log('🔄 [Frontend] Reloading data to fetch new test type from server...');
+      await loadCenterData();
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
       toast({ 

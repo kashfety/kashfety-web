@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         .or(`patient_id.eq.${userId},doctor_id.eq.${userId}`)
         .order('appointment_date', { ascending: false })
         .limit(50),
-      
+
       // Medical records (simpler query without foreign key join)
       supabase
         .from('medical_records')
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         .eq('patient_id', userId)
         .order('record_date', { ascending: false })
         .limit(50),
-      
+
       // Reviews (if you have a reviews table)
       supabase
         .from('reviews')
@@ -58,8 +58,6 @@ export async function GET(request: NextRequest) {
         .or(`patient_id.eq.${userId},doctor_id.eq.${userId}`)
         .order('created_at', { ascending: false })
         .limit(50)
-        .then(result => result)
-        .catch(() => ({ data: [], error: null })) // Reviews table might not exist
     ]);
 
     // Transform user data
@@ -92,8 +90,8 @@ export async function GET(request: NextRequest) {
       qualifications: user.qualifications,
       home_visits_available: user.home_visits_available,
       rating: user.rating,
-      // Password status (for admin view)
-      password_hash: user.password_hash || null
+      // Password status (for admin view) - don't expose the actual hash
+      password_hash: user.password_hash ? 'set' : null
     };
 
     // Transform appointments and enrich with doctor/center info
@@ -101,7 +99,7 @@ export async function GET(request: NextRequest) {
     for (const apt of appointmentsResult.data || []) {
       let doctorInfo = null;
       let centerInfo = null;
-      
+
       if (apt.doctor_id) {
         const { data: doctor } = await supabase
           .from('users')
@@ -110,7 +108,7 @@ export async function GET(request: NextRequest) {
           .single();
         doctorInfo = doctor;
       }
-      
+
       if (apt.center_id) {
         const { data: center } = await supabase
           .from('centers')
@@ -119,7 +117,7 @@ export async function GET(request: NextRequest) {
           .single();
         centerInfo = center;
       }
-      
+
       appointments.push({
         id: apt.id,
         appointment_date: apt.appointment_date,
@@ -151,7 +149,7 @@ export async function GET(request: NextRequest) {
           .single();
         doctorInfo = doctor;
       }
-      
+
       medicalRecords.push({
         id: record.id,
         record_date: record.record_date,
@@ -191,10 +189,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Admin user details API error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

@@ -254,13 +254,24 @@ export default function CenterScheduleManagement() {
               value={selectedType} 
               onValueChange={(value) => {
                 console.log('🔀 Test type selection changed:', { from: selectedType, to: value });
-                setSelectedType(value);
-                // Increment reload trigger to force schedule reload even if selecting same test type
-                setReloadTrigger(prev => {
-                  const newTrigger = prev + 1;
-                  console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
-                  return newTrigger;
-                });
+                
+                // Clear selection first if selecting same value to force reload
+                if (value === selectedType) {
+                  console.log('⚠️ Same value selected, clearing first');
+                  setSelectedType('');
+                  // Use setTimeout to ensure state updates
+                  setTimeout(() => {
+                    setSelectedType(value);
+                    setReloadTrigger(prev => prev + 1);
+                  }, 0);
+                } else {
+                  setSelectedType(value);
+                  setReloadTrigger(prev => {
+                    const newTrigger = prev + 1;
+                    console.log('🔢 Reload trigger incremented:', { from: prev, to: newTrigger });
+                    return newTrigger;
+                  });
+                }
               }}
             >
               <SelectTrigger><SelectValue placeholder={t('chooseTestType') || 'Choose test type'} /></SelectTrigger>
@@ -290,7 +301,7 @@ export default function CenterScheduleManagement() {
       </Card>
 
       {selectedType && (
-        <Card>
+        <Card key={`${selectedType}-${reloadTrigger}`}>
           <CardHeader><CardTitle><Clock className="inline h-5 w-5 mr-2" />{t('dd_weekly_schedule_for') || 'Weekly Schedule for'} {services.find((s:any)=>s.lab_test_types?.id===selectedType || s.lab_test_type_id===selectedType)?.lab_test_types?.name || 'Selected Test'}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             {DAYS.map(d => {

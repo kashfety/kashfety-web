@@ -162,7 +162,9 @@ export default function UserManagement() {
                 limit: 20,
                 ...(searchTerm && { search: searchTerm }),
                 ...(roleFilter && roleFilter !== 'all' && { role: roleFilter }),
-                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter })
+                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
+                // Add cache-busting timestamp
+                _t: Date.now()
             };
 
             console.log('🔄 Fetching users with params:', params);
@@ -170,6 +172,7 @@ export default function UserManagement() {
             // Use adminService which handles authentication automatically
             const data = await adminService.getAllUsers(params);
             console.log('✅ Users API response:', data);
+            console.log('📊 Raw users data:', data.data?.users || data.users);
 
             // Handle the response structure
             const usersData = data.data?.users || data.users || [];
@@ -204,7 +207,10 @@ export default function UserManagement() {
                         gender: user.gender,
                         emergency_contact: user.emergency_contact
                     };
-                }); setUsers(transformedUsers);
+                });
+
+            console.log('📊 Transformed users:', transformedUsers);
+            setUsers(transformedUsers);
             setTotalPages(paginationData.totalPages || Math.ceil(transformedUsers.length / 20));
 
         } catch (error) {
@@ -263,8 +269,31 @@ export default function UserManagement() {
         try {
             console.log('🔄 Updating user:', userId, 'with updates:', updates);
 
+            // Optimistically update the local user state immediately
+            setUsers(prevUsers =>
+                prevUsers.map(user => {
+                    if (user.id === userId) {
+                        const updatedUser = {
+                            ...user,
+                            // Update name if first_name or last_name are provided
+                            ...(updates.first_name !== undefined || updates.last_name !== undefined) && {
+                                name: `${updates.first_name || ''} ${updates.last_name || ''}`.trim() || user.name
+                            },
+                            // Update other fields if provided
+                            ...(updates.email !== undefined) && { email: updates.email },
+                            ...(updates.phone !== undefined) && { phone: updates.phone },
+                            ...(updates.approval_status !== undefined) && { approval_status: updates.approval_status },
+                        };
+                        console.log('🔄 Optimistically updated user:', updatedUser);
+                        return updatedUser;
+                    }
+                    return user;
+                })
+            );
+
             // Use adminService for user updates
             const result = await adminService.updateUser(userId, updates);
+            console.log('✅ User update API response:', result);
 
             let successMessage = t('admin_user_updated_successfully') || "User updated successfully";
             if (result.passwordUpdated) {
@@ -276,11 +305,21 @@ export default function UserManagement() {
                 description: successMessage,
             });
 
-            fetchUsers();
+            // Add a small delay to ensure the backend has processed the update
+            setTimeout(async () => {
+                console.log('🔄 Refreshing user list after update...');
+                // Force refresh by clearing any potential caching
+                setUsers([]); // Clear the current state
+                await fetchUsers();
+            }, 500);
+
             setShowEditDialog(false);
             setEditingUser(null);
         } catch (error) {
             console.error('❌ Error updating user:', error);
+
+            // Revert the optimistic update on error by refetching
+            await fetchUsers();
 
             toast({
                 title: t('admin_error') || "Error",

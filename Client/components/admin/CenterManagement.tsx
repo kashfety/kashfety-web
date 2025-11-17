@@ -264,9 +264,9 @@ export default function CenterManagement() {
 
             // Removed password length restriction for now
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/centers`, {
+            // Use static Next.js API route (Vercel compatible)
+            // See VERCEL_DYNAMIC_ROUTE_FIX.md for why we use static routes
+            const response = await fetch('/api/admin-create-center', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -276,7 +276,8 @@ export default function CenterManagement() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create center');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to create center');
             }
 
             toast({
@@ -315,26 +316,27 @@ export default function CenterManagement() {
     const updateCenter = async (centerId: string, updates: any) => {
         console.log('updateCenter called with centerId:', centerId, 'updates:', updates);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            console.log('Making PUT request to:', `${baseUrl}/auth/admin/centers/${centerId}`);
-
-            const response = await fetch(`${baseUrl}/auth/admin/centers/${centerId}`, {
-                method: 'PUT',
+            // Use static Next.js API route (Vercel compatible)
+            // See VERCEL_DYNAMIC_ROUTE_FIX.md for why we use static routes
+            const response = await fetch('/api/admin-update-center', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(updates)
+                body: JSON.stringify({
+                    centerId,
+                    ...updates
+                })
             });
 
             console.log('Response status:', response.status);
             console.log('Response ok:', response.ok);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error('Failed to update center');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error response:', errorData);
+                throw new Error(errorData.error || 'Failed to update center');
             }
 
             const result = await response.json();

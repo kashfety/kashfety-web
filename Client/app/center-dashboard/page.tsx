@@ -16,10 +16,20 @@ import { useTheme } from "next-themes";
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Calendar,
   Clock,
@@ -1245,49 +1255,61 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
   // Handle test type selection with auto-save (like doctor-dashboard center switching)
   const handleTypeSelection = async (newTypeId: string) => {
+    console.log('🔄 [CenterSchedule] Switching test type from', selectedTestType, 'to', newTypeId);
+    
     // If switching away from a previously selected type, auto-save current schedule
     if (selectedTestType && selectedTestType !== newTypeId) {
       try {
         // Only auto-save if there are actual changes to save
         const hasChanges = DAYS_OF_WEEK.some(d => getDayConfig(d.value).isAvailable);
+        console.log('💾 [CenterSchedule] Auto-saving previous type:', selectedTestType, 'hasChanges:', hasChanges);
         if (hasChanges) {
           await saveSchedule();
         }
       } catch (error) {
-        console.error('Auto-save failed:', error);
+        console.error('❌ [CenterSchedule] Auto-save failed:', error);
         // Continue with type selection even if auto-save fails
       }
     }
 
     setSelectedTestType(newTypeId);
 
-    // Load existing config for the new type
-    if (newTypeId && !initializedTypes.has(newTypeId)) {
+    // Always load from server (like refresh button) to get latest data
+    if (newTypeId) {
+      console.log('🔄 [CenterSchedule] Loading schedule from server for test type:', newTypeId);
       await loadScheduleForType(newTypeId);
-      setInitializedTypes(prev => new Set([...prev, newTypeId]));
-    } else if (newTypeId && typeFormStates[newTypeId]) {
-      // Load from local state
-      setScheduleConfig(typeFormStates[newTypeId]);
+      
+      // Mark as initialized after loading
+      if (!initializedTypes.has(newTypeId)) {
+        console.log('✅ [CenterSchedule] Marking test type as initialized:', newTypeId);
+        setInitializedTypes(prev => new Set([...prev, newTypeId]));
+      }
     } else {
       // Clear current config
+      console.log('🧹 [CenterSchedule] Clearing schedule config (no test type selected)');
       setScheduleConfig({});
     }
   };
 
   const loadScheduleForType = async (testTypeId: string) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('⚠️ [CenterSchedule] Cannot load schedule - no user ID');
+      return;
+    }
 
+    console.log('🔍 [CenterSchedule] Loading schedule for test type:', testTypeId, 'center:', user.id);
     setLoading(true);
     try {
-      console.log('🔍 [CenterSchedule] Loading schedule for test type:', testTypeId, 'center:', user.id);
       const response = await centerService.getLabSchedule(testTypeId);
       console.log('📅 [CenterSchedule] Schedule response:', response);
 
       if (response?.schedule) {
+        console.log('✅ [CenterSchedule] Found', response.schedule.length, 'day schedules');
         // Convert server schedule format to component format
         const newConfig: ScheduleConfig = {};
 
         response.schedule.forEach((daySchedule: any) => {
+          console.log('📆 [CenterSchedule] Processing day', daySchedule.day_of_week, ':', daySchedule);
           const hasSlots = Array.isArray(daySchedule?.time_slots) && daySchedule.time_slots.length > 0;
           newConfig[daySchedule.day_of_week] = {
             isAvailable: daySchedule.is_available ?? (hasSlots ? true : false),
@@ -1308,7 +1330,17 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         });
 
         console.log('✅ [CenterSchedule] Converted schedule config:', newConfig);
+        console.log('✅ [CenterSchedule] Setting schedule config state for test type:', testTypeId);
         setScheduleConfig(newConfig);
+        
+        // Also update typeFormStates to persist the loaded config
+        setTypeFormStates(prev => ({
+          ...prev,
+          [testTypeId]: newConfig
+        }));
+        console.log('✅ [CenterSchedule] Updated typeFormStates for test type:', testTypeId);
+      } else {
+        console.log('⚠️ [CenterSchedule] No schedule data in response');
       }
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to load schedule:', error);
@@ -1917,6 +1949,20 @@ export default function CenterDashboardPage() {
   // Services management state (like doctor-dashboard centers)
   const [serviceStates, setServiceStates] = useState<Record<string, { active: boolean; fee?: string }>>({});
 
+  // Batch selection state
+  const [selectedTestTypes, setSelectedTestTypes] = useState<Set<string>>(new Set());
+  const [batchFee, setBatchFee] = useState('');
+
+  // Create lab test type dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newTestType, setNewTestType] = useState({
+    code: '',
+    name: '',
+    category: 'lab' as 'lab' | 'imaging',
+    default_fee: ''
+  });
+
   // Schedule management state (like doctor-dashboard schedule)
   const [dayConfigs, setDayConfigs] = useState<Record<number, {
     isAvailable: boolean;
@@ -2157,6 +2203,7 @@ export default function CenterDashboardPage() {
 
       // Set lab test types with their current service settings
       if (labTestTypesRes?.success && Array.isArray(labTestTypesRes.labTestTypes)) {
+        console.log('📋 [Frontend] Received lab test types:', labTestTypesRes.labTestTypes.map((t: any) => ({ id: t.id, name: t.name, code: t.code, category: t.category, is_active: t.is_active })));
         setAllTestTypes(labTestTypesRes.labTestTypes);
 
         // Initialize service states from the loaded data
@@ -2169,12 +2216,13 @@ export default function CenterDashboardPage() {
         });
         setServiceStates(newServiceStates);
 
-        console.log('✅ Loaded lab test types with services:', {
+        console.log('✅ [Frontend] Loaded lab test types with services:', {
           totalTypes: labTestTypesRes.labTestTypes.length,
-          activeServices: labTestTypesRes.activeServices
+          activeServices: labTestTypesRes.activeServices,
+          testTypes: labTestTypesRes.labTestTypes.map((t: any) => t.name)
         });
       } else {
-        console.warn('Failed to load lab test types:', labTestTypesRes);
+        console.warn('❌ [Frontend] Failed to load lab test types:', labTestTypesRes);
         setAllTestTypes([]);
       }
 
@@ -2501,6 +2549,126 @@ export default function CenterDashboardPage() {
       });
     } finally {
       setServicesSaving(false);
+    }
+  };
+
+  // Batch selection handlers
+  const toggleTestTypeSelection = (testTypeId: string) => {
+    setSelectedTestTypes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(testTypeId)) {
+        newSet.delete(testTypeId);
+      } else {
+        newSet.add(testTypeId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllTestTypes = () => {
+    setSelectedTestTypes(new Set(allTestTypes.map((t: any) => t.id)));
+  };
+
+  const deselectAllTestTypes = () => {
+    setSelectedTestTypes(new Set());
+  };
+
+  const handleBatchEnable = () => {
+    console.log('📦 [Batch] Enabling', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          active: true,
+          fee: updated[typeId]?.fee || batchFee || ''
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${selectedTestTypes.size} ${t('test_types_enabled') || 'test types enabled'}` 
+    });
+  };
+
+  const handleBatchDisable = () => {
+    console.log('📦 [Batch] Disabling', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          active: false
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${selectedTestTypes.size} ${t('test_types_disabled') || 'test types disabled'}` 
+    });
+  };
+
+  const handleBatchSetFee = () => {
+    if (!batchFee) {
+      toast({ title: t('error') || 'Error', description: t('please_enter_fee') || 'Please enter a fee', variant: 'destructive' });
+      return;
+    }
+    console.log('📦 [Batch] Setting fee', batchFee, 'for', selectedTestTypes.size, 'test types');
+    setServiceStates(prev => {
+      const updated = { ...prev };
+      selectedTestTypes.forEach(typeId => {
+        updated[typeId] = {
+          ...updated[typeId],
+          fee: batchFee
+        };
+      });
+      return updated;
+    });
+    toast({ 
+      title: t('success') || 'Success', 
+      description: `${t('fee_set_for') || 'Fee set for'} ${selectedTestTypes.size} ${t('test_types') || 'test types'}` 
+    });
+  };
+
+  // Create new lab test type
+  const handleCreateTestType = async () => {
+    if (!newTestType.code || !newTestType.name) {
+      toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
+      return;
+    }
+    
+    setCreating(true);
+    try {
+      const response = await labService.createLabTestType({
+        code: newTestType.code,
+        name: newTestType.name,
+        category: newTestType.category,
+        default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
+      });
+      
+      const newType = response.data;
+      console.log('✅ [Frontend] Created new lab test type:', newType);
+      
+      toast({ title: 'Success', description: 'Lab test type created successfully' });
+      
+      // Reset form and close dialog
+      setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
+      setShowCreateDialog(false);
+      
+      // Reload all data from server to get the fresh list with the new test type
+      console.log('🔄 [Frontend] Reloading data to fetch new test type from server...');
+      await loadCenterData();
+    } catch (error: any) {
+      console.error('Failed to create lab test type:', error);
+      toast({ 
+        title: 'Error', 
+        description: error.response?.data?.error || 'Failed to create lab test type',
+        variant: 'destructive' 
+      });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -3012,13 +3180,83 @@ export default function CenterDashboardPage() {
                 {/* Available Services Card */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
-                      {t('available_services') || 'Available Lab Services'}
-                    </CardTitle>
-                    <CardDescription>
-                      {t('services_description') || 'Enable or disable lab test services and set pricing'}
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="w-5 h-5" />
+                          {t('available_services') || 'Available Lab Services'}
+                        </CardTitle>
+                        <CardDescription>
+                          {t('services_description') || 'Enable or disable lab test services and set pricing'}
+                        </CardDescription>
+                      </div>
+                      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            {t('add_new_type') || 'Add New Type'}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>{t('create_lab_test_type') || 'Create Lab Test Type'}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="code">{t('code') || 'Code'} *</Label>
+                              <Input
+                                id="code"
+                                value={newTestType.code}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, code: e.target.value }))}
+                                placeholder="e.g., CBC, MRI"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="name">{t('name') || 'Name'} *</Label>
+                              <Input
+                                id="name"
+                                value={newTestType.name}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="e.g., Complete Blood Count"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="category">{t('category') || 'Category'} *</Label>
+                              <Select
+                                value={newTestType.category}
+                                onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
+                              >
+                                <SelectTrigger id="category">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
+                                  <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="default_fee">{t('default_fee') || 'Default Fee (Optional)'}</Label>
+                              <Input
+                                id="default_fee"
+                                type="number"
+                                value={newTestType.default_fee}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, default_fee: e.target.value }))}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
+                              {t('cancel') || 'Cancel'}
+                            </Button>
+                            <Button onClick={handleCreateTestType} disabled={creating}>
+                              {creating ? (t('creating') || 'Creating...') : (t('create') || 'Create')}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {servicesLoading ? (
@@ -3030,12 +3268,87 @@ export default function CenterDashboardPage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        {/* Batch Actions Toolbar */}
+                        {allTestTypes.length > 0 && (
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-col gap-4">
+                              {/* Selection Controls */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {selectedTestTypes.size} {t('selected') || 'selected'}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={selectAllTestTypes}
+                                  >
+                                    {t('select_all') || 'Select All'}
+                                  </Button>
+                                  {selectedTestTypes.size > 0 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={deselectAllTestTypes}
+                                    >
+                                      {t('deselect_all') || 'Deselect All'}
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Batch Actions */}
+                              {selectedTestTypes.size > 0 && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleBatchEnable}
+                                    className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    {t('enable_selected') || 'Enable Selected'}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleBatchDisable}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    {t('disable_selected') || 'Disable Selected'}
+                                  </Button>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="number"
+                                      placeholder={t('fee') || 'Fee'}
+                                      value={batchFee}
+                                      onChange={(e) => setBatchFee(e.target.value)}
+                                      className="w-32"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={handleBatchSetFee}
+                                    >
+                                      {t('set_fee') || 'Set Fee'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         {allTestTypes.map((testType: any) => {
                           const state = serviceStates[testType.id] || { active: false, fee: '' };
+                          const isSelected = selectedTestTypes.has(testType.id);
                           return (
-                            <div key={testType.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors">
+                            <div key={testType.id} className={`p-4 border rounded-lg transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600'}`}>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleTestTypeSelection(testType.id)}
+                                  />
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900 dark:to-emerald-800 flex items-center justify-center">
                                     <TestTube className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                                   </div>

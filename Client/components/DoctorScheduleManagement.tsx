@@ -20,6 +20,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { useLocale } from "@/components/providers/locale-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TimeSlot {
   time: string;
@@ -106,6 +115,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const [selectedCenterId, setSelectedCenterId] = useState<string>('');
   const [homeVisitsAvailable, setHomeVisitsAvailable] = useState(false);
   const [defaultConsultationFee, setDefaultConsultationFee] = useState<number>(0);
+  
+  // Conflict dialog state
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictDetails, setConflictDetails] = useState<string[]>([]);
   
   // Store form states per center - key is center_id, value is dayConfigs
   const [centerFormStates, setCenterFormStates] = useState<{[centerId: string]: {[key: number]: {
@@ -622,11 +636,37 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     } catch (error: any) {
       console.error('Save schedule error:', error);
       console.error('Error response:', error.response?.data);
-      toast({
-        title: t('error') || 'Error',
-        description: error.response?.data?.error || (t('dd_save_schedule_failed') || 'Failed to save schedule'),
-        variant: "destructive"
-      });
+      console.error('Error status:', error.response?.status);
+      
+      // Handle schedule conflict (409) with detailed message
+      if (error.response?.status === 409) {
+        console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
+        const conflictData = error.response.data;
+        
+        // Set conflict message and details
+        const message = conflictData.message || 'You cannot have overlapping time slots on the same day at different centers.';
+        const conflicts = conflictData.conflicts || [];
+        
+        setConflictMessage(message);
+        setConflictDetails(conflicts);
+        setShowConflictDialog(true);
+      } else {
+        console.log('🚨 NON-409 ERROR - SHOWING GENERIC TOAST');
+        // Generic error handling
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule');
+        console.log('📢 Error message:', errorMessage);
+        
+        toast({
+          title: t('error') || 'Error',
+          description: errorMessage,
+          variant: "destructive"
+        });
+        
+        // Also try alert as backup
+        setTimeout(() => {
+          alert(`Error\n\n${errorMessage}`);
+        }, 100);
+      }
     } finally {
       setSaving(false);
     }
@@ -974,6 +1014,49 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           </Card>
         </>
       )}
+
+      {/* Conflict Alert Dialog */}
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{t('schedule_conflict') || 'Schedule Conflict'}</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="text-gray-700 dark:text-gray-300">{conflictMessage}</p>
+              
+              {conflictDetails.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                    {t('conflict_details') || 'Conflict Details:'}
+                  </p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                    {conflictDetails.map((conflict, index) => (
+                      <div key={index} className="flex items-start gap-2 text-sm">
+                        <span className="text-red-500 mt-0.5">•</span>
+                        <span className="text-gray-700 dark:text-gray-300">{conflict}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t('schedule_conflict_instruction') || 'Please adjust your schedule to avoid overlapping time slots on the same day at different centers.'}
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setShowConflictDialog(false)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {t('understood') || 'Understood'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -11,7 +11,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, Clock, Save, RotateCcw } from "lucide-react";
+import { Calendar, Clock, Save, RotateCcw, CheckCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const DAYS = [
   { value: 0, label: 'Sun' }, { value: 1, label: 'Mon' }, { value: 2, label: 'Tue' },
@@ -25,8 +34,28 @@ export default function CenterScheduleManagement() {
   const [services, setServices] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [dayConfigs, setDayConfigs] = useState<Record<number, { isAvailable: boolean; start?: string; end?: string; slot?: number; breakStart?: string; breakEnd?: string; notes?: string }>>({});
+  
+  // Store schedule configs for each test type separately (like doctor dashboard does for centers)
+  const [testTypeFormStates, setTestTypeFormStates] = useState<Record<string, Record<number, { 
+    isAvailable: boolean; 
+    start?: string; 
+    end?: string; 
+    slot?: number; 
+    breakStart?: string; 
+    breakEnd?: string; 
+    notes?: string 
+  }>>>({});
+  
+  const [initializedTestTypes, setInitializedTestTypes] = useState<Set<string>>(new Set());
+  
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictDetails, setConflictDetails] = useState<string[]>([]);
+
+  // Get configs for currently selected test type
+  const dayConfigs = testTypeFormStates[selectedType] || {};
 
   useEffect(() => {
     (async () => {
@@ -43,19 +72,92 @@ export default function CenterScheduleManagement() {
     })();
   }, []);
 
+  // Fetch schedule whenever selectedType changes (ALWAYS fetch, like doctor dashboard)
   useEffect(() => {
-    (async () => {
-      if (!selectedType) return;
+    const fetchSchedule = async () => {
+      if (!selectedType) {
+        setLoadingSchedule(false);
+        return;
+      }
+      
       try {
+        console.log('📅 [Fetch Schedule] Starting fetch for test type:', selectedType);
+        console.log('� [Fetch Schedule] Initialized test types:', Array.from(initializedTestTypes));
+        
+        setLoadingSchedule(true);
+        
         const res = await centerService.getLabSchedule(selectedType);
-        const schedule = res?.schedule || [];
-        const cfg: Record<number, any> = {};
-        for (const s of schedule) {
-          cfg[s.day_of_week] = { isAvailable: !!s.is_available, start: undefined, end: undefined, slot: s.slot_duration || 30, breakStart: s.break_start || '', breakEnd: s.break_end || '', notes: s.notes || '' };
+        const scheduleRows = res?.schedule || [];
+        console.log('� [Fetch Schedule] Schedule rows from DB:', scheduleRows.length);
+        
+        // Always fetch from DB, but only update form state if not initialized
+        const shouldUpdateFromDB = !initializedTestTypes.has(selectedType);
+        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
+        
+        if (shouldUpdateFromDB) {
+          console.log('📅 [Fetch Schedule] Building configs from schedule...');
+          const cfg: Record<number, any> = {};
+          
+          for (const s of scheduleRows) {
+            // Extract start and end times from time_slots if available
+            let startTime = undefined;
+            let endTime = undefined;
+            
+            if (s.time_slots && Array.isArray(s.time_slots) && s.time_slots.length > 0) {
+              // Get first slot's time as start
+              const firstSlot = s.time_slots[0];
+              startTime = typeof firstSlot === 'string' ? firstSlot : firstSlot?.time;
+              
+              // Calculate end time from last slot + duration
+              const lastSlot = s.time_slots[s.time_slots.length - 1];
+              const lastSlotTime = typeof lastSlot === 'string' ? lastSlot : lastSlot?.time;
+              const duration = typeof lastSlot === 'object' ? (lastSlot.duration || s.slot_duration || 30) : (s.slot_duration || 30);
+              
+              if (lastSlotTime) {
+                const [hours, minutes] = lastSlotTime.split(':').map(Number);
+                const totalMinutes = hours * 60 + minutes + duration;
+                const endHours = Math.floor(totalMinutes / 60);
+                const endMinutes = totalMinutes % 60;
+                endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+              }
+            }
+            
+            cfg[s.day_of_week] = { 
+              isAvailable: !!s.is_available, 
+              start: startTime, 
+              end: endTime, 
+              slot: s.slot_duration || 30, 
+              breakStart: s.break_start || '', 
+              breakEnd: s.break_end || '', 
+              notes: s.notes || '' 
+            };
+          }
+          
+          console.log('📅 [Fetch Schedule] Built configs:', cfg);
+          
+          // Store config for this test type
+          setTestTypeFormStates(prev => ({
+            ...prev,
+            [selectedType]: cfg
+          }));
+          
+          // Mark as initialized
+          setInitializedTestTypes(prev => new Set([...prev, selectedType]));
+          
+          console.log('✅ [Fetch Schedule] Test type initialized:', selectedType);
+        } else {
+          console.log('✅ [Fetch Schedule] Test type already initialized, using existing form state');
+          console.log('📅 [Fetch Schedule] Existing config:', testTypeFormStates[selectedType]);
         }
-        setDayConfigs(cfg);
-      } catch {}
-    })();
+      } catch (error) {
+        console.error('❌ [Fetch Schedule] Failed to load schedule:', error);
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+
+    // ALWAYS fetch when selectedType changes (just like doctor dashboard)
+    fetchSchedule();
   }, [selectedType]);
 
   const generateSlots = (start: string, end: string, duration: number): Array<{ time: string; duration: number }> => {
@@ -122,13 +224,47 @@ export default function CenterScheduleManagement() {
 
       await centerService.saveLabSchedule(selectedType, schedule as any);
       toast({ title: t('success') || 'Success', description: t('dd_schedule_updated') || 'Schedule updated successfully' });
-    } catch (e: any) {
-      toast({ title: t('error') || 'Error', description: e?.message || 'Failed to save schedule', variant: 'destructive' });
+    } catch (error: any) {
+      console.error('Save schedule error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      // Handle schedule conflict (409) with detailed message
+      if (error.response?.status === 409) {
+        console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
+        const conflictData = error.response.data;
+        
+        // Set conflict message and details
+        const message = conflictData.message || 'You cannot have overlapping time slots on the same day for different test types.';
+        const conflicts = conflictData.conflicts || [];
+        
+        setConflictMessage(message);
+        setConflictDetails(conflicts);
+        setShowConflictDialog(true);
+      } else {
+        // Generic error handling
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || error?.message || 'Failed to save schedule';
+        toast({ 
+          title: t('error') || 'Error', 
+          description: errorMessage, 
+          variant: 'destructive' 
+        });
+      }
     } finally { setSaving(false); }
   };
 
   const setCfg = (day: number, key: string, value: any) => {
-    setDayConfigs(prev => ({ ...prev, [day]: { ...prev[day], [key]: value } }));
+    if (!selectedType) return;
+    setTestTypeFormStates(prev => ({
+      ...prev,
+      [selectedType]: {
+        ...prev[selectedType],
+        [day]: {
+          ...(prev[selectedType]?.[day] || {}),
+          [key]: value
+        }
+      }
+    }));
   };
 
   return (
@@ -152,19 +288,35 @@ export default function CenterScheduleManagement() {
         <CardHeader><CardTitle>{t('selectTest') || 'Select Test/Service'}</CardTitle></CardHeader>
         <CardContent>
           {services.length > 0 ? (
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger><SelectValue placeholder={t('chooseTestType') || 'Choose test type'} /></SelectTrigger>
-              <SelectContent>
-                {services.map((service: any) => (
-                  <SelectItem key={service.lab_test_types?.id || service.id} value={service.lab_test_types?.id || service.lab_test_type_id}>
-                    {service.lab_test_types?.name || 'Unnamed Test'}
-                    <span className="ml-2 text-xs text-gray-500">
-                      (${service.base_fee || service.lab_test_types?.default_fee || 'No price'})
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {services.map((service: any) => {
+                  const testTypeId = service.lab_test_types?.id || service.lab_test_type_id;
+                  const isSelected = selectedType === testTypeId;
+                  return (
+                    <Button
+                      key={testTypeId}
+                      variant={isSelected ? "default" : "outline"}
+                      className="h-auto py-4 px-4 flex flex-col items-start gap-2 relative"
+                      onClick={() => {
+                        console.log('🔀 Test type button clicked:', { current: selectedType, clicked: testTypeId });
+                        setSelectedType(testTypeId);
+                      }}
+                    >
+                      <div className="font-semibold text-left">{service.lab_test_types?.name || 'Unnamed Test'}</div>
+                      <div className={`text-sm ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
+                        ${service.base_fee || service.lab_test_types?.default_fee || 'No price'}
+                      </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle className="h-4 w-4" />
+                        </div>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8">
               <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-4" />
@@ -180,7 +332,7 @@ export default function CenterScheduleManagement() {
       </Card>
 
       {selectedType && (
-        <Card>
+        <Card key={selectedType}>
           <CardHeader><CardTitle><Clock className="inline h-5 w-5 mr-2" />{t('dd_weekly_schedule_for') || 'Weekly Schedule for'} {services.find((s:any)=>s.lab_test_types?.id===selectedType || s.lab_test_type_id===selectedType)?.lab_test_types?.name || 'Selected Test'}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             {DAYS.map(d => {
@@ -237,6 +389,49 @@ export default function CenterScheduleManagement() {
           </CardContent>
         </Card>
       )}
+
+      {/* Conflict Alert Dialog */}
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{t('schedule_conflict') || 'Schedule Conflict'}</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="text-gray-700 dark:text-gray-300">{conflictMessage}</p>
+              
+              {conflictDetails.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                    {t('conflict_details') || 'Conflict Details:'}
+                  </p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                    {conflictDetails.map((conflict, index) => (
+                      <div key={index} className="flex items-start gap-2 text-sm">
+                        <span className="text-red-500 mt-0.5">•</span>
+                        <span className="text-gray-700 dark:text-gray-300">{conflict}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t('center_schedule_conflict_instruction') || 'Please adjust your schedule to avoid overlapping time slots on the same day for different test types.'}
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              onClick={() => setShowConflictDialog(false)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {t('understood') || 'Understood'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

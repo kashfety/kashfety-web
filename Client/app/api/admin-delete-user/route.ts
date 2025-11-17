@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,12 +86,70 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // All endpoints failed
-        console.error('❌ [Admin Delete User Proxy] All backend endpoints failed');
-        return NextResponse.json(
-            lastError || { success: false, error: 'Failed to delete user' },
-            { status: 500 }
-        );
+        // All backend endpoints failed, try Supabase fallback
+        console.log('🔄 [Admin Delete User Proxy] Backend endpoints failed, trying Supabase fallback');
+
+        if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+            console.error('❌ Missing Supabase credentials for fallback');
+            return NextResponse.json(
+                lastError || { success: false, error: 'Failed to delete user - no fallback available' },
+                { status: 500 }
+            );
+        }
+
+        try {
+            const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+            // First verify the user exists
+            const { data: existingUser, error: fetchError } = await supabase
+                .from('users')
+                .select('id, role, email, name')
+                .eq('id', userId)
+                .single();
+
+            if (fetchError || !existingUser) {
+                console.error('❌ User not found in Supabase:', fetchError);
+                return NextResponse.json({
+                    success: false,
+                    error: 'User not found'
+                }, { status: 404 });
+            }
+
+            console.log('🔍 [Admin Delete User Proxy] Found user in Supabase:', {
+                id: existingUser.id,
+                role: existingUser.role,
+                email: existingUser.email
+            });
+
+            // Delete the user from Supabase
+            const { error: deleteError } = await supabase
+                .from('users')
+                .delete()
+                .eq('id', userId);
+
+            if (deleteError) {
+                console.error('❌ Failed to delete user from Supabase:', deleteError);
+                return NextResponse.json({
+                    success: false,
+                    error: 'Failed to delete user',
+                    details: deleteError.message
+                }, { status: 500 });
+            }
+
+            console.log('✅ [Admin Delete User Proxy] User deleted successfully from Supabase');
+            return NextResponse.json({
+                success: true,
+                message: 'User deleted successfully',
+                data: { deletedUser: existingUser }
+            });
+
+        } catch (supabaseError: any) {
+            console.error('❌ Supabase fallback error:', supabaseError);
+            return NextResponse.json(
+                lastError || { success: false, error: 'Failed to delete user', details: supabaseError.message },
+                { status: 500 }
+            );
+        }
 
     } catch (error: any) {
         console.error('❌ Admin delete user proxy error:', error);

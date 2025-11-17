@@ -69,6 +69,7 @@ import DoctorProfileSettings from "@/components/DoctorProfileSettings";
 import DoctorScheduleManagement from "@/components/DoctorScheduleManagement";
 import DoctorCenterManagement from "@/components/DoctorCenterManagement";
 import DoctorScheduleCalendar from "@/components/DoctorScheduleCalendar";
+import AppointmentDetailsModal from "@/components/AppointmentDetailsModal";
 
 interface DoctorProfile {
   id: string;
@@ -500,6 +501,8 @@ export default function DoctorDashboard() {
   });
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
+  const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -1697,14 +1700,12 @@ export default function DoctorDashboard() {
               <TabsContent value="schedule-calendar" className="h-full">
                 <DoctorScheduleCalendar
                   appointments={allAppointments || []}
-                  onAppointmentClick={(appointment) => {
-                    // Handle appointment click - could open a modal or navigate to details
-                    toast({
-                      title: t('dd_appointment_details') || 'Appointment Details',
-                      description: `${appointment.patient_name} - ${appointment.appointment_time}`
-                    });
+                  onAppointmentClick={(appointment: Appointment) => {
+                    // Open detailed appointment modal
+                    setSelectedAppointmentForDetails(appointment);
+                    setShowAppointmentDetails(true);
                   }}
-                  onStatusUpdate={async (appointmentId, newStatus) => {
+                  onStatusUpdate={async (appointmentId: string, newStatus: string) => {
                     // Handle status update
                     try {
                       // You can implement the status update API call here
@@ -1713,7 +1714,7 @@ export default function DoctorDashboard() {
                         description: t('dd_appointment_status_updated') || 'Appointment status has been updated successfully.'
                       });
                       // Refresh appointments
-                      await fetchAppointments();
+                      await fetchDoctorData();
                     } catch (error) {
                       toast({
                         title: t('dd_error') || 'Error',
@@ -2039,8 +2040,8 @@ export default function DoctorDashboard() {
                                     <Star
                                       key={star}
                                       className={`w-5 h-5 ${star <= (review.rating || 0)
-                                          ? 'text-yellow-500 fill-yellow-500'
-                                          : 'text-gray-300 dark:text-gray-600'
+                                        ? 'text-yellow-500 fill-yellow-500'
+                                        : 'text-gray-300 dark:text-gray-600'
                                         }`}
                                     />
                                   ))}
@@ -2389,6 +2390,16 @@ export default function DoctorDashboard() {
                 </div>
               </div>
             )}
+
+            {/* Appointment Details Modal */}
+            <AppointmentDetailsModal
+              appointment={selectedAppointmentForDetails}
+              isOpen={showAppointmentDetails}
+              onClose={() => {
+                setShowAppointmentDetails(false);
+                setSelectedAppointmentForDetails(null);
+              }}
+            />
           </main>
         </div>
       </div>

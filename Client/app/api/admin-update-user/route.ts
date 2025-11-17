@@ -42,42 +42,55 @@ export async function POST(request: NextRequest) {
 
         console.log('📝 [Admin Update User Proxy] Update data:', updates);
 
-        // Forward the request to the backend API
-        const backendUrl = 'https://kashfety.com';
-        const apiUrl = `${backendUrl}/api/auth/admin/users/${userId}`;
+        // Try multiple backend endpoints for maximum compatibility
+        const backendUrls = [
+            'https://kashfety.com/api/auth/admin/users',
+            'https://kashfety.com/api/admin/users',
+            process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/auth/admin/users`,
+            process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/admin/users`
+        ].filter(Boolean);
 
-        console.log('🔄 [Admin Update User Proxy] Forwarding to backend Express API:', apiUrl);
+        let lastError = null;
 
-        const backendResponse = await fetch(apiUrl, {
-            method: 'PUT',
-            headers: {
-                'Authorization': authHeader,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updates)
-        });
+        for (const baseUrl of backendUrls) {
+            try {
+                const apiUrl = `${baseUrl}/${userId}`;
+                console.log('🔄 [Admin Update User Proxy] Trying endpoint:', apiUrl);
 
-        const responseData = await backendResponse.json().catch(() => ({}));
+                const backendResponse = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updates)
+                });
 
-        console.log('📥 [Admin Update User Proxy] Backend response:', {
-            status: backendResponse.status,
-            data: responseData
-        });
+                if (backendResponse.ok) {
+                    const responseData = await backendResponse.json().catch(() => ({}));
+                    console.log('✅ [Admin Update User Proxy] Success with endpoint:', apiUrl);
+                    return NextResponse.json(responseData || {
+                        success: true,
+                        message: 'User updated successfully'
+                    });
+                }
 
-        if (!backendResponse.ok) {
-            console.error('❌ Backend request failed:', backendResponse.status, responseData);
-            return NextResponse.json(
-                responseData || { success: false, error: 'Failed to update user' },
-                { status: backendResponse.status }
-            );
+                lastError = await backendResponse.json().catch(() => ({ error: `HTTP ${backendResponse.status}` }));
+                console.log('⚠️ [Admin Update User Proxy] Failed with endpoint:', apiUrl, 'Status:', backendResponse.status);
+
+            } catch (error: any) {
+                console.log('⚠️ [Admin Update User Proxy] Network error with endpoint:', baseUrl, error.message);
+                lastError = { error: error.message };
+                continue;
+            }
         }
 
-        console.log('✅ [Admin Update User Proxy] User updated successfully');
-
-        return NextResponse.json(responseData || {
-            success: true,
-            message: 'User updated successfully'
-        });
+        // All endpoints failed
+        console.error('❌ [Admin Update User Proxy] All backend endpoints failed');
+        return NextResponse.json(
+            lastError || { success: false, error: 'Failed to update user' },
+            { status: 500 }
+        );
 
     } catch (error: any) {
         console.error('❌ Admin update user proxy error:', error);

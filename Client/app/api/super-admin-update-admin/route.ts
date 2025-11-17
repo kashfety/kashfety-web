@@ -17,8 +17,58 @@ export async function POST(request: NextRequest) {
 
     console.log('👑 [Super Admin Update Admin] Updating admin:', adminId, 'with data:', { name, email, phone, role });
 
+    // Get the authorization token
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      console.error('❌ Missing authorization header');
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Try backend API first, then fallback to Supabase
+    const backendUrls = [
+      'https://kashfety.com/api/super-admin/admins',
+      'https://kashfety.com/api/admin/admins',
+      process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/super-admin/admins`,
+      process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/admin/admins`
+    ].filter(Boolean);
+
+    // Try backend endpoints first
+    for (const baseUrl of backendUrls) {
+      try {
+        const apiUrl = `${baseUrl}/${adminId}`;
+        console.log('🔄 [Super Admin Update Admin] Trying backend endpoint:', apiUrl);
+
+        const backendResponse = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, phone, role })
+        });
+
+        if (backendResponse.ok) {
+          const responseData = await backendResponse.json().catch(() => ({}));
+          console.log('✅ [Super Admin Update Admin] Success with backend endpoint:', apiUrl);
+          return NextResponse.json(responseData || {
+            success: true,
+            message: 'Admin updated successfully'
+          });
+        }
+
+        console.log('⚠️ [Super Admin Update Admin] Backend failed:', apiUrl, 'Status:', backendResponse.status);
+
+      } catch (error: any) {
+        console.log('⚠️ [Super Admin Update Admin] Network error with backend:', baseUrl, error.message);
+        continue;
+      }
+    }
+
+    // Fallback to Supabase if backend fails
+    console.log('🔄 [Super Admin Update Admin] Falling back to Supabase');
+
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
+      console.error('❌ Missing Supabase credentials for fallback');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 

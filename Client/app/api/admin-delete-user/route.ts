@@ -40,41 +40,54 @@ export async function POST(request: NextRequest) {
             }, { status: 401 });
         }
 
-        // Forward the request to the backend API
-        const backendUrl = 'https://kashfety.com';
-        const apiUrl = `${backendUrl}/api/auth/admin/users/${userId}`;
+        // Try multiple backend endpoints for maximum compatibility
+        const backendUrls = [
+            'https://kashfety.com/api/auth/admin/users',
+            'https://kashfety.com/api/admin/users',
+            process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/auth/admin/users`,
+            process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/admin/users`
+        ].filter(Boolean);
 
-        console.log('🔄 [Admin Delete User Proxy] Forwarding to backend Express API:', apiUrl);
+        let lastError = null;
 
-        const backendResponse = await fetch(apiUrl, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': authHeader,
-                'Content-Type': 'application/json',
+        for (const baseUrl of backendUrls) {
+            try {
+                const apiUrl = `${baseUrl}/${userId}`;
+                console.log('🔄 [Admin Delete User Proxy] Trying endpoint:', apiUrl);
+
+                const backendResponse = await fetch(apiUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (backendResponse.ok) {
+                    const responseData = await backendResponse.json().catch(() => ({}));
+                    console.log('✅ [Admin Delete User Proxy] Success with endpoint:', apiUrl);
+                    return NextResponse.json(responseData || {
+                        success: true,
+                        message: 'User deleted successfully'
+                    });
+                }
+
+                lastError = await backendResponse.json().catch(() => ({ error: `HTTP ${backendResponse.status}` }));
+                console.log('⚠️ [Admin Delete User Proxy] Failed with endpoint:', apiUrl, 'Status:', backendResponse.status);
+
+            } catch (error: any) {
+                console.log('⚠️ [Admin Delete User Proxy] Network error with endpoint:', baseUrl, error.message);
+                lastError = { error: error.message };
+                continue;
             }
-        });
-
-        const responseData = await backendResponse.json().catch(() => ({}));
-
-        console.log('📥 [Admin Delete User Proxy] Backend response:', {
-            status: backendResponse.status,
-            data: responseData
-        });
-
-        if (!backendResponse.ok) {
-            console.error('❌ Backend request failed:', backendResponse.status, responseData);
-            return NextResponse.json(
-                responseData || { success: false, error: 'Failed to delete user' },
-                { status: backendResponse.status }
-            );
         }
 
-        console.log('✅ [Admin Delete User Proxy] User deleted successfully');
-
-        return NextResponse.json(responseData || {
-            success: true,
-            message: 'User deleted successfully'
-        });
+        // All endpoints failed
+        console.error('❌ [Admin Delete User Proxy] All backend endpoints failed');
+        return NextResponse.json(
+            lastError || { success: false, error: 'Failed to delete user' },
+            { status: 500 }
+        );
 
     } catch (error: any) {
         console.error('❌ Admin delete user proxy error:', error);

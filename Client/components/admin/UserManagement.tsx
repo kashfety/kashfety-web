@@ -179,6 +179,8 @@ export default function UserManagement() {
             const paginationData = data.data?.pagination || data.pagination || {};
 
             // Transform users data to match our interface and filter out other admins
+            console.log('🔄 Raw users data received:', usersData.slice(0, 3).map((u: any) => ({ id: u.id, first_name: u.first_name, last_name: u.last_name, name: u.name, email: u.email })));
+
             const transformedUsers = usersData
                 .filter((user: any) => {
                     // Filter out other admins and super_admins (only show them if current user is super_admin)
@@ -187,9 +189,17 @@ export default function UserManagement() {
                     return !isAdmin || user.role !== 'admin'; // Hide regular admins but allow super_admins
                 })
                 .map((user: any) => {
-                    return {
+                    // Construct name from available fields, prioritizing first_name + last_name
+                    let displayName = 'Unknown User';
+                    if (user.first_name || user.last_name) {
+                        displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.name) {
+                        displayName = user.name;
+                    }
+
+                    const transformedUser = {
                         id: user.id,
-                        name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User',
+                        name: displayName,
                         email: user.email || '',
                         phone: user.phone || '',
                         role: user.role || 'patient',
@@ -199,6 +209,9 @@ export default function UserManagement() {
                         specialty: user.specialty,
                         certificate_status: user.certificate_status || (user.role === 'doctor' ? 'pending' : undefined),
                         password_hash: user.password_hash, // Include password_hash for admin viewing
+                        // Store the original first_name and last_name for editing
+                        first_name: user.first_name,
+                        last_name: user.last_name,
                         // Medical information for patients
                         medical_history: user.medical_history,
                         allergies: user.allergies,
@@ -207,10 +220,13 @@ export default function UserManagement() {
                         gender: user.gender,
                         emergency_contact: user.emergency_contact
                     };
+
+                    return transformedUser;
                 });
 
-            console.log('📊 Transformed users:', transformedUsers);
+            console.log('📊 Transformed users:', transformedUsers.slice(0, 3).map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
             setUsers(transformedUsers);
+            console.log('✅ Users state updated with', transformedUsers.length, 'users');
             setTotalPages(paginationData.totalPages || Math.ceil(transformedUsers.length / 20));
 
         } catch (error) {
@@ -305,13 +321,14 @@ export default function UserManagement() {
                 description: successMessage,
             });
 
-            // Add a small delay to ensure the backend has processed the update
-            setTimeout(async () => {
-                console.log('🔄 Refreshing user list after update...');
-                // Force refresh by clearing any potential caching
-                setUsers([]); // Clear the current state
-                await fetchUsers();
-            }, 500);
+            // Immediately refresh the user list to get the latest data
+            console.log('🔄 Refreshing user list after update...');
+            console.log('👤 Current users before refresh:', users.map(u => ({ id: u.id, name: u.name, email: u.email })));
+
+            // Track refresh completion
+            console.log('📊 Starting fetchUsers after successful update...');
+            await fetchUsers();
+            console.log('✅ fetchUsers completed after update');
 
             setShowEditDialog(false);
             setEditingUser(null);

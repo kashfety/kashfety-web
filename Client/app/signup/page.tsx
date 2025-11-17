@@ -54,6 +54,7 @@ export default function SignupPage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    name_ar: '', // Arabic name
     email: '',
     password: '',
     confirmPassword: '',
@@ -235,11 +236,19 @@ export default function SignupPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || firstName;
 
+      // Parse Arabic name if provided
+      const namePartsAr = formData.name_ar ? formData.name_ar.trim().split(' ') : [];
+      const firstNameAr = namePartsAr[0] || '';
+      const lastNameAr = namePartsAr.slice(1).join(' ') || firstNameAr;
+
       // Store user data for after OTP verification
       const userData = {
         first_name: firstName,
         last_name: lastName,
         name: formData.name,
+        first_name_ar: firstNameAr,
+        last_name_ar: lastNameAr,
+        name_ar: formData.name_ar,
         email: formData.email,
         password: formData.password,
         role: formData.role.toLowerCase(),
@@ -680,6 +689,30 @@ export default function SignupPage() {
                     {validationErrors.name}
                   </motion.p>
                 )}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 1.05 }}
+            >
+              <label htmlFor="name_ar" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                {t('auth_full_name_arabic_label') || 'Full Name (Arabic)'}
+              </label>
+              <div className="mt-1">
+                <motion.input
+                  whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                  transition={{ duration: 0.2 }}
+                  id="name_ar"
+                  name="name_ar"
+                  type="text"
+                  dir="rtl"
+                  value={formData.name_ar}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                  placeholder={t('auth_name_arabic_placeholder') || "جون دو"}
+                />
               </div>
             </motion.div>
 

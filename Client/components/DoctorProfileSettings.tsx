@@ -65,6 +65,7 @@ export default function DoctorProfileSettings({
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    name_ar: "",
     specialty: "",
     bio: "",
     experience_years: 0,
@@ -113,6 +114,7 @@ export default function DoctorProfileSettings({
         setProfile(doctorProfile);
         setFormData({
           name: doctorProfile.name || "",
+          name_ar: doctorProfile.name_ar || "",
           specialty: doctorProfile.specialty || "",
           bio: doctorProfile.bio || "",
           experience_years: doctorProfile.experience_years || 0,
@@ -372,14 +374,27 @@ export default function DoctorProfileSettings({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">t('fullName')</Label>
+              <Label htmlFor="name">{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Enter your full name in English"
               />
             </div>
+            <div>
+              <Label htmlFor="name_ar">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
+              <Input
+                id="name_ar"
+                value={formData.name_ar}
+                onChange={(e) => handleInputChange('name_ar', e.target.value)}
+                placeholder="أدخل اسمك الكامل بالعربية"
+                dir="rtl"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="specialty">Specialty</Label>
               <Input

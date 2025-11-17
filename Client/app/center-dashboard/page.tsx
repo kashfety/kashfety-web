@@ -1932,6 +1932,7 @@ export default function CenterDashboardPage() {
   // Profile form states
   const [profileForm, setProfileForm] = useState({
     name: '',
+    name_ar: '',
     email: '',
     phone: '',
     address: '',
@@ -2157,6 +2158,7 @@ export default function CenterDashboardPage() {
       console.log('Setting profile form with:', centerProfile);
       setProfileForm({
         name: centerProfile.name || '',
+        name_ar: centerProfile.name_ar || '',
         email: centerProfile.email || user?.email || '',
         phone: centerProfile.phone || '',
         address: centerProfile.address || '',
@@ -2167,6 +2169,7 @@ export default function CenterDashboardPage() {
       console.log('No centerProfile, using default form');
       setProfileForm({
         name: '',
+        name_ar: '',
         email: user?.email || '',
         phone: '',
         address: '',
@@ -3753,16 +3756,28 @@ export default function CenterDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="centerName">{t('center_name') || 'Center Name'} *</Label>
+                          <Label htmlFor="centerName">{t('center_name') || 'Center Name (English)'} *</Label>
                           <Input
                             id="centerName"
-                            placeholder={centerProfile?.name ? `${t('current_prefix') || 'Current:'} ${centerProfile.name}` : (t('enter_center_name') || 'Enter center name')}
+                            placeholder={centerProfile?.name ? `${t('current_prefix') || 'Current:'} ${centerProfile.name}` : (t('enter_center_name') || 'Enter center name in English')}
                             value={profileForm.name}
                             onChange={(e) => updateProfileForm('name', e.target.value)}
                             className="mt-1"
                             required
                           />
                           <p className="text-xs text-gray-500 mt-1">{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
+                        </div>
+                        <div>
+                          <Label htmlFor="centerNameAr">{t('center_name_arabic') || 'Center Name (Arabic)'}</Label>
+                          <Input
+                            id="centerNameAr"
+                            placeholder={centerProfile?.name_ar ? `${t('current_prefix') || 'Current:'} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
+                            value={profileForm.name_ar}
+                            onChange={(e) => updateProfileForm('name_ar', e.target.value)}
+                            className="mt-1"
+                            dir="rtl"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">{t('cd_name_appears_arabic') || 'Arabic name for multilingual support'}</p>
                         </div>
                         <div>
                           <Label htmlFor="email">{t('email') || 'Email'} *</Label>

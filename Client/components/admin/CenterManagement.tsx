@@ -73,6 +73,7 @@ interface Center {
 
 interface CenterFormData {
     name: string;
+    name_ar?: string; // Arabic name
     address: string;
     phone: string;
     email: string;
@@ -445,6 +446,7 @@ export default function CenterManagement() {
     const handleCreateCenter = () => {
         setFormData({
             name: '',
+            name_ar: '',
             address: '',
             phone: '',
             email: '',
@@ -466,6 +468,7 @@ export default function CenterManagement() {
         setEditingCenter(center);
         setFormData({
             name: center.name,
+            name_ar: (center as any).name_ar || '',
             address: center.address,
             phone: center.phone,
             email: center.email,
@@ -852,6 +855,25 @@ export default function CenterManagement() {
                                 />
                             </div>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <label className="text-sm font-medium">{t('admin_center_name_arabic') || 'Center Name (Arabic)'}</label>
+                                <Input
+                                    value={formData.name_ar}
+                                    onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
+                                    placeholder={t('admin_enter_center_name_arabic') || 'أدخل اسم المركز بالعربية'}
+                                    dir="rtl"
+                                />
+                            </div>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <label className="text-sm font-medium">{t('admin_phone') || 'Phone'}</label>
+                                <Input
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    placeholder={t('admin_enter_phone_number') || 'Enter phone number'}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <label className="text-sm font-medium">{t('admin_email') || 'Email'}</label>
                                 <Input
                                     type="email"
@@ -894,14 +916,6 @@ export default function CenterManagement() {
                                 </p>
                             </div>
                         )}
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <label className="text-sm font-medium">{t('admin_phone') || 'Phone'}</label>
-                            <Input
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                placeholder={t('admin_enter_phone_number') || 'Enter phone number'}
-                            />
-                        </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
                             <label className="text-sm font-medium">{t('admin_address') || 'Address'}</label>
                             <Input

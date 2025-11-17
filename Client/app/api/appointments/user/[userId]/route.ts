@@ -33,7 +33,7 @@ export async function GET(
         patient:users!fk_appointments_patient (id, name, phone, email),
         center:centers!fk_appointments_center (id, name, address, phone, email)
       `);
-    
+
     // Filter by role - super_admin sees all, others see their own
     if (role === 'super_admin' || role === 'admin') {
       // Super admin and admin can see all appointments - no filter
@@ -46,10 +46,9 @@ export async function GET(
       appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
       console.log('📋 [Appointments API] Patient - fetching appointments for patient:', userId);
     }
-    
+
     const { data: appointments, error } = await appointmentsQuery
-      .order('appointment_date', { ascending: true })
-      .order('appointment_time', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('📋 [Appointments API] Error:', error);

@@ -13,9 +13,9 @@ export async function PUT(request: NextRequest) {
     console.log('📅 [Appointment Cancel] Request:', { appointmentId, reason });
 
     if (!appointmentId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Appointment ID is required' 
+      return NextResponse.json({
+        success: false,
+        message: 'Appointment ID is required'
       }, { status: 400 });
     }
 
@@ -30,51 +30,58 @@ export async function PUT(request: NextRequest) {
 
     if (fetchError || !appointment) {
       console.error('❌ Appointment not found:', fetchError);
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Appointment not found' 
+      return NextResponse.json({
+        success: false,
+        message: 'Appointment not found'
       }, { status: 404 });
     }
 
     // Check if appointment is already cancelled
     if (appointment.status === 'cancelled') {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Appointment is already cancelled' 
+      return NextResponse.json({
+        success: false,
+        message: 'Appointment is already cancelled'
       }, { status: 400 });
     }
 
     // Check if cancellation is within 24 hours of appointment time
     if (appointment.appointment_date && appointment.appointment_time) {
+      // Parse appointment date and time correctly
       const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const now = new Date();
-      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      
+      const millisecondsUntilAppointment = appointmentDateTime.getTime() - now.getTime();
+      const hoursUntilAppointment = millisecondsUntilAppointment / (1000 * 60 * 60);
+
       console.log('⏰ [Appointment Cancel] Time check:', {
+        appointmentDate: appointment.appointment_date,
+        appointmentTime: appointment.appointment_time,
         appointmentDateTime: appointmentDateTime.toISOString(),
         now: now.toISOString(),
-        hoursUntilAppointment: hoursUntilAppointment.toFixed(2)
+        millisecondsUntil: millisecondsUntilAppointment,
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
+        willBlock24h: hoursUntilAppointment < 24,
+        willBlockPast: hoursUntilAppointment <= 0
       });
 
-      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
-        return NextResponse.json({ 
-          success: false, 
-          message: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
-          code: 'CANCELLATION_TOO_LATE'
-        }, { status: 400 });
-      }
-
-      // Also check if appointment is in the past
-      if (hoursUntilAppointment < 0) {
-        return NextResponse.json({ 
-          success: false, 
+      // Check if appointment is in the past
+      if (hoursUntilAppointment <= 0) {
+        return NextResponse.json({
+          success: false,
           message: 'Cannot cancel a past appointment',
           code: 'APPOINTMENT_IN_PAST'
         }, { status: 400 });
       }
-    }
 
-    // Update the appointment status to cancelled
+      // Block cancellation if less than 24 hours away
+      if (hoursUntilAppointment < 24) {
+        return NextResponse.json({
+          success: false,
+          message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
+          code: 'CANCELLATION_TOO_LATE',
+          hoursRemaining: hoursUntilAppointment
+        }, { status: 400 });
+      }
+    }    // Update the appointment status to cancelled
     console.log('💾 Cancelling appointment...');
     const { data: updatedAppointment, error: updateError } = await supabase
       .from('appointments')
@@ -89,10 +96,10 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) {
       console.error('❌ Failed to cancel appointment:', updateError);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         message: 'Failed to cancel appointment',
-        error: updateError.message 
+        error: updateError.message
       }, { status: 500 });
     }
 
@@ -105,10 +112,10 @@ export async function PUT(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Appointment cancel error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       message: 'Internal server error',
-      error: error.message 
+      error: error.message
     }, { status: 500 });
   }
 }

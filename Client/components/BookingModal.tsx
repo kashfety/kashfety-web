@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
+import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
@@ -60,9 +60,11 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'doctor' | 'lab';
+  preSelectedDoctorId?: string;
+  preSelectedCenterId?: string;
 }
 
-export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId }: BookingModalProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { t, isRTL, locale } = useLocale();
@@ -98,6 +100,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
   const [selectedLabType, setSelectedLabType] = useState<LabTestType | null>(null);
   const [labAvailableDates, setLabAvailableDates] = useState<string[]>([]);
   const [labCenters, setLabCenters] = useState<Center[]>([]); // All centers for lab mode step 1
+  const [labCenterFilter, setLabCenterFilter] = useState(""); // Search filter for lab centers
 
   // Schedule-related state
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string, is_available: boolean, is_booked: boolean }>>([]);
@@ -181,6 +184,17 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
       prefetchLabCenters();
     }
   }, [isOpen, isLabMode]);
+
+  // Handle pre-selected doctor or center
+  useEffect(() => {
+    if (isOpen && preSelectedDoctorId && !isLabMode) {
+      // Pre-select doctor and skip to center selection
+      fetchDoctorById(preSelectedDoctorId);
+    } else if (isOpen && preSelectedCenterId && isLabMode) {
+      // Pre-select center for lab booking
+      fetchCenterById(preSelectedCenterId);
+    }
+  }, [isOpen, preSelectedDoctorId, preSelectedCenterId, isLabMode]);
 
   const handleModeToggle = (mode: 'doctor' | 'lab') => {
     const switchingToLab = mode === 'lab';
@@ -291,6 +305,75 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     } catch (e) {
       console.error('Error fetching lab types for center:', e);
       setLabTypes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch a specific doctor by ID and pre-select them
+  const fetchDoctorById = async (doctorId: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`);
+      const data = await response.json();
+
+      if (response.ok && data.success && data.doctor) {
+        const doctor: Doctor = {
+          id: data.doctor.id,
+          name: data.doctor.name,
+          specialty: data.doctor.specialty,
+          experience_years: data.doctor.experience_years || 0,
+          profile_picture: data.doctor.profile_picture || '/default-avatar.jpg',
+          consultation_fee: data.doctor.consultation_fee || 0,
+          rating: data.doctor.rating || 0,
+          home_available: !!data.doctor.home_visits_available,
+          has_schedule: true,
+        };
+
+        setSelectedDoctor(doctor);
+        setSelectedSpecialty(doctor.specialty);
+
+        // Fetch centers for this doctor
+        await fetchDoctorCenters(doctorId, "clinic");
+
+        // Skip to step 3 (center selection)
+        setCurrentStep(3);
+      }
+    } catch (error) {
+      console.error('Error fetching doctor:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch a specific center by ID and pre-select it for lab booking
+  const fetchCenterById = async (centerId: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/lab-details?centerId=${centerId}`);
+      const data = await response.json();
+
+      if (response.ok && data.success && data.center) {
+        const center: Center = {
+          id: data.center.id,
+          name: data.center.name,
+          address: data.center.address,
+          phone: data.center.phone,
+          email: data.center.email,
+          services: data.center.tests?.map((t: any) => t.name) || [],
+          operating_hours: data.center.operating_hours,
+        };
+
+        setSelectedCenter(center);
+
+        // Fetch available lab types for this center
+        await fetchLabTypesForCenter(centerId);
+
+        // Skip to step 2 (test type selection)
+        setCurrentStep(2);
+      }
+    } catch (error) {
+      console.error('Error fetching center:', error);
     } finally {
       setLoading(false);
     }
@@ -456,12 +539,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
       // Try fallback route first (works better on Vercel)
       let response: Response;
       let result: any;
-      
+
       try {
         console.log('🔄 [BookingModal] Trying doctor-centers-by-id fallback route');
         response = await fetch(`/api/doctor-centers-by-id?doctor_id=${encodeURIComponent(doctorId)}&visit_type=${visitType}`);
         result = await response.json();
-        
+
         if (response.ok && result && result.success) {
           console.log('✅ [BookingModal] Fallback route worked, found', result.centers?.length || 0, 'centers');
           const centers = result.centers || [];
@@ -508,7 +591,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
       // Build query parameters
       const params = new URLSearchParams();
       params.set('doctorId', doctorId);
-      
+
       // Only add center_id for clinic visits, NOT for home visits
       if (selectedLocation === "clinic") {
         if (centerId) {
@@ -549,14 +632,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
         const days = Array.isArray(data.working_days) ? data.working_days : (Array.isArray(data.workingDays) ? data.workingDays : null);
         if (data.success && Array.isArray(days)) {
           console.log('✅ Received doctor working days:', days);
-          
+
           // If no working days found, use default schedule (Sunday to Thursday)
           const workingDays = days.length > 0 ? days.map((d: any) => Number(d)) : [0, 1, 2, 3, 4];
-          
+
           if (days.length === 0) {
             console.warn('⚠️ No schedules found for this doctor. Using default working days (Sun-Thu)');
           }
-          
+
           setDoctorWorkingDays(workingDays);
 
           // Generate available dates for the next 30 days based on working days
@@ -579,7 +662,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
           // Use default schedule as fallback
           console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
           setDoctorWorkingDays([0, 1, 2, 3, 4]);
-          
+
           const availableDates = [];
           const startDate = new Date();
           for (let i = 0; i < 30; i++) {
@@ -597,7 +680,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
         // Use default schedule as fallback
         console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
         setDoctorWorkingDays([0, 1, 2, 3, 4]);
-        
+
         const availableDates = [];
         const startDate = new Date();
         for (let i = 0; i < 30; i++) {
@@ -637,7 +720,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
       const params = new URLSearchParams();
       params.set('doctorId', doctorId);
       params.set('date', dateString);
-      
+
       // Only add center_id for clinic visits
       if (selectedLocation === "clinic" && selectedCenter?.id) {
         params.set('center_id', selectedCenter.id);
@@ -860,7 +943,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     setDoctorWorkingDays([]);
 
     console.log('[BookingModal] Step2 -> Step3/4', { doctorId: doctor.id, visitType: selectedLocation });
-    
+
     // For home visits, skip center selection and go directly to step 4 (schedule)
     if (selectedLocation === "home") {
       // For home visits, we don't need to select a center
@@ -902,7 +985,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
     setDoctorWorkingDays([]);
 
     console.log('[BookingModal] Centers Flow Step3 -> Step4', { doctorId: doctor.id, centerId: selectedCenter?.id, visitType: selectedLocation });
-    
+
     // For home visits, we don't need the center - fetch working days without center
     // For clinic visits, use the selected center
     if (selectedLocation === "home") {
@@ -1082,12 +1165,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
         // Doctor appointment flow (existing)
         // ENHANCED: Pre-booking validation - check if the slot is still available
         console.log('🔍 Performing pre-booking slot validation...');
-        
+
         // Build query parameters
         const validationParams = new URLSearchParams();
         validationParams.set('doctorId', selectedDoctor!.id);
         validationParams.set('date', dateString);
-        
+
         // Only add center_id for clinic visits
         if (selectedLocation === "clinic" && selectedCenter?.id) {
           validationParams.set('center_id', selectedCenter.id);
@@ -1380,12 +1463,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                 {/* Debug Info - Remove after testing */}
                 {process.env.NODE_ENV === 'development' && (
                   <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mb-4">
-                    Step: {currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} | 
-                    Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} | 
+                    Step: {currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
+                    Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} |
                     Location: {selectedLocation || 'none'}
                   </div>
                 )}
-                
+
                 {/* Step Indicator */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -1981,9 +2064,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                               <MapPin className="w-8 h-8 text-gray-400" />
                             </div>
                             <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">
-                              {selectedLocation === 'home'
-                                ? t('booking_no_home_visits') || 'This doctor is not available for home visits.'
-                                : t('booking_no_centers_for_doctor') || 'No centers available for this doctor.'}
+                              {t('booking_no_centers_for_doctor') || 'No centers available for this doctor.'}
                             </p>
                             <p className="text-gray-600 dark:text-gray-400 mt-2">
                               {t('booking_try_different_doctor') || 'Please select a different doctor'}
@@ -2005,6 +2086,28 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                       </div>
                     </div>
 
+                    {/* Search Filter */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder={t('booking_search_centers') || 'Search by center name or location...'}
+                          value={labCenterFilter}
+                          onChange={(e) => setLabCenterFilter(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#4DBCC4] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {labCenterFilter && (
+                          <button
+                            onClick={() => setLabCenterFilter("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                          >
+                            <XCircle className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     {loading ? (
                       <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
@@ -2012,47 +2115,67 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                       </div>
                     ) : (
                       <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
-                        {labCenters.length > 0 ? (
-                          labCenters.map((center) => (
-                            <Card
-                              key={center.id}
-                              className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
-                              onClick={() => handleLabCenterSelect(center)}
-                            >
-                              <CardContent className="p-6 bg-white dark:bg-gray-800">
-                                <div className="flex items-start gap-4">
-                                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] flex items-center justify-center shadow-md">
-                                    <MapPin className="w-6 h-6 text-white" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
-                                      <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-                                      <span>{center.address}</span>
-                                    </p>
-                                    {center.phone && (
-                                      <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                        <span className="text-gray-500 dark:text-gray-400">📞</span>
-                                        <span className="font-medium">{center.phone}</span>
+                        {(() => {
+                          // Filter centers based on search
+                          const filterQuery = (labCenterFilter || '').toLowerCase();
+                          const filteredCenters = labCenters.filter(center => {
+                            if (!filterQuery) return true;
+                            return (
+                              center.name.toLowerCase().includes(filterQuery) ||
+                              center.address?.toLowerCase().includes(filterQuery)
+                            );
+                          });
+
+                          return filteredCenters.length > 0 ? (
+                            filteredCenters.map((center) => (
+                              <Card
+                                key={center.id}
+                                className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
+                                onClick={() => handleLabCenterSelect(center)}
+                              >
+                                <CardContent className="p-6 bg-white dark:bg-gray-800">
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] flex items-center justify-center shadow-md">
+                                      <MapPin className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
+                                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <span>{center.address}</span>
                                       </p>
-                                    )}
-                                  </div>
-                                  <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 rounded-full bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 flex items-center justify-center">
-                                      <ChevronLeft className="w-5 h-5 text-[#4DBCC4] rotate-180" />
+                                      {center.phone && (
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                          <span className="text-gray-500 dark:text-gray-400">📞</span>
+                                          <span className="font-medium">{center.phone}</span>
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                      <div className="w-8 h-8 rounded-full bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 flex items-center justify-center">
+                                        <ChevronLeft className="w-5 h-5 text-[#4DBCC4] rotate-180" />
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))
-                        ) : (
-                          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_no_centers_available') || 'No centers available'}</p>
-                            <p className="text-gray-600 dark:text-gray-400 mt-2">{t('booking_lab_services_unavailable') || 'Lab services are not currently available. Please check back later.'}</p>
-                          </div>
-                        )}
+                                </CardContent>
+                              </Card>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">
+                                {labCenterFilter
+                                  ? (t('booking_no_centers_match_search') || 'No centers match your search')
+                                  : (t('booking_no_centers_available') || 'No centers available')}
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                {labCenterFilter
+                                  ? (t('booking_try_different_search') || 'Try a different search term')
+                                  : (t('booking_lab_services_unavailable') || 'Lab services are not currently available. Please check back later.')}
+                              </p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -2210,8 +2333,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
                           {isLabMode
                             ? `${selectedLabType?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
                             : selectedLocation === "home"
-                            ? `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} - ${t('booking_home_visit') || 'Home Visit'}`
-                            : `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
+                              ? `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} - ${t('booking_home_visit') || 'Home Visit'}`
+                              : `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
                           }
                         </p>
                       </div>
@@ -2303,81 +2426,81 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor' }
 
                         {/* Time Slots */}
                         <div>
-                        <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
-                          <Clock className="w-6 h-6 mr-2 text-[#4DBCC4]" />
-                          {t('booking_select_time') || 'Select Time'}
-                        </h4>
-                        {selectedDate ? (
-                          loadingAvailability ? (
-                            <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="flex flex-col items-center gap-3">
-                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
-                                <span className="text-base text-gray-900 dark:text-gray-100 font-medium">{t('booking_loading_times') || 'Loading available times...'}</span>
+                          <h4 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+                            <Clock className="w-6 h-6 mr-2 text-[#4DBCC4]" />
+                            {t('booking_select_time') || 'Select Time'}
+                          </h4>
+                          {selectedDate ? (
+                            loadingAvailability ? (
+                              <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
+                                  <span className="text-base text-gray-900 dark:text-gray-100 font-medium">{t('booking_loading_times') || 'Loading available times...'}</span>
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
-                                {availableSlots.map((slot, index) => (
-                                  <motion.div
-                                    key={slot.time}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.03 }}
-                                    whileHover={slot.is_available && !slot.is_booked ? { scale: 1.05, y: -2 } : {}}
-                                    whileTap={slot.is_available && !slot.is_booked ? { scale: 0.95 } : {}}
-                                  >
-                                    <Button
-                                      variant={selectedTime === slot.time ? "default" : "outline"}
-                                      size="lg"
-                                      onClick={() => setSelectedTime(slot.time)}
-                                      disabled={slot.is_booked || !slot.is_available}
-                                      className={`
+                            ) : (
+                              <div>
+                                <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                                  {availableSlots.map((slot, index) => (
+                                    <motion.div
+                                      key={slot.time}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: index * 0.03 }}
+                                      whileHover={slot.is_available && !slot.is_booked ? { scale: 1.05, y: -2 } : {}}
+                                      whileTap={slot.is_available && !slot.is_booked ? { scale: 0.95 } : {}}
+                                    >
+                                      <Button
+                                        variant={selectedTime === slot.time ? "default" : "outline"}
+                                        size="lg"
+                                        onClick={() => setSelectedTime(slot.time)}
+                                        disabled={slot.is_booked || !slot.is_available}
+                                        className={`
                                 w-full font-bold text-base py-6
                                 ${slot.is_booked || !slot.is_available
-                                          ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
-                                          : selectedTime === slot.time
-                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
-                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                            ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
+                                            : selectedTime === slot.time
+                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
+                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
-                                    >
-                                      {slot.time}
-                                      {slot.is_booked && (
-                                        <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
-                                      )}
-                                    </Button>
-                                  </motion.div>
-                                ))}
-                              </div>
-
-                              {availableSlots.length === 0 && (
-                                <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
-                                  <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Clock className="w-8 h-8 text-red-500" />
-                                  </div>
-                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
-                                    {t('booking_no_slots_date') || 'No available time slots for this date'}
-                                  </p>
-                                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                    {t('booking_try_another_date') || 'Please select another date'}
-                                  </p>
-                                  {!isLabMode && doctorWorkingDays.length > 0 && (
-                                    <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium">
-                                      {t('booking_doctor_available_hint') || 'Available days are highlighted in the calendar'}
-                                    </p>
-                                  )}
+                                      >
+                                        {slot.time}
+                                        {slot.is_booked && (
+                                          <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
+                                        )}
+                                      </Button>
+                                    </motion.div>
+                                  ))}
                                 </div>
-                              )}
+
+                                {availableSlots.length === 0 && (
+                                  <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
+                                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                      <Clock className="w-8 h-8 text-red-500" />
+                                    </div>
+                                    <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
+                                      {t('booking_no_slots_date') || 'No available time slots for this date'}
+                                    </p>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                      {t('booking_try_another_date') || 'Please select another date'}
+                                    </p>
+                                    {!isLabMode && doctorWorkingDays.length > 0 && (
+                                      <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium">
+                                        {t('booking_doctor_available_hint') || 'Available days are highlighted in the calendar'}
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                              <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                              <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_select_date_first') || 'Please select a date first'}</p>
                             </div>
-                          )
-                        ) : (
-                          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_select_date_first') || 'Please select a date first'}</p>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
                     )}
 
                     {/* Symptoms/Notes Section */}

@@ -48,6 +48,16 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface User {
     id: string;
@@ -96,6 +106,8 @@ export default function UserManagement() {
     const [showUserDetails, setShowUserDetails] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [editForm, setEditForm] = useState({
         first_name: '',
         last_name: '',
@@ -150,7 +162,9 @@ export default function UserManagement() {
                 limit: 20,
                 ...(searchTerm && { search: searchTerm }),
                 ...(roleFilter && roleFilter !== 'all' && { role: roleFilter }),
-                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter })
+                ...(statusFilter && statusFilter !== 'all' && { status: statusFilter }),
+                // Add cache-busting timestamp
+                _t: Date.now()
             };
 
             console.log('🔄 Fetching users with params:', params);
@@ -158,12 +172,15 @@ export default function UserManagement() {
             // Use adminService which handles authentication automatically
             const data = await adminService.getAllUsers(params);
             console.log('✅ Users API response:', data);
+            console.log('📊 Raw users data:', data.data?.users || data.users);
 
             // Handle the response structure
             const usersData = data.data?.users || data.users || [];
             const paginationData = data.data?.pagination || data.pagination || {};
 
             // Transform users data to match our interface and filter out other admins
+            console.log('🔄 Raw users data received:', usersData.slice(0, 3).map((u: any) => ({ id: u.id, first_name: u.first_name, last_name: u.last_name, name: u.name, email: u.email })));
+
             const transformedUsers = usersData
                 .filter((user: any) => {
                     // Filter out other admins and super_admins (only show them if current user is super_admin)
@@ -172,9 +189,17 @@ export default function UserManagement() {
                     return !isAdmin || user.role !== 'admin'; // Hide regular admins but allow super_admins
                 })
                 .map((user: any) => {
-                    return {
+                    // Construct name from available fields, prioritizing first_name + last_name
+                    let displayName = 'Unknown User';
+                    if (user.first_name || user.last_name) {
+                        displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.name) {
+                        displayName = user.name;
+                    }
+
+                    const transformedUser = {
                         id: user.id,
-                        name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User',
+                        name: displayName,
                         email: user.email || '',
                         phone: user.phone || '',
                         role: user.role || 'patient',
@@ -184,6 +209,9 @@ export default function UserManagement() {
                         specialty: user.specialty,
                         certificate_status: user.certificate_status || (user.role === 'doctor' ? 'pending' : undefined),
                         password_hash: user.password_hash, // Include password_hash for admin viewing
+                        // Store the original first_name and last_name for editing
+                        first_name: user.first_name,
+                        last_name: user.last_name,
                         // Medical information for patients
                         medical_history: user.medical_history,
                         allergies: user.allergies,
@@ -192,7 +220,13 @@ export default function UserManagement() {
                         gender: user.gender,
                         emergency_contact: user.emergency_contact
                     };
-                }); setUsers(transformedUsers);
+
+                    return transformedUser;
+                });
+
+            console.log('📊 Transformed users:', transformedUsers.slice(0, 3).map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
+            setUsers(transformedUsers);
+            console.log('✅ Users state updated with', transformedUsers.length, 'users');
             setTotalPages(paginationData.totalPages || Math.ceil(transformedUsers.length / 20));
 
         } catch (error) {
@@ -220,7 +254,7 @@ export default function UserManagement() {
 
             // Handle different response formats
             const apiData = response.data?.data || response.data || response;
-            
+
             // Create user details with real data from API (or fallback to mock if not available)
             const userDetails = {
                 user: apiData.user || apiData,
@@ -251,8 +285,31 @@ export default function UserManagement() {
         try {
             console.log('🔄 Updating user:', userId, 'with updates:', updates);
 
+            // Optimistically update the local user state immediately
+            setUsers(prevUsers =>
+                prevUsers.map(user => {
+                    if (user.id === userId) {
+                        const updatedUser = {
+                            ...user,
+                            // Update name if first_name or last_name are provided
+                            ...(updates.first_name !== undefined || updates.last_name !== undefined) && {
+                                name: `${updates.first_name || ''} ${updates.last_name || ''}`.trim() || user.name
+                            },
+                            // Update other fields if provided
+                            ...(updates.email !== undefined) && { email: updates.email },
+                            ...(updates.phone !== undefined) && { phone: updates.phone },
+                            ...(updates.approval_status !== undefined) && { approval_status: updates.approval_status },
+                        };
+                        console.log('🔄 Optimistically updated user:', updatedUser);
+                        return updatedUser;
+                    }
+                    return user;
+                })
+            );
+
             // Use adminService for user updates
             const result = await adminService.updateUser(userId, updates);
+            console.log('✅ User update API response:', result);
 
             let successMessage = t('admin_user_updated_successfully') || "User updated successfully";
             if (result.passwordUpdated) {
@@ -264,11 +321,22 @@ export default function UserManagement() {
                 description: successMessage,
             });
 
-            fetchUsers();
+            // Immediately refresh the user list to get the latest data
+            console.log('🔄 Refreshing user list after update...');
+            console.log('👤 Current users before refresh:', users.map(u => ({ id: u.id, name: u.name, email: u.email })));
+
+            // Track refresh completion
+            console.log('📊 Starting fetchUsers after successful update...');
+            await fetchUsers();
+            console.log('✅ fetchUsers completed after update');
+
             setShowEditDialog(false);
             setEditingUser(null);
         } catch (error) {
             console.error('❌ Error updating user:', error);
+
+            // Revert the optimistic update on error by refetching
+            await fetchUsers();
 
             toast({
                 title: t('admin_error') || "Error",
@@ -279,10 +347,6 @@ export default function UserManagement() {
     };
 
     const deleteUser = async (userId: string) => {
-        if (!confirm(t('admin_confirm_delete_user') || 'Are you sure you want to delete this user? This action cannot be undone.')) {
-            return;
-        }
-
         try {
             console.log('🔄 Deleting user:', userId);
 
@@ -303,6 +367,20 @@ export default function UserManagement() {
                 description: t('admin_failed_to_delete_user') || "Failed to delete user. Please try again.",
                 variant: "destructive"
             });
+        } finally {
+            setShowDeleteDialog(false);
+            setUserToDelete(null);
+        }
+    };
+
+    const handleDeleteClick = (user: User) => {
+        setUserToDelete(user);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDelete = async () => {
+        if (userToDelete) {
+            await deleteUser(userToDelete.id);
         }
     };
 
@@ -631,18 +709,17 @@ export default function UserManagement() {
                                             <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
                                                 {(() => {
                                                     // Check if password is set - password_hash should be a non-empty string
-                                                    const hasPassword = user.password_hash && 
-                                                                       typeof user.password_hash === 'string' && 
-                                                                       user.password_hash.trim().length > 0 &&
-                                                                       user.password_hash !== 'null' &&
-                                                                       user.password_hash !== 'undefined';
-                                                    
+                                                    const hasPassword = user.password_hash &&
+                                                        typeof user.password_hash === 'string' &&
+                                                        user.password_hash.trim().length > 0 &&
+                                                        user.password_hash !== 'null' &&
+                                                        user.password_hash !== 'undefined';
+
                                                     return (
-                                                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                                            hasPassword 
-                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
-                                                                : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                                        }`}>
+                                                        <span className={`text-xs px-1.5 py-0.5 rounded ${hasPassword
+                                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                            : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                            }`}>
                                                             {hasPassword ? '🔐 ' + (t('admin_password') || 'Password') : '❌ ' + (t('admin_no_password') || 'No Password')}
                                                         </span>
                                                     );
@@ -700,7 +777,7 @@ export default function UserManagement() {
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() => deleteUser(user.id)}
+                                                    onClick={() => handleDeleteClick(user)}
                                                     className="text-red-600"
                                                 >
                                                     <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -779,12 +856,12 @@ export default function UserManagement() {
                                         <div><strong>{t('admin_password_status') || 'Password Status'}:</strong>
                                             {(() => {
                                                 // Check if password is set - password_hash should be a non-empty string
-                                                const hasPassword = selectedUser.user.password_hash && 
-                                                                   typeof selectedUser.user.password_hash === 'string' && 
-                                                                   selectedUser.user.password_hash.trim().length > 0 &&
-                                                                   selectedUser.user.password_hash !== 'null' &&
-                                                                   selectedUser.user.password_hash !== 'undefined';
-                                                
+                                                const hasPassword = selectedUser.user.password_hash &&
+                                                    typeof selectedUser.user.password_hash === 'string' &&
+                                                    selectedUser.user.password_hash.trim().length > 0 &&
+                                                    selectedUser.user.password_hash !== 'null' &&
+                                                    selectedUser.user.password_hash !== 'undefined';
+
                                                 return (
                                                     <>
                                                         <span className={hasPassword ? `text-green-600 ${isRTL ? 'mr-1' : 'ml-1'}` : `text-red-600 ${isRTL ? 'mr-1' : 'ml-1'}`}>
@@ -998,6 +1075,28 @@ export default function UserManagement() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin_delete_user_title') || 'Delete User Account'}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('admin_delete_user_confirm') || 'Are you sure you want to delete'} <strong>{userToDelete?.name}</strong> ({userToDelete?.email})?
+                            {t('admin_delete_user_warning') || 'This action cannot be undone and will permanently remove this user account.'}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('admin_cancel') || 'Cancel'}</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {t('admin_delete_user') || 'Delete User'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

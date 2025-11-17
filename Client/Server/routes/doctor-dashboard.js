@@ -22,7 +22,7 @@ async function getDoctorProfile(doctorId) {
     .eq('id', doctorId)
     .eq('role', 'doctor')
     .single();
-  
+
   if (error) throw error;
   return doctor;
 }
@@ -35,7 +35,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     const doctor = await getDoctorProfile(req.user.id);
-    
+
     // Remove password from response
     const { password, ...doctorWithoutPassword } = doctor;
 
@@ -68,8 +68,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     // Validate consultation fee
     if (consultation_fee !== undefined && (consultation_fee < 0 || consultation_fee > 10000)) {
-      return res.status(400).json({ 
-        error: 'Consultation fee must be between $0 and $10,000' 
+      return res.status(400).json({
+        error: 'Consultation fee must be between $0 and $10,000'
       });
     }
 
@@ -125,7 +125,7 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
     const nextWeekDate = nextWeek.toISOString().split('T')[0];
-    
+
     // Get today's appointments with patient details
     const { data: todayAppointments, error: appointmentsError } = await supabase
       .from('appointments')
@@ -150,7 +150,7 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
 
     if (appointmentsError) {
       console.error('Today appointments error:', appointmentsError);
-      
+
       // Fallback: Get appointments without patient name join
       const { data: fallbackAppointments, error: fallbackError } = await supabase
         .from('appointments')
@@ -160,7 +160,7 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
         .lte('appointment_date', nextWeekDate)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
-      
+
       if (fallbackError) {
         return res.status(500).json({ error: 'Failed to fetch upcoming appointments' });
       }
@@ -174,13 +174,13 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
           .eq('id', apt.patient_id)
           .eq('role', 'patient')
           .single();
-        
+
         appointmentsWithNames.push({
           ...apt,
           patient_name: patient?.name || 'Unknown Patient'
         });
       }
-      
+
       // Calculate stats with fallback data
       return calculateAndSendStats(res, appointmentsWithNames, today);
     }
@@ -211,12 +211,12 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
 // Helper function to calculate and send stats
 function calculateAndSendStats(res, appointments, today = null) {
   const todayDate = today || new Date().toISOString().split('T')[0];
-  
+
   // Filter for today's appointments specifically for stats
   const todayAppointments = appointments.filter(apt => apt.appointment_date === todayDate);
   const completedToday = todayAppointments.filter(apt => apt.status === 'completed');
   const totalRevenue = completedToday.reduce((sum, apt) => sum + (apt.consultation_fee || 0), 0);
-  
+
   // Find next upcoming appointment (from all appointments)
   const currentDateTime = new Date();
   const nextAppointment = appointments.find(apt => {
@@ -272,7 +272,7 @@ router.get('/patients', authenticateToken, async (req, res) => {
 
     if (appointmentsError) {
       console.error('Patient appointments error:', appointmentsError);
-      
+
       // Fallback approach: Get appointments and patient details separately
       const { data: simpleAppointments } = await supabase
         .from('appointments')
@@ -286,7 +286,7 @@ router.get('/patients', authenticateToken, async (req, res) => {
 
       // Get unique patient IDs
       const uniquePatientIds = [...new Set(simpleAppointments.map(apt => apt.patient_id))];
-      
+
       // Get patient details
       const { data: patients } = await supabase
         .from('users')
@@ -298,7 +298,7 @@ router.get('/patients', authenticateToken, async (req, res) => {
       const patientsWithStats = patients?.map(patient => {
         const patientAppointments = simpleAppointments.filter(apt => apt.patient_id === patient.id);
         const lastAppointment = patientAppointments[0]?.appointment_date;
-        const age = patient.date_of_birth ? 
+        const age = patient.date_of_birth ?
           new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : null;
 
         return {
@@ -323,13 +323,13 @@ router.get('/patients', authenticateToken, async (req, res) => {
 
     // Process successful response with joins
     const patientMap = new Map();
-    
+
     patientAppointments?.forEach(apt => {
       const patient = apt.users;
       if (patient && !patientMap.has(patient.id)) {
-        const age = patient.date_of_birth ? 
+        const age = patient.date_of_birth ?
           new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : null;
-        
+
         patientMap.set(patient.id, {
           id: patient.id,
           name: patient.name,
@@ -391,7 +391,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
 
     if (appointmentsError) {
       console.error('Analytics appointments error:', appointmentsError);
-      
+
       // Fallback with basic appointments data
       const { data: basicAppointments } = await supabase
         .from('appointments')
@@ -428,13 +428,13 @@ function calculateAnalytics(appointments, patients) {
   // Calculate this month's appointments
   const thisMonth = new Date();
   thisMonth.setDate(1);
-  const thisMonthAppointments = appointments.filter(apt => 
+  const thisMonthAppointments = appointments.filter(apt =>
     new Date(apt.appointment_date) >= thisMonth
   );
 
   // Calculate completion rate
   const completedAppointments = appointments.filter(apt => apt.status === 'completed');
-  const completionRate = appointments.length > 0 ? 
+  const completionRate = appointments.length > 0 ?
     Math.round((completedAppointments.length / appointments.length) * 100) : 0;
 
   // Calculate total revenue
@@ -466,7 +466,7 @@ function calculateAnalytics(appointments, patients) {
 
     // Appointment types
     if (apt.appointment_type) {
-      appointmentTypes[apt.appointment_type] = 
+      appointmentTypes[apt.appointment_type] =
         (appointmentTypes[apt.appointment_type] || 0) + 1;
     }
   });
@@ -526,7 +526,7 @@ router.get('/appointments', authenticateToken, async (req, res) => {
 
     if (error) {
       console.error('Appointments fetch error:', error);
-      
+
       // Fallback without joins
       let fallbackQuery = supabase
         .from('appointments')
@@ -540,7 +540,7 @@ router.get('/appointments', authenticateToken, async (req, res) => {
       }
 
       const { data: fallbackAppointments } = await fallbackQuery;
-      
+
       // Enrich with patient names
       const enrichedAppointments = [];
       for (const apt of fallbackAppointments || []) {
@@ -550,7 +550,7 @@ router.get('/appointments', authenticateToken, async (req, res) => {
           .eq('id', apt.patient_id)
           .eq('role', 'patient')
           .single();
-        
+
         enrichedAppointments.push({
           ...apt,
           patient_name: patient?.name || 'Unknown Patient',
@@ -843,6 +843,46 @@ router.put('/appointments/:id/cancel', authenticateToken, async (req, res) => {
     const { id: appointmentId } = req.params;
     const { cancellation_reason } = req.body;
 
+    // First, fetch the appointment to check timing
+    const { data: existingAppointment, error: fetchError } = await supabase
+      .from('appointments')
+      .select('id, status, appointment_date, appointment_time, doctor_id')
+      .eq('id', appointmentId)
+      .eq('doctor_id', req.user.id)
+      .single();
+
+    if (fetchError || !existingAppointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Check if appointment is already cancelled
+    if (existingAppointment.status === 'cancelled') {
+      return res.status(400).json({ error: 'Appointment is already cancelled' });
+    }
+
+    // Check if cancellation is within 24 hours of appointment time
+    if (existingAppointment.appointment_date && existingAppointment.appointment_time) {
+      const appointmentDateTime = new Date(`${existingAppointment.appointment_date}T${existingAppointment.appointment_time}`);
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      // Check if appointment is in the past
+      if (hoursUntilAppointment < 0) {
+        return res.status(400).json({
+          error: 'Cannot cancel a past appointment',
+          code: 'APPOINTMENT_IN_PAST'
+        });
+      }
+
+      // Block cancellation if less than 24 hours away
+      if (hoursUntilAppointment < 24) {
+        return res.status(400).json({
+          error: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          code: 'CANCELLATION_TOO_LATE'
+        });
+      }
+    }
+
     // Update appointment status to cancelled
     const { data: appointment, error } = await supabase
       .from('appointments')
@@ -1032,7 +1072,7 @@ router.get('/schedule', authenticateToken, async (req, res) => {
       schedule.forEach(item => {
         const centerId = item.center_id || 'general';
         const centerName = item.centers?.name || 'General Schedule';
-        
+
         if (!groupedSchedule[centerId]) {
           groupedSchedule[centerId] = {
             center_id: centerId,
@@ -1168,11 +1208,11 @@ router.put('/home-visits', authenticateToken, async (req, res) => {
     // Start a transaction to handle both user update and center creation/deletion
     if (home_visits_available) {
       // Enable home visits - create home visit center
-      
+
       // First update the user
       const { data: doctor, error: userError } = await supabase
         .from('users')
-        .update({ 
+        .update({
           home_visits_available,
           updated_at: new Date().toISOString()
         })
@@ -1242,11 +1282,11 @@ router.put('/home-visits', authenticateToken, async (req, res) => {
 
     } else {
       // Disable home visits - remove home visit center
-      
+
       // First update the user
       const { data: doctor, error: userError } = await supabase
         .from('users')
-        .update({ 
+        .update({
           home_visits_available,
           updated_at: new Date().toISOString()
         })
@@ -1282,7 +1322,7 @@ router.put('/home-visits', authenticateToken, async (req, res) => {
 
         // Delete any scheduled appointments for this center (optional, depending on business logic)
         // You might want to handle this differently based on your requirements
-        
+
         // Delete doctor schedules for this center
         const { error: scheduleDeleteError } = await supabase
           .from('doctor_schedules')
@@ -1395,10 +1435,10 @@ router.get('/availability', authenticateToken, async (req, res) => {
     for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
       const dayOfWeek = date.getDay();
       const dateStr = date.toISOString().split('T')[0];
-      
+
       const daySchedule = schedule.find(s => s.day_of_week === dayOfWeek);
       const dayAppointments = appointments.filter(a => a.appointment_date === dateStr);
-      
+
       availability.push({
         date: dateStr,
         day_of_week: dayOfWeek,
@@ -1465,7 +1505,7 @@ router.post('/centers', authenticateToken, async (req, res) => {
 
     if (error) {
       console.error('❌ Create center request error:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Failed to create center request',
         details: error.message
       });
@@ -1482,9 +1522,9 @@ router.post('/centers', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error('❌ Create center request error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     });
   }
 });

@@ -43,26 +43,61 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
   // Check if cancellation is within 24 hours
   const canCancel = () => {
     if (!appointment?.date || !appointment?.time) return true; // Allow if date/time missing
-    
-    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
-    const now = new Date();
-    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    // Can cancel if more than 24 hours away, or if appointment is in the past (though API will block past)
-    return hoursUntilAppointment > 24 || hoursUntilAppointment < 0;
+
+    try {
+      // Parse the formatted date and time
+      // Date format: "November 25, 2025"
+      // Time format: "3:30 PM"
+      const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
+
+      // Check if date is valid
+      if (isNaN(appointmentDateTime.getTime())) {
+        console.error('❌ [CancelModal] Invalid date format:', { date: appointment.date, time: appointment.time });
+        return true; // Allow cancellation if we can't parse the date
+      }
+
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      console.log('🔍 [CancelModal] Can cancel check:', {
+        date: appointment.date,
+        time: appointment.time,
+        parsedDateTime: appointmentDateTime.toISOString(),
+        now: now.toISOString(),
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
+        canCancel: hoursUntilAppointment >= 24
+      });
+
+      // Can cancel if 24 hours or more away (not if appointment is in the past)
+      return hoursUntilAppointment >= 24;
+    } catch (error) {
+      console.error('❌ [CancelModal] Error parsing date:', error);
+      return true; // Allow cancellation if parsing fails
+    }
   };
 
   const getTimeUntilAppointment = () => {
     if (!appointment?.date || !appointment?.time) return null;
-    
-    const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
-    const now = new Date();
-    const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
-      return Math.ceil(hoursUntilAppointment);
+
+    try {
+      // Parse the formatted date and time
+      const appointmentDateTime = new Date(`${appointment.date} ${appointment.time}`);
+
+      // Check if date is valid
+      if (isNaN(appointmentDateTime.getTime())) {
+        return null;
+      }
+
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
+        return Math.ceil(hoursUntilAppointment);
+      }
+      return null;
+    } catch (error) {
+      return null;
     }
-    return null;
   };
 
   const handleCancel = async () => {
@@ -76,24 +111,24 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
       });
 
       await appointmentService.cancelAppointment(appointment.id, reason);
-      
+
       toast({
         title: t('cancel_appointment_success_title') || "Appointment Cancelled",
         description: t('cancel_appointment_success_desc') || "Your appointment has been cancelled successfully.",
       });
-      
+
       onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Error cancelling appointment:', error);
       let errorMessage = t('cancel_appointment_error') || "Failed to cancel appointment. Please try again.";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: t('error') || "Error",
         description: errorMessage,
@@ -185,8 +220,8 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
           <Button variant="outline" onClick={onClose} disabled={loading}>
             {t('keep_appointment') || 'Keep Appointment'}
           </Button>
-          <Button 
-            onClick={handleCancel} 
+          <Button
+            onClick={handleCancel}
             disabled={loading || !canCancel()}
             className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >

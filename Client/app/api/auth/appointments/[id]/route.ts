@@ -54,8 +54,7 @@ export async function GET(
                 )
             `)
             .eq(role === 'doctor' ? 'doctor_id' : 'patient_id', id)
-            .order('appointment_date', { ascending: true })
-            .order('appointment_time', { ascending: true });
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching appointments:', error);

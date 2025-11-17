@@ -39,7 +39,7 @@ export async function PUT(
 
     // Supabase fallback: check 24-hour rule before cancelling
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // First, fetch the appointment to check timing
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
@@ -58,24 +58,39 @@ export async function PUT(
 
     // Check if cancellation is within 24 hours of appointment time
     if (appointment.appointment_date && appointment.appointment_time) {
+      // Parse appointment date and time correctly
       const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const now = new Date();
-      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      
-      if (hoursUntilAppointment <= 24 && hoursUntilAppointment > 0) {
-        return NextResponse.json({ 
-          success: false, 
-          message: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
-          code: 'CANCELLATION_TOO_LATE'
+      const millisecondsUntilAppointment = appointmentDateTime.getTime() - now.getTime();
+      const hoursUntilAppointment = millisecondsUntilAppointment / (1000 * 60 * 60);
+
+      console.log('🔍 [Cancel Check]', {
+        appointmentDate: appointment.appointment_date,
+        appointmentTime: appointment.appointment_time,
+        appointmentDateTime: appointmentDateTime.toISOString(),
+        now: now.toISOString(),
+        millisecondsUntil: millisecondsUntilAppointment,
+        hoursUntilAppointment: hoursUntilAppointment.toFixed(2),
+        willBlock24h: hoursUntilAppointment < 24,
+        willBlockPast: hoursUntilAppointment <= 0
+      });
+
+      // Check if appointment is in the past
+      if (hoursUntilAppointment <= 0) {
+        return NextResponse.json({
+          success: false,
+          message: 'Cannot cancel a past appointment',
+          code: 'APPOINTMENT_IN_PAST'
         }, { status: 400 });
       }
 
-      // Also check if appointment is in the past
-      if (hoursUntilAppointment < 0) {
-        return NextResponse.json({ 
-          success: false, 
-          message: 'Cannot cancel a past appointment',
-          code: 'APPOINTMENT_IN_PAST'
+      // Block cancellation if less than 24 hours away
+      if (hoursUntilAppointment < 24) {
+        return NextResponse.json({
+          success: false,
+          message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
+          code: 'CANCELLATION_TOO_LATE',
+          hoursRemaining: hoursUntilAppointment
         }, { status: 400 });
       }
     }

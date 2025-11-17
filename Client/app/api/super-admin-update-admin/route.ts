@@ -4,23 +4,71 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     console.log('👑 [Super Admin Update Admin] Request received');
-    const { searchParams } = new URL(request.url);
-    const adminId = searchParams.get('adminId');
+
+    const body = await request.json();
+    const { adminId, name, email, phone, role } = body;
 
     if (!adminId) {
       return NextResponse.json({ success: false, error: 'Admin ID is required' }, { status: 400 });
     }
 
-    const body = await request.json();
-    const { name, email, phone, role } = body;
-
     console.log('👑 [Super Admin Update Admin] Updating admin:', adminId, 'with data:', { name, email, phone, role });
 
+    // Get the authorization token
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      console.error('❌ Missing authorization header');
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Try backend API first, then fallback to Supabase
+    const backendUrls = [
+      'https://kashfety.com/api/super-admin/admins',
+      'https://kashfety.com/api/admin/admins',
+      process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/super-admin/admins`,
+      process.env.NEXT_PUBLIC_API_URL && `${process.env.NEXT_PUBLIC_API_URL}/admin/admins`
+    ].filter(Boolean);
+
+    // Try backend endpoints first
+    for (const baseUrl of backendUrls) {
+      try {
+        const apiUrl = `${baseUrl}/${adminId}`;
+        console.log('🔄 [Super Admin Update Admin] Trying backend endpoint:', apiUrl);
+
+        const backendResponse = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, phone, role })
+        });
+
+        if (backendResponse.ok) {
+          const responseData = await backendResponse.json().catch(() => ({}));
+          console.log('✅ [Super Admin Update Admin] Success with backend endpoint:', apiUrl);
+          return NextResponse.json(responseData || {
+            success: true,
+            message: 'Admin updated successfully'
+          });
+        }
+
+        console.log('⚠️ [Super Admin Update Admin] Backend failed:', apiUrl, 'Status:', backendResponse.status);
+
+      } catch (error: any) {
+        console.log('⚠️ [Super Admin Update Admin] Network error with backend:', baseUrl, error.message);
+        continue;
+      }
+    }
+
+    // Fallback to Supabase if backend fails
+    console.log('🔄 [Super Admin Update Admin] Falling back to Supabase');
+
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
+      console.error('❌ Missing Supabase credentials for fallback');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -56,7 +104,7 @@ export async function PUT(request: NextRequest) {
         .eq('email', email)
         .neq('id', adminId)
         .single();
-      
+
       if (emailUser) {
         return NextResponse.json({ success: false, error: 'Email already in use' }, { status: 409 });
       }
@@ -80,10 +128,10 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) {
       console.error('❌ Failed to update admin:', updateError);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to update admin',
-        details: updateError.message 
+        details: updateError.message
       }, { status: 500 });
     }
 
@@ -114,10 +162,10 @@ export async function PUT(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Super admin update admin API error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

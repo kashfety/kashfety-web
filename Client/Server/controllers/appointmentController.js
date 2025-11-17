@@ -7,7 +7,7 @@ import { supabaseAdmin, TABLES } from "../utils/supabase.js";
 export const bookAppointment = async (req, res) => {
   console.log('🎯 BOOKING APPOINTMENT ENDPOINT HIT');
   console.log('🎯 Timestamp:', new Date().toISOString());
-  
+
   try {
     const {
       patient_id,
@@ -487,6 +487,53 @@ export const cancelAppointment = async (req, res) => {
     const { appointmentId } = req.params;
     const { reason } = req.body;
 
+    // First, fetch the appointment to check timing
+    const { data: appointment, error: fetchError } = await supabaseAdmin
+      .from(TABLES.APPOINTMENTS)
+      .select('id, status, appointment_date, appointment_time')
+      .eq('id', appointmentId)
+      .single();
+
+    if (fetchError || !appointment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Appointment not found'
+      });
+    }
+
+    // Check if appointment is already cancelled
+    if (appointment.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        error: 'Appointment is already cancelled'
+      });
+    }
+
+    // Check if cancellation is within 24 hours of appointment time
+    if (appointment.appointment_date && appointment.appointment_time) {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      const hoursUntilAppointment = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      // Check if appointment is in the past
+      if (hoursUntilAppointment < 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cannot cancel a past appointment',
+          code: 'APPOINTMENT_IN_PAST'
+        });
+      }
+
+      // Block cancellation if less than 24 hours away
+      if (hoursUntilAppointment < 24) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cannot cancel appointment within 24 hours of the scheduled time. Please contact support for assistance.',
+          code: 'CANCELLATION_TOO_LATE'
+        });
+      }
+    }
+
     // Update appointment status to cancelled
     const { data: cancelledAppointment, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -684,13 +731,13 @@ export const getAppointmentStats = async (req, res) => {
       completed: appointments.filter(a => a.status === 'completed').length,
       cancelled: appointments.filter(a => a.status === 'cancelled').length,
       no_show: appointments.filter(a => a.status === 'no_show').length,
-      
+
       // By type
       consultation: appointments.filter(a => a.type === 'consultation').length,
       follow_up: appointments.filter(a => a.type === 'follow_up').length,
       emergency: appointments.filter(a => a.type === 'emergency').length,
       routine: appointments.filter(a => a.type === 'routine').length,
-      
+
       // By appointment type
       clinic: appointments.filter(a => a.appointment_type === 'clinic').length,
       home: appointments.filter(a => a.appointment_type === 'home').length
@@ -1069,7 +1116,7 @@ export const getAppointmentDetails = async (req, res) => {
     }
 
     // Check access permissions
-    const hasAccess = 
+    const hasAccess =
       (userData.role === 'doctor' && appointment.doctor_id === userData.id) ||
       (userData.role === 'patient' && appointment.patient_id === userData.id) ||
       (userData.role === 'admin');
@@ -1175,12 +1222,12 @@ export const getAvailableSlots = async (req, res) => {
       const breakEndTime = breakEnd ? new Date(`2000-01-01T${breakEnd}:00`) : null;
 
       let currentTime = new Date(startTime);
-      
+
       while (currentTime < endTime) {
         const timeString = currentTime.toTimeString().slice(0, 5);
-        
+
         // Skip break time slots
-        const skipDueToBreak = breakStartTime && breakEndTime && 
+        const skipDueToBreak = breakStartTime && breakEndTime &&
           currentTime >= breakStartTime && currentTime < breakEndTime;
 
         if (!skipDueToBreak) {
@@ -1194,9 +1241,9 @@ export const getAvailableSlots = async (req, res) => {
     };
 
     const allSlots = generateTimeSlots(
-      workHours.start, 
-      workHours.end, 
-      workHours.break_start, 
+      workHours.start,
+      workHours.end,
+      workHours.break_start,
       workHours.break_end
     );
 
@@ -1232,7 +1279,7 @@ export const getAvailableSlots = async (req, res) => {
 export const getAllAppointments = async (req, res) => {
   try {
     const { page = 1, limit = 20, status, doctorId, patientId, dateFrom, dateTo } = req.query;
-    
+
     console.log('🔔 Getting all appointments (Admin)');
 
     let query = supabaseAdmin

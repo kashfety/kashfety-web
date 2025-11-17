@@ -57,6 +57,8 @@ const corsOptions = {
 
     // List of allowed origins including Vercel preview deployments
     const allowedOrigins = [
+      'https://kashfety.com',
+      'https://www.kashfety.com',
       'https://kashfety-web-git-develop-kashfetys-projects.vercel.app',
       'https://kashfety-web.vercel.app',
       'https://kashfety-fxlohki19-kashfetys-projects.vercel.app',
@@ -72,7 +74,7 @@ const corsOptions = {
     }
 
     // Check if origin matches any allowed pattern (including Vercel preview URLs)
-    const isAllowed = allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', ''))) 
+    const isAllowed = allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', '')))
       || origin.endsWith('.vercel.app')
       || origin.includes('kashfety');
 

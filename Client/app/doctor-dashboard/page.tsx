@@ -50,7 +50,8 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  Zap
+  Zap,
+  Grid3X3
 } from "lucide-react";
 import ScheduleChart from "@/components/dashboard/schedule-chart";
 import AppointmentsChart from "@/components/dashboard/appointments-chart";
@@ -67,6 +68,7 @@ import FirstTimeDoctorSetup from "@/components/FirstTimeDoctorSetup";
 import DoctorProfileSettings from "@/components/DoctorProfileSettings";
 import DoctorScheduleManagement from "@/components/DoctorScheduleManagement";
 import DoctorCenterManagement from "@/components/DoctorCenterManagement";
+import DoctorScheduleCalendar from "@/components/DoctorScheduleCalendar";
 
 interface DoctorProfile {
   id: string;
@@ -300,6 +302,9 @@ function Sidebar({
                   </NavItem>
                   <NavItem tab="appointments" icon={Calendar} isActive={activeTab === "appointments"}>
                     {t('dd_appointments_tab') || 'Appointments'}
+                  </NavItem>
+                  <NavItem tab="schedule-calendar" icon={Grid3X3} isActive={activeTab === "schedule-calendar"}>
+                    {t('dd_schedule_calendar_tab') || 'Schedule Calendar'}
                   </NavItem>
                   <NavItem tab="patients" icon={Users} isActive={activeTab === "patients"}>
                     {t('dd_patients_tab') || 'Patients'}
@@ -546,7 +551,7 @@ export default function DoctorDashboard() {
         }
 
         const response = await fetch(`/api/doctor-reviews?doctor_id=${encodeURIComponent(doctorId)}`);
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Reviews fetched:', data.reviews?.length || 0);
@@ -901,7 +906,7 @@ export default function DoctorDashboard() {
       const storedUserStr = localStorage.getItem('auth_user');
       const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
       const doctorId = user?.id || storedUser?.id;
-      
+
       if (!doctorId) {
         toast({
           title: "Error",
@@ -1688,6 +1693,38 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
+              {/* Schedule Calendar Tab */}
+              <TabsContent value="schedule-calendar" className="h-full">
+                <DoctorScheduleCalendar
+                  appointments={allAppointments || []}
+                  onAppointmentClick={(appointment) => {
+                    // Handle appointment click - could open a modal or navigate to details
+                    toast({
+                      title: t('dd_appointment_details') || 'Appointment Details',
+                      description: `${appointment.patient_name} - ${appointment.appointment_time}`
+                    });
+                  }}
+                  onStatusUpdate={async (appointmentId, newStatus) => {
+                    // Handle status update
+                    try {
+                      // You can implement the status update API call here
+                      toast({
+                        title: t('dd_status_updated') || 'Status Updated',
+                        description: t('dd_appointment_status_updated') || 'Appointment status has been updated successfully.'
+                      });
+                      // Refresh appointments
+                      await fetchAppointments();
+                    } catch (error) {
+                      toast({
+                        title: t('dd_error') || 'Error',
+                        description: t('dd_failed_to_update_status') || 'Failed to update appointment status.',
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                />
+              </TabsContent>
+
               <TabsContent value="patients" className="p-6 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
@@ -1898,9 +1935,9 @@ export default function DoctorDashboard() {
                 <div className="scroll-animation" data-animation="slide-in-up">
                   {/* Key prop changes when switching tabs, forcing refetch of centers */}
                   {activeTab === 'schedule' && (
-                    <DoctorScheduleManagement 
+                    <DoctorScheduleManagement
                       key="schedule-active"
-                      doctorId={doctorProfile?.id || ''} 
+                      doctorId={doctorProfile?.id || ''}
                     />
                   )}
                 </div>
@@ -1957,7 +1994,7 @@ export default function DoctorDashboard() {
                           <div>
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                              {reviews.length > 0 
+                              {reviews.length > 0
                                 ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(2)
                                 : '0.00'}★
                             </p>
@@ -1977,49 +2014,48 @@ export default function DoctorDashboard() {
                       {reviews.map((review) => {
                         const patientName = review.patient_name || review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient';
                         return (
-                        <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
-                                  {patientName.charAt(0).toUpperCase()}
+                          <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
+                            <CardContent className="p-6">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
+                                    {patientName.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">
+                                      {patientName}
+                                    </p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                      {new Date(review.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="font-semibold text-gray-900 dark:text-white">
-                                    {patientName}
-                                  </p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {new Date(review.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    })}
-                                  </p>
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`w-5 h-5 ${star <= (review.rating || 0)
+                                          ? 'text-yellow-500 fill-yellow-500'
+                                          : 'text-gray-300 dark:text-gray-600'
+                                        }`}
+                                    />
+                                  ))}
+                                  <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+                                    {review.rating?.toFixed(1)}
+                                  </span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`w-5 h-5 ${
-                                      star <= (review.rating || 0)
-                                        ? 'text-yellow-500 fill-yellow-500'
-                                        : 'text-gray-300 dark:text-gray-600'
-                                    }`}
-                                  />
-                                ))}
-                                <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                                  {review.rating?.toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-                            {review.comment && (
-                              <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
-                                {review.comment}
-                              </p>
-                            )}
-                          </CardContent>
-                        </Card>
+                              {review.comment && (
+                                <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
+                                  {review.comment}
+                                </p>
+                              )}
+                            </CardContent>
+                          </Card>
                         );
                       })}
                     </div>

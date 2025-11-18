@@ -6,9 +6,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// In-memory store for reset tokens (in production, use Redis or database)
-const resetTokens = new Map<string, { email: string; expiresAt: number }>();
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -41,23 +38,29 @@ export async function POST(request: NextRequest) {
 
     // Generate secure reset token
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = Date.now() + (60 * 60 * 1000); // 1 hour from now
+    const expiresAt = new Date(Date.now() + (60 * 60 * 1000)); // 1 hour from now
 
-    // Store token
-    resetTokens.set(token, { email: user.email, expiresAt });
+    // Store token in database
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        reset_token: token,
+        reset_token_expiry: expiresAt.toISOString()
+      })
+      .eq('email', email);
 
-    // Clean up expired tokens
-    for (const [key, value] of resetTokens.entries()) {
-      if (value.expiresAt < Date.now()) {
-        resetTokens.delete(key);
-      }
+    if (updateError) {
+      console.error('❌ [Forgot-Password] Error storing token:', updateError);
+      throw new Error('Failed to generate reset token');
     }
 
     console.log('✅ [Forgot-Password] Reset token generated for:', email);
 
-    // In production, send email here
-    // For now, we'll just return the token in the response (NOT SECURE, for development only)
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/update-password?token=${token}`;
+    // Determine the app URL - try multiple sources
+    const appUrl = process.env.NEXT_PUBLIC_API_URL || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    
+    const resetUrl = `${appUrl}/update-password?token=${token}`;
     
     console.log('🔗 [Forgot-Password] Reset URL:', resetUrl);
 
@@ -90,17 +93,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const tokenData = resetTokens.get(token);
+    // Check token in database
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('email, reset_token_expiry')
+      .eq('reset_token', token)
+      .single();
 
-    if (!tokenData) {
+    if (error || !user) {
       return NextResponse.json(
         { success: false, error: 'Invalid or expired token' },
         { status: 400 }
       );
     }
 
-    if (tokenData.expiresAt < Date.now()) {
-      resetTokens.delete(token);
+    // Check if token is expired
+    if (new Date(user.reset_token_expiry) < new Date()) {
       return NextResponse.json(
         { success: false, error: 'Token has expired' },
         { status: 400 }
@@ -109,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      email: tokenData.email
+      email: user.email
     });
 
   } catch (error: any) {
@@ -127,8 +135,12 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     const { token } = body;
 
+    // Clear the reset token from database
     if (token) {
-      resetTokens.delete(token);
+      await supabase
+        .from('users')
+        .update({ reset_token: null, reset_token_expiry: null })
+        .eq('reset_token', token);
     }
 
     return NextResponse.json({ success: true });

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         // Get center details first
         const { data: center, error: centerError } = await supabase
             .from('centers')
-            .select('user_id, name')
+            .select('id, name')
             .eq('id', centerId)
             .single();
 
@@ -45,6 +45,32 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('📝 [Admin Delete Center] Found center:', center.name);
+
+        // Find users associated with this center (users with role 'center' and matching center_id)
+        console.log('📝 [Admin Delete Center] Finding users linked to this center');
+        const { data: centerUsers, error: usersError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('center_id', centerId);
+
+        if (usersError) {
+            console.error('❌ [Admin Delete Center] Error finding users:', usersError);
+        } else if (centerUsers && centerUsers.length > 0) {
+            console.log('📝 [Admin Delete Center] Found', centerUsers.length, 'user(s) to delete');
+            
+            // Delete associated users
+            const { error: deleteUsersError } = await supabase
+                .from('users')
+                .delete()
+                .eq('center_id', centerId);
+
+            if (deleteUsersError) {
+                console.error('❌ [Admin Delete Center] Error deleting users:', deleteUsersError);
+            } else {
+                console.log('✅ [Admin Delete Center] Users deleted successfully');
+            }
+        }
+
         console.log('📝 [Admin Delete Center] Deleting center from database');
 
         // Delete the center
@@ -62,22 +88,6 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('✅ [Admin Delete Center] Center deleted successfully');
-
-        // Delete the associated user account if exists
-        if (center.user_id) {
-            console.log('📝 [Admin Delete Center] Deleting associated user:', center.user_id);
-            const { error: deleteUserError } = await supabase
-                .from('users')
-                .delete()
-                .eq('id', center.user_id);
-
-            if (deleteUserError) {
-                console.error('❌ [Admin Delete Center] Error deleting user:', deleteUserError);
-                // Continue anyway, center is already deleted
-            } else {
-                console.log('✅ [Admin Delete Center] User deleted successfully');
-            }
-        }
 
         return NextResponse.json({
             success: true,

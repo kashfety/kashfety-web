@@ -23,11 +23,24 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       })
 
-      if (resetError) throw resetError
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to send reset email')
+      }
+
+      // Log reset URL in development
+      if (data.resetUrl) {
+        console.log('🔗 Password Reset URL:', data.resetUrl)
+      }
 
       setSuccess(true)
     } catch (err: any) {

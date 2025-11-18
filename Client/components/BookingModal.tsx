@@ -1711,6 +1711,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             const filterQuery = (centerFilter || '').toLowerCase();
                             return !filterQuery ||
                               center.name.toLowerCase().includes(filterQuery) ||
+                              (center.name_ar || '').toLowerCase().includes(filterQuery) ||
                               (center.address || '').toLowerCase().includes(filterQuery);
                           })
                           .map((center) => (
@@ -1808,7 +1809,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
-                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
+                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.name_ar || '').toLowerCase().includes(filterQuery) || (d.first_name_ar || '').toLowerCase().includes(filterQuery) || (d.last_name_ar || '').toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
                             // Ensure rating is a number for proper comparison
                             const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
                             const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
@@ -1940,7 +1941,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
-                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
+                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.name_ar || '').toLowerCase().includes(filterQuery) || (d.first_name_ar || '').toLowerCase().includes(filterQuery) || (d.last_name_ar || '').toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
                             // Ensure rating is a number for proper comparison
                             const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
                             const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
@@ -2164,6 +2165,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             if (!filterQuery) return true;
                             return (
                               center.name.toLowerCase().includes(filterQuery) ||
+                              (center.name_ar || '').toLowerCase().includes(filterQuery) ||
                               center.address?.toLowerCase().includes(filterQuery)
                             );
                           });

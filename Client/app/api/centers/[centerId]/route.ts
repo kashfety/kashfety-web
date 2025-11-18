@@ -17,7 +17,7 @@ export async function GET(
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: center, error } = await supabase
       .from('centers')
-      .select('id, name, address, phone, email')
+      .select('id, name, name_ar, address, phone, email')
       .eq('id', centerId)
       .single();
 

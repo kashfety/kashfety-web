@@ -1533,7 +1533,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 {/* Debug Info - Remove after testing */}
                 {process.env.NODE_ENV === 'development' && (
                   <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mb-4">
-                    Step: {locale === 'ar' ? toArabicNumerals(currentStep.toString()) : currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
+                    Step: {toArabicNumerals(currentStep.toString(), locale)} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
                     Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} |
                     Location: {selectedLocation || 'none'}
                   </div>
@@ -1564,7 +1564,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           animate={currentStep >= step ? { scale: [1, 1.08, 1] } : {}}
                           transition={{ duration: 0.4 }}
                         >
-                          {locale === 'ar' ? toArabicNumerals(step.toString()) : step}
+                          {toArabicNumerals(step.toString(), locale)}
                         </motion.div>
                         {index < array.length - 1 && (
                           <motion.div

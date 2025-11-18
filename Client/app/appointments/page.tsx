@@ -17,7 +17,6 @@ import VisitSummaryModal from "@/components/VisitSummaryModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { localizeDoctorName } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -201,6 +200,26 @@ export default function MyAppointmentsPage() {
     return doctor.specialty_en || doctor.specialty || 'General Medicine';
   }
 
+  // Helper to get localized doctor name from doctor object
+  const getLocalizedDoctorName = (doctor: any) => {
+    if (!doctor) return locale === 'ar' ? 'د. طبيب' : 'Dr. Doctor';
+    
+    if (locale === 'ar') {
+      // If we have Arabic name, use it
+      if (doctor.name_ar) return doctor.name_ar;
+      if (doctor.first_name_ar && doctor.last_name_ar) {
+        return `${doctor.first_name_ar} ${doctor.last_name_ar}`;
+      }
+      if (doctor.first_name_ar) return doctor.first_name_ar;
+    }
+    
+    // Fallback to English name
+    if (doctor.first_name && doctor.last_name) {
+      return `${doctor.first_name} ${doctor.last_name}`;
+    }
+    return doctor.name || 'Doctor';
+  }
+
   // Helper to get localized center name
   const getLocalizedCenterName = (center: any) => {
     if (!center) return '';
@@ -288,7 +307,6 @@ export default function MyAppointmentsPage() {
         }
         
         // Get doctor and center information
-        const doctorName = apt.doctor?.name || apt.doctor_name || 'Doctor';
         const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
         let center = apt.center || apt.centers || null;
@@ -298,7 +316,7 @@ export default function MyAppointmentsPage() {
         
         return {
           id: apt.id,
-          doctorName: localizeDoctorName(locale, doctorName),
+          doctorName: getLocalizedDoctorName(apt.doctor),
           specialty: getLocalizedSpecialty(apt.doctor),
           date: formattedDate,
           time: formattedTime,

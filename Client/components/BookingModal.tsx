@@ -121,10 +121,23 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
   // Helper function to get localized name
-  const getLocalizedName = (item: { name?: string; name_en?: string; name_ar?: string; name_ku?: string } | null) => {
+  const getLocalizedName = (item: { name?: string; name_en?: string; name_ar?: string; name_ku?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
     if (!item) return '';
-    if (locale === 'ar' && item.name_ar) return item.name_ar;
+    
+    // For Arabic locale
+    if (locale === 'ar') {
+      // If it's a doctor with first_name_ar/last_name_ar
+      if (item.first_name_ar && item.last_name_ar) {
+        return `${item.first_name_ar} ${item.last_name_ar}`;
+      }
+      // If it has name_ar (for centers, etc)
+      if (item.name_ar) return item.name_ar;
+    }
+    
+    // For Kurdish locale
     if (locale === 'ku' && item.name_ku) return item.name_ku;
+    
+    // Default to English name
     return item.name || item.name_en || '';
   };
 
@@ -435,6 +448,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const response = await fetch(`/api/doctors?${params.toString()}`);
       const result = await response.json();
 
+      console.log('API Response:', result);
+      console.log('First doctor raw data:', result.doctors?.[0]);
+
       if (result && result.success) {
         let filteredDoctors = (result.doctors || []).map((d: any) => ({
           id: d.id,
@@ -452,6 +468,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           home_available: !!d.home_visits_available,
           has_schedule: true,
         }));
+
+        console.log('Mapped first doctor:', filteredDoctors[0]);
 
         // Filter for home visits if requested
         if (visitType === 'home') {

@@ -2052,7 +2052,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_center') || 'Select Center'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
-                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">Dr. {getLocalizedName(selectedDoctor)}</span>
+                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</span>
                         </p>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{getLocalizedSpecialtyName(selectedSpecialty)}</span>
@@ -2405,8 +2405,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           {isLabMode
                             ? `${selectedLabType?.name || ''} ${t('booking_at') || 'at'} ${getLocalizedName(selectedCenter)}`
                             : selectedLocation === "home"
-                              ? `${t('booking_with') || 'with'} Dr. ${getLocalizedName(selectedDoctor)} - ${t('booking_home_visit') || 'Home Visit'}`
-                              : `${t('booking_with') || 'with'} Dr. ${getLocalizedName(selectedDoctor)} ${t('booking_at') || 'at'} ${getLocalizedName(selectedCenter)}`
+                              ? `${t('booking_with') || 'with'} ${locale === 'ar' ? 'دكتور' : 'Dr.'} ${getLocalizedName(selectedDoctor)} - ${t('booking_home_visit') || 'Home Visit'}`
+                              : `${t('booking_with') || 'with'} ${locale === 'ar' ? 'دكتور' : 'Dr.'} ${getLocalizedName(selectedDoctor)} ${t('booking_at') || 'at'} ${getLocalizedName(selectedCenter)}`
                           }
                         </p>
                       </div>
@@ -2448,7 +2448,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           {!isLabMode && doctorWorkingDays.length > 0 && selectedDoctor && (
                             <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
                               <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
-                                <strong className="text-[#4DBCC4]">Dr. {getLocalizedName(selectedDoctor)}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
+                                <strong className="text-[#4DBCC4]">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
                                 <span className="font-semibold">
                                   {doctorWorkingDays.map(day => {
                                     const dayNames = [
@@ -2610,7 +2610,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_doctor') || 'Doctor:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">Dr. {getLocalizedName(selectedDoctor)}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_specialty') || 'Specialty:'}</span>

@@ -1546,8 +1546,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   transition={{ delay: 0.2, duration: 0.3 }}
                   className="flex justify-center mb-8"
                 >
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-4`}>
-                    {(isRTL ? (isLabMode ? [3, 2, 1] : [4, 3, 2, 1]) : (isLabMode ? [1, 2, 3] : [1, 2, 3, 4])).map((step, index) => (
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''} gap-0`}>
+                    {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index, array) => (
                       <motion.div
                         key={step}
                         initial={{ opacity: 0, scale: 0 }}
@@ -1566,7 +1566,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         >
                           {locale === 'ar' ? toArabicNumerals(step.toString()) : step}
                         </motion.div>
-                        {step < (isLabMode ? 3 : 4) && (
+                        {index < array.length - 1 && (
                           <motion.div
                             className={`w-12 h-1.5 mx-2 rounded-full transition-all duration-500 ${currentStep > step ? 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0]' : 'bg-gray-300 dark:bg-gray-700'}`}
                             initial={{ scaleX: 0 }}

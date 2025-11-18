@@ -26,6 +26,7 @@ const DoctorsSection = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleDoctors, setVisibleDoctors] = useState<Set<number>>(new Set());
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { t, locale } = useLocale();
 
@@ -39,12 +40,23 @@ const DoctorsSection = () => {
     return item.name || '';
   };
 
+  // Helper to get localized specialty name
+  const getLocalizedSpecialty = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
+  };
+
   // Reset visible doctors when component mounts
   useEffect(() => {
     setVisibleDoctors(new Set());
   }, []);
 
   useEffect(() => {
+    fetchSpecialties();
     fetchDoctors();
     
     // Setup intersection observer for scroll animations
@@ -94,6 +106,26 @@ const DoctorsSection = () => {
       return () => clearTimeout(timer);
     }
   }, [doctors]);
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await fetch('/api/specialties');
+      const result = await response.json();
+      
+      if (result.success && result.specialties) {
+        const map = new Map();
+        result.specialties.forEach((specialty: any) => {
+          map.set(specialty.name, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku
+          });
+        });
+        setSpecialtiesMap(map);
+      }
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
 
   const fetchDoctors = async () => {
     try {
@@ -164,6 +196,7 @@ const DoctorsSection = () => {
               index={index}
               isVisible={visibleDoctors.has(index)}
               locale={locale}
+              specialtiesMap={specialtiesMap}
             />
           ))}
         </div>
@@ -204,11 +237,13 @@ const DoctorShowcaseCard = ({
   index, 
   isVisible,
   locale,
+  specialtiesMap,
 }: { 
   doctor: Doctor; 
   index: number; 
   isVisible: boolean;
   locale: any;
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) => {
   const isEven = index % 2 === 0;
   const { t } = useLocale();
@@ -222,9 +257,19 @@ const DoctorShowcaseCard = ({
     }
     return item.name || '';
   };
+
+  // Get localized specialty name from database
+  const getLocalizedSpecialty = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
+  };
   
   const localizedName = getLocalizedName(doctor);
-  const localizedSpecialty = localizeSpecialty(locale, doctor.specialty)
+  const localizedSpecialty = getLocalizedSpecialty(doctor.specialty)
 
   return (
     <div 

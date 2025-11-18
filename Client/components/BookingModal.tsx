@@ -23,6 +23,11 @@ import { motion, AnimatePresence } from "framer-motion";
 interface Doctor {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
+  first_name_ar?: string;
+  last_name_ar?: string;
+  name_ar?: string;
   specialty: string;
   experience_years: number;
   profile_picture: string;
@@ -35,6 +40,7 @@ interface Doctor {
 interface Center {
   id: string;
   name: string;
+  name_ar?: string;
   address: string;
   phone?: string;
   email?: string;
@@ -53,6 +59,9 @@ interface LabTestType {
 interface Specialty {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
+  name_ku?: string;
   description: string;
 }
 
@@ -109,6 +118,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [doctorWorkingDays, setDoctorWorkingDays] = useState<number[]>([]);
   const [actualConsultationFee, setActualConsultationFee] = useState<number>(0);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // Helper function to get localized name
+  const getLocalizedName = (item: { name?: string; name_en?: string; name_ar?: string; name_ku?: string } | null) => {
+    if (!item) return '';
+    if (locale === 'ar' && item.name_ar) return item.name_ar;
+    if (locale === 'ku' && item.name_ku) return item.name_ku;
+    return item.name || item.name_en || '';
+  };
 
   // Restore booking data on modal open
   useEffect(() => {
@@ -1539,7 +1556,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             >
                               <CardContent className="p-5 text-center">
                                 <div className={`text-base font-semibold ${selectedSpecialty === specialty.name ? 'text-[#4DBCC4] dark:text-[#4DBCC4]' : 'text-gray-800 dark:text-gray-200'}`}>
-                                  {localizeSpecialty(locale, specialty.name)}
+                                  {getLocalizedName(specialty)}
                                 </div>
                               </CardContent>
                             </Card>

@@ -103,6 +103,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loadingSpecialties, setLoadingSpecialties] = useState(false);
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
   // Lab-related state
   const [labTypes, setLabTypes] = useState<LabTestType[]>([]);
   const [labCentersByType, setLabCentersByType] = useState<Record<string, Center[]>>({});
@@ -125,6 +126,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     if (locale === 'ar' && item.name_ar) return item.name_ar;
     if (locale === 'ku' && item.name_ku) return item.name_ku;
     return item.name || item.name_en || '';
+  };
+
+  // Helper to get localized specialty name from doctor's specialty string
+  const getLocalizedSpecialtyName = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
   };
 
   // Restore booking data on modal open
@@ -243,6 +254,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (response.ok) {
         const data = await response.json();
         setSpecialties(data.specialties);
+        
+        // Build specialties map for localization
+        const map = new Map();
+        data.specialties.forEach((specialty: Specialty) => {
+          map.set(specialty.name, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku
+          });
+        });
+        setSpecialtiesMap(map);
       } else {
         console.error('Failed to fetch specialties');
       }
@@ -1807,7 +1828,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                     <div className="flex items-center justify-between gap-3">
                                       <div className="flex-1 min-w-0">
                                         <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{getLocalizedName(doctor)}</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{localizeSpecialty(locale, doctor.specialty)}</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{getLocalizedSpecialtyName(doctor.specialty)}</p>
                                         <div className="flex items-center gap-2 mt-2">
                                           <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">
                                             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
@@ -1939,7 +1960,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                       <div className="flex-1 min-w-0">
                                         <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{getLocalizedName(doctor)}</h4>
-                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{localizeSpecialty(locale, doctor.specialty)}</p>
+                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{getLocalizedSpecialtyName(doctor.specialty)}</p>
                                       </div>
                                       <div className="text-right flex-shrink-0">
                                         <div className="text-2xl font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{doctor.consultation_fee} {t('currency') || 'SYP'}</div>
@@ -2563,7 +2584,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_specialty') || 'Specialty:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{localizeSpecialty(locale, selectedDoctor!.specialty)}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{getLocalizedSpecialtyName(selectedDoctor!.specialty)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_type') || 'Type:'}</span>

@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
       .from('lab_bookings')
       .select(`
         *,
-        patient:users!lab_bookings_patient_id_fkey(id, name, phone, email),
-        center:centers(id, name, address, phone, email),
-        lab_test_type:lab_test_types(id, name, description, category, default_fee)
+        patient:users!lab_bookings_patient_id_fkey(id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, phone, email),
+        center:centers(id, name, name_ar, address, phone, email),
+        lab_test_type:lab_test_types(id, name, name_ar, name_ku, description, category, default_fee)
       `)
       .eq('patient_id', patientId)
       .order('booking_date', { ascending: false })

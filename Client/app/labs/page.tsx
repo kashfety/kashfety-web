@@ -25,8 +25,8 @@ interface LabBooking {
   duration?: number;
   notes?: string;
   fee?: number;
-  center?: { id: string; name: string; address: string };
-  type?: { id: string; name: string; category: string };
+  center?: { id: string; name: string; name_ar?: string; address: string };
+  type?: { id: string; name: string; name_ar?: string; name_ku?: string; category: string };
   result_file_url?: string | null;
   rating?: number;
   review?: string;
@@ -68,6 +68,28 @@ export default function MyLabsPage() {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
+
+  // Helper functions for localized names
+  const getLocalizedTestName = (booking: LabBooking) => {
+    if (!booking.type) return t('unknown_test') || 'Unknown Test'
+    
+    if (locale === 'ar' && booking.type.name_ar) {
+      return booking.type.name_ar
+    }
+    if (locale === 'ku' && booking.type.name_ku) {
+      return booking.type.name_ku
+    }
+    return booking.type.name || t('unknown_test') || 'Unknown Test'
+  }
+
+  const getLocalizedCenterName = (booking: LabBooking) => {
+    if (!booking.center) return t('unknown_center') || 'Unknown Center'
+    
+    if (locale === 'ar' && booking.center.name_ar) {
+      return booking.center.name_ar
+    }
+    return booking.center.name || t('unknown_center') || 'Unknown Center'
+  }
 
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
@@ -240,7 +262,7 @@ export default function MyLabsPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <CardTitle className="text-xl text-foreground flex items-center gap-2">
-                        {booking.type?.name}
+                        {getLocalizedTestName(booking)}
                         {booking.rating && (
                           <div className="flex items-center gap-1 ml-2">
                             <Star size={16} className="text-yellow-500 fill-current" />
@@ -283,7 +305,7 @@ export default function MyLabsPage() {
                       <div className="flex items-start gap-3 text-muted-foreground">
                         <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
                         <div>
-                          <div className="font-medium">{booking.center?.name}</div>
+                          <div className="font-medium">{getLocalizedCenterName(booking)}</div>
                           <div className="text-sm text-gray-500">{booking.center?.address}</div>
                         </div>
                       </div>

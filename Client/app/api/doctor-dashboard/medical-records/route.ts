@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
       .from('medical_records')
       .select(`
         *,
-        patient:users!medical_records_patient_id_fkey(name, email),
-        doctor:users!medical_records_doctor_id_fkey(name, email)
+        patient:users!medical_records_patient_id_fkey(name, name_ar, first_name, last_name, first_name_ar, last_name_ar, email),
+        doctor:users!medical_records_doctor_id_fkey(name, name_ar, first_name, last_name, first_name_ar, last_name_ar, email)
       `)
       .order('created_at', { ascending: false });
     if (patient_id) query = query.eq('patient_id', patient_id);

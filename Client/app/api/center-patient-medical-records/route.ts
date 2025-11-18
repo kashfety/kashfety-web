@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       if (record.doctor_id) {
         const { data: doctor } = await supabase
           .from('users')
-          .select('id, name, specialty, profile_picture')
+          .select('id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, specialty, profile_picture')
           .eq('id', record.doctor_id)
           .single();
         doctorInfo = doctor;

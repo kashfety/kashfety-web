@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .from('medical_records')
       .select(`
         *,
-        doctor:users!medical_records_doctor_id_fkey(id, name, specialty)
+        doctor:users!medical_records_doctor_id_fkey(id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, specialty)
       `)
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false });

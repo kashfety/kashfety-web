@@ -27,9 +27,9 @@ export async function GET(request: NextRequest) {
       .from('appointments')
       .select(`
         *,
-        doctor:users!fk_appointments_doctor (id, name, specialty, phone),
+        doctor:users!fk_appointments_doctor (id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, specialty, phone),
         patient:users!fk_appointments_patient (id, name, phone, email),
-        center:centers!fk_appointments_center (id, name, address, phone, email)
+        center:centers!fk_appointments_center (id, name, name_ar, address, phone, email)
       `);
 
     // Filter by role
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       if (!apt.center && apt.center_id) {
         const { data: center } = await supabaseAdmin
           .from('centers')
-          .select('id, name, address, phone, email')
+          .select('id, name, name_ar, address, phone, email')
           .eq('id', apt.center_id)
           .single();
         if (center) apt.center = center;

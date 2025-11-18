@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
                 .map((center: any) => ({
                     id: center.id,
                     name: center.name,
+                    name_ar: center.name_ar,
                     address: center.address,
                     phone: center.phone
                 }))

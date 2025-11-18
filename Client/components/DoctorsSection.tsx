@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Star, Award, Clock, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocale } from "@/components/providers/locale-provider";
-import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n";
+import { localizeDoctorName, localizeSpecialty, toArabicNumerals, formatCurrency } from "@/lib/i18n";
 
 interface Doctor {
   id: string;
@@ -297,7 +297,7 @@ const DoctorShowcaseCard = ({
                 className="object-cover"
               />
               <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-[#4DBCC4] text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                ⭐ {doctor.rating || '4.8'}
+                ⭐ {toArabicNumerals(doctor.rating || '4.8', locale)}
               </div>
             </div>
             
@@ -309,7 +309,7 @@ const DoctorShowcaseCard = ({
               </div>
               <div className="bg-emerald-100 text-emerald-800 px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 dark:bg-emerald-900/30 dark:text-emerald-300">
                 <Clock className="w-3 h-3" />
-                {doctor.experience_years}+ {t('doctors_section_years') || 'years'}
+                {toArabicNumerals(doctor.experience_years, locale)}+ {t('doctors_section_years') || 'years'}
               </div>
             </div>
           </div>
@@ -327,9 +327,9 @@ const DoctorShowcaseCard = ({
           </p>
           <div className="flex items-center gap-2 justify-center lg:justify-start text-muted-foreground mb-4 sm:mb-6">
             <Star className="w-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
-            <span className="text-base sm:text-lg font-medium">{doctor.rating || '4.8'}</span>
+            <span className="text-base sm:text-lg font-medium">{toArabicNumerals(doctor.rating || '4.8', locale)}</span>
             <span className="text-gray-400">•</span>
-            <span className="text-sm sm:text-base">85+ {t('doctors_section_happy_patients') || 'Happy Patients'}</span>
+            <span className="text-sm sm:text-base">{toArabicNumerals('85', locale)}+ {t('doctors_section_happy_patients') || 'Happy Patients'}</span>
           </div>
         </div>
 
@@ -338,7 +338,7 @@ const DoctorShowcaseCard = ({
             <Award className="w-5 sm:w-6 sm:h-6 text-[#4DBCC4] mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_expert_in') || 'Expert in'} {localizedSpecialty}</p>
-              <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_years_line') || 'With'} {doctor.experience_years}+ {t('doctors_section_years') || 'years'} {t('doctors_section_dedicated_practice') || 'of dedicated practice'}</p>
+              <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_years_line') || 'With'} {toArabicNumerals(doctor.experience_years, locale)}+ {t('doctors_section_years') || 'years'} {t('doctors_section_dedicated_practice') || 'of dedicated practice'}</p>
             </div>
           </div>
           

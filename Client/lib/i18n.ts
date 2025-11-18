@@ -6,6 +6,35 @@ export function isRTL(locale: Locale): boolean {
   return locale === "ar"
 }
 
+/**
+ * Convert Western/ASCII numerals (0-9) to Arabic-Indic numerals (٠-٩)
+ * Used for displaying numbers in Arabic locale
+ * @param value - Number or string containing numerals
+ * @param locale - Current locale (only converts if 'ar')
+ * @returns String with Arabic numerals if locale is 'ar', otherwise original value as string
+ */
+export function toArabicNumerals(value: number | string, locale?: Locale): string {
+  if (locale !== 'ar') return String(value);
+  
+  const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(value).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+}
+
+/**
+ * Format a number as currency with proper localization
+ * @param amount - The amount to format
+ * @param locale - Current locale
+ * @param currency - Currency code (default: 'SYP')
+ * @returns Formatted currency string
+ */
+export function formatCurrency(amount: number, locale?: Locale, currency: string = 'SYP'): string {
+  const formatted = amount.toFixed(2);
+  if (locale === 'ar') {
+    return `${toArabicNumerals(formatted, locale)} ${currency}`;
+  }
+  return `${formatted} ${currency}`;
+}
+
 // Helper: normalize and translate specialty names
 function normalizeSpecialty(raw: string): string {
   if (!raw) return "general_medicine"

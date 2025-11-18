@@ -1,13 +1,14 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 
 interface HeroProps {
   onBookAppointment?: () => void;
 }
 
 const Hero = ({ onBookAppointment }: HeroProps) => {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   return (
     <section className="py-12 sm:py-16 lg:py-20 xl:py-32">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
@@ -54,7 +55,7 @@ const Hero = ({ onBookAppointment }: HeroProps) => {
                 <Check size={16} className="text-white sm:w-5 sm:h-5" />
               </div>
               <div>
-                <p className="font-bold text-foreground text-sm sm:text-base">{t('hero_experience_years') || '18+ Years'}</p>
+                <p className="font-bold text-foreground text-sm sm:text-base">{toArabicNumerals(t('hero_experience_years') || '18+ Years', locale)}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground">{t('hero_experience') || 'Experience'}</p>
               </div>
             </div>

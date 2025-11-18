@@ -64,7 +64,9 @@ export default function SpecialtyManagement() {
     const [searchTerm, setSearchTerm] = useState('')
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showEditDialog, setShowEditDialog] = useState(false)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [editingSpecialty, setEditingSpecialty] = useState<Specialty | null>(null)
+    const [deletingSpecialty, setDeletingSpecialty] = useState<Specialty | null>(null)
     const [formData, setFormData] = useState<SpecialtyFormData>({
         name: '',
         name_ar: '',
@@ -210,10 +212,13 @@ export default function SpecialtyManagement() {
         }
     }
 
-    const handleDeleteSpecialty = async (specialtyId: string) => {
-        if (!confirm(t('admin_confirm_delete_specialty') || 'Are you sure you want to delete this specialty?')) {
-            return
-        }
+    const openDeleteDialog = (specialty: Specialty) => {
+        setDeletingSpecialty(specialty)
+        setShowDeleteDialog(true)
+    }
+
+    const handleDeleteSpecialty = async () => {
+        if (!deletingSpecialty) return
 
         try {
             const response = await fetch('/api/admin-delete-specialty', {
@@ -222,7 +227,7 @@ export default function SpecialtyManagement() {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ specialtyId })
+                body: JSON.stringify({ specialtyId: deletingSpecialty.id })
             })
 
             if (!response.ok) {
@@ -235,6 +240,8 @@ export default function SpecialtyManagement() {
                 description: t('admin_specialty_deleted') || 'Specialty deleted successfully'
             })
 
+            setShowDeleteDialog(false)
+            setDeletingSpecialty(null)
             fetchSpecialties()
         } catch (error: any) {
             console.error('Error deleting specialty:', error)
@@ -365,7 +372,7 @@ export default function SpecialtyManagement() {
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
-                                                    onClick={() => handleDeleteSpecialty(specialty.id)}
+                                                    onClick={() => openDeleteDialog(specialty)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -569,6 +576,58 @@ export default function SpecialtyManagement() {
                             {t('admin_save') || 'Save Changes'}
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600 flex items-center gap-2">
+                            <Trash2 className="h-5 w-5" />
+                            {t('admin_delete_specialty') || 'Delete Specialty'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-muted-foreground">
+                            {t('admin_confirm_delete_specialty') || 'Are you sure you want to delete this specialty?'}
+                        </p>
+                        {deletingSpecialty && (
+                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                <p className="font-semibold text-red-900 dark:text-red-100">
+                                    {deletingSpecialty.name}
+                                </p>
+                                {deletingSpecialty.name_ar && (
+                                    <p className="text-sm text-red-700 dark:text-red-300 mt-1" dir="rtl">
+                                        {deletingSpecialty.name_ar}
+                                    </p>
+                                )}
+                                {deletingSpecialty.name_ku && (
+                                    <p className="text-sm text-red-700 dark:text-red-300">
+                                        {deletingSpecialty.name_ku}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                        <div className={`flex ${isRTL ? 'justify-start space-x-reverse space-x-2' : 'justify-end space-x-2'}`}>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setShowDeleteDialog(false)
+                                    setDeletingSpecialty(null)
+                                }}
+                            >
+                                {t('admin_cancel') || 'Cancel'}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDeleteSpecialty}
+                            >
+                                <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                {t('admin_delete') || 'Delete'}
+                            </Button>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

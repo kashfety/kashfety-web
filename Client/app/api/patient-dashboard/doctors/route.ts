@@ -45,9 +45,33 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // Fetch all specialties to match with doctors
+        const { data: specialties } = await supabase
+            .from('specialties')
+            .select('name, name_en, name_ar, name_ku')
+            .eq('is_active', true);
+
+        // Create a map for quick lookup
+        const specialtyMap = new Map();
+        (specialties || []).forEach((spec: any) => {
+            specialtyMap.set(spec.name?.toLowerCase(), spec);
+            if (spec.name_en) specialtyMap.set(spec.name_en.toLowerCase(), spec);
+        });
+
+        // Enrich doctors with specialty translations
+        const enrichedDoctors = (doctors || []).map(doctor => {
+            const specialtyData = specialtyMap.get(doctor.specialty?.toLowerCase());
+            return {
+                ...doctor,
+                specialty_ar: specialtyData?.name_ar,
+                specialty_ku: specialtyData?.name_ku,
+                specialty_en: specialtyData?.name_en || doctor.specialty
+            };
+        });
+
         return NextResponse.json({
             success: true,
-            doctors: doctors || [],
+            doctors: enrichedDoctors,
             total: count || 0,
             page,
             limit,

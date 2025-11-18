@@ -17,7 +17,7 @@ import VisitSummaryModal from "@/components/VisitSummaryModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n"
+import { localizeDoctorName } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -45,6 +45,9 @@ interface Appointment {
     last_name_ar?: string
     name_ar?: string
     specialty: string
+    specialty_ar?: string
+    specialty_ku?: string
+    specialty_en?: string
     phone: string
   }
   centers?: {
@@ -185,6 +188,27 @@ export default function MyAppointmentsPage() {
   // Function to refresh appointments
   const refreshAppointments = async () => {
     if (!user) return
+
+  // Helper to get localized specialty from doctor object
+  const getLocalizedSpecialty = (doctor: any) => {
+    if (!doctor) return 'General Medicine';
+    if (locale === 'ar' && doctor.specialty_ar) {
+      return doctor.specialty_ar;
+    }
+    if (locale === 'ku' && doctor.specialty_ku) {
+      return doctor.specialty_ku;
+    }
+    return doctor.specialty_en || doctor.specialty || 'General Medicine';
+  }
+
+  // Helper to get localized center name
+  const getLocalizedCenterName = (center: any) => {
+    if (!center) return '';
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar;
+    }
+    return center.name || '';
+  }
     
     try {
       setAppointmentsLoading(true)
@@ -265,18 +289,17 @@ export default function MyAppointmentsPage() {
         
         // Get doctor and center information
         const doctorName = apt.doctor?.name || apt.doctor_name || 'Doctor';
-        const doctorSpecialty = apt.doctor?.specialty || apt.doctor_specialty || apt.specialty || 'General Medicine';
         const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
         let center = apt.center || apt.centers || null;
-        let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (center?.name || apt.center_name || '');
+        let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (getLocalizedCenterName(center) || apt.center_name || '');
         let centerAddress = isHomeVisit ? (apt.patient_address || '') : (center?.address || apt.center_address || '');
         if (!isHomeVisit && !centerName && apt.center_id) centerName = t('appointments_type_clinic_consultation') || 'Clinic Consultation'
         
         return {
           id: apt.id,
           doctorName: localizeDoctorName(locale, doctorName),
-          specialty: localizeSpecialty(locale, doctorSpecialty),
+          specialty: getLocalizedSpecialty(apt.doctor),
           date: formattedDate,
           time: formattedTime,
           duration: `${apt.duration || 30} ${t('minutes_short') || 'min'}`,

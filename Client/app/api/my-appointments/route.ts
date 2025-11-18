@@ -55,6 +55,19 @@ export async function GET(request: NextRequest) {
 
     console.log(`📋 Found ${appointments?.length || 0} appointments`);
 
+    // Fetch all specialties for translation lookup
+    const { data: specialties } = await supabaseAdmin
+      .from('specialties')
+      .select('name, name_en, name_ar, name_ku')
+      .eq('is_active', true);
+
+    // Create specialty lookup map (case-insensitive)
+    const specialtyMap = new Map();
+    (specialties || []).forEach((spec: any) => {
+      if (spec.name) specialtyMap.set(spec.name.toLowerCase(), spec);
+      if (spec.name_en) specialtyMap.set(spec.name_en.toLowerCase(), spec);
+    });
+
     // Enrich
     const enriched = [] as any[];
     for (const apt of appointments || []) {
@@ -70,6 +83,17 @@ export async function GET(request: NextRequest) {
         apt.center_name = apt.center.name;
         apt.center_address = apt.center.address;
       }
+
+      // Enrich doctor with specialty translations
+      if (apt.doctor && apt.doctor.specialty) {
+        const specialtyData = specialtyMap.get(apt.doctor.specialty.toLowerCase());
+        if (specialtyData) {
+          apt.doctor.specialty_ar = specialtyData.name_ar;
+          apt.doctor.specialty_ku = specialtyData.name_ku;
+          apt.doctor.specialty_en = specialtyData.name_en || apt.doctor.specialty;
+        }
+      }
+
       enriched.push(apt);
     }
 

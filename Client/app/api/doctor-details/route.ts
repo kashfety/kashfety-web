@@ -35,6 +35,22 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // Fetch specialty translation
+        const { data: specialtyData } = await supabase
+            .from('specialties')
+            .select('name, name_en, name_ar, name_ku')
+            .or(`name.ilike.${doctor.specialty},name_en.ilike.${doctor.specialty}`)
+            .eq('is_active', true)
+            .limit(1)
+            .single();
+
+        // Enrich doctor with specialty translations
+        if (specialtyData) {
+            doctor.specialty_ar = specialtyData.name_ar;
+            doctor.specialty_ku = specialtyData.name_ku;
+            doctor.specialty_en = specialtyData.name_en || doctor.specialty;
+        }
+
         // Fetch associated centers
         const { data: doctorCenters, error: centersError } = await supabase
             .from('doctor_centers')

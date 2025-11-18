@@ -45,6 +45,9 @@ interface Doctor {
     last_name_ar?: string
     name_ar?: string
     specialty: string
+    specialty_ar?: string
+    specialty_ku?: string
+    specialty_en?: string
     consultation_fee: number
     rating: number
     experience_years: number
@@ -212,6 +215,16 @@ export default function PatientDoctorsPage() {
         return center.name
     }
 
+    const getLocalizedSpecialty = (doctor: Doctor) => {
+        if (locale === 'ar' && doctor.specialty_ar) {
+            return doctor.specialty_ar
+        }
+        if (locale === 'ku' && doctor.specialty_ku) {
+            return doctor.specialty_ku
+        }
+        return doctor.specialty_en || doctor.specialty
+    }
+
     const getUniqueSpecialties = () => {
         const specialties = doctors.map(d => d.specialty).filter(Boolean)
         return [...new Set(specialties)]
@@ -369,7 +382,7 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Specialty */}
                                                 <Badge variant="secondary" className="mb-3">
-                                                    {doctor.specialty}
+                                                    {getLocalizedSpecialty(doctor)}
                                                 </Badge>
 
                                                 {/* Rating & Experience */}

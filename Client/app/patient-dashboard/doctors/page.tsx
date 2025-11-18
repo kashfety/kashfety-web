@@ -41,6 +41,9 @@ interface Doctor {
     name: string
     first_name?: string
     last_name?: string
+    first_name_ar?: string
+    last_name_ar?: string
+    name_ar?: string
     specialty: string
     consultation_fee: number
     rating: number
@@ -55,6 +58,7 @@ interface Doctor {
 interface Center {
     id: string
     name: string
+    name_ar?: string
     address: string
     phone?: string
 }
@@ -188,6 +192,26 @@ export default function PatientDoctorsPage() {
         const firstName = doctor.first_name || doctor.name?.split(' ')[0] || 'D'
         const lastName = doctor.last_name || doctor.name?.split(' ')[1] || 'R'
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+    }
+
+    const getLocalizedDoctorName = (doctor: Doctor) => {
+        const { t, locale } = useLocale()
+        if (locale === 'ar') {
+            if (doctor.name_ar) return doctor.name_ar
+            if (doctor.first_name_ar && doctor.last_name_ar) {
+                return `${doctor.first_name_ar} ${doctor.last_name_ar}`
+            }
+            if (doctor.first_name_ar) return doctor.first_name_ar
+        }
+        return doctor.name || `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim()
+    }
+
+    const getLocalizedCenterName = (center: Center) => {
+        const { t, locale } = useLocale()
+        if (locale === 'ar' && center.name_ar) {
+            return center.name_ar
+        }
+        return center.name
     }
 
     const getUniqueSpecialties = () => {
@@ -342,7 +366,7 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Name */}
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                                                    {doctor.name}
+                                                    {getLocalizedDoctorName(doctor)}
                                                 </h3>
 
                                                 {/* Specialty */}
@@ -456,7 +480,7 @@ export default function PatientDoctorsPage() {
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{selectedDoctor.name}</DialogTitle>
+                                                <DialogTitle className="text-2xl">{getLocalizedDoctorName(selectedDoctor)}</DialogTitle>
                                                 <DialogDescription className="text-lg mt-1">
                                                     {selectedDoctor.specialty}
                                                 </DialogDescription>
@@ -529,7 +553,7 @@ export default function PatientDoctorsPage() {
                                                                     <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-1" />
                                                                     <div className="flex-1">
                                                                         <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                                            {center.name}
+                                                                            {getLocalizedCenterName(center)}
                                                                         </h4>
                                                                         <div className="flex items-start gap-2 mt-1 text-sm text-gray-600 dark:text-gray-400">
                                                                             <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />

@@ -17,14 +17,45 @@ export default function UpdatePasswordPage() {
   // Check if user is authenticated (from password reset email)
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        setError("Invalid or expired reset link. Please request a new password reset.")
-        setTimeout(() => {
-          router.push('/forgot-password')
-        }, 3000)
-      } else {
+      // First check for hash fragments (for password recovery tokens)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      const type = hashParams.get('type')
+
+      console.log('Hash params:', { accessToken: accessToken ? 'present' : 'none', type })
+
+      // If we have an access token from the URL, set the session
+      if (accessToken && type === 'recovery') {
+        console.log('Setting session from recovery token')
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: hashParams.get('refresh_token') || ''
+        })
+        
+        if (error) {
+          console.error('Error setting session:', error)
+          setError("Invalid or expired reset link. Please request a new password reset.")
+          setTimeout(() => {
+            router.push('/forgot-password')
+          }, 3000)
+          return
+        }
+        
+        console.log('Session set successfully:', data.session?.user?.email)
         setIsAuthenticated(true)
+      } else {
+        // Check if we already have a session
+        const { data: { session } } = await supabase.auth.getSession()
+        console.log('Existing session:', session?.user?.email || 'none')
+        
+        if (!session) {
+          setError("Invalid or expired reset link. Please request a new password reset.")
+          setTimeout(() => {
+            router.push('/forgot-password')
+          }, 3000)
+        } else {
+          setIsAuthenticated(true)
+        }
       }
     }
     checkAuth()
@@ -52,13 +83,30 @@ export default function UpdatePasswordPage() {
     setIsLoading(true)
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
+      console.log('Attempting to update password...')
+      
+      // Verify we have a session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('No active session. Please click the reset link from your email again.')
+      }
+      
+      console.log('Current user:', session.user.email)
+      
+      const { data, error: updateError } = await supabase.auth.updateUser({
         password: password
       })
 
-      if (updateError) throw updateError
+      if (updateError) {
+        console.error('Update error:', updateError)
+        throw updateError
+      }
 
+      console.log('Password updated successfully for user:', data.user?.email)
       setSuccess(true)
+      
+      // Sign out to force fresh login with new password
+      await supabase.auth.signOut()
       
       // Redirect to login after 3 seconds
       setTimeout(() => {

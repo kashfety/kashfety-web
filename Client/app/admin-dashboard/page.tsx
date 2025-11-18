@@ -44,7 +44,8 @@ import {
     HelpCircle,
     MessagesSquare,
     Video,
-    Image
+    Image,
+    Stethoscope
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -62,6 +63,7 @@ import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AuditLogs from '@/components/admin/AuditLogs';
 import AdminProfileSettings from '@/components/admin/AdminProfileSettings';
 import BannerManagement from '@/components/admin/BannerManagement';
+import SpecialtyManagement from '@/components/admin/SpecialtyManagement';
 
 interface DashboardStats {
     overview: {
@@ -232,6 +234,9 @@ function AdminSidebar({
                                     </NavItem>
                                     <NavItem tab="certificates" icon={FileText} isActive={activeTab === "certificates"}>
                                         {t('admin_certificates') || 'Certificates'}
+                                    </NavItem>
+                                    <NavItem tab="specialties" icon={Stethoscope} isActive={activeTab === "specialties"}>
+                                        {t('admin_specialties') || 'Specialties'}
                                     </NavItem>
                                     <NavItem tab="banners" icon={Image} isActive={activeTab === "banners"}>
                                         {t('admin_banners') || 'Banners'}
@@ -627,6 +632,12 @@ export default function AdminDashboardPage() {
                                 {activeTab === 'certificates' && (
                                     <div className="px-4 sm:px-6 py-4 sm:py-6">
                                         <CertificateApproval />
+                                    </div>
+                                )}
+
+                                {activeTab === 'specialties' && (
+                                    <div className="px-4 sm:px-6 py-4 sm:py-6">
+                                        <SpecialtyManagement />
                                     </div>
                                 )}
 

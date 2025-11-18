@@ -51,7 +51,8 @@ import {
     Unlock,
     UserX,
     History,
-    Image
+    Image,
+    Stethoscope
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -67,6 +68,7 @@ import DoctorApprovals from '@/components/admin/DoctorApprovals';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AuditLogs from '@/components/admin/AuditLogs';
 import BannerManagement from '@/components/admin/BannerManagement';
+import SpecialtyManagement from '@/components/admin/SpecialtyManagement';
 
 // Import new super admin components (we'll create these)
 import AdminManagement from '@/components/super-admin/AdminManagement';
@@ -280,6 +282,9 @@ function SuperAdminSidebar({
                                     </NavItem>
                                     <NavItem tab="certificates" icon={FileText} isActive={activeTab === "certificates"}>
                                         {t('super_admin_certificates') || 'Certificates'}
+                                    </NavItem>
+                                    <NavItem tab="specialties" icon={Stethoscope} isActive={activeTab === "specialties"}>
+                                        {t('super_admin_specialties') || 'Specialties'}
                                     </NavItem>
                                     <NavItem tab="banners" icon={Image} isActive={activeTab === "banners"}>
                                         {t('super_admin_banners') || 'Banners'}
@@ -869,6 +874,12 @@ export default function SuperAdminDashboardPage() {
                             <TabsContent value="certificates" className="flex-1 overflow-y-auto">
                                 <div className="px-4 sm:px-6 py-4 sm:py-6">
                                     <CertificateApproval />
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="specialties" className="flex-1 overflow-y-auto">
+                                <div className="px-4 sm:px-6 py-4 sm:py-6">
+                                    <SpecialtyManagement />
                                 </div>
                             </TabsContent>
 

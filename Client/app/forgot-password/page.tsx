@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase"
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,14 +23,16 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      // This would typically call an API endpoint
-      // For now, just simulate a successful request
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      })
+
+      if (resetError) throw resetError
 
       setSuccess(true)
     } catch (err: any) {
       console.error("Password reset error:", err)
-      setError("An error occurred. Please try again.")
+      setError(err.message || "An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }

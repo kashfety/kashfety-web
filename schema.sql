@@ -158,6 +158,7 @@ CREATE TABLE public.centers (
   approval_status text DEFAULT 'approved'::text CHECK (approval_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])),
   offers_labs boolean DEFAULT false,
   offers_imaging boolean DEFAULT false,
+  name_ar text,
   CONSTRAINT centers_pkey PRIMARY KEY (id),
   CONSTRAINT centers_owner_doctor_id_fkey FOREIGN KEY (owner_doctor_id) REFERENCES public.users(id)
 );
@@ -425,6 +426,11 @@ CREATE TABLE public.users (
   approval_status character varying DEFAULT 'pending'::character varying CHECK (approval_status::text = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'suspended'::text])),
   profile_picture_url text,
   profile_picture_path text,
+  name_ar text,
+  first_name_ar text,
+  last_name_ar text,
+  reset_token text,
+  reset_token_expiry timestamp without time zone,
   CONSTRAINT users_pkey PRIMARY KEY (id),
   CONSTRAINT users_center_id_fkey FOREIGN KEY (center_id) REFERENCES public.centers(id)
 );

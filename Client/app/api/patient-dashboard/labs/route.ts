@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         // Build base query for centers offering lab or imaging services
         let centersQuery = supabase
             .from('centers')
-            .select('id, name, address, phone, email, operating_hours, offers_labs, offers_imaging', { count: 'exact' })
+            .select('id, name, name_ar, address, phone, email, operating_hours, offers_labs, offers_imaging', { count: 'exact' })
             .or('offers_labs.eq.true,offers_imaging.eq.true')
             .order('name', { ascending: true })
             .range(offset, offset + limit - 1);
@@ -50,6 +50,9 @@ export async function GET(request: NextRequest) {
             lab_test_types:lab_test_type_id (
               id,
               name,
+              name_en,
+              name_ar,
+              name_ku,
               description,
               category,
               default_fee

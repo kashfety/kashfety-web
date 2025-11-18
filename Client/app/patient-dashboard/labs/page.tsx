@@ -33,6 +33,9 @@ import BookingModal from "@/components/BookingModal"
 interface LabTest {
     id: string
     name: string
+    name_en?: string
+    name_ar?: string
+    name_ku?: string
     description?: string
     category: 'lab' | 'imaging'
     default_fee: number
@@ -41,6 +44,7 @@ interface LabTest {
 interface Center {
     id: string
     name: string
+    name_ar?: string
     address: string
     phone?: string
     email?: string
@@ -55,8 +59,21 @@ interface CenterWithTests extends Center {
 
 export default function PatientLabsPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth()
-    const { t, isRTL } = useLocale()
+    const { t, isRTL, locale } = useLocale()
     const router = useRouter()
+
+    // Helper functions for localized names
+    const getLocalizedCenterName = (center: Center) => {
+        if (locale === 'ar' && center.name_ar) return center.name_ar
+        return center.name
+    }
+
+    const getLocalizedTestName = (test: LabTest) => {
+        if (locale === 'ar' && test.name_ar) return test.name_ar
+        if (locale === 'ku' && test.name_ku) return test.name_ku
+        if (test.name_en) return test.name_en
+        return test.name
+    }
 
     const [centers, setCenters] = useState<CenterWithTests[]>([])
     const [loading, setLoading] = useState(true)
@@ -168,11 +185,12 @@ export default function PatientLabsPage() {
     }
 
     const getCenterInitials = (center: Center) => {
-        const words = center.name.split(' ')
+        const name = getLocalizedCenterName(center)
+        const words = name.split(' ')
         if (words.length >= 2) {
             return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase()
         }
-        return center.name.substring(0, 2).toUpperCase()
+        return name.substring(0, 2).toUpperCase()
     }
 
     if (authLoading || (isAuthenticated && user?.role !== 'patient')) {
@@ -318,7 +336,7 @@ export default function PatientLabsPage() {
 
                                                 {/* Name */}
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                                    {center.name}
+                                                    {getLocalizedCenterName(center)}
                                                 </h3>
 
                                                 {/* Location */}
@@ -437,7 +455,7 @@ export default function PatientLabsPage() {
                                                 </span>
                                             </div>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{selectedCenter.name}</DialogTitle>
+                                                <DialogTitle className="text-2xl">{getLocalizedCenterName(selectedCenter)}</DialogTitle>
                                                 <DialogDescription className="text-lg mt-1">
                                                     <MapPin className="w-4 h-4 inline mr-1" />
                                                     {selectedCenter.address}
@@ -500,7 +518,7 @@ export default function PatientLabsPage() {
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex-1">
                                                                         <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                                            {test.name}
+                                                                            {getLocalizedTestName(test)}
                                                                         </h4>
                                                                         {test.description && (
                                                                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">

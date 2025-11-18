@@ -69,7 +69,7 @@ interface DoctorDetails extends Doctor {
 
 export default function PatientDoctorsPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth()
-    const { t, isRTL } = useLocale()
+    const { t, isRTL, locale } = useLocale()
     const router = useRouter()
 
     const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -195,7 +195,6 @@ export default function PatientDoctorsPage() {
     }
 
     const getLocalizedDoctorName = (doctor: Doctor) => {
-        const { t, locale } = useLocale()
         if (locale === 'ar') {
             if (doctor.name_ar) return doctor.name_ar
             if (doctor.first_name_ar && doctor.last_name_ar) {
@@ -207,7 +206,6 @@ export default function PatientDoctorsPage() {
     }
 
     const getLocalizedCenterName = (center: Center) => {
-        const { t, locale } = useLocale()
         if (locale === 'ar' && center.name_ar) {
             return center.name_ar
         }

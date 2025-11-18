@@ -1515,7 +1515,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 {/* Debug Info - Remove after testing */}
                 {process.env.NODE_ENV === 'development' && (
                   <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mb-4">
-                    Step: {currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
+                    Step: {locale === 'ar' ? toArabicNumerals(currentStep.toString()) : currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
                     Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} |
                     Location: {selectedLocation || 'none'}
                   </div>
@@ -1528,7 +1528,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   transition={{ delay: 0.2, duration: 0.3 }}
                   className="flex justify-center mb-8"
                 >
-                  <div className="flex items-center space-x-4">
+                  <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-4`}>
                     {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index) => (
                       <motion.div
                         key={step}
@@ -1546,14 +1546,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           animate={currentStep >= step ? { scale: [1, 1.08, 1] } : {}}
                           transition={{ duration: 0.4 }}
                         >
-                          {step}
+                          {locale === 'ar' ? toArabicNumerals(step.toString()) : step}
                         </motion.div>
                         {step < (isLabMode ? 3 : 4) && (
                           <motion.div
                             className={`w-12 h-1.5 mx-2 rounded-full transition-all duration-500 ${currentStep > step ? 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0]' : 'bg-gray-300 dark:bg-gray-700'}`}
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: currentStep > step ? 1 : 0 }}
-                            style={{ originX: 0 }}
+                            style={{ originX: isRTL ? 1 : 0 }}
                           />
                         )}
                       </motion.div>

@@ -1021,7 +1021,7 @@ export const adminService = {
   // Delete center
   deleteCenter: async (id: string) => {
     try {
-      const response = await api.delete(`/api/auth/admin/centers/${id}`);
+      const response = await api.post('/api/admin-delete-center', { centerId: id });
       return response;
     } catch (error) {
       console.error('Delete center failed:', error);

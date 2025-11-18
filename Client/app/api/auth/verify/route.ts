@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     // Fetch fresh user data from database
     const { data: userData, error } = await supabaseAdmin
       .from('users')
-      .select('id, name, first_name, last_name, email, phone, role, center_id, created_at, updated_at')
+      .select('id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, email, phone, role, center_id, created_at, updated_at')
       .eq('id', userId)
       .single();
 

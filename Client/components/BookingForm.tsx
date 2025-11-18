@@ -14,8 +14,8 @@ const BookingForm = ({ onBookAppointment }: BookingFormProps) => {
     <Card className="w-full bg-background/95 backdrop-blur-lg shadow-2xl border">
       <CardContent className="p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <h3 className="text-xl sm:text-2xl font-bold text-foreground text-center lg:text-left">{t('booking_title') || 'Book an appointment'}</h3>
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <h3 className="text-xl sm:text-2xl font-bold text-foreground text-center lg:text-start">{t('booking_title') || 'Book an appointment'}</h3>
+          <div className="flex items-center gap-2 sm:gap-3">
             <Checkbox id="send-sms" />
             <label
               htmlFor="send-sms"

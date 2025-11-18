@@ -296,7 +296,7 @@ const DoctorShowcaseCard = ({
                 fill
                 className="object-cover"
               />
-              <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-[#4DBCC4] text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+              <div className="absolute top-3 sm:top-4 end-3 sm:end-4 bg-[#4DBCC4] text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                 ⭐ {toArabicNumerals(doctor.rating || '4.8', locale)}
               </div>
             </div>
@@ -317,7 +317,7 @@ const DoctorShowcaseCard = ({
       </div>
 
       {/* Doctor Information */}
-      <div className="flex-1 text-center lg:text-left px-4 sm:px-0">
+      <div className="flex-1 text-center lg:text-start px-4 sm:px-0">
         <div className="mb-4">
           <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             {localizedName}
@@ -334,7 +334,7 @@ const DoctorShowcaseCard = ({
         </div>
 
         <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Award className="w-5 sm:w-6 sm:h-6 text-[#4DBCC4] mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_expert_in') || 'Expert in'} {localizedSpecialty}</p>
@@ -342,7 +342,7 @@ const DoctorShowcaseCard = ({
             </div>
           </div>
           
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Heart className="w-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_compassionate_care') || 'Compassionate Care'}</p>
@@ -350,7 +350,7 @@ const DoctorShowcaseCard = ({
             </div>
           </div>
           
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Clock className="w-5 sm:w-6 sm:h-6 text-blue-500 mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_flexible_appointments') || 'Flexible Appointments'}</p>

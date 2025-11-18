@@ -18,7 +18,7 @@ const Hero = ({ onBookAppointment }: HeroProps) => {
             {t('hero_title_line1') || 'Your Path to'} <br />
             <span className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] bg-clip-text text-transparent">{t('hero_title_highlight') || 'Better Health'}</span>
           </h1>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0">
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground max-w-lg mx-auto lg:ms-0">
             {t('hero_subtitle') || "Our professional doctors will take care of your health. Choose your desired time below and we'll help out."}
           </p>
           <div className="mt-6 sm:mt-8 flex justify-center lg:justify-start">
@@ -50,7 +50,7 @@ const Hero = ({ onBookAppointment }: HeroProps) => {
             </div>
 
             {/* Experience Badge */}
-            <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 z-20 flex items-center gap-2 sm:gap-3 bg-background backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg border border-border">
+            <div className="absolute -bottom-4 -start-4 sm:-bottom-6 sm:-start-6 z-20 flex items-center gap-2 sm:gap-3 bg-background backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg border border-border">
               <div className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] rounded-full p-1.5 sm:p-2">
                 <Check size={16} className="text-white sm:w-5 sm:h-5" />
               </div>

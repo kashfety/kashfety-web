@@ -77,7 +77,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex items-center -ml-1"
+            className="flex items-center -ms-1"
           >
             {/* Logo - switches between light and dark mode */}
             <div className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48">

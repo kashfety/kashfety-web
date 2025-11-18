@@ -245,7 +245,7 @@ export default function HomePage() {
                   "{testimonial.review}"
                 </p>
                 <div className="flex items-center">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${testimonial.bgColor} rounded-full flex items-center justify-center mr-3`}>
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 ${testimonial.bgColor} rounded-full flex items-center justify-center me-3`}>
                     <span className={`${testimonial.textColor} font-semibold text-sm sm:text-base`}>{testimonial.initials}</span>
                   </div>
                   <div>
@@ -265,13 +265,13 @@ export default function HomePage() {
               className="text-center mt-8 sm:mt-12"
             >
               <div className="inline-flex items-center bg-card rounded-full px-4 sm:px-6 py-3 shadow-lg border border-border">
-                <div className="flex text-yellow-400 mr-3">
+                <div className="flex text-yellow-400 me-3">
                   {"★★★★★".split("").map((star, i) => (
                     <span key={i} className="text-base sm:text-lg">{star}</span>
                   ))}
                 </div>
                 <span className="text-foreground font-semibold text-sm sm:text-base">4.9/5</span>
-                <span className="text-muted-foreground ml-2 text-xs sm:text-sm">{t('reviews_stat') || 'from 2,500+ reviews'}</span>
+                <span className="text-muted-foreground ms-2 text-xs sm:text-sm">{t('reviews_stat') || 'from 2,500+ reviews'}</span>
               </div>
             </motion.div>
           </div>

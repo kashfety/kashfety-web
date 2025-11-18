@@ -69,6 +69,7 @@ export async function GET(req: Request) {
                 centers!inner(
                     id,
                     name,
+                    name_ar,
                     address,
                     phone,
                     email,
@@ -92,6 +93,7 @@ export async function GET(req: Request) {
                 uniqueCentersMap.set(center.id, {
                     id: center.id,
                     name: center.name,
+                    name_ar: center.name_ar,
                     address: center.address,
                     phone: center.phone,
                     email: center.email,

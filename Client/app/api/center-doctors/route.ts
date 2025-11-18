@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       .select(`
         doctor_id,
         users:users!fk_doctor_centers_doctor (
-          id, name, specialty, consultation_fee, home_visits_available, rating, experience_years, profile_picture
+          id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, specialty, consultation_fee, home_visits_available, rating, experience_years, profile_picture
         )
       `)
       .eq('center_id', centerId);
@@ -46,6 +46,11 @@ export async function GET(request: NextRequest) {
       .map((u: any) => ({
         id: u.id,
         name: u.name,
+        first_name: u.first_name,
+        last_name: u.last_name,
+        first_name_ar: u.first_name_ar,
+        last_name_ar: u.last_name_ar,
+        name_ar: u.name_ar,
         specialty: u.specialty,
         consultation_fee: Number(u.consultation_fee || 0),
         home_available: !!u.home_visits_available,

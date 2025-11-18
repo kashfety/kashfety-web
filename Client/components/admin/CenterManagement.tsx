@@ -102,7 +102,9 @@ export default function CenterManagement() {
     const [showCenterDetails, setShowCenterDetails] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [editingCenter, setEditingCenter] = useState<Center | null>(null);
+    const [deletingCenter, setDeletingCenter] = useState<Center | null>(null);
     const [formData, setFormData] = useState<CenterFormData>({
         name: '',
         address: '',
@@ -364,22 +366,27 @@ export default function CenterManagement() {
         }
     };
 
-    const deleteCenter = async (centerId: string) => {
-        if (!confirm(t('admin_confirm_delete_center') || 'Are you sure you want to delete this center? This action cannot be undone.')) {
-            return;
-        }
+    const openDeleteDialog = (center: Center) => {
+        setDeletingCenter(center);
+        setShowDeleteDialog(true);
+    };
+
+    const deleteCenter = async () => {
+        if (!deletingCenter) return;
 
         try {
-            console.log('🔄 Deleting center:', centerId);
+            console.log('🔄 Deleting center:', deletingCenter.id);
 
             // Use adminService for center deletion
-            await adminService.deleteCenter(centerId);
+            await adminService.deleteCenter(deletingCenter.id);
 
             toast({
                 title: t('admin_success') || "Success",
                 description: t('admin_center_deleted_successfully') || "Center deleted successfully",
             });
 
+            setShowDeleteDialog(false);
+            setDeletingCenter(null);
             fetchCenters();
         } catch (error) {
             console.error('❌ Error deleting center:', error);
@@ -692,7 +699,7 @@ export default function CenterManagement() {
                                                     {t('admin_edit_center') || 'Edit Center'}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    onClick={() => deleteCenter(center.id)}
+                                                    onClick={() => openDeleteDialog(center)}
                                                     className="text-red-600"
                                                 >
                                                     <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -954,6 +961,51 @@ export default function CenterManagement() {
                                 disabled={!formData.name || !formData.email || !formData.phone || !formData.address}
                             >
                                 {editingCenter ? (t('admin_update_center') || 'Update Center') : (t('admin_create_center') || 'Create Center')}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600 flex items-center gap-2">
+                            <Trash2 className="h-5 w-5" />
+                            {t('admin_delete_center') || 'Delete Center'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-muted-foreground">
+                            {t('admin_confirm_delete_center') || 'Are you sure you want to delete this center? This action cannot be undone.'}
+                        </p>
+                        {deletingCenter && (
+                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                <p className="font-semibold text-red-900 dark:text-red-100">
+                                    {deletingCenter.name}
+                                </p>
+                                <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                                    {deletingCenter.address}
+                                </p>
+                            </div>
+                        )}
+                        <div className={`flex ${isRTL ? 'justify-start space-x-reverse space-x-2' : 'justify-end space-x-2'}`}>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setShowDeleteDialog(false);
+                                    setDeletingCenter(null);
+                                }}
+                            >
+                                {t('admin_cancel') || 'Cancel'}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={deleteCenter}
+                            >
+                                <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                {t('admin_delete') || 'Delete'}
                             </Button>
                         </div>
                     </div>

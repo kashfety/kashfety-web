@@ -39,11 +39,22 @@ interface Appointment {
   center_id?: string
   doctor?: {
     name: string
+    first_name?: string
+    last_name?: string
+    first_name_ar?: string
+    last_name_ar?: string
+    name_ar?: string
     specialty: string
     phone: string
   }
   centers?: {
     name: string
+    name_ar?: string
+    address: string
+  }
+  center?: {
+    name: string
+    name_ar?: string
     address: string
   }
 }
@@ -130,6 +141,30 @@ export default function MyAppointmentsPage() {
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 
   const showingCountText = `${locale === 'ar' ? 'عرض' : 'Showing'} ${filteredAppointments.length} ${locale === 'ar' ? 'من' : 'of'} ${appointments.length}`
+
+  // Helper functions for localized names
+  const getLocalizedDoctorName = (appointment: Appointment) => {
+    if (!appointment.doctor) return appointment.doctorName || t('unknown_doctor') || 'Unknown Doctor'
+    
+    if (locale === 'ar') {
+      if (appointment.doctor.name_ar) return appointment.doctor.name_ar
+      if (appointment.doctor.first_name_ar && appointment.doctor.last_name_ar) {
+        return `${appointment.doctor.first_name_ar} ${appointment.doctor.last_name_ar}`
+      }
+      if (appointment.doctor.first_name_ar) return appointment.doctor.first_name_ar
+    }
+    return appointment.doctor.name || appointment.doctorName || t('unknown_doctor') || 'Unknown Doctor'
+  }
+
+  const getLocalizedCenterName = (appointment: Appointment) => {
+    const center = appointment.center || appointment.centers
+    if (!center) return appointment.location || t('unknown_location') || 'Unknown Location'
+    
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar
+    }
+    return center.name || appointment.location || t('unknown_location') || 'Unknown Location'
+  }
 
   // Function to fetch reviewed appointment IDs
   const fetchReviewedAppointments = async (appointmentIds: string[]) => {
@@ -524,7 +559,7 @@ export default function MyAppointmentsPage() {
                     <div>
                       <CardTitle className="text-xl text-foreground flex items-center gap-2">
                         <User className="w-5 h-5 text-emerald-600" />
-                        {appointment.doctorName}
+                        {getLocalizedDoctorName(appointment)}
                       </CardTitle>
                       <CardDescription className="text-emerald-600 font-medium">
                         {appointment.specialty}
@@ -573,7 +608,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-start gap-3 text-muted-foreground">
                         <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
                         <div>
-                          <div className="font-medium">{appointment.location}</div>
+                          <div className="font-medium">{getLocalizedCenterName(appointment)}</div>
                           <div className="text-sm text-gray-500">{appointment.address}</div>
                           {appointment.isHomeVisit && (
                             <Badge variant="secondary" className="mt-1 text-xs bg-green-100 text-green-800">

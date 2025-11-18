@@ -10,6 +10,9 @@ import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n";
 interface Doctor {
   id: string;
   name: string;
+  first_name_ar?: string;
+  last_name_ar?: string;
+  name_ar?: string;
   specialty: string;
   experience_years: number;
   profile_picture_url: string;
@@ -25,6 +28,16 @@ const DoctorsSection = () => {
   const [visibleDoctors, setVisibleDoctors] = useState<Set<number>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { t, locale } = useLocale();
+
+  // Helper to get localized name
+  const getLocalizedName = (item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
+    if (!item) return '';
+    if (locale === 'ar') {
+      if (item.name_ar) return item.name_ar;
+      if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+    }
+    return item.name || '';
+  };
 
   // Reset visible doctors when component mounts
   useEffect(() => {
@@ -200,7 +213,17 @@ const DoctorShowcaseCard = ({
   const isEven = index % 2 === 0;
   const { t } = useLocale();
   
-  const localizedName = localizeDoctorName(locale, doctor.name)
+  // Get localized doctor name from database
+  const getLocalizedName = (item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
+    if (!item) return '';
+    if (locale === 'ar') {
+      if (item.name_ar) return item.name_ar;
+      if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+    }
+    return item.name || '';
+  };
+  
+  const localizedName = getLocalizedName(doctor);
   const localizedSpecialty = localizeSpecialty(locale, doctor.specialty)
 
   return (

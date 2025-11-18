@@ -338,6 +338,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const doctor: Doctor = {
           id: data.doctor.id,
           name: data.doctor.name,
+          first_name_ar: data.doctor.first_name_ar,
+          last_name_ar: data.doctor.last_name_ar,
+          name_ar: data.doctor.name_ar,
           specialty: data.doctor.specialty,
           experience_years: data.doctor.experience_years || 0,
           profile_picture: data.doctor.profile_picture || '/default-avatar.jpg',
@@ -374,6 +377,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const center: Center = {
           id: data.center.id,
           name: data.center.name,
+          name_ar: data.center.name_ar,
           address: data.center.address,
           phone: data.center.phone,
           email: data.center.email,
@@ -1695,7 +1699,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1">
                                     <div className="flex items-center justify-between gap-4 mb-3">
                                       <div className="flex-1">
-                                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{center.name}</h4>
+                                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{getLocalizedName(center)}</h4>
                                         <p className="text-base text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-1">
                                           <MapPin className="w-5 h-5 text-[#4DBCC4] flex-shrink-0" />
                                           <span>{center.address}</span>
@@ -1797,12 +1801,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-5 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-4">
                                   <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={doctor.name} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-3">
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{doctor.name}</h4>
+                                        <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{getLocalizedName(doctor)}</h4>
                                         <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{localizeSpecialty(locale, doctor.specialty)}</p>
                                         <div className="flex items-center gap-2 mt-2">
                                           <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">
@@ -1929,12 +1933,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-5">
                                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-[#4DBCC4] transition-all">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={doctor.name} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{doctor.name}</h4>
+                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{getLocalizedName(doctor)}</h4>
                                         <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{localizeSpecialty(locale, doctor.specialty)}</p>
                                       </div>
                                       <div className="text-right flex-shrink-0">
@@ -1998,7 +2002,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_center') || 'Select Center'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
-                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">Dr. {selectedDoctor.name}</span>
+                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">Dr. {getLocalizedName(selectedDoctor)}</span>
                         </p>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{selectedSpecialty}</span>
@@ -2041,7 +2045,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
                                       <div className="flex-1">
-                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
                                         <p className="text-base text-gray-700 dark:text-gray-300 flex items-start gap-2">
                                           <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                                           <span>{center.address}</span>
@@ -2156,7 +2160,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       <MapPin className="w-6 h-6 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
                                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
                                         <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                                         <span>{center.address}</span>

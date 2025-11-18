@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         // Fetch doctor details
         const { data: doctor, error: doctorError } = await supabase
             .from('users')
-            .select('id, name, first_name, last_name, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, qualifications')
+            .select('id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, qualifications')
             .eq('id', doctorId)
             .eq('role', 'doctor')
             .single();
@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
                 centers (
                     id,
                     name,
+                    name_ar,
                     address,
                     phone
                 )

@@ -19,12 +19,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('📝 [Admin Create Specialty] Request data received');
 
-    const { name, name_en, name_ar, name_ku, description, icon_name, color_code, is_active, display_order } = body;
+    const { name, name_ar, name_ku, description, icon_name, color_code, is_active, display_order } = body;
     
     // Validate required fields
-    if (!name || !name_en) {
+    if (!name) {
       return NextResponse.json({ 
-        error: 'Name and English name are required' 
+        error: 'Name is required' 
       }, { status: 400 });
     }
 
@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Create specialty record
+    // Create specialty record with name_en defaulting to "General"
     const specialtyData = {
       name,
-      name_en,
+      name_en: 'General',
       name_ar: name_ar || null,
       name_ku: name_ku || null,
       description: description || null,

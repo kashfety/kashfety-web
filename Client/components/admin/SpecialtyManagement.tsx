@@ -46,7 +46,6 @@ interface Specialty {
 
 interface SpecialtyFormData {
     name: string
-    name_en: string
     name_ar: string
     name_ku: string
     description: string
@@ -68,7 +67,6 @@ export default function SpecialtyManagement() {
     const [editingSpecialty, setEditingSpecialty] = useState<Specialty | null>(null)
     const [formData, setFormData] = useState<SpecialtyFormData>({
         name: '',
-        name_en: '',
         name_ar: '',
         name_ku: '',
         description: '',
@@ -113,7 +111,6 @@ export default function SpecialtyManagement() {
     const handleCreateSpecialty = () => {
         setFormData({
             name: '',
-            name_en: '',
             name_ar: '',
             name_ku: '',
             description: '',
@@ -129,7 +126,6 @@ export default function SpecialtyManagement() {
         setEditingSpecialty(specialty)
         setFormData({
             name: specialty.name,
-            name_en: specialty.name_en,
             name_ar: specialty.name_ar,
             name_ku: specialty.name_ku,
             description: specialty.description || '',
@@ -144,10 +140,10 @@ export default function SpecialtyManagement() {
     const handleSaveSpecialty = async () => {
         try {
             // Validate required fields
-            if (!formData.name.trim() || !formData.name_en.trim()) {
+            if (!formData.name.trim()) {
                 toast({
                     title: t('admin_error') || 'Error',
-                    description: t('admin_name_required') || 'Name and English name are required',
+                    description: t('admin_name_required') || 'Name is required',
                     variant: 'destructive'
                 })
                 return
@@ -393,25 +389,14 @@ export default function SpecialtyManagement() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">{t('admin_name') || 'Name'} *</Label>
-                                <Input
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="General Medicine"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="name_en">{t('admin_english_name') || 'English Name'} *</Label>
-                                <Input
-                                    id="name_en"
-                                    value={formData.name_en}
-                                    onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
-                                    placeholder="General Medicine"
-                                />
-                            </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="name">{t('admin_name') || 'Name'} *</Label>
+                            <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="General Medicine"
+                            />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -503,23 +488,13 @@ export default function SpecialtyManagement() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="edit_name">{t('admin_name') || 'Name'} *</Label>
-                                <Input
-                                    id="edit_name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="edit_name_en">{t('admin_english_name') || 'English Name'} *</Label>
-                                <Input
-                                    id="edit_name_en"
-                                    value={formData.name_en}
-                                    onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
-                                />
-                            </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit_name">{t('admin_name') || 'Name'} *</Label>
+                            <Input
+                                id="edit_name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">

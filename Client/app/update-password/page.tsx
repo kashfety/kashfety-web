@@ -18,13 +18,14 @@ export default function UpdatePasswordPage() {
   // Verify reset token from URL
   useEffect(() => {
     const verifyToken = async () => {
-      // Get token from URL query parameters
+      // Get token_hash and type from URL query parameters (Supabase Auth format)
       const urlParams = new URLSearchParams(window.location.search)
-      const resetToken = urlParams.get('token')
+      const tokenHash = urlParams.get('token_hash')
+      const type = urlParams.get('type')
 
-      console.log('Reset token:', resetToken ? 'present' : 'none')
+      console.log('Token hash:', tokenHash ? 'present' : 'none', 'Type:', type)
 
-      if (!resetToken) {
+      if (!tokenHash || type !== 'recovery') {
         setError("Invalid reset link. Please request a new password reset.")
         setTimeout(() => {
           router.push('/forgot-password')
@@ -32,31 +33,12 @@ export default function UpdatePasswordPage() {
         return
       }
 
-      try {
-        // Verify token with our custom API
-        const response = await fetch(`/api/auth/forgot-password?token=${resetToken}`)
-        const data = await response.json()
-
-        if (!response.ok || !data.email) {
-          console.error('Token verification failed:', data.error)
-          setError(data.error || "Invalid or expired reset link. Please request a new password reset.")
-          setTimeout(() => {
-            router.push('/forgot-password')
-          }, 3000)
-          return
-        }
-
-        console.log('Token verified for email:', data.email)
-        setEmail(data.email)
-        setToken(resetToken)
-        setIsAuthenticated(true)
-      } catch (err) {
-        console.error('Error verifying token:', err)
-        setError("An error occurred. Please try again.")
-        setTimeout(() => {
-          router.push('/forgot-password')
-        }, 3000)
-      }
+      // Store the token hash for later use
+      setToken(tokenHash)
+      setIsAuthenticated(true)
+      
+      // We don't need to verify the token separately - Supabase will verify it when we update the password
+      console.log('Token hash received, ready to update password')
     }
     verifyToken()
   }, [router])
@@ -83,16 +65,16 @@ export default function UpdatePasswordPage() {
     setIsLoading(true)
 
     try {
-      console.log('Attempting to update password for:', email)
+      console.log('Attempting to update password with token hash')
       
-      // Call our custom reset password API
+      // Call our custom reset password API with token_hash
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
+          tokenHash: token,
           newPassword: password,
         }),
       })
@@ -103,12 +85,7 @@ export default function UpdatePasswordPage() {
         throw new Error(data.error || 'Failed to update password')
       }
 
-      console.log('Password updated successfully for user:', email)
-      
-      // Consume the reset token
-      await fetch(`/api/auth/forgot-password?token=${token}`, {
-        method: 'DELETE',
-      })
+      console.log('Password updated successfully')
       
       setSuccess(true)
       

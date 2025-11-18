@@ -56,19 +56,28 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [Forgot-Password] Reset token generated for:', email);
 
-    // Determine the app URL - try multiple sources
-    const appUrl = process.env.NEXT_PUBLIC_API_URL || 
-                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-    
-    const resetUrl = `${appUrl}/update-password?token=${token}`;
-    
-    console.log('🔗 [Forgot-Password] Reset URL:', resetUrl);
+    // Send password reset email using Supabase Auth
+    // The email template in Supabase Dashboard should contain:
+    // {{ .SiteURL }}/update-password?token_hash={{ .TokenHash }}&type=recovery
+    try {
+      const { error: emailError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/update-password`
+      });
+
+      if (emailError) {
+        console.error('❌ [Forgot-Password] Error sending email:', emailError);
+        // Don't throw - we still want to return success to prevent email enumeration
+      } else {
+        console.log('✅ [Forgot-Password] Email sent successfully to:', email);
+      }
+    } catch (emailException: any) {
+      console.error('❌ [Forgot-Password] Exception sending email:', emailException);
+      // Continue anyway to prevent email enumeration
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Password reset link has been sent to your email.',
-      // Remove this in production - only for development
-      resetUrl: process.env.NODE_ENV === 'development' ? resetUrl : undefined
+      message: 'Password reset link has been sent to your email.'
     });
 
   } catch (error: any) {

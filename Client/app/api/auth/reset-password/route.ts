@@ -10,14 +10,14 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, newPassword, token } = body;
+    const { tokenHash, newPassword } = body;
 
-    console.log('📥 [Reset-Password] Request received for email:', email);
+    console.log('📥 [Reset-Password] Request received with token hash');
 
     // Validate required fields
-    if (!email || !newPassword) {
+    if (!tokenHash || !newPassword) {
       return NextResponse.json(
-        { success: false, error: 'Email and new password are required' },
+        { success: false, error: 'Token and new password are required' },
         { status: 400 }
       );
     }
@@ -30,47 +30,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, email, name')
-      .eq('email', email)
-      .single();
+    // Verify the token and get the user session using Supabase Auth
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: 'recovery'
+    });
 
-    if (userError || !user) {
-      console.error('❌ [Reset-Password] User not found:', email);
+    if (verifyError || !verifyData.user) {
+      console.error('❌ [Reset-Password] Invalid or expired token:', verifyError);
       return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
+        { success: false, error: 'Invalid or expired reset token' },
+        { status: 400 }
       );
     }
 
-    console.log('✅ [Reset-Password] User found:', user.name);
+    const userEmail = verifyData.user.email;
+    console.log('✅ [Reset-Password] Token verified for user:', userEmail);
 
-    // Hash new password
+    // Hash new password for our custom users table
     const saltRounds = 12;
     const password_hash = await bcrypt.hash(newPassword, saltRounds);
 
     console.log('🔐 [Reset-Password] Password hashed, updating database...');
 
-    // Update password in users table
+    // Update password in our custom users table
     const { error: updateError } = await supabase
       .from('users')
       .update({ 
         password_hash,
+        reset_token: null,
+        reset_token_expiry: null,
         updated_at: new Date().toISOString()
       })
-      .eq('email', email);
+      .eq('email', userEmail);
 
     if (updateError) {
-      console.error('❌ [Reset-Password] Error updating password:', updateError);
+      console.error('❌ [Reset-Password] Error updating password in users table:', updateError);
+    }
+
+    // Also update the password in Supabase Auth for consistency
+    const { error: authUpdateError } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (authUpdateError) {
+      console.error('❌ [Reset-Password] Error updating Supabase Auth password:', authUpdateError);
       return NextResponse.json(
         { success: false, error: 'Failed to update password' },
         { status: 500 }
       );
     }
 
-    console.log('✅ [Reset-Password] Password updated successfully for:', email);
+    console.log('✅ [Reset-Password] Password updated successfully for:', userEmail);
 
     return NextResponse.json({
       success: true,

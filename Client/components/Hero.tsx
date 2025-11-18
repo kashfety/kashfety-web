@@ -13,7 +13,7 @@ const Hero = ({ onBookAppointment }: HeroProps) => {
     <section className="py-12 sm:py-16 lg:py-20 xl:py-32">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
         {/* Left Side: Text Content */}
-        <div className="text-center lg:text-left order-2 lg:order-1">
+        <div className="text-center lg:text-start order-2 lg:order-1">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight">
             {t('hero_title_line1') || 'Your Path to'} <br />
             <span className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] bg-clip-text text-transparent">{t('hero_title_highlight') || 'Better Health'}</span>

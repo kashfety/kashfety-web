@@ -11,6 +11,17 @@ import { useLocale } from "@/components/providers/locale-provider";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 
+// Helper to get localized user name
+const getLocalizedUserName = (user: any, locale: string) => {
+  if (!user) return '';
+  if (locale === 'ar') {
+    if (user.name_ar) return user.name_ar;
+    if (user.first_name_ar && user.last_name_ar) return `${user.first_name_ar} ${user.last_name_ar}`;
+    if (user.first_name_ar) return user.first_name_ar;
+  }
+  return user.name || user.first_name || 'User';
+};
+
 interface HeaderProps {
   onMenuToggle?: () => void;
 }
@@ -18,7 +29,7 @@ interface HeaderProps {
 const Header = ({ onMenuToggle }: HeaderProps) => {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { theme } = useTheme();
 
   const handleAuthAction = () => {
@@ -94,7 +105,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           ) : user ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="hidden lg:block text-foreground/80 font-medium text-sm">
-                {t('header_hello') || 'Hello,'} {user.name}
+                {t('header_hello') || 'Hello,'} {getLocalizedUserName(user, locale)}
               </span>
               <Button 
                 variant="outline" 

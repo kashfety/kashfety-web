@@ -324,7 +324,7 @@ export default function PatientDoctorsPage() {
 
                             {/* Results count */}
                             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                                {t('showing_results') || 'Showing'} {doctors.length} {t('of') || 'of'} {totalDoctors} {t('doctors') || 'doctors'}
+                                {t('showing_results') || 'Showing'} {toArabicNumerals(doctors.length, locale)} {t('of') || 'of'} {toArabicNumerals(totalDoctors, locale)} {t('doctors') || 'doctors'}
                             </div>
                         </CardContent>
                     </Card>
@@ -390,7 +390,7 @@ export default function PatientDoctorsPage() {
                                                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
                                                     <div className="flex items-center gap-1">
                                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span>{doctor.rating?.toFixed(1) || '0.0'}</span>
+                                                        <span>{toArabicNumerals(doctor.rating?.toFixed(1) || '0.0', locale)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <Briefcase className="w-4 h-4 text-blue-500" />
@@ -450,7 +450,7 @@ export default function PatientDoctorsPage() {
                                                         onClick={() => setCurrentPage(page)}
                                                         className={currentPage === page ? "bg-blue-600" : ""}
                                                     >
-                                                        {page}
+                                                        {toArabicNumerals(page, locale)}
                                                     </Button>
                                                 )
                                             } else if (page === currentPage - 2 || page === currentPage + 2) {
@@ -499,7 +499,7 @@ export default function PatientDoctorsPage() {
                                                 <div className="flex items-center gap-4 mt-2">
                                                     <div className="flex items-center gap-1 text-sm">
                                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span className="font-medium">{selectedDoctor.rating?.toFixed(1) || '0.0'}</span>
+                                                        <span className="font-medium">{toArabicNumerals(selectedDoctor.rating?.toFixed(1) || '0.0', locale)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />

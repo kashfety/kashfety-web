@@ -668,6 +668,21 @@ export const translations = {
     lab_booking_summary: "Booking Summary",
     lab_booking_confirm: "Confirm Test Booking",
 
+    // Patient Dashboard - Doctors Page
+    view_profile: "View Profile",
+    find_doctors: "Find Doctors",
+    browse_doctors_desc: "Browse our network of qualified healthcare professionals",
+    search_doctors_placeholder: "Search by name, specialty...",
+    all_specialties: "All Specialties",
+    showing_results: "Showing",
+    no_doctors_found: "No Doctors Found",
+    try_different_search: "Try adjusting your search criteria",
+    about: "About",
+    qualifications: "Qualifications",
+    consultation_fee: "Consultation Fee",
+    previous: "Previous",
+    next: "Next",
+
     // Common
     search: "Search",
     searchDoctors: "Search doctors...",
@@ -1468,9 +1483,9 @@ export const translations = {
     doctors_section_promo_title: "اختبر الرعاية الصحية مع كشفيتي",
     doctors_section_promo_desc:
       "انضم لآلاف المرضى الراضين الذين يثقون بكشفيتي. رعاية عالية الجودة وأطباء خبراء في تطبيق واحد.",
-    doctors_section_promo_rating: "تقييم 4.9/5 من المرضى",
-    doctors_section_promo_doctors: "+50 طبيب خبير",
-    doctors_section_promo_available: "متاح 24/7",
+    doctors_section_promo_rating: "تقييم ٤.٩/٥ من المرضى",
+    doctors_section_promo_doctors: "+٥٠ طبيب خبير",
+    doctors_section_promo_available: "متاح ٢٤/٧",
     doctors_section_certified: "معتمد",
     doctors_section_years: "سنة",
     doctors_section_years_line: "بخبرة",
@@ -1891,6 +1906,21 @@ export const translations = {
     lab_test_price: "سعر الفحص",
     lab_booking_summary: "ملخص الحجز",
     lab_booking_confirm: "تأكيد حجز الفحص",
+
+    // Patient Dashboard - Doctors Page
+    view_profile: "عرض الملف الشخصي",
+    find_doctors: "البحث عن أطباء",
+    browse_doctors_desc: "تصفح شبكة أطبائنا المؤهلين",
+    search_doctors_placeholder: "ابحث بالاسم أو التخصص...",
+    all_specialties: "جميع التخصصات",
+    showing_results: "عرض",
+    no_doctors_found: "لم يتم العثور على أطباء",
+    try_different_search: "حاول تعديل معايير البحث",
+    about: "حول",
+    qualifications: "المؤهلات",
+    consultation_fee: "رسوم الاستشارة",
+    previous: "السابق",
+    next: "التالي",
 
     // Common
     search: "بحث",

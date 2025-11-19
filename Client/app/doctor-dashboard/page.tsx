@@ -211,9 +211,17 @@ function getLocalizedName(
 function getLocalizedSpecialty(
   specialtyName: string | undefined,
   specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>,
-  locale: string
+  locale: string,
+  specialty_name_ar?: string
 ): string {
   if (!specialtyName) return '';
+  
+  // First, check if we have specialty_name_ar directly from API (for doctor profile)
+  if (locale === 'ar' && specialty_name_ar) {
+    return specialty_name_ar;
+  }
+  
+  // Otherwise, look it up in the specialtiesMap
   const specialtyData = specialtiesMap.get(specialtyName);
   if (!specialtyData) return specialtyName;
   
@@ -438,7 +446,9 @@ function ProfileHeader({
                 {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {getLocalizedSpecialty(doctorProfile?.specialty, specialtiesMap, locale) || 'General Medicine'}
+                {(locale === 'ar' && doctorProfile?.specialty_name_ar) 
+                  ? doctorProfile.specialty_name_ar 
+                  : (doctorProfile?.specialty || 'General Medicine')}
               </div>
             </div>
           </div>
@@ -570,14 +580,19 @@ export default function DoctorDashboard() {
         const response = await fetch('/api/specialties');
         if (response.ok) {
           const data = await response.json();
+          const specialtiesList = data.specialties || data; // Handle both response formats
           const map = new Map();
-          data.forEach((specialty: any) => {
-            map.set(specialty.name, {
-              name_ar: specialty.name_ar,
-              name_ku: specialty.name_ku
+          
+          if (Array.isArray(specialtiesList)) {
+            specialtiesList.forEach((specialty: any) => {
+              map.set(specialty.name, {
+                name_ar: specialty.name_ar,
+                name_ku: specialty.name_ku
+              });
             });
-          });
-          setSpecialtiesMap(map);
+            setSpecialtiesMap(map);
+            console.log('✅ Loaded specialties map:', map.size, 'entries');
+          }
         }
       } catch (error) {
         console.error('Error fetching specialties:', error);
@@ -685,6 +700,13 @@ export default function DoctorDashboard() {
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
         console.log('Profile data received:', profileData);
+        console.log('Doctor specialty fields:', {
+          specialty: profileData.doctor?.specialty,
+          specialty_name_ar: profileData.doctor?.specialty_name_ar,
+          name_ar: profileData.doctor?.name_ar,
+          first_name_ar: profileData.doctor?.first_name_ar,
+          last_name_ar: profileData.doctor?.last_name_ar
+        });
         setDoctorProfile(profileData.doctor);
 
         // Check if this is first time setup (no specialty set)

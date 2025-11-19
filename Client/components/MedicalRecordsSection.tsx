@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlertTriangle, Pill, Phone, Edit, Save, X, Plus, FileText, Trash2, Calendar, User } from "lucide-react";
 import { useAuth } from "@/lib/providers/auth-provider";
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
@@ -50,7 +51,7 @@ interface MedicalRecord {
 
 export default function MedicalRecordsSection() {
   const { user, isAuthenticated } = useAuth();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { toast } = useToast();
   
   const [medicalInfo, setMedicalInfo] = useState<MedicalInfo | null>(null);
@@ -91,7 +92,7 @@ export default function MedicalRecordsSection() {
       fetchMedicalInfo();
       fetchMedicalRecords();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, locale]);
 
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;

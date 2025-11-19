@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
+import { toArabicNumerals } from "@/lib/i18n"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -102,12 +103,12 @@ export default function PatientDoctorsPage() {
         }
     }, [authLoading, isAuthenticated, user, router])
 
-    // Fetch doctors
+    // Fetch doctors when locale changes to refresh localized data
     useEffect(() => {
         if (isAuthenticated && user?.role === 'patient') {
             fetchDoctors()
         }
-    }, [currentPage, searchQuery, specialtyFilter, isAuthenticated, user])
+    }, [currentPage, searchQuery, specialtyFilter, isAuthenticated, user, locale])
 
     const fetchDoctors = async () => {
         try {
@@ -392,15 +393,15 @@ export default function PatientDoctorsPage() {
                                                         <span>{doctor.rating?.toFixed(1) || '0.0'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        <Briefcase className="w-4 h-4" />
-                                                        <span>{doctor.experience_years || 0}y</span>
+                                                        <Briefcase className="w-4 h-4 text-blue-500" />
+                                                        <span>{toArabicNumerals(doctor.experience_years || 0, locale)}y</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Consultation Fee */}
                                                 <div className="flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold">
                                                     <DollarSign className="w-4 h-4" />
-                                                    <span>${doctor.consultation_fee || 0}</span>
+                                                    <span>${toArabicNumerals(doctor.consultation_fee || 0, locale)}</span>
                                                 </div>
 
                                                 {/* Action Button */}
@@ -502,7 +503,7 @@ export default function PatientDoctorsPage() {
                                                     </div>
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />
-                                                        <span>{selectedDoctor.experience_years || 0} years experience</span>
+                                                        <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} years experience</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -549,7 +550,7 @@ export default function PatientDoctorsPage() {
                                                     {t('consultation_fee') || 'Consultation Fee'}
                                                 </h3>
                                                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${selectedDoctor.consultation_fee || 0}
+                                                    ${toArabicNumerals(selectedDoctor.consultation_fee || 0, locale)}
                                                 </p>
                                             </div>
                                         </TabsContent>
@@ -571,9 +572,9 @@ export default function PatientDoctorsPage() {
                                                                             <span>{center.address}</span>
                                                                         </div>
                                                                         {center.phone && (
-                                                                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                                                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                                                                 <Phone className="w-4 h-4" />
-                                                                                <span>{center.phone}</span>
+                                                                                <span>{toArabicNumerals(center.phone, locale)}</span>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -612,7 +613,7 @@ export default function PatientDoctorsPage() {
                                                                 {t('phone') || 'Phone'}
                                                             </p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
-                                                                {selectedDoctor.phone}
+                                                                {toArabicNumerals(selectedDoctor.phone, locale)}
                                                             </p>
                                                         </div>
                                                     </div>

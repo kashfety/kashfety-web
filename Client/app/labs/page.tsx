@@ -279,7 +279,7 @@ export default function MyLabsPage() {
                       {booking.result_file_url && (
                         <div className="flex items-center">
                           <CheckCircle className="w-5 h-5 text-green-600" />
-                          <span className="text-xs text-green-600 ml-1">Results</span>
+                          <span className="text-xs text-green-600 ml-1">{t('results') || 'Results'}</span>
                         </div>
                       )}
                       <Badge className={`${getStatusColor(booking.status)} border`}>{(booking.status || '').toUpperCase()}</Badge>

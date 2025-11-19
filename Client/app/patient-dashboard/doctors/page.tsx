@@ -236,7 +236,7 @@ export default function PatientDoctorsPage() {
             <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F12] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('loading') || 'Loading...'}</p>
                 </div>
             </div>
         )
@@ -503,7 +503,7 @@ export default function PatientDoctorsPage() {
                                                     </div>
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />
-                                                        <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} years experience</span>
+                                                        <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} {t('years_experience') || 'years experience'}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -541,6 +541,12 @@ export default function PatientDoctorsPage() {
                                                         {selectedDoctor.qualifications}
                                                     </p>
                                                 </div>
+                                            )}
+
+                                            {!selectedDoctor.bio && !selectedDoctor.qualifications && (
+                                                <p className="text-gray-500 dark:text-gray-400 italic text-center py-4">
+                                                    {t('no_additional_info') || 'No additional information available'}
+                                                </p>
                                             )}
 
                                             {/* Consultation Fee */}

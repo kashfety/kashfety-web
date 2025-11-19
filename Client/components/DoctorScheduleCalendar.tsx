@@ -89,6 +89,13 @@ export default function DoctorScheduleCalendar({
         return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
     };
 
+    // Helper to get localized status
+    const getLocalizedStatus = (status: string): string => {
+        const statusLower = status.toLowerCase();
+        const key = `dd_status_${statusLower}`;
+        return t(key) || status;
+    };
+
     // Localize appointment type
     const getLocalizedAppointmentType = (type: string) => {
         if (!type) return '';
@@ -430,7 +437,7 @@ export default function DoctorScheduleCalendar({
 
                                                             <div className="relative z-10 flex items-start justify-between mb-3">
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
-                                                                    {appointment.status}
+                                                                    {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
                                                                 <DropdownMenu>
                                                                     <DropdownMenuTrigger asChild>
@@ -503,7 +510,7 @@ export default function DoctorScheduleCalendar({
 
                                                             <div className="relative z-10 flex items-start justify-between mb-3">
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
-                                                                    {appointment.status}
+                                                                    {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
                                                                 <DropdownMenu>
                                                                     <DropdownMenuTrigger asChild>

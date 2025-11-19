@@ -54,7 +54,7 @@ export default function DoctorProfileSettings({
   doctorId, 
   onProfileUpdate 
 }: DoctorProfileSettingsProps) {
-  const { t, isRTL } = useLocale()
+  const { t, isRTL, locale } = useLocale()
 
   const [profile, setProfile] = useState<DoctorProfileData | null>(null);
   const [certificates, setCertificates] = useState<DoctorCertificate[]>([]);
@@ -610,17 +610,17 @@ export default function DoctorProfileSettings({
                       <div className="flex gap-4 text-sm text-gray-600">
                         {certificate.issue_date && (
                           <span>
-                            <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString()}
+                            <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         )}
                         {certificate.expiry_date && (
                           <span>
-                            <strong>{t('expiry_date') || 'Expires'}:</strong> {new Date(certificate.expiry_date).toLocaleDateString()}
+                            <strong>{t('expiry_date') || 'Expires'}:</strong> {new Date(certificate.expiry_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-gray-500">
-                        {t('certificate_uploaded_on') || 'Uploaded on'}: {new Date(certificate.submitted_at).toLocaleDateString()}
+                        {t('certificate_uploaded_on') || 'Uploaded on'}: {new Date(certificate.submitted_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">

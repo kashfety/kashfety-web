@@ -18,25 +18,41 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function getDoctorProfile(doctorId) {
   const { data: doctor, error } = await supabase
     .from('users')
-    .select('*')
+    .select(`
+      *,
+      name_ar,
+      first_name_ar,
+      last_name_ar
+    `)
     .eq('id', doctorId)
     .eq('role', 'doctor')
     .single();
 
   if (error) throw error;
   
+  console.log('🔍 Doctor data from DB:', {
+    name: doctor?.name,
+    name_ar: doctor?.name_ar,
+    first_name_ar: doctor?.first_name_ar,
+    last_name_ar: doctor?.last_name_ar,
+    specialty: doctor?.specialty
+  });
+  
   // If doctor has specialty text, try to get the corresponding specialty data
   if (doctor && doctor.specialty) {
     const { data: specialtyData } = await supabase
       .from('specialties')
-      .select('name, name_ar, name_en')
+      .select('name, name_ar, name_en, name_ku')
       .eq('name', doctor.specialty)
       .single();
+    
+    console.log('🔍 Specialty data from DB:', specialtyData);
     
     if (specialtyData) {
       doctor.specialty_name = specialtyData.name;
       doctor.specialty_name_ar = specialtyData.name_ar;
       doctor.specialty_name_en = specialtyData.name_en;
+      doctor.specialty_name_ku = specialtyData.name_ku;
     }
   }
   
@@ -316,7 +332,7 @@ router.get('/patients', authenticateToken, async (req, res) => {
       // Get patient details
       const { data: patients } = await supabase
         .from('users')
-        .select('id, name, email, phone, gender, date_of_birth, created_at')
+        .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, phone, gender, date_of_birth, created_at')
         .in('id', uniquePatientIds)
         .eq('role', 'patient');
 
@@ -330,6 +346,11 @@ router.get('/patients', authenticateToken, async (req, res) => {
         return {
           id: patient.id,
           name: patient.name,
+          name_ar: patient.name_ar,
+          first_name: patient.first_name,
+          first_name_ar: patient.first_name_ar,
+          last_name: patient.last_name,
+          last_name_ar: patient.last_name_ar,
           email: patient.email,
           phone: patient.phone,
           age,

@@ -123,6 +123,25 @@ export default function AppointmentDetailsModal({
         return num.toString().split('').map(digit => arabicNumerals[parseInt(digit)] || digit).join('');
     };
 
+    // Localize appointment type
+    const getLocalizedAppointmentType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
+        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
+        return type;
+    };
+
+    // Localize consultation type
+    const getLocalizedConsultationType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
+        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
+        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
+        return type;
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -214,7 +233,7 @@ export default function AppointmentDetailsModal({
                                             {t('dd_type') || 'Type'}
                                         </p>
                                         <p className="font-semibold text-gray-900 dark:text-white">
-                                            {appointment.appointment_type} • {appointment.type}
+                                            {getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}
                                         </p>
                                     </div>
                                 </div>

@@ -89,6 +89,25 @@ export default function DoctorScheduleCalendar({
         return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
     };
 
+    // Localize appointment type
+    const getLocalizedAppointmentType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
+        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
+        return type;
+    };
+
+    // Localize consultation type
+    const getLocalizedConsultationType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
+        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
+        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
+        return type;
+    };
+
     // Get all unique time slots from appointments, including non-whole hours
     const getAllTimeSlots = () => {
         const appointmentTimes = new Set<string>();
@@ -446,7 +465,7 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{appointment.appointment_type}</span>
+                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (
@@ -519,7 +538,7 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{appointment.appointment_type}</span>
+                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (

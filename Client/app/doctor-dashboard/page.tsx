@@ -1245,7 +1245,7 @@ export default function DoctorDashboard() {
                           const nextDate = new Date(`${next.appointment_date}T${(next.appointment_time || '00:00')}:00`)
                           minutes = Math.max(0, Math.round((nextDate.getTime() - now.getTime()) / 60000))
                         }
-                        return `${t('dd_you_have') || 'You have'} ${total} ${t('dd_upcoming_appointments') || 'upcoming appointments'} • ${t('dd_next_patient_in') || 'Next patient in'} ${minutes || 0} ${t('dd_minutes') || 'minutes'}`
+                        return `${t('dd_you_have') || 'You have'} ${locale === 'ar' ? toArabicNumerals(total.toString()) : total} ${t('dd_upcoming_appointments') || 'upcoming appointments'} • ${t('dd_next_patient_in') || 'Next patient in'} ${locale === 'ar' ? toArabicNumerals((minutes || 0).toString()) : (minutes || 0)} ${t('dd_minutes') || 'minutes'}`
                       })()}
                     </span>
                   </div>
@@ -1326,10 +1326,10 @@ export default function DoctorDashboard() {
                                   {locale === 'ar' && patient.name_ar ? patient.name_ar : patient.name}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${patient.lastAppointment}` : (t('no_recent_visit') || 'No recent visit')}
+                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-500">
-                                  {toArabicNumerals(patient.totalAppointments || 0, locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
+                                  {toArabicNumerals((patient.totalAppointments || 0).toString(), locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
                                 </p>
                               </div>
                             </div>

@@ -71,20 +71,26 @@ export async function GET(request: NextRequest) {
       (certificates || []).map(async (cert) => {
         try {
           // Extract the storage path from the URL
-          // URL format: https://<supabase-url>/storage/v1/object/sign/certificates/<file>?token=...
-          // Or: https://<supabase-url>/storage/v1/object/public/certificates/<file>
+          // URL format: https://<supabase-url>/storage/v1/object/sign/medical-documents/certificates/<doctor-id>/<file>?token=...
           let filePath = cert.certificate_file_name;
           
           if (cert.certificate_file_url) {
-            const urlParts = cert.certificate_file_url.split('/certificates/');
+            // Try to extract path after 'medical-documents/'
+            const urlParts = cert.certificate_file_url.split('/medical-documents/');
             if (urlParts.length > 1) {
-              filePath = urlParts[1].split('?')[0]; // Get filename before query params
+              filePath = urlParts[1].split('?')[0]; // Get path before query params
+            } else {
+              // Fallback: try to extract just after 'certificates/'
+              const certParts = cert.certificate_file_url.split('/certificates/');
+              if (certParts.length > 1) {
+                filePath = 'certificates/' + certParts[1].split('?')[0];
+              }
             }
           }
           
           // Generate a fresh signed URL valid for 1 hour
           const { data: signedUrlData, error: signError } = await supabase.storage
-            .from('certificates')
+            .from('medical-documents')
             .createSignedUrl(filePath, 3600); // 3600 seconds = 1 hour
 
           if (signError) {

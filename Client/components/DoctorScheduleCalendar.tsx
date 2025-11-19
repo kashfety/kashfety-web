@@ -182,7 +182,7 @@ export default function DoctorScheduleCalendar({
 
     // Format date for display
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
             weekday: 'short',
             month: 'short',
             day: 'numeric'
@@ -309,7 +309,7 @@ export default function DoctorScheduleCalendar({
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
-                                                    {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                    {currentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                                 </div>
                                                 {isToday && (
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>
@@ -340,7 +340,7 @@ export default function DoctorScheduleCalendar({
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
-                                                    {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                    {date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' })}
                                                 </div>
                                                 {isToday && (
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>

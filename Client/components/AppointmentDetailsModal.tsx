@@ -93,6 +93,13 @@ export default function AppointmentDetailsModal({
         if (!time) return '';
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
+        
+        if (locale === 'ar') {
+            // Arabic 24-hour format
+            return `${toArabicNumerals(hour)}:${toArabicNumerals(parseInt(minutes))}`;
+        }
+        
+        // English AM/PM format
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
         return `${displayHour}:${minutes} ${ampm}`;
@@ -101,12 +108,19 @@ export default function AppointmentDetailsModal({
     // Format date for display
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr + 'T00:00:00');
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Convert numbers to Arabic numerals
+    const toArabicNumerals = (num: number) => {
+        if (locale !== 'ar') return num.toString();
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return num.toString().split('').map(digit => arabicNumerals[parseInt(digit)] || digit).join('');
     };
 
     return (
@@ -213,7 +227,7 @@ export default function AppointmentDetailsModal({
                                             {t('dd_fee') || 'Consultation Fee'}
                                         </p>
                                         <p className="font-semibold text-gray-900 dark:text-white">
-                                            ${appointment.consultation_fee}
+                                            ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee) : appointment.consultation_fee}
                                         </p>
                                     </div>
                                 </div>

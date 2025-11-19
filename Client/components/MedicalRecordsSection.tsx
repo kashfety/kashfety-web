@@ -155,9 +155,8 @@ export default function MedicalRecordsSection() {
       if (result.success && result.specialties) {
         const map = new Map();
         result.specialties.forEach((specialty: any) => {
-          // Map by name_en (which is typically used as the key in medical records)
-          const keyName = specialty.name_en || specialty.name;
-          map.set(keyName, {
+          // Map by name (which is the key used in medical records)
+          map.set(specialty.name, {
             name_ar: specialty.name_ar,
             name_ku: specialty.name_ku,
             name_en: specialty.name_en || specialty.name

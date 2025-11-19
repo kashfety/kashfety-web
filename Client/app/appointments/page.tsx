@@ -285,12 +285,12 @@ export default function MyAppointmentsPage() {
         
         const appointmentTime = apt.appointment_time
         
-        // Format date
-        const formattedDate = toArabicNumerals(appointmentDate.toLocaleDateString(locale || 'en-US', {
+        // Format date with proper locale
+        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : locale === 'ku' ? 'ku-IQ' : 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        }), locale)
+        })
         
         console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
         
@@ -644,7 +644,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Clock className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{(() => { try { const [h,m] = (appointment.appointment_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })()} ({appointment.duration})</div>
+                          <div className="font-medium">{toArabicNumerals((() => { try { const [h,m] = (appointment.appointment_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
                           <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                         </div>
                       </div>

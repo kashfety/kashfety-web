@@ -684,6 +684,23 @@ export const translations = {
     previous: "Previous",
     next: "Next",
 
+    // Patient Dashboard - Labs Page
+    find_labs: "Medical Centers & Labs",
+    browse_labs_desc: "Find medical centers offering lab tests and imaging services",
+    search_labs_placeholder: "Search by center name, location...",
+    all_services: "All Services",
+    lab_tests: "Lab Tests",
+    imaging: "Imaging",
+    no_centers_found: "No Centers Found",
+    view_details: "View Details",
+    tests_tab: "Tests Available",
+    operating_hours: "Operating Hours",
+    no_tests_available: "No tests information available",
+    book_lab_test: "Book Lab Test",
+    tests_available: "tests available",
+    lab_test_singular: "Lab Test",
+    imaging_services: "Imaging Services",
+
     // Common
     search: "Search",
     searchDoctors: "Search doctors...",
@@ -1923,6 +1940,23 @@ export const translations = {
     centers: "المراكز",
     previous: "السابق",
     next: "التالي",
+
+    // Patient Dashboard - Labs Page
+    find_labs: "المراكز الطبية والمختبرات",
+    browse_labs_desc: "ابحث عن المراكز الطبية التي تقدم الفحوصات المخبرية وخدمات التصوير",
+    search_labs_placeholder: "ابحث باسم المركز أو الموقع...",
+    all_services: "جميع الخدمات",
+    lab_tests: "الفحوصات المخبرية",
+    imaging: "التصوير",
+    no_centers_found: "لم يتم العثور على مراكز",
+    view_details: "عرض التفاصيل",
+    tests_tab: "الفحوصات المتاحة",
+    operating_hours: "ساعات العمل",
+    no_tests_available: "لا توجد معلومات عن الفحوصات",
+    book_lab_test: "حجز فحص مخبري",
+    tests_available: "فحص متاح",
+    lab_test_singular: "فحص مخبري",
+    imaging_services: "خدمات التصوير",
 
     // Common
     search: "بحث",

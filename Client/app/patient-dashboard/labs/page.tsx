@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
+import { toArabicNumerals } from "@/lib/i18n"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -283,7 +284,7 @@ export default function PatientLabsPage() {
 
                             {/* Results count */}
                             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                                {t('showing_results') || 'Showing'} {centers.length} {t('of') || 'of'} {totalCenters} {t('centers') || 'centers'}
+                                {t('showing_results') || 'Showing'} {toArabicNumerals(centers.length, locale)} {t('of') || 'of'} {toArabicNumerals(totalCenters, locale)} {t('centers') || 'centers'}
                             </div>
                         </CardContent>
                     </Card>
@@ -350,13 +351,13 @@ export default function PatientLabsPage() {
                                                     {center.offers_labs && (
                                                         <Badge variant="secondary" className="text-xs">
                                                             <TestTube className="w-3 h-3 mr-1" />
-                                                            Lab Tests
+                                                            {t('lab_tests') || 'Lab Tests'}
                                                         </Badge>
                                                     )}
                                                     {center.offers_imaging && (
                                                         <Badge variant="secondary" className="text-xs">
                                                             <Activity className="w-3 h-3 mr-1" />
-                                                            Imaging
+                                                            {t('imaging') || 'Imaging'}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -364,7 +365,7 @@ export default function PatientLabsPage() {
                                                 {/* Tests Count */}
                                                 {center.tests && center.tests.length > 0 && (
                                                     <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-4">
-                                                        {center.tests.length} tests available
+                                                        {toArabicNumerals(center.tests.length, locale)} {t('tests_available') || 'tests available'}
                                                     </p>
                                                 )}
 
@@ -414,7 +415,7 @@ export default function PatientLabsPage() {
                                                         onClick={() => setCurrentPage(page)}
                                                         className={currentPage === page ? "bg-blue-600" : ""}
                                                     >
-                                                        {page}
+                                                        {toArabicNumerals(page, locale)}
                                                     </Button>
                                                 )
                                             } else if (page === currentPage - 2 || page === currentPage + 2) {
@@ -467,7 +468,7 @@ export default function PatientLabsPage() {
                                     <Tabs defaultValue="overview" className="mt-6">
                                         <TabsList className="grid w-full grid-cols-3">
                                             <TabsTrigger value="overview">{t('overview') || 'Overview'}</TabsTrigger>
-                                            <TabsTrigger value="tests">{t('tests') || 'Tests Available'}</TabsTrigger>
+                                            <TabsTrigger value="tests">{t('tests_tab') || 'Tests Available'}</TabsTrigger>
                                             <TabsTrigger value="contact">{t('contact') || 'Contact'}</TabsTrigger>
                                         </TabsList>
 
@@ -481,13 +482,13 @@ export default function PatientLabsPage() {
                                                     {selectedCenter.offers_labs && (
                                                         <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
                                                             <TestTube className="w-4 h-4 mr-1" />
-                                                            Lab Tests
+                                                            {t('lab_tests') || 'Lab Tests'}
                                                         </Badge>
                                                     )}
                                                     {selectedCenter.offers_imaging && (
                                                         <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
                                                             <Activity className="w-4 h-4 mr-1" />
-                                                            Imaging Services
+                                                            {t('imaging_services') || 'Imaging Services'}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -526,12 +527,12 @@ export default function PatientLabsPage() {
                                                                             </p>
                                                                         )}
                                                                         <Badge variant="outline" className="mt-2">
-                                                                            {test.category === 'lab' ? 'Lab Test' : 'Imaging'}
+                                                                            {test.category === 'lab' ? (t('lab_test_singular') || 'Lab Test') : (t('imaging') || 'Imaging')}
                                                                         </Badge>
                                                                     </div>
                                                                     <div className="text-right">
                                                                         <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                                            ${test.default_fee}
+                                                                            ${toArabicNumerals(test.default_fee, locale)}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -556,7 +557,7 @@ export default function PatientLabsPage() {
                                                                 {t('phone') || 'Phone'}
                                                             </p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
-                                                                {selectedCenter.phone}
+                                                                {toArabicNumerals(selectedCenter.phone, locale)}
                                                             </p>
                                                         </div>
                                                     </div>

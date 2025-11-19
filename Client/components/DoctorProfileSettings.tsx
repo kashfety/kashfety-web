@@ -156,13 +156,51 @@ export default function DoctorProfileSettings({
       if (response.ok) {
         const data = await response.json();
         setCertificates(data.certificates || []);
+        return data.certificates || [];
       } else {
         console.error('Failed to load certificates:', response.status);
+        return [];
       }
     } catch (error) {
       console.error('Error loading certificates:', error);
+      return [];
     } finally {
       setLoadingCertificates(false);
+    }
+  };
+
+  const handleViewCertificate = async (certificateId: string, currentUrl: string) => {
+    try {
+      // Refresh certificates to get fresh signed URLs
+      const freshCertificates = await loadDoctorCertificates();
+      const freshCert = freshCertificates.find((c: any) => c.id === certificateId);
+      const urlToOpen = freshCert?.certificate_file_url || currentUrl;
+      window.open(urlToOpen, '_blank');
+    } catch (error) {
+      console.error('Error opening certificate:', error);
+      // Fallback to current URL if refresh fails
+      window.open(currentUrl, '_blank');
+    }
+  };
+
+  const handleDownloadCertificate = async (certificateId: string, currentUrl: string, fileName: string) => {
+    try {
+      // Refresh certificates to get fresh signed URLs
+      const freshCertificates = await loadDoctorCertificates();
+      const freshCert = freshCertificates.find((c: any) => c.id === certificateId);
+      const urlToDownload = freshCert?.certificate_file_url || currentUrl;
+      
+      const link = document.createElement('a');
+      link.href = urlToDownload;
+      link.download = fileName;
+      link.click();
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      // Fallback to current URL if refresh fails
+      const link = document.createElement('a');
+      link.href = currentUrl;
+      link.download = fileName;
+      link.click();
     }
   };
 
@@ -651,7 +689,7 @@ export default function DoctorProfileSettings({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(certificate.certificate_file_url, '_blank')}
+                          onClick={() => handleViewCertificate(certificate.id, certificate.certificate_file_url)}
                           className="flex items-center gap-1"
                         >
                           <Eye className="w-3 h-3" />
@@ -660,12 +698,7 @@ export default function DoctorProfileSettings({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = certificate.certificate_file_url;
-                            link.download = certificate.certificate_file_name;
-                            link.click();
-                          }}
+                          onClick={() => handleDownloadCertificate(certificate.id, certificate.certificate_file_url, certificate.certificate_file_name)}
                           className="flex items-center gap-1"
                         >
                           <Download className="w-3 h-3" />

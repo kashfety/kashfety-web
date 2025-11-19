@@ -680,6 +680,7 @@ export const translations = {
     about: "About",
     qualifications: "Qualifications",
     consultation_fee: "Consultation Fee",
+    centers: "Centers",
     previous: "Previous",
     next: "Next",
 
@@ -1919,6 +1920,7 @@ export const translations = {
     about: "حول",
     qualifications: "المؤهلات",
     consultation_fee: "رسوم الاستشارة",
+    centers: "المراكز",
     previous: "السابق",
     next: "التالي",
 

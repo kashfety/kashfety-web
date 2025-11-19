@@ -494,7 +494,7 @@ export default function PatientDoctorsPage() {
                                             <div className="flex-1">
                                                 <DialogTitle className="text-2xl">{getLocalizedDoctorName(selectedDoctor)}</DialogTitle>
                                                 <DialogDescription className="text-lg mt-1">
-                                                    {selectedDoctor.specialty}
+                                                    {getLocalizedSpecialty(selectedDoctor)}
                                                 </DialogDescription>
                                                 <div className="flex items-center gap-4 mt-2">
                                                     <div className="flex items-center gap-1 text-sm">

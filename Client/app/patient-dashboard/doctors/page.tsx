@@ -274,10 +274,10 @@ export default function PatientDoctorsPage() {
                     {/* Page Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground">
-                            {t('find_doctors') || 'Find Doctors'}
+                            {t('find_doctors') || t('doctors') || 'Find Doctors'}
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            {t('browse_doctors_desc') || 'Browse our network of qualified healthcare professionals'}
+                            {t('browse_doctors_desc') || t('doctors_subtitle') || 'Browse our network of qualified healthcare professionals'}
                         </p>
                     </div>
 

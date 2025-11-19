@@ -194,7 +194,7 @@ export default function MyLabsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground">{t('my_labs_title') || 'My Lab Tests & Scans'}</h1>
-              <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
+              <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || t('labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
             </div>
             <div className="flex gap-2">
               <Button onClick={refresh} variant="outline" className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">

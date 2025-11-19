@@ -678,7 +678,7 @@ export default function MedicalRecordsSection() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
-                    {t('mr_medical_records') || 'Medical Records'}
+                    {t('mr_tab_records') || t('mr_medical_records') || 'Medical Records'}
                   </CardTitle>
                   <Button onClick={handleCreateRecord} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -748,18 +748,18 @@ export default function MedicalRecordsSection() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div>
-                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}:</Label>
+                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}</Label>
                             <p className="text-foreground mt-1">{record.treatment}</p>
                           </div>
                           {record.prescription && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}:</Label>
+                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}</Label>
                               <p className="text-foreground mt-1">{record.prescription}</p>
                             </div>
                           )}
                           {record.notes && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}:</Label>
+                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}</Label>
                               <p className="text-foreground mt-1 whitespace-pre-wrap">{record.notes}</p>
                             </div>
                           )}

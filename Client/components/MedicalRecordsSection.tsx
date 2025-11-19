@@ -52,6 +52,8 @@ interface MedicalRecord {
     last_name_ar?: string;
     specialty?: string;
     specialty_ar?: string;
+    specialty_ku?: string;
+    specialty_en?: string;
   };
 }
 
@@ -90,8 +92,15 @@ export default function MedicalRecordsSection() {
 
   const getLocalizedSpecialty = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return '';
+    
     if (locale === 'ar' && doctor.specialty_ar) {
       return doctor.specialty_ar;
+    }
+    if (locale === 'ku' && doctor.specialty_ku) {
+      return doctor.specialty_ku;
+    }
+    if (doctor.specialty_en) {
+      return doctor.specialty_en;
     }
     return doctor.specialty || '';
   };

@@ -286,11 +286,11 @@ export default function MyAppointmentsPage() {
         const appointmentTime = apt.appointment_time
         
         // Format date
-        const formattedDate = appointmentDate.toLocaleDateString(locale || 'en-US', {
+        const formattedDate = toArabicNumerals(appointmentDate.toLocaleDateString(locale || 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        })
+        }), locale)
         
         console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
         

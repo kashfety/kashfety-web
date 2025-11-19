@@ -422,6 +422,12 @@ export const translations = {
     dd_clinic: "Clinic",
     dd_home: "Home",
     dd_telemedicine: "Telemedicine",
+    dd_weekly_schedule: "Weekly Schedule",
+    dd_weekly_schedule_desc: "Your patient appointments this week",
+    dd_appointments_trend: "Appointments Trend",
+    dd_appointments_trend_desc: "Your appointments and consultations over time",
+    dd_consultations: "Consultations",
+    dd_loading_dashboard: "Loading your dashboard...",
 
     // Doctor Dashboard — Certificates (en)
     doctor_certificates: "My Certificates",
@@ -1741,6 +1747,12 @@ export const translations = {
     dd_clinic: "عيادة",
     dd_home: "منزل",
     dd_telemedicine: "طب عن بُعد",
+    dd_weekly_schedule: "الجدول الأسبوعي",
+    dd_weekly_schedule_desc: "مواعيد مرضاك هذا الأسبوع",
+    dd_appointments_trend: "اتجاه المواعيد",
+    dd_appointments_trend_desc: "مواعيدك واستشاراتك على مدار الوقت",
+    dd_consultations: "الاستشارات",
+    dd_loading_dashboard: "جاري تحميل لوحة التحكم...",
 
     // Doctor Dashboard — Schedule management (ar)
     dd_loading_schedule: "جاري تحميل الجدول...",

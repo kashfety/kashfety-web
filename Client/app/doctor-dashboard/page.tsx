@@ -74,6 +74,11 @@ import AppointmentDetailsModal from "@/components/AppointmentDetailsModal";
 interface DoctorProfile {
   id: string;
   name: string;
+  name_ar?: string;
+  first_name?: string;
+  first_name_ar?: string;
+  last_name?: string;
+  last_name_ar?: string;
   email: string;
   specialty?: string;
   specialty_name?: string;
@@ -401,7 +406,9 @@ function ProfileHeader({
             </div>
             <div className="hidden sm:block text-left">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {localizeDoctorName(locale, doctorProfile?.name || 'Doctor')}
+                {locale === 'ar' && (doctorProfile?.name_ar || (doctorProfile?.first_name_ar && doctorProfile?.last_name_ar))
+                  ? (doctorProfile?.name_ar || `${doctorProfile?.first_name_ar} ${doctorProfile?.last_name_ar}`)
+                  : (doctorProfile?.name || 'Doctor')}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {locale === 'ar' && doctorProfile?.specialty_name_ar 
@@ -423,7 +430,9 @@ function ProfileHeader({
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
-                  {localizeDoctorName(locale, doctorProfile?.name || 'Doctor')}
+                  {locale === 'ar' && (doctorProfile?.name_ar || (doctorProfile?.first_name_ar && doctorProfile?.last_name_ar))
+                    ? (doctorProfile?.name_ar || `${doctorProfile?.first_name_ar} ${doctorProfile?.last_name_ar}`)
+                    : (doctorProfile?.name || 'Doctor')}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {doctorProfile?.email || ''}
@@ -1038,7 +1047,7 @@ export default function DoctorDashboard() {
       <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F12] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('dd_loading_dashboard') || 'Loading your dashboard...'}</p>
         </div>
       </div>
     );

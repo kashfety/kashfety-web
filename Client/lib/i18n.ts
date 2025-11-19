@@ -457,6 +457,12 @@ export const translations = {
     feeChangeNoticeText: "Changes to your consultation fee will apply to all new appointments. Existing scheduled appointments will keep their original pricing.",
     saveConsultationFee: "Save Consultation Fee",
     saving: "Saving...",
+    profile_settings_title: "Profile Settings",
+    profile_settings_desc: "Manage your professional profile and consultation fees",
+    doctor_profile: "Doctor Profile",
+    dd_qualifications_certifications: "Qualifications & Certifications",
+    dd_no_qualifications: "No qualifications listed",
+    dd_contact_support_qualifications: "Contact support to update your qualifications and certifications",
 
     // Doctor Dashboard — Reviews tab (en)
     dd_reviews_title: "Reviews & Ratings",
@@ -1854,6 +1860,12 @@ export const translations = {
     feeChangeNoticeText: "سيتم تطبيق التغييرات على رسوم الاستشارة على جميع المواعيد الجديدة. المواعيد المجدولة الحالية ستحتفظ بأسعارها الأصلية.",
     saveConsultationFee: "حفظ رسوم الاستشارة",
     saving: "جاري الحفظ...",
+    profile_settings_title: "إعدادات الملف الشخصي",
+    profile_settings_desc: "إدارة ملفك المهني ورسوم الاستشارة",
+    doctor_profile: "ملف الطبيب",
+    dd_qualifications_certifications: "المؤهلات والشهادات",
+    dd_no_qualifications: "لا توجد مؤهلات مدرجة",
+    dd_contact_support_qualifications: "تواصل مع الدعم لتحديث مؤهلاتك وشهاداتك",
 
     // Doctor Dashboard — Reviews tab (ar)
     dd_reviews_title: "التقييمات والمراجعات",

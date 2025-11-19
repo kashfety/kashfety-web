@@ -355,11 +355,11 @@ export default function DoctorProfileSettings({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
-          <p className="text-gray-600">Manage your professional profile and consultation fees</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('profile_settings_title') || 'Profile Settings'}</h2>
+          <p className="text-gray-600">{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
         </div>
         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          Doctor Profile
+          {t('doctor_profile') || 'Doctor Profile'}
         </Badge>
       </div>
 

@@ -522,17 +522,27 @@ export default function DoctorDashboard() {
   const getLocalizedPatientName = (appointment: any) => {
     if (!appointment) return 'Unknown Patient';
     
-    // If we have patient_name_ar from the API
-    if (locale === 'ar' && appointment.patient_name_ar) {
-      return appointment.patient_name_ar;
-    }
-    
-    // If we have users object with name_ar
-    if (locale === 'ar' && appointment.users?.name_ar) {
-      return appointment.users.name_ar;
+    if (locale === 'ar') {
+      // Try name_ar first
+      if (appointment.name_ar) return appointment.name_ar;
+      
+      // Build from first_name_ar + last_name_ar
+      if (appointment.first_name_ar || appointment.last_name_ar) {
+        return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
+      }
+      
+      // Check users object
+      if (appointment.users?.name_ar) return appointment.users.name_ar;
+      if (appointment.users?.first_name_ar || appointment.users?.last_name_ar) {
+        return [appointment.users.first_name_ar, appointment.users.last_name_ar].filter(Boolean).join(' ').trim();
+      }
     }
     
     // Fallback to English name
+    if (appointment.name) return appointment.name;
+    if (appointment.first_name || appointment.last_name) {
+      return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
+    }
     return appointment.patient_name || appointment.users?.name || 'Unknown Patient';
   };
 

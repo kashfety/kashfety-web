@@ -49,6 +49,7 @@ interface ScheduleData {
 interface Center {
   id: string;
   name: string;
+  name_ar?: string;
   address: string;
   phone?: string;
   email?: string;
@@ -107,7 +108,7 @@ const generateTimeSlots = (
 
 export default function DoctorScheduleManagement({ doctorId }: ScheduleManagementProps) {
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [schedule, setSchedule] = useState<ScheduleData[]>([]);
@@ -115,6 +116,14 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const [selectedCenterId, setSelectedCenterId] = useState<string>('');
   const [homeVisitsAvailable, setHomeVisitsAvailable] = useState(false);
   const [defaultConsultationFee, setDefaultConsultationFee] = useState<number>(0);
+  
+  // Helper to get localized center name
+  const getLocalizedCenterName = (center: Center) => {
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar;
+    }
+    return center.name;
+  };
   
   // Conflict dialog state
   const [showConflictDialog, setShowConflictDialog] = useState(false);
@@ -805,7 +814,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-sm">{center.name}</h3>
+                        <h3 className="font-medium text-sm">{getLocalizedCenterName(center)}</h3>
                         <div className="flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3 text-gray-500" />
                           <p className="text-xs text-gray-600 dark:text-gray-400">

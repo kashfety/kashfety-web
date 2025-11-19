@@ -1853,7 +1853,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.length || 0}
+                              {toArabicNumerals((patients?.length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                           </div>
@@ -1869,7 +1869,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0}
+                              {toArabicNumerals((patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('active_30_days') || 'Active (30 days)'}</p>
                           </div>
@@ -1885,7 +1885,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0}
+                              {toArabicNumerals((patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('total_visits') || 'Total Visits'}</p>
                           </div>
@@ -1901,7 +1901,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {(() => {
+                              {toArabicNumerals(((() => {
                                 const dist = analytics?.analytics?.patientDemographics?.genderDistribution as Record<string, number> | undefined
                                 if (dist && Object.keys(dist).length > 0) {
                                   const total = Object.values(dist).reduce((a, b) => a + (Number(b) || 0), 0)
@@ -1918,7 +1918,7 @@ export default function DoctorDashboard() {
                                     if (g === 'female' || g === 'f') female += 1
                                   })
                                 return total ? Math.round((female / total) * 100) : 0
-                              })()}%
+                              })()).toString(), locale)}%
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('female_patients') || 'Female Patients'}</p>
                           </div>
@@ -1974,7 +1974,11 @@ export default function DoctorDashboard() {
                                     </Badge>
                                     {patient.lastAppointment && (
                                       <Badge variant="secondary" className="text-xs">
-                                        {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale || 'en-US')}
+                                        {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric'
+                                        })}
                                       </Badge>
                                     )}
                                     {patient.gender && (

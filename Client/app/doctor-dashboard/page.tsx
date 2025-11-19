@@ -1142,7 +1142,7 @@ export default function DoctorDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {t('dd_welcome_back') || 'Welcome back'}, Dr. {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
+                      {t('dd_welcome_back') || 'Welcome back'}, {locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
                       {t('dd_whats_happening') || "Here's what's happening in your practice today"}

@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('doctor_schedules')
-      .select('*, centers:center_id(id, name, address)')
+      .select('*, centers:center_id(id, name, name_ar, address)')
       .eq('doctor_id', doctorId);
     
     // Filter by center if specified
@@ -295,7 +295,7 @@ export async function PUT(request: NextRequest) {
     if (daysToCheck.length > 0) {
       const { data: existingSchedules, error: existingError } = await supabase
         .from('doctor_schedules')
-        .select('day_of_week, time_slots, center_id, centers:center_id(name)')
+        .select('day_of_week, time_slots, center_id, centers:center_id(name, name_ar)')
         .eq('doctor_id', doctorId)
         .in('day_of_week', daysToCheck)
         .neq('center_id', centerId);
@@ -433,7 +433,7 @@ export async function PUT(request: NextRequest) {
     // Get the updated schedule for this specific center
     const { data: updatedSchedule, error: fetchError } = await supabase
       .from('doctor_schedules')
-      .select('*, centers:center_id(id, name, address)')
+      .select('*, centers:center_id(id, name, name_ar, address)')
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .order('day_of_week');

@@ -46,7 +46,16 @@ export async function GET(request: NextRequest) {
         chief_complaint,
         notes,
         patient_id,
-        users:users!appointments_patient_id_fkey (name, phone, email)
+        users:users!appointments_patient_id_fkey (
+          name, 
+          name_ar,
+          first_name,
+          first_name_ar,
+          last_name,
+          last_name_ar,
+          phone, 
+          email
+        )
       `)
       .eq('doctor_id', doctorId)
       .order('appointment_date', { ascending: true })
@@ -76,6 +85,12 @@ export async function GET(request: NextRequest) {
         notes: row.notes,
         patient_id: row.patient_id,
         patient_name: user?.name || 'Patient',
+        name: user?.name,
+        name_ar: user?.name_ar,
+        first_name: user?.first_name,
+        first_name_ar: user?.first_name_ar,
+        last_name: user?.last_name,
+        last_name_ar: user?.last_name_ar,
         patient_phone: user?.phone || null,
         patient_email: user?.email || null,
       };

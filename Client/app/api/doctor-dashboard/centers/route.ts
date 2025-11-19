@@ -94,11 +94,11 @@ export async function GET(request: NextRequest) {
     let centersQuery = supabase.from('centers') as any;
     if (hasPersonalColumns && doctorId) {
       centersQuery = centersQuery
-        .select('id, name, address, phone, email, center_type, owner_doctor_id, approval_status')
+        .select('id, name, name_ar, address, phone, email, center_type, owner_doctor_id, approval_status')
         .or(`owner_doctor_id.eq.${doctorId},and(center_type.eq.generic,approval_status.eq.approved)`, { referencedTable: 'centers' })
         .order('name');
     } else {
-      centersQuery = centersQuery.select('id, name, address, phone, email').order('name');
+      centersQuery = centersQuery.select('id, name, name_ar, address, phone, email').order('name');
     }
     const { data: allCenters, error: centersError } = await centersQuery;
     if (centersError) throw centersError;

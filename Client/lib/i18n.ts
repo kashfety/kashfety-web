@@ -21,6 +21,26 @@ export function toArabicNumerals(value: number | string, locale?: Locale): strin
 }
 
 /**
+ * Format a phone number according to locale
+ * @param phoneNumber - The phone number to format
+ * @param locale - Current locale
+ * @returns Formatted phone number string
+ */
+export function formatPhoneNumber(phoneNumber: string | undefined | null, locale?: Locale): string {
+  if (!phoneNumber) return '';
+  
+  // Remove all non-digit characters
+  const digitsOnly = phoneNumber.replace(/\D/g, '');
+  
+  if (locale === 'ar') {
+    // Convert to Arabic numerals
+    return toArabicNumerals(phoneNumber, locale);
+  }
+  
+  return phoneNumber;
+}
+
+/**
  * Format a number as currency with proper localization
  * @param amount - The amount to format
  * @param locale - Current locale
@@ -298,11 +318,13 @@ export const translations = {
     dd_this_month: "This month",
     dd_overview_tab: "Overview",
     dd_appointments_tab: "Appointments",
+    dd_schedule_calendar_tab: "Schedule Calendar",
     dd_patients_tab: "Patients",
     dd_schedule_tab: "Schedule",
     dd_centers_tab: "Centers",
     dd_profile_tab: "Profile",
     dd_analytics_tab: "Analytics",
+    dd_reviews_tab: "Reviews",
     dd_welcome_back: "Welcome back",
     dd_whats_happening: "Here's what's happening in your practice today",
     dd_practice_overview: "Here's your comprehensive practice overview for today",
@@ -366,6 +388,40 @@ export const translations = {
     // Doctor Dashboard — Profile tab (en)
     dd_profile_settings_title: "Profile Settings",
     dd_update_practice_info: "Update your personal and practice information",
+
+    // Doctor Dashboard — Reviews tab (en)
+    dd_reviews_title: "Reviews & Ratings",
+    dd_reviews_subtitle: "View feedback from your patients",
+    dd_loading_reviews: "Loading reviews...",
+    dd_no_reviews: "No reviews yet",
+    dd_no_reviews_desc: "Patient reviews will appear here after completed appointments",
+    dd_reviewer: "Reviewer",
+    dd_rating: "Rating",
+    dd_comment: "Comment",
+    dd_reviewed_on: "Reviewed on",
+    dd_total_reviews: "Total Reviews",
+    dd_show_all_reviews: "Show All Reviews",
+    dd_show_less_reviews: "Show Less",
+
+    // Doctor Dashboard — Analytics tab (en)
+    dd_practice_analytics: "Practice Analytics",
+    dd_practice_analytics_subtitle: "Insights and performance metrics for your medical practice",
+    dd_patient_satisfaction: "Patient Satisfaction",
+    dd_completion_rate: "Completion Rate",
+    dd_revenue: "Revenue",
+    dd_patient_demographics: "Patient Demographics",
+    dd_patient_demographics_subtitle: "Breakdown of your patient population",
+    dd_age_distribution: "Age Distribution",
+    dd_gender: "Gender",
+    dd_appointment_types: "Appointment Types",
+    dd_under_18: "Under 18",
+    dd_over_65: "Over 65",
+    dd_female: "Female",
+    dd_male: "Male",
+    dd_other: "Other",
+    dd_clinic: "Clinic",
+    dd_home: "Home",
+    dd_telemedicine: "Telemedicine",
 
     // Doctor Dashboard — Certificates (en)
     doctor_certificates: "My Certificates",
@@ -1581,11 +1637,13 @@ export const translations = {
     dd_this_month: "هذا الشهر",
     dd_overview_tab: "نظرة عامة",
     dd_appointments_tab: "المواعيد",
+    dd_schedule_calendar_tab: "جدول المواعيد",
     dd_patients_tab: "المرضى",
     dd_schedule_tab: "الجدول",
     dd_centers_tab: "المراكز",
     dd_profile_tab: "الملف الشخصي",
     dd_analytics_tab: "التحليلات",
+    dd_reviews_tab: "التقييمات",
     dd_welcome_back: "مرحباً بعودتك",
     dd_whats_happening: "إليك ما يحدث في عيادتك اليوم",
     dd_practice_overview: "إليك نظرة شاملة على ممارستك الطبية اليوم",
@@ -1649,6 +1707,40 @@ export const translations = {
     // Doctor Dashboard — Profile tab (ar)
     dd_profile_settings_title: "إعدادات الملف الشخصي",
     dd_update_practice_info: "تحديث معلوماتك الشخصية ومعلومات الممارسة",
+
+    // Doctor Dashboard — Reviews tab (ar)
+    dd_reviews_title: "التقييمات والمراجعات",
+    dd_reviews_subtitle: "اعرض ملاحظات مرضاك",
+    dd_loading_reviews: "جاري تحميل التقييمات...",
+    dd_no_reviews: "لا توجد تقييمات بعد",
+    dd_no_reviews_desc: "ستظهر تقييمات المرضى هنا بعد المواعيد المكتملة",
+    dd_reviewer: "المُقيّم",
+    dd_rating: "التقييم",
+    dd_comment: "التعليق",
+    dd_reviewed_on: "تمت المراجعة في",
+    dd_total_reviews: "إجمالي التقييمات",
+    dd_show_all_reviews: "عرض كل التقييمات",
+    dd_show_less_reviews: "عرض أقل",
+
+    // Doctor Dashboard — Analytics tab (ar)
+    dd_practice_analytics: "تحليلات الممارسة",
+    dd_practice_analytics_subtitle: "رؤى ومقاييس الأداء لممارستك الطبية",
+    dd_patient_satisfaction: "رضا المرضى",
+    dd_completion_rate: "معدل الإنجاز",
+    dd_revenue: "الإيرادات",
+    dd_patient_demographics: "بيانات المرضى",
+    dd_patient_demographics_subtitle: "تفصيل لمجموعة مرضاك",
+    dd_age_distribution: "التوزيع العمري",
+    dd_gender: "الجنس",
+    dd_appointment_types: "أنواع المواعيد",
+    dd_under_18: "أقل من 18",
+    dd_over_65: "أكثر من 65",
+    dd_female: "أنثى",
+    dd_male: "ذكر",
+    dd_other: "آخر",
+    dd_clinic: "عيادة",
+    dd_home: "منزل",
+    dd_telemedicine: "طب عن بُعد",
 
     // Doctor Dashboard — Schedule management (ar)
     dd_loading_schedule: "جاري تحميل الجدول...",

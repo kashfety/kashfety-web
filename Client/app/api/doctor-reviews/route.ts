@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       if (review.patient_id) {
         const { data: patient } = await supabase
           .from('users')
-          .select('id, name, first_name, last_name, email, profile_picture')
+          .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, profile_picture')
           .eq('id', review.patient_id)
           .single();
         
@@ -53,9 +53,16 @@ export async function GET(request: NextRequest) {
             patientName = patient.email.split('@')[0];
           }
           
+          // Build Arabic name
+          let patientNameAr = patient.name_ar;
+          if (!patientNameAr && (patient.first_name_ar || patient.last_name_ar)) {
+            patientNameAr = [patient.first_name_ar, patient.last_name_ar].filter(Boolean).join(' ').trim();
+          }
+          
           patientInfo = {
             ...patient,
-            name: patientName || 'Anonymous Patient'
+            name: patientName || 'Anonymous Patient',
+            name_ar: patientNameAr
           };
         }
       }
@@ -63,7 +70,8 @@ export async function GET(request: NextRequest) {
       enrichedReviews.push({
         ...review,
         patient: patientInfo,
-        patient_name: patientInfo?.name || 'Anonymous Patient'
+        patient_name: patientInfo?.name || 'Anonymous Patient',
+        patient_name_ar: patientInfo?.name_ar
       });
     }
 

@@ -24,6 +24,22 @@ async function getDoctorProfile(doctorId) {
     .single();
 
   if (error) throw error;
+  
+  // If doctor has specialty text, try to get the corresponding specialty data
+  if (doctor && doctor.specialty) {
+    const { data: specialtyData } = await supabase
+      .from('specialties')
+      .select('name, name_ar, name_en')
+      .eq('name', doctor.specialty)
+      .single();
+    
+    if (specialtyData) {
+      doctor.specialty_name = specialtyData.name;
+      doctor.specialty_name_ar = specialtyData.name_ar;
+      doctor.specialty_name_en = specialtyData.name_en;
+    }
+  }
+  
   return doctor;
 }
 
@@ -140,7 +156,7 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
         symptoms,
         chief_complaint,
         patient_id,
-        patient_name:users!fk_appointments_patient(name)
+        patient_name:users!fk_appointments_patient(name, name_ar, first_name, first_name_ar, last_name, last_name_ar)
       `)
       .eq('doctor_id', req.user.id)
       .gte('appointment_date', today)
@@ -191,6 +207,11 @@ router.get('/today-stats', authenticateToken, async (req, res) => {
       appointment_time: apt.appointment_time,
       appointment_date: apt.appointment_date,
       patient_name: apt.patient_name?.name || 'Unknown Patient',
+      patient_name_ar: apt.patient_name?.name_ar || null,
+      patient_first_name: apt.patient_name?.first_name || null,
+      patient_first_name_ar: apt.patient_name?.first_name_ar || null,
+      patient_last_name: apt.patient_name?.last_name || null,
+      patient_last_name_ar: apt.patient_name?.last_name_ar || null,
       patient_id: apt.patient_id,
       type: apt.type,
       appointment_type: apt.appointment_type,
@@ -260,6 +281,11 @@ router.get('/patients', authenticateToken, async (req, res) => {
         users!fk_appointments_patient (
           id,
           name,
+          name_ar,
+          first_name,
+          first_name_ar,
+          last_name,
+          last_name_ar,
           email,
           phone,
           gender,
@@ -512,7 +538,7 @@ router.get('/appointments', authenticateToken, async (req, res) => {
         chief_complaint,
         notes,
         patient_id,
-        users!fk_appointments_patient (name, phone, email)
+        users!fk_appointments_patient (name, name_ar, first_name, first_name_ar, last_name, last_name_ar, phone, email)
       `)
       .eq('doctor_id', req.user.id)
       .order('appointment_date', { ascending: false })
@@ -931,7 +957,7 @@ router.get('/centers', authenticateToken, async (req, res) => {
     // Get all available centers (only approved ones)
     const { data: allCenters, error: centersError } = await supabase
       .from('centers')
-      .select('id, name, address, phone, email, approval_status')
+      .select('id, name, name_ar, address, phone, email, approval_status')
       .eq('approval_status', 'approved')
       .order('name');
 

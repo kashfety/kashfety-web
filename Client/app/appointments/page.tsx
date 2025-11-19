@@ -300,13 +300,13 @@ export default function MyAppointmentsPage() {
           const [hours, minutes] = appointmentTime.split(':');
           const timeObj = new Date();
           timeObj.setHours(parseInt(hours), parseInt(minutes), 0);
-          formattedTime = timeObj.toLocaleTimeString(locale || 'en-US', {
+          formattedTime = toArabicNumerals(timeObj.toLocaleTimeString(locale || 'en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: locale !== 'ar'
-          });
+          }), locale);
         } catch {
-          formattedTime = appointmentTime;
+          formattedTime = toArabicNumerals(appointmentTime, locale);
         }
         
         // Get doctor and center information

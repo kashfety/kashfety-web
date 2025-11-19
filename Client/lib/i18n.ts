@@ -217,6 +217,7 @@ export const translations = {
     booking_cta_location: "Find nearby doctors",
     booking_cta_date: "Choose your time",
     booking_cta_persons: "Book for your family",
+    booking_search_centers: "Search by center name or location...",
 
     // Doctors Section
     doctors_section_title_loading: "Our Expert Doctors",
@@ -1499,6 +1500,7 @@ export const translations = {
     booking_cta_location: "ابحث عن أطباء قريبين",
     booking_cta_date: "اختر وقتك المناسب",
     booking_cta_persons: "احجز لعائلتك",
+    booking_search_centers: "ابحث باسم المركز أو الموقع...",
 
     // Doctors Section
     doctors_section_title_loading: "أفضل أطبائنا",

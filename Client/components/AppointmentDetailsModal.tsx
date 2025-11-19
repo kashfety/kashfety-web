@@ -20,6 +20,12 @@ interface Appointment {
     notes?: string;
     patient_id: string;
     patient_name: string;
+    name?: string;
+    name_ar?: string;
+    first_name?: string;
+    first_name_ar?: string;
+    last_name?: string;
+    last_name_ar?: string;
     patient_phone?: string;
     patient_email?: string;
 }
@@ -39,9 +45,32 @@ export default function AppointmentDetailsModal({
     onStatusUpdate,
     onStartConsultation
 }: AppointmentDetailsModalProps) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
 
     if (!appointment) return null;
+
+    // Get localized patient name
+    const getLocalizedPatientName = (appointment: Appointment) => {
+        if (locale === 'ar') {
+            // Try name_ar first
+            if (appointment.name_ar) return appointment.name_ar;
+            // Try first_name_ar + last_name_ar
+            if (appointment.first_name_ar || appointment.last_name_ar) {
+                const firstName = appointment.first_name_ar || '';
+                const lastName = appointment.last_name_ar || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                if (fullName) return fullName;
+            }
+        }
+        // Fall back to English
+        if (appointment.name) return appointment.name;
+        if (appointment.first_name || appointment.last_name) {
+            const firstName = appointment.first_name || '';
+            const lastName = appointment.last_name || '';
+            return `${firstName} ${lastName}`.trim();
+        }
+        return appointment.patient_name;
+    };
 
     // Get status color
     const getStatusColor = (status: string) => {
@@ -91,7 +120,7 @@ export default function AppointmentDetailsModal({
                         <div>
                             <div className="text-xl font-bold">{t('dd_appointment_details') || 'Appointment Details'}</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400 font-normal">
-                                {appointment.patient_name}
+                                {getLocalizedPatientName(appointment)}
                             </div>
                         </div>
                     </DialogTitle>
@@ -206,7 +235,7 @@ export default function AppointmentDetailsModal({
                                     </div>
                                     <div>
                                         <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                            {appointment.patient_name}
+                                            {getLocalizedPatientName(appointment)}
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                             {t('dd_patient_id') || 'Patient ID'}: {appointment.patient_id}

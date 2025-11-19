@@ -251,9 +251,6 @@ export default function AppointmentDetailsModal({
                                         <p className="text-lg font-bold text-gray-900 dark:text-white">
                                             {getLocalizedPatientName(appointment)}
                                         </p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {t('dd_patient_id') || 'Patient ID'}: {appointment.patient_id}
-                                        </p>
                                     </div>
                                 </div>
                                 {appointment.patient_phone && (

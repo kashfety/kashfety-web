@@ -89,11 +89,27 @@ export default function DoctorScheduleCalendar({
         return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
     };
 
-    // Time slots from 8 AM to 8 PM
-    const timeSlots = Array.from({ length: 13 }, (_, i) => {
-        const hour = i + 8;
-        return `${hour.toString().padStart(2, '0')}:00`;
-    });
+    // Get all unique time slots from appointments, including non-whole hours
+    const getAllTimeSlots = () => {
+        const appointmentTimes = new Set<string>();
+        appointments.forEach(apt => {
+            if (apt.appointment_time) {
+                // Extract hour:minute format (e.g., "09:30")
+                const time = apt.appointment_time.substring(0, 5);
+                appointmentTimes.add(time);
+            }
+        });
+        
+        // Add default hourly slots from 8 AM to 8 PM
+        for (let i = 8; i <= 20; i++) {
+            appointmentTimes.add(`${i.toString().padStart(2, '0')}:00`);
+        }
+        
+        // Sort times chronologically
+        return Array.from(appointmentTimes).sort();
+    };
+
+    const timeSlots = getAllTimeSlots();
 
     // Get appointments for the current view
     const getAppointmentsForView = () => {
@@ -159,6 +175,8 @@ export default function DoctorScheduleCalendar({
         switch (status.toLowerCase()) {
             case 'confirmed':
                 return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            case 'scheduled':
+                return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
             case 'cancelled':

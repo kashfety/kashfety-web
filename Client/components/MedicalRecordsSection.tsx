@@ -76,6 +76,9 @@ export default function MedicalRecordsSection() {
     }
   });
 
+  // States for specialties mapping
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string; name_en?: string }>>(new Map());
+
   // Helper function for localized doctor names
   const getLocalizedDoctorName = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return t('unknown_doctor') || 'Unknown Doctor';
@@ -93,6 +96,7 @@ export default function MedicalRecordsSection() {
   const getLocalizedSpecialty = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return '';
     
+    // If specialty_ar is already in the doctor object, use it
     if (locale === 'ar' && doctor.specialty_ar) {
       return doctor.specialty_ar;
     }
@@ -102,6 +106,17 @@ export default function MedicalRecordsSection() {
     if (doctor.specialty_en) {
       return doctor.specialty_en;
     }
+    
+    // Otherwise, try to get it from specialtiesMap
+    if (doctor.specialty) {
+      const specialtyData = specialtiesMap.get(doctor.specialty);
+      if (specialtyData) {
+        if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+        if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+        if (specialtyData.name_en) return specialtyData.name_en;
+      }
+    }
+    
     return doctor.specialty || '';
   };
 
@@ -128,8 +143,32 @@ export default function MedicalRecordsSection() {
     if (isAuthenticated && user?.id) {
       fetchMedicalInfo();
       fetchMedicalRecords();
+      fetchSpecialties();
     }
   }, [isAuthenticated, user, locale]);
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await fetch('/api/specialties');
+      const result = await response.json();
+      
+      if (result.success && result.specialties) {
+        const map = new Map();
+        result.specialties.forEach((specialty: any) => {
+          // Map by name_en (which is typically used as the key in medical records)
+          const keyName = specialty.name_en || specialty.name;
+          map.set(keyName, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku,
+            name_en: specialty.name_en || specialty.name
+          });
+        });
+        setSpecialtiesMap(map);
+      }
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
 
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;

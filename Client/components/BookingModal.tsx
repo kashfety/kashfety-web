@@ -51,6 +51,9 @@ interface Center {
 interface LabTestType {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
+  name_ku?: string;
   description?: string;
   category?: 'lab' | 'imaging';
   is_active?: boolean;
@@ -149,6 +152,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
     if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
     return specialtyName;
+  };
+
+  // Helper to get localized lab test type name
+  const getLocalizedLabTestName = (labTest: LabTestType | null) => {
+    if (!labTest) return '';
+    
+    if (locale === 'ar' && labTest.name_ar) return labTest.name_ar;
+    if (locale === 'ku' && labTest.name_ku) return labTest.name_ku;
+    if (labTest.name_en) return labTest.name_en;
+    return labTest.name;
   };
 
   // Restore booking data on modal open
@@ -2219,7 +2232,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       {center.phone && (
                                         <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                           <span className="text-gray-500 dark:text-gray-400">📞</span>
-                                          <span className="font-medium">{center.phone}</span>
+                                          <span className="font-medium">{toArabicNumerals(center.phone, locale)}</span>
                                         </p>
                                       )}
                                     </div>
@@ -2295,13 +2308,13 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
-                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{type.name}</h4>
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{getLocalizedLabTestName(type)}</h4>
                                       {type.category && (
                                         <Badge
                                           variant="outline"
                                           className="capitalize text-xs font-semibold border-2 border-[#4DBCC4] text-[#4DBCC4] bg-[#4DBCC4]/5 dark:bg-[#4DBCC4]/10"
                                         >
-                                          {type.category}
+                                          {type.category === 'lab' ? (t('lab') || 'Lab') : (t('imaging') || 'Imaging')}
                                         </Badge>
                                       )}
                                     </div>
@@ -2625,7 +2638,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_test') || 'Test:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{selectedLabType!.name}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{getLocalizedLabTestName(selectedLabType)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_center') || 'Center:'}</span>

@@ -92,6 +92,12 @@ export default function MyLabsPage() {
     return booking.center.name || t('unknown_center') || 'Unknown Center'
   }
 
+  const getLocalizedStatus = (status: string) => {
+    const statusLower = (status || '').toLowerCase()
+    const statusKey = `appointments_status_${statusLower}`
+    return t(statusKey) || status.toUpperCase()
+  }
+
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
     const catOk = (b: LabBooking) => categoryFilter === 'all' || (b.type?.category || '').toLowerCase() === categoryFilter;
@@ -282,7 +288,7 @@ export default function MyLabsPage() {
                           <span className="text-xs text-green-600 ml-1">{t('results') || 'Results'}</span>
                         </div>
                       )}
-                      <Badge className={`${getStatusColor(booking.status)} border`}>{(booking.status || '').toUpperCase()}</Badge>
+                      <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
                     </div>
                   </div>
                 </CardHeader>

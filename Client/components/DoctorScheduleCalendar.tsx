@@ -34,6 +34,12 @@ interface Appointment {
     notes?: string;
     patient_id: string;
     patient_name: string;
+    name?: string;
+    name_ar?: string;
+    first_name?: string;
+    first_name_ar?: string;
+    last_name?: string;
+    last_name_ar?: string;
     patient_phone?: string;
     patient_email?: string;
 }
@@ -50,9 +56,38 @@ export default function DoctorScheduleCalendar({
     onStatusUpdate
 }: DoctorScheduleCalendarProps) {
     const { toast } = useToast();
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
+
+    // Helper to get localized patient name
+    const getLocalizedPatientName = (appointment: Appointment) => {
+        if (!appointment) return 'Unknown Patient';
+        
+        if (locale === 'ar') {
+            // Try name_ar first
+            if (appointment.name_ar) return appointment.name_ar;
+            
+            // Build from first_name_ar + last_name_ar
+            if (appointment.first_name_ar || appointment.last_name_ar) {
+                return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
+            }
+        }
+        
+        // Fallback to English name
+        if (appointment.name) return appointment.name;
+        if (appointment.first_name || appointment.last_name) {
+            return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
+        }
+        return appointment.patient_name || 'Unknown Patient';
+    };
+
+    // Helper to convert numbers to Arabic numerals
+    const toArabicNumerals = (num: number | string): string => {
+        if (locale !== 'ar') return String(num);
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+    };
 
     // Time slots from 8 AM to 8 PM
     const timeSlots = Array.from({ length: 13 }, (_, i) => {
@@ -379,7 +414,7 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{appointment.patient_name}</span>
+                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
                                                                 <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
@@ -452,7 +487,7 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{appointment.patient_name}</span>
+                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
                                                                 <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">

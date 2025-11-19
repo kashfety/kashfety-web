@@ -562,11 +562,11 @@ export default function MyAppointmentsPage() {
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
@@ -668,7 +668,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Phone className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{appointment.phone}</div>
+                          <div className="font-medium">{toArabicNumerals(appointment.phone, locale)}</div>
                           <div className="text-sm text-gray-500">{t('appointments_contact_number_label') || 'Contact Number'}</div>
                         </div>
                       </div>

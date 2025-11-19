@@ -233,11 +233,11 @@ export default function MyLabsPage() {
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>

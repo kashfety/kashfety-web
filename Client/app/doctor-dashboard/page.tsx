@@ -2208,7 +2208,7 @@ export default function DoctorDashboard() {
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Patient Details: {selectedPatient.name}
+                        {t('dd_patient_details')}: {getLocalizedPatientName(selectedPatient)}
                       </h2>
                       <Button
                         variant="ghost"
@@ -2226,7 +2226,7 @@ export default function DoctorDashboard() {
                       <div className="space-y-3">
                         <h3 className="font-medium text-gray-900 dark:text-white">{t('dd_basic_info') || 'Basic Information'}</h3>
                         <div className="space-y-2 text-sm">
-                          <p><span className="font-medium">{t('dd_name_label') || 'Name:'}</span> {selectedPatient.name}</p>
+                          <p><span className="font-medium">{t('dd_name_label') || 'Name:'}</span> {getLocalizedPatientName(selectedPatient)}</p>
                           <p><span className="font-medium">{t('dd_email_label') || 'Email:'}</span> {selectedPatient.email}</p>
                           <p><span className="font-medium">{t('dd_phone_label') || 'Phone:'}</span> {formatPhoneNumber(selectedPatient.phone, locale)}</p>
                           <p><span className="font-medium">{t('dd_age_label') || 'Age:'}</span> {selectedPatient.age ? toArabicNumerals(selectedPatient.age, locale) : 'N/A'}</p>
@@ -2235,11 +2235,11 @@ export default function DoctorDashboard() {
                       </div>
 
                       <div className="space-y-3">
-                        <h3 className="font-medium text-gray-900 dark:text-white">Medical History</h3>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{t('dd_medical_history')}</h3>
                         <div className="space-y-2 text-sm">
-                          <p><span className="font-medium">Allergies:</span> {selectedPatient.allergies || 'None reported'}</p>
-                          <p><span className="font-medium">Current Medications:</span> {selectedPatient.medications || 'None reported'}</p>
-                          <p><span className="font-medium">Medical History:</span> {selectedPatient.medical_history || 'None reported'}</p>
+                          <p><span className="font-medium">{t('dd_allergies')}:</span> {selectedPatient.allergies || t('dd_none_reported')}</p>
+                          <p><span className="font-medium">{t('dd_current_medications')}:</span> {selectedPatient.medications || t('dd_none_reported')}</p>
+                          <p><span className="font-medium">{t('dd_medical_history')}:</span> {selectedPatient.medical_history || t('dd_none_reported')}</p>
                         </div>
                       </div>
 
@@ -2261,45 +2261,49 @@ export default function DoctorDashboard() {
 
                     {/* Medical Records */}
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">Medical Records</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">{t('dd_medical_records')}</h3>
                       {selectedPatient.medicalRecords && selectedPatient.medicalRecords.length > 0 ? (
                         <div className="space-y-3">
                           {selectedPatient.medicalRecords.map((record) => (
                             <div key={record.id} className="border border-gray-200 dark:border-[#1F1F23] rounded-lg p-4">
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                  <p className="font-medium text-sm">Diagnosis</p>
+                                  <p className="font-medium text-sm">{t('dd_diagnosis')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.diagnosis}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm">Treatment</p>
+                                  <p className="font-medium text-sm">{t('dd_treatment')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.treatment}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm">Prescription</p>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">{record.prescription || 'None'}</p>
+                                  <p className="font-medium text-sm">{t('dd_prescription')}</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">{record.prescription || t('dd_none')}</p>
                                 </div>
                               </div>
                               {record.notes && (
                                 <div className="mt-2">
-                                  <p className="font-medium text-sm">Notes</p>
+                                  <p className="font-medium text-sm">{t('dd_notes')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.notes}</p>
                                 </div>
                               )}
                               <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                {new Date(record.created_at).toLocaleDateString()}
+                                {new Date(record.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
                               </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">No medical records found</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_records_found')}</p>
                       )}
                     </div>
 
                     {/* Appointment History with Symptoms */}
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">Appointment History & Symptoms</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">{t('dd_appointment_history_symptoms')}</h3>
                       {selectedPatient.appointmentHistory && selectedPatient.appointmentHistory.length > 0 ? (
                         <div className="space-y-3">
                           {selectedPatient.appointmentHistory.map((appointment) => (
@@ -2307,10 +2311,14 @@ export default function DoctorDashboard() {
                               <div className="flex items-center justify-between mb-2">
                                 <div>
                                   <p className="font-medium text-sm">
-                                    {appointment.appointment_date} at {appointment.appointment_time}
+                                    {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })} {t('dd_at')} {appointment.appointment_time}
                                   </p>
                                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                                    {appointment.appointment_type} • {appointment.type}
+                                    {appointment.appointment_type === 'Clinic' ? t('dd_clinic_visit') : t('dd_home_visit')} • {appointment.type}
                                   </p>
                                 </div>
                                 <Badge variant={
@@ -2318,18 +2326,22 @@ export default function DoctorDashboard() {
                                     appointment.status === 'cancelled' ? 'destructive' :
                                       'secondary'
                                 }>
-                                  {appointment.status}
+                                  {appointment.status === 'completed' ? t('dd_status_completed') :
+                                   appointment.status === 'scheduled' ? t('dd_status_scheduled') :
+                                   appointment.status === 'confirmed' ? t('dd_status_confirmed') :
+                                   appointment.status === 'cancelled' ? t('dd_status_cancelled') :
+                                   appointment.status}
                                 </Badge>
                               </div>
                               {appointment.symptoms && (
                                 <div>
-                                  <p className="font-medium text-sm">Symptoms</p>
+                                  <p className="font-medium text-sm">{t('dd_symptoms')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.symptoms}</p>
                                 </div>
                               )}
                               {appointment.cancellation_reason && (
                                 <div className="mt-2">
-                                  <p className="font-medium text-sm text-red-600 dark:text-red-400">Cancellation Reason</p>
+                                  <p className="font-medium text-sm text-red-600 dark:text-red-400">{t('dd_cancellation_reason')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.cancellation_reason}</p>
                                 </div>
                               )}
@@ -2337,7 +2349,7 @@ export default function DoctorDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">No appointment history found</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_appointment_history')}</p>
                       )}
                     </div>
                   </div>
@@ -2351,10 +2363,10 @@ export default function DoctorDashboard() {
                 <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full">
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Complete Consultation - {selectedAppointment.patient_name}
+                      {t('dd_complete_consultation') || 'Complete Consultation'} - {getLocalizedPatientName(selectedAppointment)}
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {selectedAppointment.appointment_date} at {selectedAppointment.appointment_time}
+                      {new Date(selectedAppointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {selectedAppointment.appointment_time}
                     </p>
                   </div>
 
@@ -2363,7 +2375,7 @@ export default function DoctorDashboard() {
                     {selectedAppointment.symptoms && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Patient Symptoms
+                          {t('dd_patient_symptoms') || 'Patient Symptoms'}
                         </label>
                         <p className="text-sm text-gray-600 dark:text-gray-400 p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg">
                           {selectedAppointment.symptoms}
@@ -2374,14 +2386,14 @@ export default function DoctorDashboard() {
                     {/* Diagnosis */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Diagnosis *
+                        {t('dd_diagnosis') || 'Diagnosis'} *
                       </label>
                       <textarea
                         value={medicalRecordForm.diagnosis}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, diagnosis: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter diagnosis..."
+                        placeholder={t('dd_diagnosis_placeholder') || 'Enter diagnosis...'}
                         required
                       />
                     </div>
@@ -2389,14 +2401,14 @@ export default function DoctorDashboard() {
                     {/* Treatment */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Treatment *
+                        {t('dd_treatment') || 'Treatment'} *
                       </label>
                       <textarea
                         value={medicalRecordForm.treatment}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, treatment: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter treatment plan..."
+                        placeholder={t('dd_treatment_placeholder') || 'Enter treatment plan...'}
                         required
                       />
                     </div>
@@ -2404,28 +2416,28 @@ export default function DoctorDashboard() {
                     {/* Prescription */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Prescription
+                        {t('dd_prescription') || 'Prescription'}
                       </label>
                       <textarea
                         value={medicalRecordForm.prescription}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, prescription: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter prescription details..."
+                        placeholder={t('dd_prescription_placeholder') || 'Enter prescription details...'}
                       />
                     </div>
 
                     {/* Additional Notes */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Additional Notes
+                        {t('dd_additional_notes') || 'Additional Notes'}
                       </label>
                       <textarea
                         value={medicalRecordForm.notes}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, notes: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={2}
-                        placeholder="Additional notes..."
+                        placeholder={t('dd_notes_placeholder') || 'Additional notes...'}
                       />
                     </div>
 
@@ -2436,7 +2448,7 @@ export default function DoctorDashboard() {
                         className="flex-1"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Complete Consultation
+                        {t('dd_complete_consultation') || 'Complete Consultation'}
                       </Button>
                       <Button
                         variant="outline"
@@ -2446,7 +2458,7 @@ export default function DoctorDashboard() {
                           setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
                         }}
                       >
-                        Cancel
+                        {t('dd_cancel') || 'Cancel'}
                       </Button>
                     </div>
                   </div>

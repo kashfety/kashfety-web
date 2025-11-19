@@ -175,6 +175,13 @@ export default function DoctorScheduleCalendar({
         if (!time) return '';
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
+        
+        if (locale === 'ar') {
+            // Arabic 24-hour format
+            return `${toArabicNumerals(hour)}:${toArabicNumerals(minutes)}`;
+        }
+        
+        // English AM/PM format
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
         return `${displayHour}:${minutes} ${ampm}`;
@@ -529,7 +536,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
                                 <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-                                    {appointments.length}
+                                    {toArabicNumerals(appointments.length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -548,7 +555,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_confirmed') || 'Confirmed'}
                                 </p>
                                 <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                                    {appointments.filter(apt => apt.status === 'confirmed').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'confirmed').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -567,7 +574,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_pending') || 'Pending'}
                                 </p>
                                 <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">
-                                    {appointments.filter(apt => apt.status === 'pending').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'pending').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -586,7 +593,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_completed') || 'Completed'}
                                 </p>
                                 <p className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-                                    {appointments.filter(apt => apt.status === 'completed').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'completed').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">

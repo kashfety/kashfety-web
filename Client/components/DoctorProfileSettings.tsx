@@ -368,7 +368,7 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Basic Information
+            {t('dd_basic_info') || 'Basic Information'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -437,10 +437,10 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-emerald-800">
             <DollarSign className="w-5 h-5" />
-            Consultation Fee Settings
+            {t('dd_consultation_fee_settings') || 'Consultation Fee Settings'}
           </CardTitle>
           <p className="text-sm text-emerald-600">
-            Set your consultation fee that will be displayed to patients and used in billing
+            {t('dd_consultation_fee_desc') || 'Set your consultation fee that will be displayed to patients and used in billing'}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -555,7 +555,7 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="w-5 h-5" />
-            Qualifications & Certifications
+            {t('dd_qualifications_certifications') || 'Qualifications & Certifications'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -567,11 +567,11 @@ export default function DoctorProfileSettings({
                 </Badge>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">No qualifications listed</p>
+              <p className="text-gray-500 text-sm">{t('dd_no_qualifications') || 'No qualifications listed'}</p>
             )}
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Contact support to update your qualifications and certifications
+            {t('dd_contact_support_qualifications') || 'Contact support to update your qualifications and certifications'}
           </p>
         </CardContent>
       </Card>

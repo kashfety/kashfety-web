@@ -319,6 +319,8 @@ export const translations = {
     dd_overview_tab: "Overview",
     dd_appointments_tab: "Appointments",
     dd_schedule_calendar_tab: "Schedule Calendar",
+    dd_schedule_calendar: "Schedule Calendar",
+    dd_schedule_calendar_desc: "View and manage your appointments in calendar format",
     dd_patients_tab: "Patients",
     dd_schedule_tab: "Schedule",
     dd_centers_tab: "Centers",
@@ -418,6 +420,8 @@ export const translations = {
     // Doctor Dashboard — Profile tab (en)
     dd_profile_settings_title: "Profile Settings",
     dd_update_practice_info: "Update your personal and practice information",
+    dd_consultation_fee_settings: "Consultation Fee Settings",
+    dd_consultation_fee_desc: "Set your consultation fee that will be displayed to patients and used in billing",
 
     // Doctor Dashboard — Reviews tab (en)
     dd_reviews_title: "Reviews & Ratings",
@@ -1676,6 +1680,8 @@ export const translations = {
     dd_overview_tab: "نظرة عامة",
     dd_appointments_tab: "المواعيد",
     dd_schedule_calendar_tab: "جدول المواعيد",
+    dd_schedule_calendar: "تقويم المواعيد",
+    dd_schedule_calendar_desc: "عرض وإدارة مواعيدك في شكل تقويم",
     dd_patients_tab: "المرضى",
     dd_schedule_tab: "الجدول",
     dd_centers_tab: "المراكز",
@@ -1775,6 +1781,8 @@ export const translations = {
     // Doctor Dashboard — Profile tab (ar)
     dd_profile_settings_title: "إعدادات الملف الشخصي",
     dd_update_practice_info: "تحديث معلوماتك الشخصية ومعلومات الممارسة",
+    dd_consultation_fee_settings: "إعدادات رسوم الاستشارة",
+    dd_consultation_fee_desc: "حدد رسوم الاستشارة التي ستظهر للمرضى وتستخدم في الفواتير",
 
     // Doctor Dashboard — Reviews tab (ar)
     dd_reviews_title: "التقييمات والمراجعات",

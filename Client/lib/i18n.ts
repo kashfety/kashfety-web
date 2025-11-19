@@ -183,6 +183,7 @@ export const translations = {
     switching_view: "Switching to patients view...",
     opening_profile_settings: "Opening profile settings...",
     medical_records: "Medical Records",
+    medical_records_subtitle: "Manage your health information and medical history",
     add_patient: "Add Patient",
     patients_will_appear: "Patients will appear here after their first appointment",
     total_visits: "Total Visits",
@@ -683,6 +684,7 @@ export const translations = {
     centers: "Centers",
     previous: "Previous",
     next: "Next",
+    year_short: "y",
 
     // Patient Dashboard - Labs Page
     find_labs: "Medical Centers & Labs",
@@ -1458,6 +1460,7 @@ export const translations = {
     switching_view: "جاري الانتقال إلى عرض المرضى...",
     opening_profile_settings: "جاري فتح إعدادات الملف الشخصي...",
     medical_records: "السجل الطبي",
+    medical_records_subtitle: "إدارة معلوماتك الصحية وتاريخك الطبي",
     add_patient: "إضافة مريض",
     patients_will_appear: "سيظهر المرضى هنا بعد موعدهم الأول",
     total_visits: "إجمالي الزيارات",
@@ -1940,6 +1943,7 @@ export const translations = {
     centers: "المراكز",
     previous: "السابق",
     next: "التالي",
+    year_short: "سنة",
 
     // Patient Dashboard - Labs Page
     find_labs: "المراكز الطبية والمختبرات",

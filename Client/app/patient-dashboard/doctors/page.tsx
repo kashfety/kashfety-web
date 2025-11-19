@@ -313,11 +313,16 @@ export default function PatientDoctorsPage() {
                                         className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">{t('all_specialties') || 'All Specialties'}</option>
-                                        {getUniqueSpecialties().map((specialty) => (
-                                            <option key={specialty} value={specialty}>
-                                                {specialty}
-                                            </option>
-                                        ))}
+                                        {getUniqueSpecialties().map((specialty) => {
+                                            // Find a doctor with this specialty to get localized name
+                                            const doctorWithSpecialty = doctors.find(d => d.specialty === specialty);
+                                            const localizedName = doctorWithSpecialty ? getLocalizedSpecialty(doctorWithSpecialty) : specialty;
+                                            return (
+                                                <option key={specialty} value={specialty}>
+                                                    {localizedName}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                             </div>
@@ -394,7 +399,7 @@ export default function PatientDoctorsPage() {
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <Briefcase className="w-4 h-4 text-blue-500" />
-                                                        <span>{toArabicNumerals(doctor.experience_years || 0, locale)}y</span>
+                                                        <span>{toArabicNumerals(doctor.experience_years || 0, locale)}{t('year_short') || 'y'}</span>
                                                     </div>
                                                 </div>
 

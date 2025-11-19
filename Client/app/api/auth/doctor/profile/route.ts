@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email, phone, specialty, bio, experience_years, consultation_fee, qualifications')
+      .select('id, name, name_ar, email, phone, specialty, bio, experience_years, consultation_fee, qualifications')
       .eq('id', doctorId)
       .eq('role', 'doctor')
       .single();
@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest) {
     const doctorId = searchParams.get('doctor_id') || body?.doctor_id;
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
 
-    const allowedFields = ['name', 'specialty', 'bio', 'experience_years', 'consultation_fee', 'qualifications'];
+    const allowedFields = ['name', 'name_ar', 'specialty', 'bio', 'experience_years', 'consultation_fee', 'qualifications'];
     const updates: Record<string, any> = {};
     for (const key of allowedFields) {
       if (key in body) updates[key] = body[key];
@@ -103,7 +103,7 @@ export async function PUT(request: NextRequest) {
       .update(updates)
       .eq('id', doctorId)
       .eq('role', 'doctor')
-      .select('id, name, email, phone, specialty, bio, experience_years, consultation_fee, qualifications')
+      .select('id, name, name_ar, email, phone, specialty, bio, experience_years, consultation_fee, qualifications')
       .single();
 
     if (error) {

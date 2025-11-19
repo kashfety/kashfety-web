@@ -143,7 +143,9 @@ export default function MyAppointmentsPage() {
     return appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 
-  const showingCountText = `${locale === 'ar' ? 'عرض' : 'Showing'} ${toArabicNumerals(filteredAppointments.length, locale)} ${locale === 'ar' ? 'من' : 'of'} ${toArabicNumerals(appointments.length, locale)}`
+  const showingCountText = useMemo(() => {
+    return `${locale === 'ar' ? 'عرض' : 'Showing'} ${toArabicNumerals(filteredAppointments.length, locale)} ${locale === 'ar' ? 'من' : 'of'} ${toArabicNumerals(appointments.length, locale)}`
+  }, [filteredAppointments.length, appointments.length, locale])
 
   // Helper functions for localized names
   const getLocalizedDoctorName = (appointment: Appointment) => {
@@ -364,20 +366,10 @@ export default function MyAppointmentsPage() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user])
 
-  // Fetch appointments when user is loaded
+  // Fetch appointments when user is loaded OR when locale changes
   useEffect(() => {
     if (user && !loading) refreshAppointments()
-  }, [user, loading])
-
-  // Refresh appointments display when locale changes (to update localized fields)
-  useEffect(() => {
-    // Force component re-render when locale changes by updating a dummy state
-    // This ensures DB-fetched localized fields are displayed correctly
-    if (appointments.length > 0) {
-      // Trigger re-computation of localized values
-      setAppointments([...appointments])
-    }
-  }, [locale])
+  }, [user, loading, locale])
 
   // Redirect to login if not authenticated
   useEffect(() => {

@@ -152,15 +152,8 @@ export default function MyLabsPage() {
   // Remove the convertToAppointment function as we're using lab-specific modals now
 
   useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | Kashfety`; }, [t]);
-  useEffect(() => { if (user && !loading) refresh(); }, [user, loading]);
+  useEffect(() => { if (user && !loading) refresh(); }, [user, loading, locale]);
   useEffect(() => { if (!loading && !user) router.push('/login'); }, [user, loading, router]);
-  
-  // Refresh display when locale changes (to update localized DB fields)
-  useEffect(() => {
-    if (bookings.length > 0) {
-      setBookings([...bookings])
-    }
-  }, [locale]);
 
   if (loading || isLoading) {
     return (

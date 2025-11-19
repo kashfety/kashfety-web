@@ -426,6 +426,8 @@ export const translations = {
     dd_weekly_schedule_desc: "Your patient appointments this week",
     dd_appointments_trend: "Appointments Trend",
     dd_appointments_trend_desc: "Your appointments and consultations over time",
+    dd_patients: "Patients",
+    dd_appointments: "Appointments",
     dd_consultations: "Consultations",
     dd_loading_dashboard: "Loading your dashboard...",
 
@@ -1751,6 +1753,8 @@ export const translations = {
     dd_weekly_schedule_desc: "مواعيد مرضاك هذا الأسبوع",
     dd_appointments_trend: "اتجاه المواعيد",
     dd_appointments_trend_desc: "مواعيدك واستشاراتك على مدار الوقت",
+    dd_patients: "المرضى",
+    dd_appointments: "المواعيد",
     dd_consultations: "الاستشارات",
     dd_loading_dashboard: "جاري تحميل لوحة التحكم...",
 

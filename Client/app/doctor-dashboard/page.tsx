@@ -195,6 +195,33 @@ interface PatientDetails {
   appointmentHistory?: Appointment[];
 }
 
+// Helper functions for localized names
+function getLocalizedName(
+  item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null,
+  locale: string
+): string {
+  if (!item) return '';
+  if (locale === 'ar') {
+    if (item.name_ar) return item.name_ar;
+    if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+  }
+  return item.name || '';
+}
+
+function getLocalizedSpecialty(
+  specialtyName: string | undefined,
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>,
+  locale: string
+): string {
+  if (!specialtyName) return '';
+  const specialtyData = specialtiesMap.get(specialtyName);
+  if (!specialtyData) return specialtyName;
+  
+  if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+  if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+  return specialtyName;
+}
+
 // Sidebar Component
 function Sidebar({
   activeTab,
@@ -378,11 +405,13 @@ function Sidebar({
 function ProfileHeader({
   doctorProfile,
   setActiveTab,
-  toast
+  toast,
+  specialtiesMap
 }: {
   doctorProfile: DoctorProfile | null;
   setActiveTab: (tab: string) => void;
   toast: any;
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) {
   const { t, locale } = useLocale();
   const { logout } = useAuth();
@@ -406,14 +435,10 @@ function ProfileHeader({
             </div>
             <div className="hidden sm:block text-left">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {locale === 'ar' && (doctorProfile?.name_ar || (doctorProfile?.first_name_ar && doctorProfile?.last_name_ar))
-                  ? (doctorProfile?.name_ar || `${doctorProfile?.first_name_ar} ${doctorProfile?.last_name_ar}`)
-                  : (doctorProfile?.name || 'Doctor')}
+                {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {locale === 'ar' && doctorProfile?.specialty_name_ar 
-                  ? doctorProfile.specialty_name_ar 
-                  : (doctorProfile?.specialty || 'General Medicine')}
+                {getLocalizedSpecialty(doctorProfile?.specialty, specialtiesMap, locale) || 'General Medicine'}
               </div>
             </div>
           </div>
@@ -430,9 +455,7 @@ function ProfileHeader({
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
-                  {locale === 'ar' && (doctorProfile?.name_ar || (doctorProfile?.first_name_ar && doctorProfile?.last_name_ar))
-                    ? (doctorProfile?.name_ar || `${doctorProfile?.first_name_ar} ${doctorProfile?.last_name_ar}`)
-                    : (doctorProfile?.name || 'Doctor')}
+                  {getLocalizedName(doctorProfile, locale) || 'Doctor'}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {doctorProfile?.email || ''}
@@ -486,16 +509,6 @@ export default function DoctorDashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { t, locale } = useLocale();
 
-  // Helper function to get localized name
-  const getLocalizedName = (item: any) => {
-    if (!item) return '';
-    if (locale === 'ar' && item.name_ar) {
-      return item.name_ar;
-    }
-    return item.name || '';
-  };
-
-  // Helper function to get localized patient name from appointment
   const getLocalizedPatientName = (appointment: any) => {
     if (!appointment) return 'Unknown Patient';
     
@@ -524,6 +537,7 @@ export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
 
   // Pagination states
   const [showAllAppointments, setShowAllAppointments] = useState(false);
@@ -547,6 +561,29 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Fetch specialties for localization
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const response = await fetch('/api/specialties');
+        if (response.ok) {
+          const data = await response.json();
+          const map = new Map();
+          data.forEach((specialty: any) => {
+            map.set(specialty.name, {
+              name_ar: specialty.name_ar,
+              name_ku: specialty.name_ku
+            });
+          });
+          setSpecialtiesMap(map);
+        }
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+    fetchSpecialties();
   }, []);
 
   useEffect(() => {
@@ -1071,6 +1108,7 @@ export default function DoctorDashboard() {
               doctorProfile={doctorProfile}
               setActiveTab={setActiveTab}
               toast={toast}
+              specialtiesMap={specialtiesMap}
             />
           </header>
 
@@ -1323,7 +1361,7 @@ export default function DoctorDashboard() {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-900 dark:text-white">
-                                  {locale === 'ar' && patient.name_ar ? patient.name_ar : patient.name}
+                                  {getLocalizedName(patient, locale)}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
                                   {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
@@ -1876,7 +1914,9 @@ export default function DoctorDashboard() {
                     <CardContent>
                       {patients && patients.length > 0 ? (
                         <div className="space-y-4">
-                          {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => (
+                          {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => {
+                            const patientName = getLocalizedName(patient, locale);
+                            return (
                             <div
                               key={patient.id}
                               className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
@@ -1884,12 +1924,12 @@ export default function DoctorDashboard() {
                               <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                   <span className="text-white font-medium">
-                                    {patient.name?.charAt(0)?.toUpperCase() || 'P'}
+                                    {patientName?.charAt(0)?.toUpperCase() || 'P'}
                                   </span>
                                 </div>
                                 <div>
                                   <h4 className="font-medium text-gray-900 dark:text-white">
-                                    {locale === 'ar' && patient.name_ar ? patient.name_ar : patient.name}
+                                    {patientName}
                                   </h4>
                                   <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                                     <span className="flex items-center gap-1">
@@ -1932,7 +1972,8 @@ export default function DoctorDashboard() {
                                 </Button>
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           {patients.length > 10 && (
                             <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">

@@ -1,7 +1,6 @@
 import { MapPin, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useLocale } from "@/components/providers/locale-provider";
 
 interface BookingFormProps {
@@ -13,24 +12,15 @@ const BookingForm = ({ onBookAppointment }: BookingFormProps) => {
   return (
     <Card className="w-full bg-background/95 backdrop-blur-lg shadow-2xl border">
       <CardContent className="p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="mb-6 sm:mb-8">
           <h3 className="text-xl sm:text-2xl font-bold text-foreground text-center lg:text-start">{t('booking_title') || 'Book an appointment'}</h3>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Checkbox id="send-sms" />
-            <label
-              htmlFor="send-sms"
-              className="text-xs sm:text-sm font-medium text-foreground cursor-pointer"
-            >
-              {t('booking_send_sms') || 'Send message on phone'}
-            </label>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 items-end">
-          {/* Form Input Fields */}
-          <BookingInput icon={MapPin} label={t('booking_location_label') || 'Location'} value="Cairo, Egypt" />
-          <BookingInput icon={Calendar} label={t('booking_date_label') || 'Appointment date'} value="02 Aug, 2025" />
-          <BookingInput icon={Users} label={t('booking_persons_label') || 'Persons'} value="2 adults, 1 child" />
+          {/* Motivational Messages */}
+          <BookingInput icon={MapPin} label={t('booking_location_label') || 'Location'} value={t('booking_cta_location') || 'Find nearby doctors'} />
+          <BookingInput icon={Calendar} label={t('booking_date_label') || 'Appointment date'} value={t('booking_cta_date') || 'Choose your time'} />
+          <BookingInput icon={Users} label={t('booking_persons_label') || 'Persons'} value={t('booking_cta_persons') || 'Book for your family'} />
 
           {/* Submit Button */}
           <Button 

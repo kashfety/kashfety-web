@@ -210,11 +210,13 @@ export const translations = {
 
     // Booking Form
     booking_title: "Book an appointment",
-    booking_send_sms: "Send message on phone",
     booking_location_label: "Location",
     booking_date_label: "Appointment date",
     booking_persons_label: "Persons",
     booking_submit: "Book now",
+    booking_cta_location: "Find nearby doctors",
+    booking_cta_date: "Choose your time",
+    booking_cta_persons: "Book for your family",
 
     // Doctors Section
     doctors_section_title_loading: "Our Expert Doctors",
@@ -1489,11 +1491,13 @@ export const translations = {
 
     // Booking Form
     booking_title: "احجز موعداً",
-    booking_send_sms: "إرسال رسالة على الهاتف",
     booking_location_label: "الموقع",
     booking_date_label: "تاريخ الموعد",
     booking_persons_label: "الأشخاص",
     booking_submit: "احجز الآن",
+    booking_cta_location: "ابحث عن أطباء قريبين",
+    booking_cta_date: "اختر وقتك المناسب",
+    booking_cta_persons: "احجز لعائلتك",
 
     // Doctors Section
     doctors_section_title_loading: "أفضل أطبائنا",

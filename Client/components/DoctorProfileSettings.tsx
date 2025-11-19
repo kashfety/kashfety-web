@@ -379,7 +379,7 @@ export default function DoctorProfileSettings({
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter your full name in English"
+                placeholder={t('fullNamePlaceholder') || "Enter your full name in English"}
               />
             </div>
             <div>
@@ -388,7 +388,7 @@ export default function DoctorProfileSettings({
                 id="name_ar"
                 value={formData.name_ar}
                 onChange={(e) => handleInputChange('name_ar', e.target.value)}
-                placeholder="أدخل اسمك الكامل بالعربية"
+                placeholder={t('fullNameArabicPlaceholder') || "أدخل اسمك الكامل بالعربية"}
                 dir="rtl"
               />
             </div>
@@ -396,29 +396,29 @@ export default function DoctorProfileSettings({
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="specialty">Specialty</Label>
+              <Label htmlFor="specialty">{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
                 onChange={(e) => handleInputChange('specialty', e.target.value)}
-                placeholder="e.g., Cardiology, Dermatology"
+                placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
               />
             </div>
           </div>
           
           <div>
-            <Label htmlFor="bio">Professional Bio</Label>
+            <Label htmlFor="bio">{t('professionalBio') || 'Professional Bio'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder="Describe your background, expertise, and approach to patient care..."
+              placeholder={t('professionalBioPlaceholder') || "Describe your background, expertise, and approach to patient care..."}
               rows={4}
             />
           </div>
 
           <div>
-            <Label htmlFor="experience">Years of Experience</Label>
+            <Label htmlFor="experience">{t('yearsOfExperience') || 'Years of Experience'}</Label>
             <Input
               id="experience"
               type="number"
@@ -426,7 +426,7 @@ export default function DoctorProfileSettings({
               max="50"
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-              placeholder="Enter years of experience"
+              placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
             />
           </div>
         </CardContent>
@@ -447,7 +447,7 @@ export default function DoctorProfileSettings({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="consultation_fee" className="text-base font-medium">
-                Consultation Fee (USD)
+                {t('consultationFeeUSD') || 'Consultation Fee (USD)'}
               </Label>
               <div className="mt-1 flex items-center gap-2">
                 <button
@@ -502,24 +502,24 @@ export default function DoctorProfileSettings({
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                This fee will be displayed to patients when booking appointments
+                {t('consultationFeeNote') || 'This fee will be displayed to patients when booking appointments'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
-              <h4 className="font-medium text-emerald-800 mb-2">Fee Preview</h4>
+              <h4 className="font-medium text-emerald-800 mb-2">{t('feePreview') || 'Fee Preview'}</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Clinic Consultation:</span>
+                  <span>{t('clinicConsultation') || 'Clinic Consultation'}:</span>
                   <span className="font-medium">${formData.consultation_fee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Home Visit:</span>
+                  <span>{t('homeVisit') || 'Home Visit'}:</span>
                   <span className="font-medium">${(formData.consultation_fee + 50).toFixed(2)}</span>
                 </div>
                 <Separator className="my-2" />
                 <p className="text-xs text-gray-600">
-                  Home visits include additional travel fee
+                  {t('homeVisitNote') || 'Home visits include additional travel fee'}
                 </p>
               </div>
             </div>
@@ -528,11 +528,10 @@ export default function DoctorProfileSettings({
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
             <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Fee Change Notice
+              {t('feeChangeNotice') || 'Fee Change Notice'}
             </h4>
             <p className="text-sm text-blue-700">
-              Changes to your consultation fee will apply to all new appointments. 
-              Existing scheduled appointments will keep their original pricing.
+              {t('feeChangeNoticeText') || 'Changes to your consultation fee will apply to all new appointments. Existing scheduled appointments will keep their original pricing.'}
             </p>
           </div>
 
@@ -544,7 +543,7 @@ export default function DoctorProfileSettings({
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Save className="w-4 h-4 mr-2" />
-              {saving ? "Saving..." : "Save Consultation Fee"}
+              {saving ? (t('saving') || "Saving...") : (t('saveConsultationFee') || "Save Consultation Fee")}
             </Button>
           </div>
         </CardContent>

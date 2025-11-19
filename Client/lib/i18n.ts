@@ -702,6 +702,8 @@ export const translations = {
     tests_available: "tests available",
     lab_test_singular: "Lab Test",
     imaging_services: "Imaging Services",
+    no_labs: "No Lab/Imaging Bookings",
+    no_labs_desc: "You haven't booked any lab tests yet.",
 
     // Common
     search: "Search",
@@ -1961,6 +1963,8 @@ export const translations = {
     tests_available: "فحص متاح",
     lab_test_singular: "فحص مخبري",
     imaging_services: "خدمات التصوير",
+    no_labs: "لا توجد حجوزات مخبرية أو تصوير",
+    no_labs_desc: "لم تقم بحجز أي فحوصات مخبرية بعد.",
 
     // Common
     search: "بحث",

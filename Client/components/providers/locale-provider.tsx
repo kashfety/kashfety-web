@@ -15,7 +15,16 @@ interface LocaleContextType {
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined)
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale)
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    // Initialize from localStorage if available (SSR-safe)
+    if (typeof window !== "undefined") {
+      const savedLocale = localStorage.getItem("locale") as Locale
+      if (savedLocale && ["en", "ar"].includes(savedLocale)) {
+        return savedLocale
+      }
+    }
+    return defaultLocale
+  })
   const [mounted, setMounted] = useState(false)
 
   const setLocale = (newLocale: Locale) => {
@@ -33,23 +42,14 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
+    // Apply the locale to the document on mount
     if (typeof window !== "undefined") {
-      const savedLocale = localStorage.getItem("locale") as Locale
-      if (savedLocale && ["en", "ar"].includes(savedLocale)) {
-        setLocale(savedLocale)
-      } else {
-        const browserLang = navigator.language.split("-")[0]
-        if (browserLang === "ar") {
-          setLocale("ar")
-        }
-      }
+      document.documentElement.lang = locale
+      document.documentElement.dir = isRTL(locale) ? "rtl" : "ltr"
     }
-  }, [])
+  }, [locale])
 
-  if (!mounted) {
-    return null
-  }
-
+  // Don't block rendering - provide the locale immediately
   return (
     <LocaleContext.Provider
       value={{

@@ -82,48 +82,6 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
           }
         }
       }
-    },
-    {
-      icon: Settings,
-      label: t('header_services') || 'Services',
-      action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/#services');
-        } else {
-          const servicesSection = document.getElementById('services');
-          if (servicesSection) {
-            servicesSection.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      }
-    },
-    {
-      icon: Info,
-      label: t('header_about') || 'About us',
-      action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/#about');
-        } else {
-          const aboutSection = document.getElementById('about');
-          if (aboutSection) {
-            aboutSection.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      }
-    },
-    {
-      icon: Star,
-      label: t('header_reviews') || 'Reviews',
-      action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/#reviews');
-        } else {
-          const reviewsSection = document.getElementById('reviews');
-          if (reviewsSection) {
-            reviewsSection.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      }
     }
   ];
 

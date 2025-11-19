@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { CircleUserRound, Menu, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/providers/auth-provider";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "./theme-toggle";
 import { LocaleSwitcher } from "./ui/locale-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 // Helper to get localized user name
 const getLocalizedUserName = (user: any, locale: string) => {
@@ -29,8 +30,14 @@ interface HeaderProps {
 const Header = ({ onMenuToggle }: HeaderProps) => {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const { t, locale } = useLocale();
   const { theme } = useTheme();
+  const [isLandingPage, setIsLandingPage] = useState(false);
+
+  useEffect(() => {
+    setIsLandingPage(pathname === '/');
+  }, [pathname]);
 
   const handleAuthAction = () => {
     if (user) {
@@ -91,6 +98,51 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             </div>
           </motion.div>
         </div>
+
+        {/* Center: Navigation Links (only on landing page) */}
+        {isLandingPage && (
+          <nav className="hidden lg:flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const servicesSection = document.getElementById('services');
+                if (servicesSection) {
+                  servicesSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_services') || 'Services'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const aboutSection = document.getElementById('about');
+                if (aboutSection) {
+                  aboutSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_about') || 'About us'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const reviewsSection = document.getElementById('reviews');
+                if (reviewsSection) {
+                  reviewsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_reviews') || 'Reviews'}
+            </Button>
+          </nav>
+        )}
 
         {/* Right side: Controls */}
         <div className="flex items-center gap-2 sm:gap-3">

@@ -1142,7 +1142,7 @@ export default function DoctorDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {t('dd_welcome_back') || 'Welcome back'}, {localizeDoctorName(t ? (t as any).locale || 'en' : 'en', doctorProfile?.name || 'Doctor')}
+                      {t('dd_welcome_back') || 'Welcome back'}, Dr. {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
                       {t('dd_whats_happening') || "Here's what's happening in your practice today"}
@@ -1592,10 +1592,12 @@ export default function DoctorDashboard() {
                                     {getLocalizedPatientName(appointment)}
                                   </h4>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {new Date(appointment.appointment_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
+                                    {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
                                   </p>
                                   <p className="text-sm text-gray-500 dark:text-gray-500">
-                                    {localizeSpecialty(locale, appointment.appointment_type || 'Clinic')}
+                                    {appointment.appointment_type === 'home' 
+                                      ? (t('dd_home_visit') || 'Home Visit') 
+                                      : (t('dd_clinic_visit') || 'Clinic Visit')}
                                   </p>
                                   {appointment.symptoms && (
                                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
@@ -1629,7 +1631,7 @@ export default function DoctorDashboard() {
                                 </Badge>
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
-                                    ${appointment.consultation_fee}
+                                    ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
                                   </Badge>
                                 )}
                                 <div className="flex items-center gap-1">

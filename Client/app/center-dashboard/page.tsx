@@ -339,7 +339,7 @@ function CenterOverview({
                           <div className="flex-1 flex justify-between items-center">
                             <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">{count}</span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(count, locale)}</span>
                               <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full ${color} transition-all duration-500`}
@@ -1065,13 +1065,17 @@ function CenterAnalytics({
                         contentStyle={{
                           backgroundColor: isDark ? "#1f2937" : "#ffffff",
                           border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-                          borderRadius: "12px",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          borderRadius: "8px",
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
                           color: isDark ? "#ffffff" : "#000000",
-                          direction: isRTL ? 'rtl' : 'ltr',
-                          padding: "12px",
-                          fontSize: "14px",
-                          textAlign: isRTL ? 'right' : 'left'
+                          fontSize: "13px",
+                          fontWeight: "500",
+                          zIndex: 9999,
+                          position: "relative"
+                        }}
+                        wrapperStyle={{
+                          zIndex: 9999,
+                          position: "relative"
                         }}
                       />
                     </PieChart>
@@ -3068,8 +3072,8 @@ export default function CenterDashboardPage() {
 
           <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#0F0F12]">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-              <div className="p-6">
-                <h1 className={`text-2xl font-bold text-gray-900 dark:text-white mb-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className={`p-6 ${isRTL ? 'text-right' : 'text-left'}`}>
+                <h1 className={`text-2xl font-bold text-gray-900 dark:text-white mb-6 ${isRTL ? 'text-right mr-0' : 'text-left ml-0'}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                   {t('center_dashboard') || 'Center Dashboard'}
                 </h1>
               </div>

@@ -45,7 +45,8 @@ import {
     MessagesSquare,
     Video,
     Image,
-    Stethoscope
+    Stethoscope,
+    Beaker
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -64,6 +65,7 @@ import AuditLogs from '@/components/admin/AuditLogs';
 import AdminProfileSettings from '@/components/admin/AdminProfileSettings';
 import BannerManagement from '@/components/admin/BannerManagement';
 import SpecialtyManagement from '@/components/admin/SpecialtyManagement';
+import LabTestTypesManagement from '@/components/admin/LabTestTypesManagement';
 
 interface DashboardStats {
     overview: {
@@ -237,6 +239,9 @@ function AdminSidebar({
                                     </NavItem>
                                     <NavItem tab="specialties" icon={Stethoscope} isActive={activeTab === "specialties"}>
                                         {t('admin_specialties') || 'Specialties'}
+                                    </NavItem>
+                                    <NavItem tab="lab-test-types" icon={Beaker} isActive={activeTab === "lab-test-types"}>
+                                        {t('admin_lab_test_types') || 'Lab Test Types'}
                                     </NavItem>
                                     <NavItem tab="banners" icon={Image} isActive={activeTab === "banners"}>
                                         {t('admin_banners') || 'Banners'}
@@ -638,6 +643,12 @@ export default function AdminDashboardPage() {
                                 {activeTab === 'specialties' && (
                                     <div className="px-4 sm:px-6 py-4 sm:py-6">
                                         <SpecialtyManagement />
+                                    </div>
+                                )}
+
+                                {activeTab === 'lab-test-types' && (
+                                    <div className="px-4 sm:px-6 py-4 sm:py-6">
+                                        <LabTestTypesManagement />
                                     </div>
                                 )}
 

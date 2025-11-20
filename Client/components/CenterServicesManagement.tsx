@@ -30,6 +30,9 @@ interface TypeRow {
   id: string;
   code?: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
+  name_ku?: string;
   category: string; // 'lab' | 'imaging'
   default_fee?: number | null;
 }
@@ -37,6 +40,13 @@ interface TypeRow {
 export default function CenterServicesManagement() {
   const { toast } = useToast();
   const { t, locale, isRTL } = useLocale();
+
+  // Helper function to get localized test type name
+  const getLocalizedTestTypeName = (testType: TypeRow) => {
+    if (locale === 'ar' && testType.name_ar) return testType.name_ar;
+    if (locale === 'en' && testType.name_en) return testType.name_en;
+    return testType.name || testType.name_en || testType.name_ar;
+  };
   const [loading, setLoading] = useState(true);
   const [types, setTypes] = useState<TypeRow[]>([]);
   const [services, setServices] = useState<Record<string, { active: boolean; fee?: string }>>({});
@@ -153,7 +163,7 @@ export default function CenterServicesManagement() {
           <div className="text-sm text-gray-500 dark:text-gray-400">{t('loading') || 'Loading...'}</div>
         ) : (
           <div className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-center mb-4`}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('services_lab_test_types') || 'Lab Test Types'}</h3>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
@@ -191,8 +201,8 @@ export default function CenterServicesManagement() {
                         value={newTestType.category}
                         onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
                       >
-                        <SelectTrigger id="category">
-                          <SelectValue />
+                        <SelectTrigger id="category" className={isRTL ? 'text-right' : 'text-left'}>
+                          <SelectValue placeholder={t('services_choose_category') || 'Choose a category...'} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="lab">{t('services_lab') || 'Lab'}</SelectItem>
@@ -211,7 +221,7 @@ export default function CenterServicesManagement() {
                       />
                     </div>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className={`${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
                     <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
                       {t('services_cancel') || 'Cancel'}
                     </Button>
@@ -224,22 +234,22 @@ export default function CenterServicesManagement() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {types.map((t1) => (
-                <div key={t1.id} className="border border-emerald-200 dark:border-emerald-700 rounded-lg p-3 bg-white/50 dark:bg-gray-800/50">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium text-gray-900 dark:text-white">{t1.name}</div>
-                    <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                      <input type="checkbox" checked={!!services[t1.id]?.active} onChange={() => toggleActive(t1.id)} />
+                <div key={t1.id} className={`border border-emerald-200 dark:border-emerald-700 rounded-lg p-3 bg-white/50 dark:bg-gray-800/50 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between`}>
+                    <div className="font-medium text-gray-900 dark:text-white">{getLocalizedTestTypeName(t1)}</div>
+                    <label className={`inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <input type="checkbox" checked={!!services[t1.id]?.active} onChange={() => toggleActive(t1.id)} className={isRTL ? 'ml-2' : 'mr-2'} />
                       {t('services_enabled') || 'Enabled'}
                     </label>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{t(`services_category_${t1.category}`) || t1.category}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t(`services_category_${t1.category}`) || t1.category}</div>
                   <div className="mt-2">
                     <div className="text-xs mb-1 text-gray-700 dark:text-gray-300">{t('services_fee') || 'Fee'}</div>
                     <Input
                       value={services[t1.id]?.fee ?? ''}
                       onChange={(e) => updateFee(t1.id, e.target.value)}
                       placeholder={(t1.default_fee ?? '').toString()}
-                      className="text-sm"
+                      className={`text-sm ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                   </div>
                 </div>

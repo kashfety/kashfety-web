@@ -411,6 +411,7 @@ export const translations = {
     services_saving: "Saving...",
     services_category_lab: "Lab",
     services_category_imaging: "Imaging",
+    services_choose_category: "Choose a category...",
 
     // Units / common UI
     minutes_short: "min",
@@ -2052,6 +2053,7 @@ export const translations = {
     services_saving: "جاري الحفظ...",
     services_category_lab: "مخبري",
     services_category_imaging: "تصوير",
+    services_choose_category: "اختر فئة...",
 
     // Units / common UI
     minutes_short: "د",

@@ -45,7 +45,7 @@ export default function AppointmentDetailsModal({
     onStatusUpdate,
     onStartConsultation
 }: AppointmentDetailsModalProps) {
-    const { t, locale } = useLocale();
+    const { t, locale, isRTL } = useLocale();
 
     if (!appointment) return null;
 
@@ -86,6 +86,13 @@ export default function AppointmentDetailsModal({
             default:
                 return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
         }
+    };
+
+    // Get localized status text
+    const getLocalizedStatus = (status: string): string => {
+        const statusLower = status.toLowerCase();
+        const key = `dd_status_${statusLower}`;
+        return t(key) || status;
     };
 
     // Format time for display
@@ -144,13 +151,13 @@ export default function AppointmentDetailsModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-3">
+            <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
+                <DialogHeader className={isRTL ? 'text-right' : 'text-left'}>
+                    <DialogTitle className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <User className="w-5 h-5 text-white" />
                         </div>
-                        <div>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                             <div className="text-xl font-bold">{t('dd_appointment_details') || 'Appointment Details'}</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400 font-normal">
                                 {getLocalizedPatientName(appointment)}
@@ -161,9 +168,9 @@ export default function AppointmentDetailsModal({
 
                 <div className="space-y-6">
                     {/* Status and Quick Actions */}
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <Badge className={`px-3 py-1 rounded-full font-medium ${getStatusColor(appointment.status)}`}>
-                            {appointment.status}
+                            {getLocalizedStatus(appointment.status)}
                         </Badge>
                         <div className="flex gap-2">
                             {appointment.status === 'confirmed' && onStartConsultation && (

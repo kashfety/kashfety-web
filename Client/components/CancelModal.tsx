@@ -38,7 +38,7 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, isRTL, locale } = useLocale();
 
   // Check if cancellation is within 24 hours
   const canCancel = () => {
@@ -143,9 +143,9 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+      <DialogContent className={`max-w-md ${isRTL ? 'rtl' : 'ltr'}`}>
+        <DialogHeader className={isRTL ? 'text-right' : 'text-left'}>
+          <DialogTitle className={`text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <X className="w-5 h-5" />
             {t('cancel_appointment') || 'Cancel Appointment'}
           </DialogTitle>
@@ -155,7 +155,7 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
           {/* 24-hour restriction warning */}
           {!canCancel() && (
             <div className="bg-red-100 dark:bg-red-900/30 border-2 border-red-400 dark:border-red-500 rounded-lg p-4">
-              <div className="flex items-start gap-2">
+              <div className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row'}`}>
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-red-900 dark:text-red-100">
                   <p className="font-bold mb-1">{t('cancel_24h_restriction_title') || 'Cancellation Not Allowed'}</p>

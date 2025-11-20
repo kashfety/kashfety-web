@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Get patient details
     const { data: patient, error } = await supabase
       .from('users')
-      .select('id, name, email, phone, gender, date_of_birth, created_at, profile_picture')
+      .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, phone, gender, date_of_birth, created_at, profile_picture')
       .eq('id', patientId)
       .eq('role', 'patient')
       .single();

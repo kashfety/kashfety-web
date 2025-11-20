@@ -56,7 +56,7 @@ export default function DoctorScheduleCalendar({
     onStatusUpdate
 }: DoctorScheduleCalendarProps) {
     const { toast } = useToast();
-    const { t, locale } = useLocale();
+    const { t, locale, isRTL } = useLocale();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
 
@@ -571,11 +571,11 @@ export default function DoctorScheduleCalendar({
             </div>
 
             {/* Summary Stats */}
-            <div className="relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className={`relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
@@ -593,8 +593,8 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">
                                     {t('dd_confirmed') || 'Confirmed'}
                                 </p>
@@ -612,8 +612,8 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400 mb-1">
                                     {t('dd_pending') || 'Pending'}
                                 </p>
@@ -631,8 +631,8 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-1">
                                     {t('dd_completed') || 'Completed'}
                                 </p>

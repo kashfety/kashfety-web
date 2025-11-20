@@ -44,7 +44,7 @@ interface RescheduleModalProps {
 }
 
 export default function RescheduleModal({ isOpen, onClose, appointment, onSuccess, onReschedule }: RescheduleModalProps) {
-  const { t } = useLocale();
+  const { t, isRTL, locale } = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
@@ -487,7 +487,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       <AnimatePresence>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
+            <DialogContent className={`max-w-2xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -497,8 +497,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
               >
                 <div className="space-y-6 p-6">
                   {/* Header Section - Matching BookingModal */}
-                  <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm">
-                    <div>
+                  <div className={`flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm ${isRTL ? 'border-r-4 border-l-0 flex-row-reverse text-right' : 'border-l-4'}`}>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('reschedule_title') || 'Reschedule Appointment'}</h3>
                       <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
                         {t('reschedule_with') || 'with'} {appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}

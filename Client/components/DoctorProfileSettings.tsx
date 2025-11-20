@@ -76,6 +76,17 @@ export default function DoctorProfileSettings({
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
 
+  // Helper function to get localized certificate type
+  const getLocalizedCertificateType = (type: string): string => {
+    const typeKey = `dc_${type.toLowerCase()}`;
+    const translated = t(typeKey);
+    if (translated && translated !== typeKey) {
+      return translated;
+    }
+    // Fallback to formatted English name
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   // Load doctor profile on component mount
   useEffect(() => {
     loadDoctorProfile();
@@ -368,10 +379,10 @@ export default function DoctorProfileSettings({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className={`flex items-center justify-center p-8 ${isRTL ? 'rtl' : 'ltr'}`}>
         <div className="flex flex-col items-center gap-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-sm text-gray-500">Loading profile...</span>
+          <span className="text-sm text-gray-500">{t('dd_loading_profile') || 'Loading profile...'}</span>
         </div>
       </div>
     );
@@ -379,20 +390,20 @@ export default function DoctorProfileSettings({
 
   if (!profile) {
     return (
-      <div className="text-center p-8">
-        <p className="text-gray-500">Unable to load profile data.</p>
+      <div className={`text-center p-8 ${isRTL ? 'rtl' : 'ltr'}`}>
+        <p className="text-gray-500">{t('dd_unable_load_profile') || 'Unable to load profile data.'}</p>
         <Button onClick={loadDoctorProfile} className="mt-4">
-          Try Again
+          {t('dd_retry') || 'Retry'}
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={isRTL ? 'text-right' : 'text-left'}>
           <h2 className="text-2xl font-bold text-gray-900">{t('profile_settings_title') || 'Profile Settings'}</h2>
           <p className="text-gray-600">{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
         </div>
@@ -629,11 +640,11 @@ export default function DoctorProfileSettings({
           ) : certificates.length > 0 ? (
             <div className="space-y-4">
               {certificates.map((certificate) => (
-                <div key={certificate.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between">
+                <div key={certificate.id} className={`border rounded-lg p-4 space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className="space-y-2">
-                      <h3 className="font-medium capitalize">
-                        {certificate.certificate_type.replace('_', ' ')}
+                      <h3 className="font-medium">
+                        {getLocalizedCertificateType(certificate.certificate_type)}
                       </h3>
                       {certificate.certificate_number && (
                         <p className="text-sm text-gray-600">
@@ -645,7 +656,7 @@ export default function DoctorProfileSettings({
                           <strong>{t('issuing_authority') || 'Issuing Authority'}:</strong> {certificate.issuing_authority}
                         </p>
                       )}
-                      <div className="flex gap-4 text-sm text-gray-600">
+                      <div className={`flex gap-4 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         {certificate.issue_date && (
                           <span>
                             <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
@@ -820,15 +831,15 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
         <Button 
           onClick={handleSaveProfile}
           disabled={saving}
           className="bg-emerald-600 hover:bg-emerald-700"
           size="lg"
         >
-          <Save className="w-4 h-4 mr-2" />
-          {saving ? "Saving..." : "Save Profile"}
+          <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {saving ? (t('dd_save_profile_saving') || "Saving...") : (t('dd_save_profile') || "Save Profile")}
         </Button>
       </div>
 

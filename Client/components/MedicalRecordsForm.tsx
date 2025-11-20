@@ -191,9 +191,9 @@ export default function MedicalRecordsForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
+        <DialogHeader className={isRTL ? 'text-right' : 'text-left'}>
+          <DialogTitle className={`text-2xl font-bold flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <Heart className="w-6 h-6 text-red-500" />
             {t('complete_medical_profile') || 'Complete Your Medical Profile'}
           </DialogTitle>
@@ -223,7 +223,7 @@ export default function MedicalRecordsForm({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="emergency-relationship">Relationship</Label>
+                  <Label htmlFor="emergency-relationship">{t('mr_relationship') || 'Relationship'}</Label>
                   <Select
                     value={emergencyContact.relationship}
                     onValueChange={(value) => setEmergencyContact({...emergencyContact, relationship: value})}
@@ -232,12 +232,12 @@ export default function MedicalRecordsForm({
                       <SelectValue placeholder={t('mr_select_relationship_placeholder') || 'Select relationship'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="spouse">Spouse</SelectItem>
-                      <SelectItem value="parent">Parent</SelectItem>
-                      <SelectItem value="child">Child</SelectItem>
-                      <SelectItem value="sibling">Sibling</SelectItem>
-                      <SelectItem value="friend">Friend</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="spouse">{t('mr_relationship_spouse') || 'Spouse'}</SelectItem>
+                      <SelectItem value="parent">{t('mr_relationship_parent') || 'Parent'}</SelectItem>
+                      <SelectItem value="child">{t('mr_relationship_child') || 'Child'}</SelectItem>
+                      <SelectItem value="sibling">{t('mr_relationship_sibling') || 'Sibling'}</SelectItem>
+                      <SelectItem value="friend">{t('mr_relationship_friend') || 'Friend'}</SelectItem>
+                      <SelectItem value="other">{t('mr_relationship_other') || 'Other'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { labService, centerService } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from '@/lib/i18n';
+import { useLocale } from '@/components/providers/locale-provider';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ interface TypeRow {
 
 export default function CenterServicesManagement() {
   const { toast } = useToast();
-  const { t, locale, isRTL } = useLanguage();
+  const { t, locale, isRTL } = useLocale();
   const [loading, setLoading] = useState(true);
   const [types, setTypes] = useState<TypeRow[]>([]);
   const [services, setServices] = useState<Record<string, { active: boolean; fee?: string }>>({});

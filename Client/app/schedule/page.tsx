@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Filter, Clock, User, Phone } from "lucide-react"
-import { useLanguage } from '@/lib/i18n'
+import { useLocale } from '@/components/providers/locale-provider'
 import { formatLocalizedNumber, formatLocalizedDate, formatLocalizedTime } from '@/lib/i18n'
 
 // Sample data for appointments
@@ -66,7 +66,7 @@ const appointments = [
 ]
 
 export default function SchedulePage() {
-  const { t, locale, isRTL } = useLanguage()
+  const { t, locale, isRTL } = useLocale()
 
   // Set comprehensive page title
   useEffect(() => {

@@ -16,10 +16,10 @@ import { Separator } from "@/components/ui/separator"
 import React from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import LogoutButton from "@/components/LogoutButton";
-import { useLanguage } from '@/lib/i18n';
+import { useLocale } from '@/components/providers/locale-provider';
 
 export default function SettingsPage() {
-  const { t, locale, isRTL } = useLanguage()
+  const { t, locale, isRTL } = useLocale()
 
   useEffect(() => {
     const title = t('settings_page_title') || "Account Settings & Preferences | Healthcare Management System"

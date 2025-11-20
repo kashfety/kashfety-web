@@ -1945,7 +1945,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(2)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back to Centers'}
@@ -2084,7 +2084,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(2)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back to Doctors'}
@@ -2285,7 +2285,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(1)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back_to_centers') || 'Back to Centers'}
@@ -2343,7 +2343,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             <Button
                               variant="outline"
                               onClick={() => setCurrentStep(1)}
-                              className="mt-6 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                              className="mt-6 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                             >
                               <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                               {t('booking_choose_different_center') || 'Choose Different Center'}
@@ -2432,7 +2432,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(isLabMode ? 2 : 3)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back'}
@@ -2550,8 +2550,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                 ${slot.is_booked || !slot.is_available
                                             ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
                                             : selectedTime === slot.time
-                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
-                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
+                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                       >
                                         {slot.time}

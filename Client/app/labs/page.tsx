@@ -178,14 +178,6 @@ export default function MyLabsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
-      {/* Overlay for mobile when sidebar is open */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-
       {/* Main Content - No transform, sidebar overlays on top */}
       <div>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">

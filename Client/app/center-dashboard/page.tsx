@@ -302,20 +302,20 @@ function CenterOverview({
                   {/* Weekly Trend Summary */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {todayStats.appointments.length}
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+                        {formatLocalizedNumber(todayStats.appointments.length, locale)}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">{t('dd_today') || 'Today'}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {todayStats.stats?.todayCompleted || 0}
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400" dir="ltr">
+                        {formatLocalizedNumber(todayStats.stats?.todayCompleted || 0, locale)}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">{t('completed') || 'Completed'}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        {todayStats.stats?.todayRevenue?.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US') || '0'} {t('currency') || 'SYP'}
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
+                        {formatLocalizedNumber(todayStats.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">{t('cd_revenue') || 'Revenue'}</div>
                     </div>
@@ -346,7 +346,7 @@ function CenterOverview({
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
-                              <span className="text-xs text-gray-500 w-8">{percentage.toFixed(0)}%</span>
+                              <span className="text-xs text-gray-500 w-8" dir="ltr">{formatLocalizedNumber(percentage, locale, { maximumFractionDigits: 0 })}%</span>
                             </div>
                           </div>
                         </div>
@@ -410,11 +410,13 @@ function CenterOverview({
                           appointment.status === 'cancelled' ? t('cd_cancelled') :
                             t('appointments_status_scheduled')}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                       {getLocalizedNameUtil(appointment, locale, 'patient_name')} • {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {
                         appointment.booking_date && appointment.booking_time ?
-                          `${new Date(appointment.booking_date).toLocaleDateString()} at ${appointment.booking_time}` :
-                          t('time_tbd') || 'Time TBD'
+                          `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
+                          appointment.appointment_date && appointment.appointment_time ?
+                            `${formatLocalizedDate(appointment.appointment_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')}` :
+                            t('time_tbd') || 'Time TBD'
                       }
                     </p>
                   </div>
@@ -1055,12 +1057,21 @@ function CenterAnalytics({
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value) => [formatLocalizedNumber(Number(value), locale), '']}
+                        formatter={(value, name) => {
+                          const formattedValue = formatLocalizedNumber(Number(value), locale);
+                          return [`${formattedValue} ${t('cd_patients') || 'patients'}`, name];
+                        }}
+                        labelFormatter={(label) => `${t('cd_gender')}: ${label}`}
                         contentStyle={{
                           backgroundColor: isDark ? "#1f2937" : "#ffffff",
                           border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-                          borderRadius: "8px",
+                          borderRadius: "12px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          color: isDark ? "#ffffff" : "#000000",
                           direction: isRTL ? 'rtl' : 'ltr',
+                          padding: "12px",
+                          fontSize: "14px",
+                          textAlign: isRTL ? 'right' : 'left'
                         }}
                       />
                     </PieChart>
@@ -3058,7 +3069,7 @@ export default function CenterDashboardPage() {
           <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#0F0F12]">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
               <div className="p-6">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <h1 className={`text-2xl font-bold text-gray-900 dark:text-white mb-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('center_dashboard') || 'Center Dashboard'}
                 </h1>
               </div>
@@ -3106,7 +3117,7 @@ export default function CenterDashboardPage() {
                               <div>
                                 <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')} • {formatLocalizedNumber(appointment.fee, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
+                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {appointment.appointment_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time') : appointment.booking_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time') : t('cd_na')} • {formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                                 </p>
                               </div>
                             </div>

@@ -1264,6 +1264,8 @@ export const translations = {
     // Center Dashboard (en) - Additional translations
     cd_view_patient_records: "View patient records and upload documents",
     cd_total_patients: "total patients",
+    cd_patients: "patients",
+    cd_gender: "Gender",
     cd_upload_result: "Upload Result",
     cd_view_patient: "View Patient",
 
@@ -2782,6 +2784,8 @@ export const translations = {
     // Center Dashboard (ar) - Additional translations
     cd_view_patient_records: "عرض سجلات المرضى ورفع المستندات",
     cd_total_patients: "إجمالي المرضى",
+    cd_patients: "مرضى",
+    cd_gender: "الجنس",
     cd_upload_result: "رفع النتيجة",
     cd_view_patient: "عرض المريض",
 

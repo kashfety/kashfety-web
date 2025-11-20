@@ -150,8 +150,11 @@ export default function LabTestTypesManagement() {
             method: 'DELETE'
           });
 
+          const data = await response.json();
+
           if (!response.ok) {
-            throw new Error('Failed to delete lab test type');
+            // Show the specific error message from the API
+            throw new Error(data.error || 'Failed to delete lab test type');
           }
 
           setLabTestTypes(labTestTypes.filter(test => test.id !== id));

@@ -311,7 +311,11 @@ export default function MyAppointmentsPage() {
         }
 
         // Get doctor and center information
-        const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+        let doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+        // Filter out placeholder phone values that contain IDs
+        if (doctorPhone && (doctorPhone.includes('PHONE_NEEDED') || doctorPhone.includes('_') && doctorPhone.length > 20)) {
+          doctorPhone = 'N/A';
+        }
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
         let center = apt.center || apt.centers || null;
         let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (getLocalizedCenterName(center) || apt.center_name || '');

@@ -112,13 +112,13 @@ export default function MyAppointmentsPage() {
       return typeFilter === 'home' ? isHome : !isHome
     }
     const toDate = (d: string) => {
-      try { 
+      try {
         // Parse date as local date to avoid timezone issues
         if (d.includes('T')) {
-          return new Date(d).setHours(0,0,0,0)
+          return new Date(d).setHours(0, 0, 0, 0)
         } else {
           const [year, month, day] = d.split('-').map(Number);
-          return new Date(year, month - 1, day).setHours(0,0,0,0);
+          return new Date(year, month - 1, day).setHours(0, 0, 0, 0);
         }
       } catch { return NaN }
     }
@@ -152,7 +152,7 @@ export default function MyAppointmentsPage() {
   // Helper functions for localized names
   const getLocalizedDoctorName = (appointment: Appointment) => {
     if (!appointment.doctor) return appointment.doctorName || t('unknown_doctor') || 'Unknown Doctor'
-    
+
     if (locale === 'ar') {
       if (appointment.doctor.name_ar) return appointment.doctor.name_ar
       if (appointment.doctor.first_name_ar && appointment.doctor.last_name_ar) {
@@ -166,7 +166,7 @@ export default function MyAppointmentsPage() {
   const getLocalizedCenterName = (appointment: Appointment) => {
     const center = appointment.center || appointment.centers
     if (!center) return appointment.location || t('unknown_location') || 'Unknown Location'
-    
+
     if (locale === 'ar' && center.name_ar) {
       return center.name_ar
     }
@@ -176,11 +176,11 @@ export default function MyAppointmentsPage() {
   // Function to fetch reviewed appointment IDs
   const fetchReviewedAppointments = async (appointmentIds: string[]) => {
     if (!user?.id || appointmentIds.length === 0) return
-    
+
     try {
       const response = await fetch(`/api/reviews?appointment_ids=${appointmentIds.join(',')}&patient_id=${user.id}`)
       const data = await response.json()
-      
+
       if (data.success && data.reviewedAppointmentIds) {
         setReviewedIds(new Set(data.reviewedAppointmentIds))
       }
@@ -193,49 +193,50 @@ export default function MyAppointmentsPage() {
   const refreshAppointments = async () => {
     if (!user) return
 
-  // Helper to get localized specialty from doctor object
-  const getLocalizedSpecialty = (doctor: any) => {
-    if (!doctor) return 'General Medicine';
-    if (locale === 'ar' && doctor.specialty_ar) {
-      return doctor.specialty_ar;
-    }
-    if (locale === 'ku' && doctor.specialty_ku) {
-      return doctor.specialty_ku;
-    }
-    // For English, use 'name' field which is the English name
-    return doctor.specialty || 'General Medicine';
-  }
-
-  // Helper to get localized doctor name from doctor object
-  const getLocalizedDoctorName = (doctor: any) => {
-    if (!doctor) return locale === 'ar' ? 'د. طبيب' : 'Dr. Doctor';
-    
-    if (locale === 'ar') {
-      // If we have Arabic name, use it
-      if (doctor.name_ar) return doctor.name_ar;
-      if (doctor.first_name_ar && doctor.last_name_ar) {
-        return `${doctor.first_name_ar} ${doctor.last_name_ar}`;
+    // Helper to get localized specialty from doctor object
+    const getLocalizedSpecialty = (doctor: any) => {
+      if (!doctor) return 'General Medicine';
+      if (locale === 'ar' && doctor.specialty_ar) {
+        return doctor.specialty_ar;
       }
-      if (doctor.first_name_ar) return doctor.first_name_ar;
+      // Kurdish locale removed - not currently supported
+      // if (locale === 'ku' && doctor.specialty_ku) {
+      //   return doctor.specialty_ku
+      // }
+      // For English, use 'name' field which is the English name
+      return doctor.specialty || 'General Medicine';
     }
-    
-    // For English, use 'name' field directly (full name from database)
-    return doctor.name || 'Doctor';
-  }
 
-  // Helper to get localized center name
-  const getLocalizedCenterName = (center: any) => {
-    if (!center) return '';
-    if (locale === 'ar' && center.name_ar) {
-      return center.name_ar;
+    // Helper to get localized doctor name from doctor object
+    const getLocalizedDoctorName = (doctor: any) => {
+      if (!doctor) return locale === 'ar' ? 'د. طبيب' : 'Dr. Doctor';
+
+      if (locale === 'ar') {
+        // If we have Arabic name, use it
+        if (doctor.name_ar) return doctor.name_ar;
+        if (doctor.first_name_ar && doctor.last_name_ar) {
+          return `${doctor.first_name_ar} ${doctor.last_name_ar}`;
+        }
+        if (doctor.first_name_ar) return doctor.first_name_ar;
+      }
+
+      // For English, use 'name' field directly (full name from database)
+      return doctor.name || 'Doctor';
     }
-    return center.name || '';
-  }
-    
+
+    // Helper to get localized center name
+    const getLocalizedCenterName = (center: any) => {
+      if (!center) return '';
+      if (locale === 'ar' && center.name_ar) {
+        return center.name_ar;
+      }
+      return center.name || '';
+    }
+
     try {
       setAppointmentsLoading(true)
       setError(null)
-      
+
       // Use the API service to fetch appointments
       const appointmentsResponse = await appointmentService.getAppointments();
       if (!appointmentsResponse.appointments) {
@@ -243,7 +244,7 @@ export default function MyAppointmentsPage() {
         setAppointmentsLoading(false);
         return;
       }
-      
+
       // Transform the data to match our interface
       const transformedAppointments: Appointment[] = appointmentsResponse.appointments.map((apt: any) => {
         console.log('🔍 Raw appointment data:', {
@@ -252,7 +253,7 @@ export default function MyAppointmentsPage() {
           appointment_time: apt.appointment_time,
           status: apt.status
         });
-        
+
         // Handle appointment date more safely with timezone-aware parsing
         let appointmentDate: Date;
         if (!apt.appointment_date) {
@@ -262,7 +263,7 @@ export default function MyAppointmentsPage() {
           // Parse date string as local date to avoid timezone issues
           const dateString = apt.appointment_date;
           console.log('📅 Parsing date string:', dateString);
-          
+
           if (dateString.includes('T')) {
             // If it's an ISO string, parse normally
             appointmentDate = new Date(dateString);
@@ -273,27 +274,27 @@ export default function MyAppointmentsPage() {
             appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
             console.log('📅 Parsed as local date:', appointmentDate, 'from parts:', { year, month: month - 1, day });
           }
-          
+
           // Check if the date is valid
           if (isNaN(appointmentDate.getTime())) {
             console.warn('⚠️ Invalid appointment_date:', apt.appointment_date, 'for appointment:', apt.id);
             appointmentDate = new Date(); // fallback to today
           }
         }
-        
+
         console.log('📅 Parsed appointment date:', appointmentDate, 'from:', apt.appointment_date);
-        
+
         const appointmentTime = apt.appointment_time
-        
+
         // Format date with proper locale
-        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : locale === 'ku' ? 'ku-IQ' : 'en-US', {
+        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         })
-        
+
         console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
-        
+
         // Format time
         let formattedTime = appointmentTime;
         try {
@@ -308,7 +309,7 @@ export default function MyAppointmentsPage() {
         } catch {
           formattedTime = toArabicNumerals(appointmentTime, locale);
         }
-        
+
         // Get doctor and center information
         const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
@@ -316,7 +317,7 @@ export default function MyAppointmentsPage() {
         let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (getLocalizedCenterName(center) || apt.center_name || '');
         let centerAddress = isHomeVisit ? (apt.patient_address || '') : (center?.address || apt.center_address || '');
         if (!isHomeVisit && !centerName && apt.center_id) centerName = t('appointments_type_clinic_consultation') || 'Clinic Consultation'
-        
+
         return {
           id: apt.id,
           doctorName: getLocalizedDoctorName(apt.doctor),
@@ -337,15 +338,15 @@ export default function MyAppointmentsPage() {
           center_id: apt.center_id || null
         }
       })
-      
+
       setAppointments(transformedAppointments)
-      
+
       // Fetch reviewed appointment IDs after appointments are loaded
       const appointmentIds = transformedAppointments.map(apt => apt.id)
       if (appointmentIds.length > 0) {
         await fetchReviewedAppointments(appointmentIds)
       }
-      
+
       setAppointmentsLoading(false)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to load appointments')
@@ -394,8 +395,8 @@ export default function MyAppointmentsPage() {
 
   // Function to update a specific appointment without full refresh
   const handleAppointmentUpdate = (updatedAppointment: Appointment) => {
-    setAppointments(prevAppointments => 
-      prevAppointments.map(apt => 
+    setAppointments(prevAppointments =>
+      prevAppointments.map(apt =>
         apt.id === updatedAppointment.id ? updatedAppointment : apt
       )
     )
@@ -426,7 +427,7 @@ export default function MyAppointmentsPage() {
           return a as Appointment;
         }));
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [appointments, t]);
 
   const getStatusText = (status: string) => {
@@ -484,7 +485,7 @@ export default function MyAppointmentsPage() {
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      
+
       {/* Main Content - No transform, sidebar overlays on top */}
       <div onClick={() => sidebarOpen && toggleSidebar()}>
         {/* Header */}
@@ -492,224 +493,224 @@ export default function MyAppointmentsPage() {
           <Header onMenuToggle={toggleSidebar} />
         </div>
 
-      {/* Main Content */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="outline" size="sm" onClick={() => router.push('/')} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
-              <ArrowLeft size={16} />
-              {t('appointments_back_home') || 'Back to Home'}
-            </Button>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{t('appointments_page_title') || 'My Appointments'}</h1>
-              <p className="text-muted-foreground mt-1">{t('appointments_page_subtitle') || 'Manage and view your upcoming medical appointments'}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={refreshAppointments} variant="outline" disabled={appointmentsLoading} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
-                <RefreshCw size={16} className={appointmentsLoading ? 'animate-spin' : ''} />
-                {appointmentsLoading ? (t('loading') || 'Loading...') : (t('appointments_refresh') || 'Refresh')}
-              </Button>
-              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
-                <Plus size={16} />
-                {t('appointments_book_new') || 'Book New Appointment'}
+        {/* Main Content */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <Button variant="outline" size="sm" onClick={() => router.push('/')} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+                <ArrowLeft size={16} />
+                {t('appointments_back_home') || 'Back to Home'}
               </Button>
             </div>
-          </div>
-        </div>
 
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_status_label') || 'Status'}</label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('appointments_status_placeholder') || 'All'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('appointments_status_all') || 'All'}</SelectItem>
-                    <SelectItem value="scheduled">{t('appointments_status_scheduled') || 'Scheduled'}</SelectItem>
-                    <SelectItem value="confirmed">{t('appointments_status_confirmed') || 'Confirmed'}</SelectItem>
-                    <SelectItem value="completed">{t('appointments_status_completed') || 'Completed'}</SelectItem>
-                    <SelectItem value="cancelled">{t('appointments_status_cancelled') || 'Cancelled'}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_type_label') || 'Type'}</label>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('appointments_type_placeholder') || 'All'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('appointments_type_all') || 'All'}</SelectItem>
-                    <SelectItem value="clinic">{t('appointments_type_clinic') || 'Clinic'}</SelectItem>
-                    <SelectItem value="home">{t('appointments_type_home') || 'Home'}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
-                <Input placeholder={t('appointments_search_placeholder') || 'Doctor or specialty'} value={searchText} onChange={e => setSearchText(e.target.value)} />
-              </div>
-            </div>
-            <div className="flex justify-between items-center mt-3 text-sm text-muted-foreground">
-              <div>
-                {showingCountText}
+                <h1 className="text-3xl font-bold text-foreground">{t('appointments_page_title') || 'My Appointments'}</h1>
+                <p className="text-muted-foreground mt-1">{t('appointments_page_subtitle') || 'Manage and view your upcoming medical appointments'}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setStartDate(''); setEndDate(''); setSearchText(''); }} className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">{t('appointments_clear_filters') || 'Clear'}</Button>
+                <Button onClick={refreshAppointments} variant="outline" disabled={appointmentsLoading} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+                  <RefreshCw size={16} className={appointmentsLoading ? 'animate-spin' : ''} />
+                  {appointmentsLoading ? (t('loading') || 'Loading...') : (t('appointments_refresh') || 'Refresh')}
+                </Button>
+                <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
+                  <Plus size={16} />
+                  {t('appointments_book_new') || 'Book New Appointment'}
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Appointments List */}
-        {filteredAppointments.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
-              <p className="text-muted-foreground mb-6">{t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}</p>
-              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
+          {/* Filters */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_status_label') || 'Status'}</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('appointments_status_placeholder') || 'All'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('appointments_status_all') || 'All'}</SelectItem>
+                      <SelectItem value="scheduled">{t('appointments_status_scheduled') || 'Scheduled'}</SelectItem>
+                      <SelectItem value="confirmed">{t('appointments_status_confirmed') || 'Confirmed'}</SelectItem>
+                      <SelectItem value="completed">{t('appointments_status_completed') || 'Completed'}</SelectItem>
+                      <SelectItem value="cancelled">{t('appointments_status_cancelled') || 'Cancelled'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_type_label') || 'Type'}</label>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('appointments_type_placeholder') || 'All'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('appointments_type_all') || 'All'}</SelectItem>
+                      <SelectItem value="clinic">{t('appointments_type_clinic') || 'Clinic'}</SelectItem>
+                      <SelectItem value="home">{t('appointments_type_home') || 'Home'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
+                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
+                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
+                  <Input placeholder={t('appointments_search_placeholder') || 'Doctor or specialty'} value={searchText} onChange={e => setSearchText(e.target.value)} />
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-3 text-sm text-muted-foreground">
+                <div>
+                  {showingCountText}
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setStartDate(''); setEndDate(''); setSearchText(''); }} className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">{t('appointments_clear_filters') || 'Clear'}</Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="space-y-6">
-            {filteredAppointments.map((appointment: Appointment) => (
-              <Card key={appointment.id} className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-xl text-foreground flex items-center gap-2">
-                        <User className="w-5 h-5 text-emerald-600" />
-                        {getLocalizedDoctorName(appointment)}
-                      </CardTitle>
-                      <CardDescription className="text-emerald-600 font-medium">
-                        {appointment.specialty}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${getStatusColor(appointment.status)} border`}>
-                        {getStatusText(appointment.status)}
-                      </Badge>
-                      {appointment.isHomeVisit ? (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                          {t('appointments_home_visit_badge') || 'Home'}
+
+          {/* Appointments List */}
+          {filteredAppointments.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
+                <p className="text-muted-foreground mb-6">{t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}</p>
+                <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {filteredAppointments.map((appointment: Appointment) => (
+                <Card key={appointment.id} className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-xl text-foreground flex items-center gap-2">
+                          <User className="w-5 h-5 text-emerald-600" />
+                          {getLocalizedDoctorName(appointment)}
+                        </CardTitle>
+                        <CardDescription className="text-emerald-600 font-medium">
+                          {appointment.specialty}
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${getStatusColor(appointment.status)} border`}>
+                          {getStatusText(appointment.status)}
                         </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                          {t('appointments_clinic_visit_badge') || 'Clinic'}
-                        </Badge>
-                      )}
-                      {(appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
-                        <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">{t('appointments_booked_badge') || 'Booked'}</Badge>
-                      )}
+                        {appointment.isHomeVisit ? (
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                            {t('appointments_home_visit_badge') || 'Home'}
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                            {t('appointments_clinic_visit_badge') || 'Clinic'}
+                          </Badge>
+                        )}
+                        {(appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
+                          <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">{t('appointments_booked_badge') || 'Booked'}</Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Left Column - Time & Location */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <Calendar className="w-5 h-5 text-emerald-600" />
-                        <div>
-                          <div className="font-medium">{appointment.date}</div>
-                          <div className="text-sm text-gray-500">{t('appointments_date_label') || 'Date'}</div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Left Column - Time & Location */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Calendar className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <div className="font-medium">{appointment.date}</div>
+                            <div className="text-sm text-gray-500">{t('appointments_date_label') || 'Date'}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Clock className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
+                            <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                          <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
+                          <div>
+                            <div className="font-medium">{getLocalizedCenterName(appointment)}</div>
+                            <div className="text-sm text-gray-500">{appointment.address}</div>
+                            {appointment.isHomeVisit && (
+                              <Badge variant="secondary" className="mt-1 text-xs bg-green-100 text-green-800">
+                                {t('appointments_home_visit_badge') || 'Home Visit'}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <Clock className="w-5 h-5 text-emerald-600" />
-                        <div>
-                          <div className="font-medium">{toArabicNumerals((() => { try { const [h,m] = (appointment.appointment_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
-                          <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
+
+                      {/* Right Column - Details & Actions */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Phone className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <div className="font-medium">{toArabicNumerals(appointment.phone, locale)}</div>
+                            <div className="text-sm text-gray-500">{t('appointments_contact_number_label') || 'Contact Number'}</div>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
+
                         <div>
-                          <div className="font-medium">{getLocalizedCenterName(appointment)}</div>
-                          <div className="text-sm text-gray-500">{appointment.address}</div>
-                          {appointment.isHomeVisit && (
-                            <Badge variant="secondary" className="mt-1 text-xs bg-green-100 text-green-800">
-                              {t('appointments_home_visit_badge') || 'Home Visit'}
-                            </Badge>
+                          <div className="text-sm font-medium text-foreground mb-1">{t('appointments_appointment_type_label') || 'Appointment Type'}</div>
+                          <Badge variant="outline" className="text-sm">
+                            {appointment.type}
+                          </Badge>
+                        </div>
+
+                        {appointment.notes && (
+                          <div>
+                            <div className="text-sm font-medium text-foreground mb-1">{t('appointments_notes_label') || 'Notes'}</div>
+                            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                              {appointment.notes}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-2">
+                          <Button variant="outline" size="sm" className="text-[#4DBCC4] border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:text-[#4DBCC4] dark:border-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20" onClick={() => handleReschedule(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
+                            {t('appointments_reschedule_button') || 'Reschedule'}
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => handleCancel(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
+                            {t('appointments_cancel_button') || 'Cancel'}
+                          </Button>
+                          {appointment.status === 'completed' && (
+                            <>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedAppointment(appointment); setReviewOpen(true); }} className="border-yellow-500 text-yellow-700 hover:bg-yellow-50" disabled={reviewedIds.has(appointment.id)}>
+                                {reviewedIds.has(appointment.id) ? t('appointments_reviewed_button') || 'Reviewed' : t('appointments_leave_review_button') || 'Leave Review'}
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedAppointment(appointment); setSummaryOpen(true); }} className="border-green-500 text-green-700 hover:bg-green-50">
+                                {t('appointments_visit_summary_button') || 'Visit Summary'}
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Right Column - Details & Actions */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <Phone className="w-5 h-5 text-emerald-600" />
-                        <div>
-                          <div className="font-medium">{toArabicNumerals(appointment.phone, locale)}</div>
-                          <div className="text-sm text-gray-500">{t('appointments_contact_number_label') || 'Contact Number'}</div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-sm font-medium text-foreground mb-1">{t('appointments_appointment_type_label') || 'Appointment Type'}</div>
-                        <Badge variant="outline" className="text-sm">
-                          {appointment.type}
-                        </Badge>
-                      </div>
-                      
-                      {appointment.notes && (
-                        <div>
-                          <div className="text-sm font-medium text-foreground mb-1">{t('appointments_notes_label') || 'Notes'}</div>
-                          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                            {appointment.notes}
-                          </p>
-                        </div>
-                      )}
-                      
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="text-[#4DBCC4] border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:text-[#4DBCC4] dark:border-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20" onClick={() => handleReschedule(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
-                          {t('appointments_reschedule_button') || 'Reschedule'}
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => handleCancel(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
-                          {t('appointments_cancel_button') || 'Cancel'}
-                        </Button>
-                        {appointment.status === 'completed' && (
-                          <>
-                            <Button variant="outline" size="sm" onClick={() => { setSelectedAppointment(appointment); setReviewOpen(true); }} className="border-yellow-500 text-yellow-700 hover:bg-yellow-50" disabled={reviewedIds.has(appointment.id)}>
-                              {reviewedIds.has(appointment.id) ? t('appointments_reviewed_button') || 'Reviewed' : t('appointments_leave_review_button') || 'Leave Review'}
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => { setSelectedAppointment(appointment); setSummaryOpen(true); }} className="border-green-500 text-green-700 hover:bg-green-50">
-                              {t('appointments_visit_summary_button') || 'Visit Summary'}
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Close main content wrapper */}
+        {/* Close main content wrapper */}
       </div>
 
       {/* Modals */}

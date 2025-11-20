@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, formatLocalizedNumber } from "@/lib/i18n"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -71,7 +71,8 @@ export default function PatientLabsPage() {
 
     const getLocalizedTestName = (test: LabTest) => {
         if (locale === 'ar' && test.name_ar) return test.name_ar
-        if (locale === 'ku' && test.name_ku) return test.name_ku
+        // Kurdish locale not currently supported
+        // if (locale === 'ku' && test.name_ku) return test.name_ku
         if (test.name_en) return test.name_en
         return test.name
     }
@@ -230,7 +231,7 @@ export default function PatientLabsPage() {
                     </div>
 
                     {/* Search and Filter */}
-                    <Card className="mb-6 border-0 shadow-xl shadow-blue-500/5">
+                    <Card className="mb-6 border-0 shadow-xl shadow-blue-500/5 relative z-10">
                         <CardContent className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Search */}
@@ -251,18 +252,25 @@ export default function PatientLabsPage() {
                                 </div>
 
                                 {/* Category Filter */}
-                                <div>
+                                <div className="relative z-20">
                                     <select
                                         value={categoryFilter}
                                         onChange={(e) => {
                                             setCategoryFilter(e.target.value as '' | 'lab' | 'imaging')
                                             setCurrentPage(1)
                                         }}
-                                        className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full h-10 px-3 py-2 rounded-lg border-2 border-[#4DBCC4] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] hover:shadow-lg focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-md font-medium appearance-none"
+                                        style={{
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
+                                            paddingLeft: isRTL ? '2rem' : '0.75rem',
+                                            paddingRight: isRTL ? '0.75rem' : '2rem'
+                                        }}
                                     >
-                                        <option value="">{t('all_services') || 'All Services'}</option>
-                                        <option value="lab">{t('lab_tests') || 'Lab Tests'}</option>
-                                        <option value="imaging">{t('imaging') || 'Imaging'}</option>
+                                        <option value="" className="bg-white dark:bg-gray-800">{t('all_services') || 'All Services'}</option>
+                                        <option value="lab" className="bg-white dark:bg-gray-800">{t('lab_tests') || 'Lab Tests'}</option>
+                                        <option value="imaging" className="bg-white dark:bg-gray-800">{t('imaging') || 'Imaging'}</option>
                                     </select>
                                 </div>
                             </div>
@@ -515,9 +523,9 @@ export default function PatientLabsPage() {
                                                                             {test.category === 'lab' ? (t('lab_test_singular') || 'Lab Test') : (t('imaging') || 'Imaging')}
                                                                         </Badge>
                                                                     </div>
-                                                                    <div className="text-right">
-                                                                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                                            ${toArabicNumerals(test.default_fee, locale)}
+                                                                    <div className={isRTL ? 'text-left' : 'text-right'}>
+                                                                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+                                                                            {formatLocalizedNumber(test.default_fee, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}
                                                                         </p>
                                                                     </div>
                                                                 </div>

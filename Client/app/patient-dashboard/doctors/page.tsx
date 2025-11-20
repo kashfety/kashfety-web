@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, formatLocalizedNumber } from "@/lib/i18n"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -220,9 +220,10 @@ export default function PatientDoctorsPage() {
         if (locale === 'ar' && doctor.specialty_ar) {
             return doctor.specialty_ar
         }
-        if (locale === 'ku' && doctor.specialty_ku) {
-            return doctor.specialty_ku
-        }
+        // Kurdish locale not currently supported
+        // if (locale === 'ku' && doctor.specialty_ku) {
+        //     return doctor.specialty_ku
+        // }
         // For English, use 'specialty' field which is the English name
         return doctor.specialty
     }
@@ -289,22 +290,29 @@ export default function PatientDoctorsPage() {
                                 </div>
 
                                 {/* Specialty Filter */}
-                                <div>
+                                <div className="relative">
                                     <select
                                         value={specialtyFilter}
                                         onChange={(e) => {
                                             setSpecialtyFilter(e.target.value)
                                             setCurrentPage(1)
                                         }}
-                                        className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full h-10 px-3 py-2 rounded-lg border-2 border-[#4DBCC4] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] hover:shadow-lg focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-md font-medium appearance-none"
+                                        style={{
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
+                                            paddingLeft: isRTL ? '2rem' : '0.75rem',
+                                            paddingRight: isRTL ? '0.75rem' : '2rem'
+                                        }}
                                     >
-                                        <option value="">{t('all_specialties') || 'All Specialties'}</option>
+                                        <option value="" className="bg-white dark:bg-gray-800">{t('all_specialties') || 'All Specialties'}</option>
                                         {getUniqueSpecialties().map((specialty) => {
                                             // Find a doctor with this specialty to get localized name
                                             const doctorWithSpecialty = doctors.find(d => d.specialty === specialty);
                                             const localizedName = doctorWithSpecialty ? getLocalizedSpecialty(doctorWithSpecialty) : specialty;
                                             return (
-                                                <option key={specialty} value={specialty}>
+                                                <option key={specialty} value={specialty} className="bg-white dark:bg-gray-800">
                                                     {localizedName}
                                                 </option>
                                             );
@@ -379,10 +387,12 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Rating & Experience */}
                                                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span>{toArabicNumerals(doctor.rating?.toFixed(1) || '0.0', locale)}</span>
-                                                    </div>
+                                                    {doctor.rating && doctor.rating > 0 && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                            <span>{toArabicNumerals(doctor.rating.toFixed(1), locale)}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1">
                                                         <Briefcase className="w-4 h-4 text-blue-500" />
                                                         <span>{toArabicNumerals(doctor.experience_years || 0, locale)}{t('year_short') || 'y'}</span>
@@ -390,9 +400,8 @@ export default function PatientDoctorsPage() {
                                                 </div>
 
                                                 {/* Consultation Fee */}
-                                                <div className="flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold">
-                                                    <DollarSign className="w-4 h-4" />
-                                                    <span>${toArabicNumerals(doctor.consultation_fee || 0, locale)}</span>
+                                                <div className={`flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                                    <span dir="ltr">{formatLocalizedNumber(doctor.consultation_fee || 0, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                                                 </div>
 
                                                 {/* Action Button */}
@@ -488,10 +497,12 @@ export default function PatientDoctorsPage() {
                                                     {getLocalizedSpecialty(selectedDoctor)}
                                                 </DialogDescription>
                                                 <div className="flex items-center gap-4 mt-2">
-                                                    <div className="flex items-center gap-1 text-sm">
-                                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span className="font-medium">{toArabicNumerals(selectedDoctor.rating?.toFixed(1) || '0.0', locale)}</span>
-                                                    </div>
+                                                    {selectedDoctor.rating && selectedDoctor.rating > 0 && (
+                                                        <div className="flex items-center gap-1 text-sm">
+                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                            <span className="font-medium">{toArabicNumerals(selectedDoctor.rating.toFixed(1), locale)}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />
                                                         <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} {t('years_experience') || 'years experience'}</span>
@@ -542,12 +553,11 @@ export default function PatientDoctorsPage() {
 
                                             {/* Consultation Fee */}
                                             <div>
-                                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                    <DollarSign className="w-4 h-4" />
+                                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                                                     {t('consultation_fee') || 'Consultation Fee'}
                                                 </h3>
-                                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${toArabicNumerals(selectedDoctor.consultation_fee || 0, locale)}
+                                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+                                                    {formatLocalizedNumber(selectedDoctor.consultation_fee || 0, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}
                                                 </p>
                                             </div>
                                         </TabsContent>

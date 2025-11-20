@@ -81,11 +81,11 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      
+
       // After successful login, check if doctor needs to upload certificate
       const certificateStatus = localStorage.getItem('doctor_certificate_status')
       const authToken = localStorage.getItem('auth_token')
-      
+
       if (certificateStatus === 'not_uploaded' && authToken) {
         // Store the token for certificate upload
         setDoctorToken(authToken)
@@ -141,9 +141,9 @@ export default function LoginPage() {
     // Show success message and redirect to login to try again
     setEmail('')
     setPassword('')
-    showAlert(
-      t('cert_upload_success_login') || 'Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.',
-      'success'
+    showSuccess(
+      'Success',
+      t('cert_upload_success_login') || 'Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.'
     )
   }
 

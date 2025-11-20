@@ -61,7 +61,7 @@ export default function MedicalRecordsSection() {
   const { user, isAuthenticated } = useAuth();
   const { t, locale } = useLocale();
   const { toast } = useToast();
-  
+
   const [medicalInfo, setMedicalInfo] = useState<MedicalInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -82,7 +82,7 @@ export default function MedicalRecordsSection() {
   // Helper function for localized doctor names
   const getLocalizedDoctorName = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return t('unknown_doctor') || 'Unknown Doctor';
-    
+
     if (locale === 'ar') {
       if (doctor.name_ar) return doctor.name_ar;
       if (doctor.first_name_ar && doctor.last_name_ar) {
@@ -95,28 +95,28 @@ export default function MedicalRecordsSection() {
 
   const getLocalizedSpecialty = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return '';
-    
+
     // If specialty_ar is already in the doctor object, use it
     if (locale === 'ar' && doctor.specialty_ar) {
       return doctor.specialty_ar;
     }
-    if (locale === 'ku' && doctor.specialty_ku) {
-      return doctor.specialty_ku;
-    }
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && doctor.specialty_ku) {
+    //   return doctor.specialty_ku;
+    // }
     if (doctor.specialty_en) {
       return doctor.specialty_en;
     }
-    
+
     // Otherwise, try to get it from specialtiesMap
     if (doctor.specialty) {
       const specialtyData = specialtiesMap.get(doctor.specialty);
       if (specialtyData) {
         if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
-        if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
         if (specialtyData.name_en) return specialtyData.name_en;
       }
     }
-    
+
     return doctor.specialty || '';
   };
 
@@ -151,7 +151,7 @@ export default function MedicalRecordsSection() {
     try {
       const response = await fetch('/api/specialties');
       const result = await response.json();
-      
+
       if (result.success && result.specialties) {
         const map = new Map();
         result.specialties.forEach((specialty: any) => {
@@ -171,7 +171,7 @@ export default function MedicalRecordsSection() {
 
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/patient/medical-info?userId=${user.id}`);
@@ -189,7 +189,7 @@ export default function MedicalRecordsSection() {
             phone: result.medical_info.emergency_contact?.phone || ''
           }
         });
-        
+
         // Parse lists
         setAllergiesList(result.medical_info.allergies ? result.medical_info.allergies.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
         setMedicationsList(result.medical_info.medications ? result.medical_info.medications.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
@@ -208,7 +208,7 @@ export default function MedicalRecordsSection() {
 
   const handleSave = async () => {
     if (!user?.id) return;
-    
+
     setLoading(true);
     try {
       const updateData = {
@@ -293,7 +293,7 @@ export default function MedicalRecordsSection() {
   // Fetch medical records from medical_records table
   const fetchMedicalRecords = async () => {
     if (!user?.id) return;
-    
+
     setRecordsLoading(true);
     try {
       const response = await fetch(`/api/patient-medical-records?patient_id=${user.id}`);
@@ -319,7 +319,7 @@ export default function MedicalRecordsSection() {
   // Handle create/update medical record
   const handleSaveRecord = async () => {
     if (!user?.id) return;
-    
+
     if (!recordForm.diagnosis || !recordForm.treatment) {
       toast({
         title: "Error",
@@ -331,20 +331,20 @@ export default function MedicalRecordsSection() {
 
     setRecordsLoading(true);
     try {
-      const url = editingRecord 
+      const url = editingRecord
         ? '/api/patient-medical-records'
         : '/api/patient-medical-records';
-      
+
       const method = editingRecord ? 'PUT' : 'POST';
       const body = editingRecord
         ? {
-            record_id: editingRecord.id,
-            ...recordForm
-          }
+          record_id: editingRecord.id,
+          ...recordForm
+        }
         : {
-            patient_id: user.id,
-            ...recordForm
-          };
+          patient_id: user.id,
+          ...recordForm
+        };
 
       const response = await fetch(url, {
         method,
@@ -475,7 +475,7 @@ export default function MedicalRecordsSection() {
           <p className="text-muted-foreground">{t('mr_section_subtitle') || 'Keep your health information up to date'}</p>
         </div>
         {!editing ? (
-          <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+          <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
             <Edit className="w-4 h-4 mr-2" />
             {t('mr_edit') || 'Edit'}
           </Button>
@@ -485,7 +485,7 @@ export default function MedicalRecordsSection() {
               <Save className="w-4 h-4 mr-2" />
               {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
             </Button>
-            <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+            <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
               <X className="w-4 h-4 mr-2" />
               {t('mr_cancel') || 'Cancel'}
             </Button>
@@ -505,11 +505,11 @@ export default function MedicalRecordsSection() {
       ) : (
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
-            <TabsTrigger value="allergies">{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
-            <TabsTrigger value="medications">{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
-            <TabsTrigger value="emergency">{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
-            <TabsTrigger value="records">{t('mr_tab_records') || 'Medical Records'}</TabsTrigger>
+            <TabsTrigger value="overview" disabled={editing && false}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
+            <TabsTrigger value="allergies" disabled={editing && false}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
+            <TabsTrigger value="medications" disabled={editing && false}>{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
+            <TabsTrigger value="emergency" disabled={editing && false}>{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
+            <TabsTrigger value="records" disabled={editing}>{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -574,8 +574,8 @@ export default function MedicalRecordsSection() {
                       {allergiesList.map((allergy, index) => (
                         <Badge key={index} variant="destructive" className="flex items-center gap-1">
                           {allergy}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
+                          <X
+                            className="w-3 h-3 cursor-pointer"
                             onClick={() => removeAllergy(allergy)}
                           />
                         </Badge>
@@ -626,8 +626,8 @@ export default function MedicalRecordsSection() {
                       {medicationsList.map((medication, index) => (
                         <Badge key={index} variant="secondary" className="flex items-center gap-1">
                           {medication}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
+                          <X
+                            className="w-3 h-3 cursor-pointer"
                             onClick={() => removeMedication(medication)}
                           />
                         </Badge>
@@ -725,12 +725,8 @@ export default function MedicalRecordsSection() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
-                    {t('mr_tab_records') || t('mr_medical_records') || 'Medical Records'}
+                    {t('mr_tab_consultations') || 'Consultations'}
                   </CardTitle>
-                  <Button onClick={handleCreateRecord} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('mr_add_record') || 'Add Record'}
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -742,11 +738,7 @@ export default function MedicalRecordsSection() {
                 ) : medicalRecords.length === 0 ? (
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">{t('mr_no_records') || 'No medical records found'}</p>
-                    <Button onClick={handleCreateRecord} className="mt-4" variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t('mr_add_first_record') || 'Add Your First Record'}
-                    </Button>
+                    <p className="text-muted-foreground">{t('mr_no_consultations') || 'No consultations found'}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -771,25 +763,6 @@ export default function MedicalRecordsSection() {
                                   <span>{toArabicNumerals(new Date(record.record_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</span>
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditRecord(record)}
-                                title={t('mr_edit') || 'Edit'}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteRecord(record.id)}
-                                className="text-red-600 hover:text-red-700"
-                                title={t('mr_delete') || 'Delete'}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
                             </div>
                           </div>
                         </CardHeader>

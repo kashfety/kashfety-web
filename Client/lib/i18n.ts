@@ -15,7 +15,7 @@ export function isRTL(locale: Locale): boolean {
  */
 export function toArabicNumerals(value: number | string, locale?: Locale): string {
   if (locale !== 'ar') return String(value);
-  
+
   const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   return String(value).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
 }
@@ -28,15 +28,15 @@ export function toArabicNumerals(value: number | string, locale?: Locale): strin
  */
 export function formatPhoneNumber(phoneNumber: string | undefined | null, locale?: Locale): string {
   if (!phoneNumber) return '';
-  
+
   // Remove all non-digit characters
   const digitsOnly = phoneNumber.replace(/\D/g, '');
-  
+
   if (locale === 'ar') {
     // Convert to Arabic numerals
     return toArabicNumerals(phoneNumber, locale);
   }
-  
+
   return phoneNumber;
 }
 
@@ -152,6 +152,148 @@ export function localizeDoctorName(locale: Locale, name: string): string {
   return `Dr. ${base}`
 }
 
+/**
+ * Get localized month names
+ * @param locale - Current locale
+ * @returns Array of month names in the specified locale
+ */
+export function getLocalizedMonths(locale: Locale): string[] {
+  if (locale === 'ar') {
+    return [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+  }
+  return [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+}
+
+/**
+ * Get short localized month names
+ * @param locale - Current locale
+ * @returns Array of short month names in the specified locale
+ */
+export function getLocalizedMonthsShort(locale: Locale): string[] {
+  if (locale === 'ar') {
+    return [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+  }
+  return [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+}
+
+/**
+ * Get localized gender labels
+ * @param locale - Current locale
+ * @returns Object with male and female labels
+ */
+export function getLocalizedGenders(locale: Locale): { male: string; female: string } {
+  if (locale === 'ar') {
+    return { male: 'ذكر', female: 'أنثى' };
+  }
+  return { male: 'Male', female: 'Female' };
+}
+
+/**
+ * Format date with Arabic locale support
+ * @param date - Date to format
+ * @param locale - Current locale
+ * @param format - Date format type
+ * @returns Formatted date string
+ */
+export function formatLocalizedDate(date: Date | string, locale: Locale, format: 'short' | 'long' | 'time' = 'short'): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  if (locale === 'ar') {
+    const months = getLocalizedMonths(locale);
+    const day = toArabicNumerals(dateObj.getDate(), locale);
+    const month = months[dateObj.getMonth()];
+    const year = toArabicNumerals(dateObj.getFullYear(), locale);
+
+    if (format === 'time') {
+      const hours = toArabicNumerals(dateObj.getHours().toString().padStart(2, '0'), locale);
+      const minutes = toArabicNumerals(dateObj.getMinutes().toString().padStart(2, '0'), locale);
+      return `${hours}:${minutes}`;
+    } else if (format === 'long') {
+      return `${day} ${month} ${year}`;
+    } else {
+      return `${day}/${toArabicNumerals(dateObj.getMonth() + 1, locale)}/${year}`;
+    }
+  } else {
+    if (format === 'time') {
+      return dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } else if (format === 'long') {
+      return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } else {
+      return dateObj.toLocaleDateString('en-US');
+    }
+  }
+}
+
+/**
+ * Format numbers with proper RTL/LTR handling
+ * @param value - Number to format
+ * @param locale - Current locale
+ * @param options - Formatting options
+ * @returns Formatted number string with proper directionality
+ */
+export function formatLocalizedNumber(value: number | string, locale: Locale, options?: {
+  style?: 'decimal' | 'currency' | 'percent';
+  currency?: string;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+}): string {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  if (locale === 'ar') {
+    let formatted: string;
+
+    if (options?.style === 'currency') {
+      formatted = numValue.toFixed(options.minimumFractionDigits || 0);
+      const arabicNumber = toArabicNumerals(formatted, locale);
+      const currency = options.currency || 'ل.س';
+      // Use LTR mark to keep number formatting but place in RTL context
+      return `\u202D${arabicNumber}\u202C ${currency}`;
+    } else if (options?.style === 'percent') {
+      formatted = (numValue * 100).toFixed(options.minimumFractionDigits || 0);
+      const arabicNumber = toArabicNumerals(formatted, locale);
+      return `\u202D${arabicNumber}%\u202C`;
+    } else {
+      formatted = numValue.toLocaleString('ar-EG', options);
+      return `\u202D${toArabicNumerals(formatted, locale)}\u202C`;
+    }
+  } else {
+    if (options?.style === 'currency') {
+      return numValue.toLocaleString('en-US', {
+        style: 'currency',
+        currency: options.currency || 'USD',
+        ...options
+      });
+    } else {
+      return numValue.toLocaleString('en-US', options);
+    }
+  }
+}
+
+/**
+ * Format time string for appointment display with locale support
+ * @param timeString - Time string (e.g., "09:00 AM")
+ * @param locale - Current locale
+ * @returns Formatted time string
+ */
+export function formatLocalizedTime(timeString: string, locale: Locale): string {
+  if (locale === 'ar') {
+    return toArabicNumerals(timeString, locale);
+  }
+  return timeString;
+}
+
 export const translations = {
   en: {
     // Navigation
@@ -167,6 +309,145 @@ export const translations = {
     error_rate: "Error Rate",
     analytics: "Analytics",
     settings: "Settings",
+
+    // Schedule Page
+    schedule_page_title: "Doctor Schedule Management | Healthcare Appointment System",
+    schedule_breadcrumb: "Schedule",
+    today_schedule: "Today's Schedule",
+    add_appointment: "Add Appointment",
+    schedule_appointments: "Appointments",
+    manage_patient_appointments: "Manage your patient appointments",
+    search_patients: "Search patients...",
+    schedule_time: "Time",
+    schedule_patient: "Patient",
+    schedule_type: "Type",
+    schedule_duration: "Duration",
+    schedule_status: "Status",
+    schedule_contact: "Contact",
+
+    // Appointment Types
+    appointment_type_consultation: "Consultation",
+    appointment_type_follow_up: "Follow-up",
+    appointment_type_treatment: "Treatment",
+    appointment_type_emergency: "Emergency",
+
+    // Duration translations
+    duration_30_min: "30 min",
+    duration_45_min: "45 min",
+    duration_60_min: "60 min",
+
+    // Status translations
+    schedule_status_confirmed: "Confirmed",
+    schedule_status_pending: "Pending",
+    schedule_status_urgent: "Urgent",
+
+    // Settings Page
+    settings_page_title: "Account Settings & Preferences | Healthcare Management System",
+    settings_breadcrumb: "Settings",
+    settings_title: "Settings",
+    save_changes: "Save Changes",
+    user_settings: "User Settings",
+    profile_tab: "Profile",
+    account_tab: "Account",
+    notifications_tab: "Notifications",
+    security_tab: "Security",
+    settings_description: "Manage your account settings and preferences",
+
+    // Profile Information
+    profile_information: "Profile Information",
+    update_personal_info: "Update your personal information",
+    change_avatar: "Change Avatar",
+    first_name: "First Name",
+    last_name: "Last Name",
+    display_name: "Display Name",
+    job_title: "Job Title",
+    bio: "Bio",
+    bio_placeholder: "Write a short bio about yourself",
+    bio_default: "System administrator for EduHub platform, managing centers and user access.",
+    location: "Location",
+    timezone: "Timezone",
+    select_timezone: "Select timezone",
+    timezone_et: "Eastern Time (ET)",
+    timezone_ct: "Central Time (CT)",
+    timezone_mt: "Mountain Time (MT)",
+    timezone_pt: "Pacific Time (PT)",
+    timezone_gmt: "Greenwich Mean Time (GMT)",
+
+    // Contact Information
+    contact_information: "Contact Information",
+    update_contact_details: "Update your contact details",
+    email_address: "Email Address",
+    phone_number: "Phone Number",
+    alternative_email: "Alternative Email",
+    enter_alternative_email: "Enter an alternative email",
+
+    // Account Access & Sign Out
+    account_access: "Account Access",
+    manage_account_access: "Manage your account access and sessions",
+    sign_out: "Sign Out",
+    sign_out_device_desc: "Sign out of your account on this device",
+    active_sessions: "Active Sessions",
+    manage_all_sessions: "Manage and sign out from all of your active sessions on other browsers and devices",
+    sign_out_all_devices: "Sign out from all devices",
+
+    // Services Management
+    services_lab_test_types: "Lab Test Types",
+    services_add_new_type: "Add New Type",
+    services_create_lab_test_type: "Create Lab Test Type",
+    services_code: "Code",
+    services_code_placeholder: "e.g., CBC, MRI",
+    services_name: "Name",
+    services_name_placeholder: "e.g., Complete Blood Count",
+    services_category: "Category",
+    services_lab: "Lab",
+    services_imaging: "Imaging",
+    services_default_fee: "Default Fee (Optional)",
+    services_cancel: "Cancel",
+    services_create: "Create",
+    services_creating: "Creating...",
+    services_enabled: "Enabled",
+    services_fee: "Fee",
+    services_save: "Save",
+    services_saving: "Saving...",
+    services_category_lab: "Lab",
+    services_category_imaging: "Imaging",
+    services_choose_category: "Choose a category...",
+    services_fill_required_fields: "Please fill in all required fields",
+    services_created_successfully: "Lab test type created successfully",
+    services_failed_create: "Failed to create lab test type",
+
+    // Doctor Dashboard Messages
+    dd_error_load_dashboard: "Failed to load dashboard data. Please try again.",
+    dd_error_load_patient: "Failed to load patient details",
+    dd_success_medical_record: "Medical record saved and appointment completed",
+    dd_error_save_medical_record: "Failed to save medical record",
+    dd_success_appointment_cancelled: "Appointment cancelled successfully",
+    dd_error_cancel_appointment: "Failed to cancel appointment",
+    dd_error_doctor_id: "Doctor ID not found",
+    dd_success_status_updated: "Appointment status updated",
+    dd_error_update_status: "Failed to update appointment status",
+
+    // Certificate Upload Messages
+    cert_invalid_file_type: "Invalid File Type",
+    cert_invalid_file_desc: "Please upload a PDF, JPG, JPEG, or PNG file",
+    cert_file_too_large: "File Too Large",
+    cert_file_too_large_desc: "Please upload a file smaller than 10MB",
+
+    // Medical Records Messages
+    med_records_error_fetch_info: "Failed to fetch medical information",
+    med_records_success_update: "Medical information updated successfully",
+    med_records_error_update: "Failed to update medical information",
+    med_records_error_fetch_records: "Failed to fetch medical records",
+    med_records_error_required: "Diagnosis and treatment are required",
+
+    // Medical Center Management Messages
+    med_center_error_load: "Failed to load medical centers.",
+    med_center_validation_error: "Validation Error",
+    med_center_validation_desc: "Please fill in the required fields.",
+    med_center_success_add: "Medical center added successfully.",
+    med_center_error_add: "Failed to add medical center.",
+    med_center_success_update: "Medical center updated successfully.",
+    med_center_error_update: "Failed to update medical center.",
 
     // Units / common UI
     minutes_short: "min",
@@ -313,7 +594,7 @@ export const translations = {
     dd_dashboard: "Dashboard",
     dd_management_section: "Management",
     dd_communication_section: "Communication",
-    dd_help_support: "Help & Support",
+
     dd_today: "Today",
     dd_this_month: "This month",
     dd_overview_tab: "Overview",
@@ -1062,6 +1343,10 @@ export const translations = {
     mr_emergency_relationship_placeholder: "Relationship (e.g., Spouse, Parent, Sibling)",
     mr_emergency_phone_placeholder: "Emergency contact phone",
     mr_tab_records: "Medical Records",
+    mr_tab_consultations: "Consultations",
+    mr_add_consultation: "Add Consultation",
+    mr_no_consultations: "No consultations found",
+    mr_add_first_consultation: "Add Your First Consultation",
     mr_medical_records: "Medical Records",
     mr_loading_records: "Loading records...",
     mr_no_records: "No medical records found",
@@ -1135,6 +1420,8 @@ export const translations = {
     // Center Dashboard (en) - Additional translations
     cd_view_patient_records: "View patient records and upload documents",
     cd_total_patients: "total patients",
+    cd_patients: "patients",
+    cd_gender: "Gender",
     cd_upload_result: "Upload Result",
     cd_view_patient: "View Patient",
 
@@ -1506,7 +1793,7 @@ export const translations = {
     admin_notifications: "Notifications",
     admin_account: "Account",
     admin_profile: "Profile",
-    admin_help_support: "Help & Support",
+
     admin_welcome_back: "Welcome back",
     admin_whats_happening: "Here's what's happening in your system today",
     admin_total_users: "Users",
@@ -1605,6 +1892,90 @@ export const translations = {
     profile_picture_no_image: "No profile picture uploaded",
     profile_picture_upload_hint: "Click to upload a new profile picture",
     profile_picture_supported_formats: "Supported formats: JPEG, PNG, WebP, GIF (Max 5MB)",
+
+    // Center Dashboard specific translations
+    cd_center_name_arabic: "Center Name (Arabic)",
+    cd_name_arabic_help: "Arabic name for multilingual support",
+    cd_age_distribution_chart: "Age Distribution",
+    cd_gender_distribution_chart: "Gender Distribution",
+    cd_popular_tests_chart: "Popular Tests",
+    cd_no_age_data_available: "No age data available",
+    cd_no_gender_data_available: "No gender data available",
+    cd_data_will_appear_patients: "Data will appear when patients register",
+    cd_no_test_data_available: "No test data available",
+    cd_service_status_active: "Active",
+    cd_service_status_inactive: "Inactive",
+    cd_batch_operations: "Batch Operations",
+    cd_selected_count: "selected",
+    cd_lab_test_type_selection: "Lab Test Type Selection",
+    cd_select_test_type_to_manage: "Select Test Type to Manage Schedule",
+    cd_test_type_desc_schedule: "Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.",
+    cd_weekly_schedule_title: "Weekly Schedule for",
+    cd_time_slot_duration: "Slot Duration (minutes)",
+    cd_break_time_optional: "Break Time (optional)",
+    cd_generated_slots_preview: "Generated Time Slots Preview ({count} total)",
+    cd_copy_schedule_from: "Copy schedule from:",
+    cd_schedule_stats_summary: "Schedule Statistics Summary",
+    cd_working_days_count: "Working Days",
+    cd_weekly_slots_total: "Total Weekly Slots",
+    cd_current_test_type: "Current Test Type",
+    cd_no_lab_history: "No lab test history with our center",
+    cd_no_tests_yet: "Patient hasn't had any tests at this center yet",
+    cd_patient_registration_info: "Patient Registration Information",
+    cd_personal_details: "Personal Details",
+    cd_patient_full_name: "Full Name",
+    cd_patient_gender: "Gender",
+    cd_patient_dob: "Date of Birth",
+    cd_patient_phone: "Phone",
+    cd_patient_email: "Email",
+    cd_value_not_provided: "Not provided",
+    cd_emergency_contact: "Emergency Contact",
+    cd_contact_name: "Name",
+    cd_contact_relationship: "Relationship",
+    cd_no_emergency_contact: "No emergency contact information provided",
+    cd_medical_history: "Medical History",
+    cd_patient_allergies: "Allergies",
+    cd_current_medications: "Current Medications",
+    cd_no_medical_history: "No medical history provided",
+    cd_no_allergies: "No allergies recorded",
+    cd_no_medications: "No medications recorded",
+    cd_patient_medical_records: "Patient Medical Records",
+    cd_unknown_patient: "Unknown Patient",
+    cd_patient_information: "Patient Information",
+    cd_lab_test_history: "Lab Test History with Our Center",
+    cd_unknown_test: "Unknown Test",
+    cd_date_not_available: "Date not available",
+    cd_view_result: "View Result",
+    cd_notes: "Notes",
+    cd_upload_lab_result: "Upload Lab Result",
+    cd_modal_patient_name: "Patient Name",
+    cd_modal_test_type: "Test Type",
+    cd_appointment_date: "Appointment Date",
+    cd_appointment_time: "Appointment Time",
+    cd_na: "N/A",
+    cd_upload_lab_result_pdf: "Upload Lab Result (PDF)",
+    cd_upload_pdf_hint: "Upload the PDF lab result for this test",
+    cd_result_notes_optional: "Result Notes (Optional)",
+    cd_notes_placeholder: "Add any notes about the lab results or recommendations...",
+    cd_uploading: "Uploading...",
+    cd_modal_upload_result: "Upload Result",
+    cd_modal_cancel: "Cancel",
+    cd_registration_details: "Registration Details",
+    cd_registered: "Registered",
+    cd_last_updated: "Last Updated",
+    cd_unknown: "Unknown",
+    cd_not_updated: "Not updated",
+    cd_no_patient_registration: "No patient registration information found",
+    cd_registration_details_appear: "Patient registration details will appear here when available",
+    cd_close: "Close",
+    cd_registered_date: "Registered",
+    cd_last_updated_date: "Last Updated",
+    status_scheduled: "Scheduled",
+    status_confirmed: "Confirmed",
+    status_completed: "Completed",
+    status_cancelled: "Cancelled",
+    cd_confirm: "Confirm",
+    cd_complete: "Complete",
   },
   ar: {
     // Navigation
@@ -1620,6 +1991,147 @@ export const translations = {
     error_rate: "معدل الخطأ",
     analytics: "التحليلات",
     settings: "الإعدادات",
+
+    // Schedule Page
+    schedule_page_title: "إدارة جداول الطبيب | نظام إدارة المواعيد الطبية",
+    schedule_breadcrumb: "الجدول",
+    today_schedule: "جدول اليوم",
+    add_appointment: "إضافة موعد",
+    schedule_appointments: "المواعيد",
+    manage_patient_appointments: "إدارة مواعيد المرضى",
+    search_patients: "البحث عن المرضى...",
+    schedule_time: "الوقت",
+    schedule_patient: "المريض",
+    schedule_type: "النوع",
+    schedule_duration: "المدة",
+    schedule_status: "الحالة",
+    schedule_contact: "الاتصال",
+
+    // Appointment Types
+    appointment_type_consultation: "استشارة",
+    appointment_type_follow_up: "متابعة",
+    appointment_type_treatment: "علاج",
+    appointment_type_emergency: "طوارئ",
+
+    // Duration translations
+    duration_30_min: "٣٠ دقيقة",
+    duration_45_min: "٤٥ دقيقة",
+    duration_60_min: "٦٠ دقيقة",
+
+    // Status translations
+    schedule_status_confirmed: "مؤكد",
+    schedule_status_pending: "في الانتظار",
+    schedule_status_urgent: "عاجل",
+
+    // Settings Page
+    settings_page_title: "إعدادات الحساب والتفضيلات | نظام إدارة الرعاية الصحية",
+    settings_breadcrumb: "الإعدادات",
+    settings_title: "الإعدادات",
+    save_changes: "حفظ التغييرات",
+    user_settings: "إعدادات المستخدم",
+    profile_tab: "الملف الشخصي",
+    account_tab: "الحساب",
+    notifications_tab: "الإشعارات",
+    security_tab: "الأمان",
+    settings_description: "إدارة إعدادات الحساب والتفضيلات",
+
+    // Profile Information
+    profile_information: "معلومات الملف الشخصي",
+    update_personal_info: "تحديث معلوماتك الشخصية",
+    change_avatar: "تغيير الصورة الشخصية",
+    first_name: "الاسم الأول",
+    last_name: "اسم العائلة",
+    display_name: "اسم العرض",
+    job_title: "المسمى الوظيفي",
+    bio: "السيرة الذاتية",
+    bio_placeholder: "اكتب نبذة مختصرة عن نفسك",
+    bio_default: "مدير النظام لمنصة EduHub، يدير المراكز ووصول المستخدمين.",
+    location: "الموقع",
+    timezone: "المنطقة الزمنية",
+    select_timezone: "اختر المنطقة الزمنية",
+    timezone_et: "التوقيت الشرقي (ET)",
+    timezone_ct: "التوقيت المركزي (CT)",
+    timezone_mt: "توقيت الجبل (MT)",
+    timezone_pt: "توقيت المحيط الهادئ (PT)",
+    timezone_gmt: "توقيت غرينتش (GMT)",
+
+    // Contact Information
+    contact_information: "معلومات الاتصال",
+    update_contact_details: "تحديث بيانات الاتصال",
+    email_address: "عنوان البريد الإلكتروني",
+    phone_number: "رقم الهاتف",
+    alternative_email: "البريد الإلكتروني البديل",
+    enter_alternative_email: "أدخل بريد إلكتروني بديل",
+
+    // Account Access & Sign Out
+    account_access: "الوصول للحساب",
+    manage_account_access: "إدارة الوصول لحسابك والجلسات النشطة",
+    sign_out: "تسجيل الخروج",
+    sign_out_device_desc: "تسجيل الخروج من حسابك على هذا الجهاز",
+    active_sessions: "الجلسات النشطة",
+    manage_all_sessions: "إدارة وتسجيل الخروج من جميع الجلسات النشطة على المتصفحات والأجهزة الأخرى",
+    sign_out_all_devices: "تسجيل الخروج من جميع الأجهزة",
+
+    // Services Management
+    services_lab_test_types: "أنواع الفحوصات المخبرية",
+    services_add_new_type: "إضافة نوع جديد",
+    services_create_lab_test_type: "إنشاء نوع فحص مخبري",
+    services_code: "الرمز",
+    services_code_placeholder: "مثال: CBC, MRI",
+    services_name: "الاسم",
+    services_name_placeholder: "مثال: تعداد الدم الشامل",
+    services_category: "الفئة",
+    services_lab: "مخبري",
+    services_imaging: "تصوير",
+    services_default_fee: "الرسوم الافتراضية (اختياري)",
+    services_cancel: "إلغاء",
+    services_create: "إنشاء",
+    services_creating: "جاري الإنشاء...",
+    services_enabled: "خدمات مُفعّلة حالياً",
+    services_fee: "الرسوم",
+    services_save: "حفظ",
+    services_saving: "جاري الحفظ...",
+    services_category_lab: "مخبري",
+    services_category_imaging: "تصوير",
+    services_choose_category: "اختر فئة...",
+    services_fill_required_fields: "يرجى ملء جميع الحقول المطلوبة",
+    services_created_successfully: "تم إنشاء نوع الفحص المخبري بنجاح",
+    services_failed_create: "فشل في إنشاء نوع الفحص المخبري",
+
+    // Doctor Dashboard Messages (Arabic)
+    dd_error_load_dashboard: "فشل في تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى.",
+    dd_error_load_patient: "فشل في تحميل تفاصيل المريض",
+    dd_success_medical_record: "تم حفظ السجل الطبي وإكمال الموعد",
+    dd_error_save_medical_record: "فشل في حفظ السجل الطبي",
+    dd_success_appointment_cancelled: "تم إلغاء الموعد بنجاح",
+    dd_error_cancel_appointment: "فشل في إلغاء الموعد",
+    dd_error_doctor_id: "لم يتم العثور على معرف الطبيب",
+    dd_success_status_updated: "تم تحديث حالة الموعد",
+    dd_error_update_status: "فشل في تحديث حالة الموعد",
+    dd_opening_booking_for_patient: "فتح حجز الموعد للمريض...",
+    dd_opening_booking_form: "فتح نموذج حجز الموعد...",
+
+    // Certificate Upload Messages (Arabic)
+    cert_invalid_file_type: "نوع ملف غير صحيح",
+    cert_invalid_file_desc: "يرجى تحميل ملف PDF أو JPG أو JPEG أو PNG",
+    cert_file_too_large: "الملف كبير جداً",
+    cert_file_too_large_desc: "يرجى تحميل ملف أصغر من 10 ميجابايت",
+
+    // Medical Records Messages (Arabic)
+    med_records_error_fetch_info: "فشل في جلب المعلومات الطبية",
+    med_records_success_update: "تم تحديث المعلومات الطبية بنجاح",
+    med_records_error_update: "فشل في تحديث المعلومات الطبية",
+    med_records_error_fetch_records: "فشل في جلب السجلات الطبية",
+    med_records_error_required: "التشخيص والعلاج مطلوبان",
+
+    // Medical Center Management Messages (Arabic)
+    med_center_error_load: "فشل في تحميل المراكز الطبية.",
+    med_center_validation_error: "خطأ في التحقق",
+    med_center_validation_desc: "يرجى ملء الحقول المطلوبة.",
+    med_center_success_add: "تم إضافة المركز الطبي بنجاح.",
+    med_center_error_add: "فشل في إضافة المركز الطبي.",
+    med_center_success_update: "تم تحديث المركز الطبي بنجاح.",
+    med_center_error_update: "فشل في تحديث المركز الطبي.",
 
     // Units / common UI
     minutes_short: "د",
@@ -1766,7 +2278,7 @@ export const translations = {
     dd_dashboard: "لوحة التحكم",
     dd_management_section: "الإدارة",
     dd_communication_section: "التواصل",
-    dd_help_support: "المساعدة والدعم",
+
     dd_today: "اليوم",
     dd_this_month: "هذا الشهر",
     dd_overview_tab: "نظرة عامة",
@@ -1845,8 +2357,6 @@ export const translations = {
     dd_relationship_label: "القرابة:",
     dd_no_emergency_contact: "لم يتم تقديم جهة اتصال طارئة",
     dd_book_appointment_title: "حجز موعد",
-    dd_opening_booking_for_patient: "فتح نموذج حجز الموعد للمريض...",
-    dd_opening_booking_form: "فتح نموذج حجز الموعد...",
     dd_collapse_sidebar: "طي الشريط الجانبي",
     dd_expand_sidebar: "توسيع الشريط الجانبي",
     dd_patient_details: "تفاصيل المريض",
@@ -2497,6 +3007,10 @@ export const translations = {
     mr_emergency_relationship_placeholder: "القرابة (مثل الزوج/الزوجة، الوالد، الأخ/الأخت)",
     mr_emergency_phone_placeholder: "هاتف جهة الاتصال الطارئة",
     mr_tab_records: "السجلات الطبية",
+    mr_tab_consultations: "الاستشارات",
+    mr_add_consultation: "إضافة استشارة",
+    mr_no_consultations: "لا توجد استشارات",
+    mr_add_first_consultation: "إضافة استشارتك الأولى",
     mr_medical_records: "السجلات الطبية",
     mr_loading_records: "جاري تحميل السجلات...",
     mr_no_records: "لم يتم العثور على سجلات طبية",
@@ -2570,6 +3084,8 @@ export const translations = {
     // Center Dashboard (ar) - Additional translations
     cd_view_patient_records: "عرض سجلات المرضى ورفع المستندات",
     cd_total_patients: "إجمالي المرضى",
+    cd_patients: "مرضى",
+    cd_gender: "الجنس",
     cd_upload_result: "رفع النتيجة",
     cd_view_patient: "عرض المريض",
 
@@ -2732,6 +3248,82 @@ export const translations = {
     profile_update_failed: "فشل تحديث الملف الشخصي",
     center_dashboard: "لوحة تحكم المركز",
     cd_update_profile_desc: "تحديث معلومات مركزك لمساعدة المرضى في العثور عليك والاتصال بك",
+    center_name_arabic: "اسم المركز (بالعربية)",
+    cd_name_appears_arabic: "الاسم العربي للدعم متعدد اللغات",
+    cd_no_age_data: "لا توجد بيانات عمرية متاحة",
+    cd_no_gender_data: "لا توجد بيانات جنسية متاحة",
+    cd_data_will_appear_patients: "ستظهر البيانات عند تسجيل المرضى",
+    cd_no_test_data: "لا توجد بيانات فحوصات متاحة",
+    age: "العمر",
+    gender_male: "ذكر",
+    gender_female: "أنثى",
+    gender_other: "آخر",
+    test_type_selection: "اختيار نوع الفحص",
+    select_test_type_manage: "اختر نوع الفحص لإدارة الجدول",
+    test_type_selection_desc: "اختر نوع الفحص المخبري الذي تريد ضبط جدوله الزمني. كل نوع فحص يمكن أن يكون له ساعات عمل فريدة.",
+    test_type: "نوع الفحص",
+    no_services_selected: "لا توجد خدمات محددة",
+    select_services_first: "يرجى تفعيل الخدمات في تبويب الخدمات أولاً",
+    weekly_schedule_for: "الجدول الأسبوعي لـ",
+    start_time: "وقت البدء",
+    end_time: "وقت الانتهاء",
+    slot_duration_minutes: "مدة الموعد (بالدقائق)",
+    break_start_optional: "بداية الاستراحة (اختياري)",
+    break_end_optional: "نهاية الاستراحة (اختياري)",
+    generated_time_slots_total: "الفترات الزمنية المُولَّدة ({count} إجمالي)",
+    more_count: "+{count} أخرى",
+    copy_from: "نسخ من:",
+    schedule_summary: "ملخص الجدول",
+    working_days: "أيام العمل",
+    total_weekly_slots: "إجمالي الفترات الأسبوعية",
+    center_schedule_management: "إدارة جدول المختبر",
+    schedule_saved: "تم حفظ الجدول بنجاح",
+    save_schedule: "حفظ الجدول",
+    refresh: "تحديث",
+    selected: "محدد",
+    select_all: "تحديد الكل",
+    deselect_all: "إلغاء تحديد الكل",
+    enable_selected: "تفعيل المحدد",
+    disable_selected: "تعطيل المحدد",
+    set_fee: "تحديد الرسوم",
+    fee: "الرسوم",
+    enabled: "مُفعّل",
+    disabled: "معطّل",
+    duration: "المدة",
+    category: "الفئة",
+    online_booking_enabled: "الحجز عبر الإنترنت مُفعّل",
+    instant_confirmation: "تأكيد فوري",
+    automated_scheduling: "جدولة تلقائية",
+    active_services: "الخدمات المخبرية النشطة",
+    active_services_description: "خدمات الفحوصات المخبرية المُفعّلة حالياً مع إعداداتها",
+    no_active_services_title: "لا توجد خدمات مُفعّلة بعد.",
+    no_active_services_desc: "فعّل خدمات الفحوصات المخبرية أعلاه لرؤيتها هنا كبطاقات.",
+    test_types_enabled: "أنواع فحوصات مُفعّلة",
+    test_types_disabled: "أنواع فحوصات معطّلة",
+    please_enter_fee: "يرجى إدخال رسوم",
+    fee_set_for: "تم تحديد الرسوم لـ",
+    test_types: "أنواع الفحوصات",
+    add_new_type: "إضافة نوع جديد",
+    create_lab_test_type: "إنشاء نوع فحص مخبري",
+    code: "الرمز",
+    default_fee: "الرسوم الافتراضية (اختياري)",
+    creating: "جاري الإنشاء...",
+    save_services: "حفظ الخدمات",
+    reset: "إعادة تعيين",
+    services_reset: "تم إعادة تعيين الخدمات",
+    services_reset_desc: "تم إعادة تعيين الخدمات إلى الإعدادات المحفوظة",
+    enable_all: "تفعيل الكل",
+    activate_all_services: "تفعيل جميع الخدمات",
+    disable_all: "تعطيل الكل",
+    deactivate_all_services: "تعطيل جميع الخدمات",
+    reset_pricing: "إعادة تعيين الأسعار",
+    restore_default_prices: "استعادة الأسعار الافتراضية",
+    bulk_enable: "تفعيل مجمع",
+    bulk_disable: "تعطيل مجمع",
+    all_services_disabled: "تم تعطيل جميع الخدمات",
+    pricing_reset: "إعادة تعيين الأسعار",
+    default_prices_applied: "تم تطبيق الأسعار الافتراضية",
+    no_patients_registered: "لم يسجل مرضى بعد",
     cd_name_appears_on: "سيظهر هذا الاسم على المواعيد والمراسلات",
     cd_primary_contact_email: "البريد الإلكتروني الأساسي للتواصل مع المرضى والإشعارات",
     cd_contact_number_appointments: "رقم الاتصال للمواعيد والطوارئ",
@@ -2940,13 +3532,12 @@ export const translations = {
     admin_notifications: "الإشعارات",
     admin_account: "الحساب",
     admin_profile: "الملف الشخصي",
-    admin_help_support: "المساعدة والدعم",
+
     admin_welcome_back: "مرحباً بعودتك",
     admin_whats_happening: "إليك ما يحدث في نظامك اليوم",
     admin_total_users: "المستخدمون",
     admin_revenue: "الإيرادات",
     admin_role: "مدير",
-    refresh: "تحديث",
 
     // Admin Overview Dashboard
     admin_period: "الفترة:",
@@ -3044,6 +3635,89 @@ export const translations = {
     profile_picture_no_image: "لم يتم رفع صورة للملف الشخصي",
     profile_picture_upload_hint: "انقر لرفع صورة جديدة للملف الشخصي",
     profile_picture_supported_formats: "الصيغ المدعومة: JPEG, PNG, WebP, GIF (الحد الأقصى 5 ميجابايت)",
+
+    // Center Dashboard specific translations
+    cd_center_name_arabic: "اسم المركز (بالعربية)",
+    cd_name_arabic_help: "الاسم العربي للدعم متعدد اللغات",
+    cd_age_distribution_chart: "التوزيع العمري",
+    cd_gender_distribution_chart: "التوزيع الجنسي",
+    cd_popular_tests_chart: "الفحوصات الشائعة",
+    cd_no_age_data_available: "لا توجد بيانات عمرية متاحة",
+    cd_no_gender_data_available: "لا توجد بيانات جنسية متاحة",
+    cd_no_test_data_available: "لا توجد بيانات فحوصات متاحة",
+    cd_service_status_active: "نشط",
+    cd_service_status_inactive: "غير نشط",
+    cd_batch_operations: "العمليات المجمعة",
+    cd_selected_count: "محدد",
+    cd_lab_test_type_selection: "اختيار نوع الفحص المخبري",
+    cd_select_test_type_to_manage: "اختر نوع الفحص لإدارة الجدول",
+    cd_test_type_desc_schedule: "اختر نوع الفحص المخبري الذي تريد ضبط جدوله الزمني. كل نوع فحص يمكن أن يكون له ساعات عمل فريدة.",
+    cd_weekly_schedule_title: "الجدول الأسبوعي لـ",
+    cd_time_slot_duration: "مدة الموعد (بالدقائق)",
+    cd_break_time_optional: "فترة الراحة (اختيارية)",
+    cd_generated_slots_preview: "معاينة الفترات الزمنية المُولدة ({count} إجمالي)",
+    cd_copy_schedule_from: "نسخ الجدول من:",
+    cd_schedule_stats_summary: "ملخص إحصائيات الجدول",
+    cd_working_days_count: "أيام العمل",
+    cd_weekly_slots_total: "إجمالي الفترات الأسبوعية",
+    cd_current_test_type: "نوع الفحص الحالي",
+    cd_no_lab_history: "لا توجد سجلات فحوصات مخبرية مع مركزنا",
+    cd_no_tests_yet: "لم يجر المريض أي فحوصات في هذا المركز بعد",
+    cd_patient_registration_info: "معلومات تسجيل المريض",
+    cd_personal_details: "التفاصيل الشخصية",
+    cd_patient_full_name: "الاسم الكامل",
+    cd_patient_gender: "الجنس",
+    cd_patient_dob: "تاريخ الميلاد",
+    cd_patient_phone: "الهاتف",
+    cd_patient_email: "البريد الإلكتروني",
+    cd_value_not_provided: "غير مقدم",
+    cd_emergency_contact: "جهة الاتصال الطارئ",
+    cd_contact_name: "الاسم",
+    cd_contact_relationship: "العلاقة",
+    cd_no_emergency_contact: "لا توجد معلومات جهة اتصال طارئ مقدمة",
+    cd_medical_history: "التاريخ الطبي",
+    cd_patient_allergies: "الحساسيات",
+    cd_current_medications: "الأدوية الحالية",
+    cd_no_medical_history: "لا يوجد تاريخ طبي مقدم",
+    cd_no_allergies: "لا توجد حساسيات مسجلة",
+    cd_no_medications: "لا توجد أدوية مسجلة",
+    cd_patient_medical_records: "السجلات الطبية للمريض",
+    cd_unknown_patient: "مريض غير معروف",
+    cd_patient_information: "معلومات المريض",
+    cd_lab_test_history: "تاريخ التحاليل المخبرية مع مركزنا",
+    cd_unknown_test: "تحليل غير معروف",
+    cd_date_not_available: "التاريخ غير متوفر",
+    cd_view_result: "عرض النتيجة",
+    cd_notes: "ملاحظات",
+    cd_upload_lab_result: "رفع نتيجة الفحص المخبري",
+    cd_modal_patient_name: "اسم المريض",
+    cd_modal_test_type: "نوع الفحص",
+    cd_appointment_date: "تاريخ الموعد",
+    cd_appointment_time: "وقت الموعد",
+    cd_na: "غير متاح",
+    cd_upload_lab_result_pdf: "رفع نتيجة الفحص المخبري (PDF)",
+    cd_upload_pdf_hint: "ارفع ملف PDF لنتيجة هذا الفحص",
+    cd_result_notes_optional: "ملاحظات النتيجة (اختيارية)",
+    cd_notes_placeholder: "أضف أي ملاحظات حول النتائج المخبرية أو التوصيات...",
+    cd_uploading: "جاري الرفع...",
+    cd_modal_upload_result: "رفع النتيجة",
+    cd_modal_cancel: "إلغاء",
+    cd_registration_details: "تفاصيل التسجيل",
+    cd_registered: "مسجل",
+    cd_last_updated: "آخر تحديث",
+    cd_unknown: "غير معروف",
+    cd_not_updated: "لم يتم التحديث",
+    cd_no_patient_registration: "لم يتم العثور على معلومات تسجيل المريض",
+    cd_registration_details_appear: "ستظهر تفاصيل تسجيل المريض هنا عند توفرها",
+    cd_close: "إغلاق",
+    cd_registered_date: "مسجل",
+    cd_last_updated_date: "آخر تحديث",
+    status_scheduled: "مجدول",
+    status_confirmed: "مؤكد",
+    status_completed: "مكتمل",
+    status_cancelled: "ملغي",
+    cd_confirm: "تأكيد",
+    cd_complete: "إكمال",
   },
 } as const
 

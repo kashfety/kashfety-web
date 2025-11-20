@@ -48,7 +48,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
   };
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
@@ -80,14 +80,42 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           </Button>
 
           {/* Logo */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex items-center -ms-1"
           >
             {/* Logo - switches between light and dark mode */}
-            <div className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48">
+            <div
+              onClick={() => {
+                if (user) {
+                  // Navigate based on user role
+                  switch (user.role) {
+                    case 'patient':
+                      router.push('/patient-dashboard/doctors');
+                      break;
+                    case 'doctor':
+                      router.push('/doctor-dashboard');
+                      break;
+                    case 'center':
+                      router.push('/center-dashboard');
+                      break;
+                    case 'admin':
+                      router.push('/admin-dashboard');
+                      break;
+                    case 'super_admin':
+                      router.push('/super-admin-dashboard');
+                      break;
+                    default:
+                      router.push('/');
+                  }
+                } else {
+                  router.push('/');
+                }
+              }}
+              className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <Image
                 src={theme === 'dark' ? "/logo/branding-dark.png" : "/logo/branding-light.png"}
                 alt="Kashfety Logo"
@@ -159,8 +187,8 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
               <span className="hidden lg:block text-foreground/80 font-medium text-sm">
                 {t('header_hello') || 'Hello,'} {getLocalizedUserName(user, locale)}
               </span>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleAuthAction}
                 className="border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 px-2 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 text-sm"
               >
@@ -169,8 +197,8 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
               </Button>
             </div>
           ) : (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleAuthAction}
               className="border-2 border-[#4DBCC4] dark:border-[#2a5f6b] text-[#4DBCC4] dark:text-[#2a5f6b] hover:bg-[#4DBCC4] dark:hover:bg-[#2a5f6b] hover:text-white transition-all duration-300 px-3 sm:px-6 py-2 text-sm"
             >

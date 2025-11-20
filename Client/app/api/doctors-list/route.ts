@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
         // Apply search filter
         if (search) {
-            query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,specialty.ilike.%${search}%`);
+            query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,first_name_ar.ilike.%${search}%,last_name_ar.ilike.%${search}%,name_ar.ilike.%${search}%,specialty.ilike.%${search}%`);
         }
 
         // Apply specialty filter
@@ -54,9 +54,17 @@ export async function GET(request: NextRequest) {
 
         // Create a map for quick lookup
         const specialtyMap = new Map();
+        const specialtySearchMap = new Map(); // Map for Arabic specialty search
         (specialties || []).forEach((spec: any) => {
             specialtyMap.set(spec.name?.toLowerCase(), spec);
             if (spec.name_en) specialtyMap.set(spec.name_en.toLowerCase(), spec);
+            // Create reverse mapping for Arabic search
+            if (spec.name_ar) {
+                const matchingEnglishName = spec.name || spec.name_en;
+                if (matchingEnglishName) {
+                    specialtySearchMap.set(spec.name_ar.toLowerCase(), matchingEnglishName.toLowerCase());
+                }
+            }
         });
 
         // Enrich doctors with specialty translations
@@ -70,13 +78,35 @@ export async function GET(request: NextRequest) {
             };
         });
 
+        // If search query exists, filter enriched doctors to include Arabic specialty matches
+        let filteredDoctors = enrichedDoctors;
+        if (search) {
+            const searchLower = search.toLowerCase();
+            filteredDoctors = enrichedDoctors.filter(doctor => {
+                // Check if already matched by database query
+                const matchedByDB =
+                    doctor.name?.toLowerCase().includes(searchLower) ||
+                    doctor.first_name?.toLowerCase().includes(searchLower) ||
+                    doctor.last_name?.toLowerCase().includes(searchLower) ||
+                    doctor.first_name_ar?.toLowerCase().includes(searchLower) ||
+                    doctor.last_name_ar?.toLowerCase().includes(searchLower) ||
+                    doctor.name_ar?.toLowerCase().includes(searchLower) ||
+                    doctor.specialty?.toLowerCase().includes(searchLower);
+
+                // Also check Arabic specialty field
+                const matchedByArSpecialty = doctor.specialty_ar?.toLowerCase().includes(searchLower);
+
+                return matchedByDB || matchedByArSpecialty;
+            });
+        }
+
         return NextResponse.json({
             success: true,
-            doctors: enrichedDoctors,
-            total: count || 0,
+            doctors: filteredDoctors,
+            total: search ? filteredDoctors.length : (count || 0),
             page,
             limit,
-            totalPages: Math.ceil((count || 0) / limit)
+            totalPages: search ? Math.ceil(filteredDoctors.length / limit) : Math.ceil((count || 0) / limit)
         });
     } catch (error: any) {
         console.error('Unexpected error in doctors list endpoint:', error);

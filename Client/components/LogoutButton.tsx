@@ -6,7 +6,7 @@ import { authService } from "@/lib/api"
 interface LogoutButtonProps {
     className?: string
     onClick?: () => void
-    variant?: 'default' | 'outline'
+    variant?: 'default' | 'outline' | 'destructive'
     children?: React.ReactNode
 }
 

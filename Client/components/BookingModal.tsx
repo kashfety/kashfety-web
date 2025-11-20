@@ -126,7 +126,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   // Helper function to get localized name
   const getLocalizedName = (item: { name?: string; name_en?: string; name_ar?: string; name_ku?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
     if (!item) return '';
-    
+
     // For Arabic locale
     if (locale === 'ar') {
       // If it's a doctor with first_name_ar/last_name_ar
@@ -136,10 +136,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       // If it has name_ar (for centers, etc)
       if (item.name_ar) return item.name_ar;
     }
-    
+
     // For Kurdish locale
-    if (locale === 'ku' && item.name_ku) return item.name_ku;
-    
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && item.name_ku) return item.name_ku;
+
     // Default to English name
     return item.name || item.name_en || '';
   };
@@ -148,18 +149,20 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const getLocalizedSpecialtyName = (specialtyName: string) => {
     const specialtyData = specialtiesMap.get(specialtyName);
     if (!specialtyData) return specialtyName;
-    
+
     if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
-    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
     return specialtyName;
   };
 
   // Helper to get localized lab test type name
   const getLocalizedLabTestName = (labTest: LabTestType | null) => {
     if (!labTest) return '';
-    
+
     if (locale === 'ar' && labTest.name_ar) return labTest.name_ar;
-    if (locale === 'ku' && labTest.name_ku) return labTest.name_ku;
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && labTest.name_ku) return labTest.name_ku;
     if (labTest.name_en) return labTest.name_en;
     return labTest.name;
   };
@@ -280,7 +283,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (response.ok) {
         const data = await response.json();
         setSpecialties(data.specialties);
-        
+
         // Build specialties map for localization
         const map = new Map();
         data.specialties.forEach((specialty: Specialty) => {

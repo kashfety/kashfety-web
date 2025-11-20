@@ -28,12 +28,12 @@ interface CertificateFormData {
     certificate_file: File | null;
 }
 
-export default function DoctorCertificateUpload({ 
-    onUploadComplete, 
-    onSkip, 
-    doctorToken, 
+export default function DoctorCertificateUpload({
+    onUploadComplete,
+    onSkip,
+    doctorToken,
     showSkipOption = false,
-    isModal = false 
+    isModal = false
 }: DoctorCertificateUploadProps) {
     const { toast } = useToast();
     const { showAlert } = useCustomAlert();
@@ -88,7 +88,7 @@ export default function DoctorCertificateUpload({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!formData.certificate_file) {
             toast({
                 title: t('dc_missing_file') || "Missing File",
@@ -121,7 +121,7 @@ export default function DoctorCertificateUpload({
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
             const uploadUrl = `${baseUrl}/auth/doctor/upload-certificate`;
-            
+
             console.log('Certificate upload URL:', uploadUrl);
 
             const response = await fetch(uploadUrl, {
@@ -140,10 +140,10 @@ export default function DoctorCertificateUpload({
 
             // Clear temporary token after successful upload
             localStorage.removeItem('temp_doctor_token');
-            
-            showAlert(
-                t('dc_upload_success') || "Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved.",
-                'success'
+
+            showSuccess(
+                'Success',
+                t('dc_upload_success') || "Certificate uploaded successfully! Your account is now pending admin approval. You will be notified once approved."
             );
 
             onUploadComplete();
@@ -306,7 +306,7 @@ export default function DoctorCertificateUpload({
                                     </>
                                 )}
                             </Button>
-                            
+
                             {showSkipOption && onSkip && (
                                 <Button
                                     type="button"

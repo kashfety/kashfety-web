@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAuth } from '@/lib/providers/auth-provider';
 
 export interface PermissionConfig {
@@ -116,7 +117,7 @@ export function withPermissions<T extends object>(
             return permissionConfig.fallback || null;
         }
 
-        return <Component { ...props } />;
+        return React.createElement(Component, props);
     };
 }
 
@@ -142,10 +143,10 @@ export function RoleGuard({
     });
 
     if (!hasAccess) {
-        return <>{ fallback } </>;
+        return React.createElement(React.Fragment, {}, fallback);
     }
 
-    return <>{ children } </>;
+    return React.createElement(React.Fragment, {}, children);
 }
 
 export default usePermissions;

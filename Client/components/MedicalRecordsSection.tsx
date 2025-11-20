@@ -505,11 +505,11 @@ export default function MedicalRecordsSection() {
       ) : (
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
-            <TabsTrigger value="allergies">{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
-            <TabsTrigger value="medications">{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
-            <TabsTrigger value="emergency">{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
-            <TabsTrigger value="records">{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
+            <TabsTrigger value="overview" disabled={editing && false}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
+            <TabsTrigger value="allergies" disabled={editing && false}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
+            <TabsTrigger value="medications" disabled={editing && false}>{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
+            <TabsTrigger value="emergency" disabled={editing && false}>{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
+            <TabsTrigger value="records" disabled={editing}>{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">

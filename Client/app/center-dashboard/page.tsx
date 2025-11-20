@@ -921,12 +921,15 @@ function CenterAnalytics({
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: isDark ? "#1f2937" : "#ffffff",
-                    border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+                    backgroundColor: isDark ? "rgba(15, 23, 42, 0.98)" : "rgba(255, 255, 255, 0.98)",
+                    border: `2px solid ${isDark ? "#10B981" : "#10B981"}`,
                     borderRadius: "12px",
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                    color: isDark ? "#ffffff" : "#000000",
+                    boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
+                    color: isDark ? "#f8fafc" : "#0f172a",
                     direction: isRTL ? 'rtl' : 'ltr',
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
                   }}
                   formatter={(value, name) => [
                     name === 'revenue' ? formatLocalizedNumber(Number(value), locale, { style: 'currency', currency: t('currency') || 'SYP' }) :
@@ -1005,9 +1008,14 @@ function CenterAnalytics({
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: isDark ? "#1f2937" : "#ffffff",
-                        border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-                        borderRadius: "8px"
+                        backgroundColor: isDark ? "rgba(15, 23, 42, 0.98)" : "rgba(255, 255, 255, 0.98)",
+                        border: `2px solid ${isDark ? "#10B981" : "#10B981"}`,
+                        borderRadius: "12px",
+                        boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
+                        color: isDark ? "#f8fafc" : "#0f172a",
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
+                        textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
                       }}
                     />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -1075,17 +1083,18 @@ function CenterAnalytics({
                         }}
                         labelFormatter={(label) => `${t('cd_gender')}: ${label}`}
                         contentStyle={{
-                          backgroundColor: isDark ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
-                          border: `1px solid ${isDark ? "#10B981" : "#10B981"}`,
+                          backgroundColor: isDark ? "rgba(15, 23, 42, 0.98)" : "rgba(255, 255, 255, 0.98)",
+                          border: `2px solid ${isDark ? "#10B981" : "#10B981"}`,
                           borderRadius: "12px",
-                          boxShadow: isDark ? "0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)" : "0 20px 25px -5px rgba(16, 185, 129, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
-                          color: isDark ? "#ffffff" : "#1f2937",
+                          boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
+                          color: isDark ? "#f8fafc" : "#0f172a",
                           fontSize: "14px",
                           fontWeight: "600",
                           padding: "12px 16px",
-                          backdropFilter: "blur(8px)",
-                          WebkitBackdropFilter: "blur(8px)",
-                          zIndex: 9999
+                          backdropFilter: "blur(12px)",
+                          WebkitBackdropFilter: "blur(12px)",
+                          zIndex: 9999,
+                          textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
                         }}
                         wrapperStyle={{
                           zIndex: 9999,

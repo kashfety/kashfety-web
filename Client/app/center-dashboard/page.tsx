@@ -465,12 +465,12 @@ function CenterPatients({
           <div className="p-2 rounded-xl gradient-emerald animate-glow">
             <Users className="h-5 w-5 text-white" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">
+          <div className={isRTL ? 'text-right' : 'text-left'}>
+            <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>
               {t('cd_patient_management') || 'Patient Management'}
             </h2>
-            <p className="text-emerald-700/80 dark:text-emerald-400/80">
-              {t('cd_view_patient_records') || 'View patient records and upload documents'} ({patients?.length || 0} {t('cd_total_patients') || 'total patients'})
+            <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              {t('cd_view_patient_records') || 'View patient records and upload documents'} ({formatLocalizedNumber(patients?.length || 0, locale)} {t('cd_total_patients') || 'total patients'})
             </p>
           </div>
         </div>
@@ -478,7 +478,7 @@ function CenterPatients({
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
-          <CardTitle>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
+          <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -808,10 +808,10 @@ function CenterAnalytics({
               <BarChart2 className="h-5 w-5 text-white" />
             </div>
             <div className={isRTL ? 'text-right' : 'text-left'}>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">
+              <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>
                 {t('cd_analytics_demographics') || 'Analytics & Demographics'}
               </h2>
-              <p className="text-emerald-700/80 dark:text-emerald-400/80">
+              <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {t('cd_center_performance_insights') || 'Center performance insights and patient demographics'}
               </p>
             </div>
@@ -834,7 +834,7 @@ function CenterAnalytics({
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                   {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                 </p>
-                <p className="text-xs text-gray-500">{t('today') || 'Today'}: {todayRevenue.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} {t('currency') || 'SYP'}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: {formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</p>
               </div>
               <DollarSign className="h-8 w-8 text-emerald-500" />
             </div>
@@ -849,7 +849,7 @@ function CenterAnalytics({
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {formatLocalizedNumber(totalBookings, locale)}
                 </p>
-                <p className="text-xs text-gray-500">{t('today') || 'Today'}: {todayBookings}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: {formatLocalizedNumber(todayBookings, locale)}</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -864,7 +864,7 @@ function CenterAnalytics({
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {formatLocalizedNumber(completionRate, locale)}%
                 </p>
-                <p className="text-xs text-gray-500">{completedBookings} {t('of') || 'of'} {totalBookings}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(completedBookings, locale)} {t('of') || 'of'} {formatLocalizedNumber(totalBookings, locale)}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-purple-500" />
             </div>
@@ -890,11 +890,11 @@ function CenterAnalytics({
       {/* Monthly Trends Chart */}
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
-          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
             <TrendingUp className="h-5 w-5 text-emerald-600" />
             {t('cd_lab_test_trends_revenue') || 'Lab Test Trends & Revenue'}
           </CardTitle>
-          <CardDescription>{t('cd_monthly_bookings_desc') || 'Monthly bookings, completions, and revenue over time'}</CardDescription>
+          <CardDescription className={isRTL ? 'text-right' : 'text-left'}>{t('cd_monthly_bookings_desc') || 'Monthly bookings, completions, and revenue over time'}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -1040,7 +1040,7 @@ function CenterAnalytics({
         {/* Gender Distribution */}
         <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <Users className="h-5 w-5 text-emerald-600" />
               {t('cd_gender_distribution') || 'Gender Distribution'}
             </CardTitle>
@@ -1652,7 +1652,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               {/* Weekly Schedule */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                     <Calendar className="h-5 w-5" />
                     {(t('weekly_schedule_for') || 'Weekly Schedule for')} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
                   </CardTitle>
@@ -1786,7 +1786,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               {/* Schedule Summary */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                     <CheckCircle className="h-5 w-5" />
                     {t('schedule_summary') || 'Schedule Summary'}
                   </CardTitle>
@@ -3123,21 +3123,21 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Appointments Tab */}
-              <TabsContent value="appointments" className="p-6 space-y-6">
+              <TabsContent value="appointments" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('cd_appointment_management') || 'Appointment Management'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('cd_manage_appointments_desc') || 'Manage your center\'s appointments and bookings'}</p>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_appointment_management') || 'Appointment Management'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_manage_appointments_desc') || 'Manage your center\'s appointments and bookings'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Today's Appointments */}
-                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CardHeader>
-                    <CardTitle>{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</CardTitle>
+                    <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -3241,12 +3241,12 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Patients Tab */}
-              <TabsContent value="patients" className="p-6 space-y-6">
+              <TabsContent value="patients" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <CenterPatients patients={patients} onViewPatient={handleViewPatient} />
               </TabsContent>
 
               {/* Analytics Tab */}
-              <TabsContent value="analytics" className="p-6 space-y-6">
+              <TabsContent value="analytics" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <CenterAnalytics
                   analytics={analytics}
                   todayStats={todayStats}
@@ -3257,13 +3257,13 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Schedule Tab */}
-              <TabsContent value="schedule" className="p-6 space-y-6">
+              <TabsContent value="schedule" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('cd_schedule_management') || 'Schedule Management'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('cd_configure_operating_hours') || 'Configure operating hours and availability for each lab test type'}</p>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_schedule_management') || 'Schedule Management'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_operating_hours') || 'Configure operating hours and availability for each lab test type'}</p>
                     </div>
                   </div>
                 </div>
@@ -3277,13 +3277,13 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Services Tab */}
-              <TabsContent value="services" className="p-6 space-y-6">
+              <TabsContent value="services" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><TestTube className="h-5 w-5 text-white" /></div>
-                    <div>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('cd_services_management') || 'Services Management'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('cd_configure_lab_services') || 'Configure and manage your lab testing services'}</p>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_services_management') || 'Services Management'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_lab_services') || 'Configure and manage your lab testing services'}</p>
                     </div>
                   </div>
                 </div>
@@ -3293,11 +3293,11 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                           <Building2 className="w-5 h-5" />
                           {t('available_services') || 'Available Lab Services'}
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
                           {t('services_description') || 'Enable or disable lab test services and set pricing'}
                         </CardDescription>
                       </div>
@@ -3589,11 +3589,11 @@ export default function CenterDashboardPage() {
                 {/* Selected Services Card View */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <CheckCircle className="w-5 h-5 text-green-500" />
                       {t('active_services') || 'Active Lab Services'}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
                       {t('active_services_description') || 'Currently enabled lab test services with their configurations'}
                     </CardDescription>
                   </CardHeader>
@@ -3863,7 +3863,7 @@ export default function CenterDashboardPage() {
                       <Edit className="w-5 h-5" />
                       {t('center_profile') || 'Edit Center Profile'}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
                       {t('cd_update_profile_desc') || 'Update your center information to help patients find and contact you'}
                     </CardDescription>
                   </CardHeader>

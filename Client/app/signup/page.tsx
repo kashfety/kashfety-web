@@ -1140,7 +1140,7 @@ export default function SignupPage() {
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-gray-400"
+                    className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
                   >
                     {validatePassword(formData.password) 
                       ? "✓ Strong password" 

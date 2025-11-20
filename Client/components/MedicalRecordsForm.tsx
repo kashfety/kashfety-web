@@ -144,17 +144,14 @@ export default function MedicalRecordsForm({
 
       console.log('Submitting medical data:', medicalData);
 
-      // Use the fallback API route for Vercel compatibility
-      const response = await fetch('/api/auth/register-verified', {
+      // Use the medical records API endpoint
+      const response = await fetch('/api/medical-records', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          medical_records_data: medicalData,
-          patient_id: patientId
-        })
+        body: JSON.stringify(medicalData)
       });
 
       if (!response.ok) {

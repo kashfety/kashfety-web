@@ -1073,8 +1073,10 @@ function CenterAnalytics({
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: entry.fill }}
                       ></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400" dir="ltr">
-                        {entry.name} ({formatLocalizedNumber(entry.value, locale)})
+                      <span className={`text-xs text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <span className="font-medium">{entry.name}</span>
+                        <span className="mx-1 opacity-60">•</span>
+                        <span className="font-mono" dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
                       </span>
                     </div>
                   ))}
@@ -3127,7 +3129,7 @@ export default function CenterDashboardPage() {
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
                                 >
                                   <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('confirm') || 'Confirm'}
+                                  {t('cd_confirm') || 'Confirm'}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -3135,7 +3137,7 @@ export default function CenterDashboardPage() {
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
                                 >
                                   <XCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('cancel') || 'Cancel'}
+                                  {t('cd_cancel') || 'Cancel'}
                                 </Button>
                               </>
                             )}
@@ -3147,7 +3149,7 @@ export default function CenterDashboardPage() {
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
                                 >
                                   <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('complete') || 'Complete'}
+                                  {t('cd_complete') || 'Complete'}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -3960,7 +3962,7 @@ export default function CenterDashboardPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Patient Medical Records: {selectedPatient.name || 'Unknown Patient'}
+                {t('cd_patient_medical_records')}: {getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')}
               </h3>
               <Button variant="outline" size="sm" onClick={() => setShowPatientModal(false)}>
                 <XCircle className="w-4 h-4" />
@@ -3971,25 +3973,25 @@ export default function CenterDashboardPage() {
               {/* Patient Basic Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Patient Information</CardTitle>
+                  <CardTitle className="text-lg">{t('cd_patient_information')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Patient Name</Label>
-                      <Input value={selectedPatient.name || 'Unknown Patient'} readOnly />
+                      <Label>{t('cd_patient_full_name')}</Label>
+                      <Input value={getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')} readOnly />
                     </div>
                     <div>
-                      <Label>Email</Label>
-                      <Input value={selectedPatient.email || 'N/A'} readOnly />
+                      <Label>{t('cd_patient_email')}</Label>
+                      <Input value={selectedPatient.email || t('cd_value_not_provided')} readOnly />
                     </div>
                     <div>
-                      <Label>Phone</Label>
-                      <Input value={selectedPatient.phone || 'N/A'} readOnly />
+                      <Label>{t('cd_patient_phone')}</Label>
+                      <Input value={selectedPatient.phone || t('cd_value_not_provided')} readOnly />
                     </div>
                     <div>
-                      <Label>Registration Date</Label>
-                      <Input value={selectedPatient.created_at ? new Date(selectedPatient.created_at).toLocaleDateString() : 'N/A'} readOnly />
+                      <Label>{t('cd_registered_date')}</Label>
+                      <Input value={selectedPatient.created_at ? formatLocalizedDate(selectedPatient.created_at, locale) : t('cd_value_not_provided')} readOnly />
                     </div>
                   </div>
                 </CardContent>
@@ -3998,7 +4000,7 @@ export default function CenterDashboardPage() {
               {/* Past Lab Tests History with This Center */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Lab Test History with Our Center</CardTitle>
+                  <CardTitle className="text-lg">{t('cd_lab_test_history')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.labHistory?.length > 0 ? (
@@ -4007,26 +4009,32 @@ export default function CenterDashboardPage() {
                         <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{test.lab_test_types?.name || 'Unknown Test'}</p>
+                              <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test')}</p>
                               <p className="text-sm text-gray-500">
-                                {test.booking_date ? new Date(test.booking_date).toLocaleDateString() : 'Date not available'} • ${test.fee}
+                                {test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available')} • ${formatLocalizedNumber(test.fee, locale)}
                               </p>
                             </div>
                             <div className="text-right">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${test.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
                                 test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                  test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                    test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
+                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
                                 }`}>
-                                {test.status}
+                                {test.status === 'completed' ? t('status_completed') :
+                                  test.status === 'confirmed' ? t('status_confirmed') :
+                                    test.status === 'scheduled' ? t('status_scheduled') :
+                                      test.status === 'cancelled' ? t('status_cancelled') :
+                                        test.status}
                               </span>
                               {test.result_file_url && (
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="ml-2"
+                                  className={isRTL ? "mr-2" : "ml-2"}
                                   onClick={() => window.open(test.result_file_url, '_blank')}
                                 >
-                                  View Result
+                                  {t('cd_view_result')}
                                 </Button>
                               )}
                             </div>
@@ -4068,7 +4076,7 @@ export default function CenterDashboardPage() {
                                   <strong>{t('cd_patient_full_name')}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_gender')}:</strong> {record.gender || t('cd_value_not_provided')}
+                                  <strong>{t('cd_patient_gender')}:</strong> {record.gender ? (locale === 'ar' ? (record.gender.toLowerCase() === 'male' ? 'ذكر' : record.gender.toLowerCase() === 'female' ? 'أنثى' : record.gender) : record.gender) : t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
                                   <strong>{t('cd_patient_dob')}:</strong> {record.date_of_birth ? new Date(record.date_of_birth).toLocaleDateString() : t('cd_value_not_provided')}

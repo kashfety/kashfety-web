@@ -177,8 +177,10 @@ export default function LabTestTypesManagement() {
   };
 
   const filteredTestTypes = labTestTypes.filter(test =>
-    test.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    test.name_ar.includes(searchTerm)
+    (test.name && test.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (test.name_ar && test.name_ar.includes(searchTerm)) ||
+    (test.name_ku && test.name_ku.includes(searchTerm)) ||
+    (test.code && test.code.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

@@ -179,7 +179,7 @@ export default function MyLabsPage() {
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
       {/* Main Content - No transform, sidebar overlays on top */}
-      <div>
+      <div onClick={() => sidebarOpen && toggleSidebar()}>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Header onMenuToggle={toggleSidebar} />
         </div>

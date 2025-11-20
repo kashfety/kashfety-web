@@ -56,6 +56,7 @@ export default function MedicalRecordsPage() {
       {/* Main Content - No transform, sidebar overlays on top */}
       <div 
         className="flex flex-col min-h-screen"
+        onClick={() => sidebarOpen && toggleSidebar()}
       >
         {/* Header */}
         <div className="w-full px-4 sm:px-6 lg:px-8 pt-6">

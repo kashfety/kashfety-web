@@ -65,8 +65,8 @@ export default function HomePage() {
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
       {/* Main Content - No transform, sidebar overlays on top */}
-      <div>
-        {/* Animated Background Elements */}
+      <div onClick={() => sidebarOpen && toggleSidebar()}>
+        {/* Animated background elements */}
         <motion.div
           className="absolute inset-0 opacity-20 sm:opacity-30"
           style={{ y: backgroundY, opacity: backgroundOpacity }}

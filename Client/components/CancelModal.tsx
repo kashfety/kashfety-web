@@ -191,11 +191,11 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-gray-900 dark:text-gray-100">{appointment.date} at {appointment.time}</span>
+                <span className="text-gray-900 dark:text-gray-100">{appointment.date} {t('at') || 'at'} {appointment.time}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-gray-900 dark:text-gray-100">{appointment.duration} {t('appointment') || 'appointment'}</span>
+                <span className="text-gray-900 dark:text-gray-100">{appointment.duration}</span>
               </div>
             </div>
           </div>

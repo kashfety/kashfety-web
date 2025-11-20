@@ -394,7 +394,6 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Consultation Fee */}
                                                 <div className={`flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                                    <DollarSign className="w-4 h-4" />
                                                     <span dir="ltr">{formatLocalizedNumber(doctor.consultation_fee || 0, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                                                 </div>
 
@@ -547,8 +546,7 @@ export default function PatientDoctorsPage() {
 
                                             {/* Consultation Fee */}
                                             <div>
-                                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                    <DollarSign className="w-4 h-4" />
+                                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                                                     {t('consultation_fee') || 'Consultation Fee'}
                                                 </h3>
                                                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">

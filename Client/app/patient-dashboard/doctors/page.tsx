@@ -223,7 +223,8 @@ export default function PatientDoctorsPage() {
         if (locale === 'ku' && doctor.specialty_ku) {
             return doctor.specialty_ku
         }
-        return doctor.specialty_en || doctor.specialty
+        // For English, use 'specialty' field which is the English name
+        return doctor.specialty
     }
 
     const getUniqueSpecialties = () => {
@@ -624,7 +625,11 @@ export default function PatientDoctorsPage() {
                                                                 {t('phone') || 'Phone'}
                                                             </p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
-                                                                {toArabicNumerals(selectedDoctor.phone, locale)}
+                                                                {toArabicNumerals(
+                                                                    // Clean phone number: remove any _DOCTOR_ or UUID suffixes
+                                                                    selectedDoctor.phone.split('_DOCTOR_')[0].split('_')[0],
+                                                                    locale
+                                                                )}
                                                             </p>
                                                         </div>
                                                     </div>

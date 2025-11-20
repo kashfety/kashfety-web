@@ -73,14 +73,7 @@ export default function HomePage() {
       )}
 
       {/* Main Content */}
-      <div
-        className="transition-all duration-300"
-        style={{
-          transform: isRTL
-            ? `translateX(${sidebarOpen ? -280 : 0}px)`
-            : `translateX(${sidebarOpen ? 280 : 0}px)`
-        }}
-      >
+      <div className="transition-all duration-300">
         {/* Animated Background Elements */}
         <motion.div
           className="absolute inset-0 opacity-20 sm:opacity-30"

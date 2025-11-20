@@ -200,7 +200,8 @@ export default function MyAppointmentsPage() {
     if (locale === 'ku' && doctor.specialty_ku) {
       return doctor.specialty_ku;
     }
-    return doctor.specialty_en || doctor.specialty || 'General Medicine';
+    // For English, use 'name' field which is the English name
+    return doctor.specialty || 'General Medicine';
   }
 
   // Helper to get localized doctor name from doctor object

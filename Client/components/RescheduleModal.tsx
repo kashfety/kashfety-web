@@ -659,7 +659,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           selected={selectedDate}
                           onSelect={handleDateSelect}
                           disabled={isDateDisabled}
-                          className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 bg-white dark:bg-gray-800 w-full"
+                          className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 pr-4 bg-white dark:bg-gray-800 w-full"
                         />
                       </div>
 

@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocale } from '@/components/providers/locale-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from "next-themes";
+import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -134,15 +135,15 @@ function TopNav({
         <div className="flex items-center gap-4 text-sm">
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{displayAppointments}</p>
+            <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">{t('cd_revenue') || 'Total Revenue'}</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{displayRevenue.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} {t('currency') || 'SYP'}</p>
+            <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</p>
           </div>
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">{t('completed') || 'Completed'}</p>
-            <p className="font-semibold text-emerald-600">{todayStats?.stats?.todayCompleted || 0}</p>
+            <p className="font-semibold text-emerald-600" dir="ltr">{formatLocalizedNumber(todayStats?.stats?.todayCompleted || 0, locale)}</p>
           </div>
         </div>
 
@@ -234,29 +235,29 @@ function CenterOverview({
   const stats = [
     {
       title: t('dd_total_patients'),
-      value: patients?.length?.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US') || '0',
-      change: analytics?.patientGrowth || '+0%',
+      value: formatLocalizedNumber(patients?.length || 0, locale),
+      change: analytics?.patientGrowth || (locale === 'ar' ? '+٠%' : '+0%'),
       color: 'emerald',
       icon: Users
     },
     {
       title: t('cd_upcoming_appointments'),
-      value: todayStats?.stats?.todayAppointments?.toString() || '0',
-      change: analytics?.appointmentGrowth || '+0%',
+      value: formatLocalizedNumber(todayStats?.stats?.todayAppointments || 0, locale),
+      change: analytics?.appointmentGrowth || (locale === 'ar' ? '+٠%' : '+0%'),
       color: 'blue',
       icon: Calendar
     },
     {
       title: t('cd_todays_revenue'),
-      value: `${todayStats?.stats?.todayRevenue?.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US') || '0'} ${t('currency') || 'SYP'}`,
-      change: analytics?.revenueGrowth || '+0%',
+      value: formatLocalizedNumber(todayStats?.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' }),
+      change: analytics?.revenueGrowth || (locale === 'ar' ? '+٠%' : '+0%'),
       color: 'purple',
       icon: DollarSign
     },
     {
       title: t('cd_lab_test_services'),
-      value: activeServicesCount.toString(),
-      change: analytics?.serviceGrowth || '+0%',
+      value: formatLocalizedNumber(activeServicesCount, locale),
+      change: analytics?.serviceGrowth || (locale === 'ar' ? '+٠%' : '+0%'),
       color: 'yellow',
       icon: TestTube
     }
@@ -563,10 +564,13 @@ function CenterAnalytics({
 
     // Generate last 7 months data
     const months = [];
+    const localizedMonths = getLocalizedMonths(locale);
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
-      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+      const monthIndex = date.getMonth();
+      const monthName = locale === 'ar' ? localizedMonths[monthIndex] : date.toLocaleDateString('en-US', { month: 'short' });
       const year = date.getFullYear();
       const month = date.getMonth();
 
@@ -752,11 +756,12 @@ function CenterAnalytics({
       }))
     : [];
 
+  const genderLabels = getLocalizedGenders(locale);
   const genderData = demographicsData.genderDistribution
     ? Object.entries(demographicsData.genderDistribution)
       .filter(([gender, count]) => (count as number) > 0)
       .map(([gender, count]) => ({
-        name: gender.charAt(0).toUpperCase() + gender.slice(1),
+        name: gender === 'male' ? genderLabels.male : gender === 'female' ? genderLabels.female : gender.charAt(0).toUpperCase() + gender.slice(1),
         value: count as number,
         fill: getGenderColor(gender)
       }))
@@ -910,7 +915,7 @@ function CenterAnalytics({
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `${value}`}
+                  tickFormatter={(value) => formatLocalizedNumber(value, locale)}
                 />
                 <Tooltip
                   contentStyle={{
@@ -922,7 +927,8 @@ function CenterAnalytics({
                     direction: isRTL ? 'rtl' : 'ltr',
                   }}
                   formatter={(value, name) => [
-                    name === 'revenue' ? `${Number(value).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} ${t('currency') || 'SYP'}` : value,
+                    name === 'revenue' ? formatLocalizedNumber(Number(value), locale, { style: 'currency', currency: t('currency') || 'SYP' }) :
+                      `${formatLocalizedNumber(Number(value), locale)}`,
                     name === 'bookings' ? t('cd_total_bookings') :
                       name === 'completed' ? t('cd_completed_tests') :
                         name === 'revenue' ? t('cd_revenue') : name
@@ -1048,7 +1054,15 @@ function CenterAnalytics({
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip
+                        formatter={(value) => [formatLocalizedNumber(Number(value), locale), '']}
+                        contentStyle={{
+                          backgroundColor: isDark ? "#1f2937" : "#ffffff",
+                          border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+                          borderRadius: "8px",
+                          direction: isRTL ? 'rtl' : 'ltr',
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -1059,8 +1073,8 @@ function CenterAnalytics({
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: entry.fill }}
                       ></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                        {t(`gender_${entry.name.toLowerCase()}`) || entry.name} ({entry.value})
+                      <span className="text-xs text-gray-600 dark:text-gray-400" dir="ltr">
+                        {entry.name} ({formatLocalizedNumber(entry.value, locale)})
                       </span>
                     </div>
                   ))}
@@ -3089,8 +3103,8 @@ export default function CenterDashboardPage() {
                                 }`}></div>
                               <div>
                                 <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className="text-sm text-gray-500">
-                                  {appointment.test_type_name} • {appointment.appointment_time} • ${appointment.fee}
+                                <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')} • {formatLocalizedNumber(appointment.fee, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                                 </p>
                               </div>
                             </div>
@@ -4018,8 +4032,8 @@ export default function CenterDashboardPage() {
                             </div>
                           </div>
                           {test.result_notes && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                              Notes: {test.result_notes}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {t('cd_notes')}: {test.result_notes}
                             </p>
                           )}
                         </div>
@@ -4132,10 +4146,10 @@ export default function CenterDashboardPage() {
                             <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_registration_details')}</h4>
                             <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                <strong>{t('cd_registered')}:</strong> {record.created_at ? new Date(record.created_at).toLocaleDateString() : t('cd_unknown')}
+                                <strong>{t('cd_registered_date')}:</strong> {record.created_at ? formatLocalizedDate(record.created_at, locale) : t('cd_unknown')}
                               </p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                <strong>{t('cd_last_updated')}:</strong> {record.updated_at ? new Date(record.updated_at).toLocaleDateString() : t('cd_not_updated')}
+                                <strong>{t('cd_last_updated_date')}:</strong> {record.updated_at ? formatLocalizedDate(record.updated_at, locale) : t('cd_not_updated')}
                               </p>
                             </div>
                           </div>
@@ -4188,11 +4202,11 @@ export default function CenterDashboardPage() {
                     </div>
                     <div>
                       <Label>{t('cd_appointment_date')}</Label>
-                      <Input value={selectedAppointment.booking_date || t('cd_na')} readOnly />
+                      <Input value={selectedAppointment.booking_date ? formatLocalizedDate(selectedAppointment.booking_date, locale) : t('cd_na')} readOnly />
                     </div>
                     <div>
                       <Label>{t('cd_appointment_time')}</Label>
-                      <Input value={selectedAppointment.booking_time || t('cd_na')} readOnly />
+                      <Input value={selectedAppointment.booking_time ? formatLocalizedDate(new Date(`2000-01-01 ${selectedAppointment.booking_time}`), locale, 'time') : t('cd_na')} readOnly />
                     </div>
                   </div>
                 </CardContent>

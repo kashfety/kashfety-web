@@ -152,6 +152,135 @@ export function localizeDoctorName(locale: Locale, name: string): string {
   return `Dr. ${base}`
 }
 
+/**
+ * Get localized month names
+ * @param locale - Current locale
+ * @returns Array of month names in the specified locale
+ */
+export function getLocalizedMonths(locale: Locale): string[] {
+  if (locale === 'ar') {
+    return [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+  }
+  return [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+}
+
+/**
+ * Get short localized month names
+ * @param locale - Current locale
+ * @returns Array of short month names in the specified locale
+ */
+export function getLocalizedMonthsShort(locale: Locale): string[] {
+  if (locale === 'ar') {
+    return [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+  }
+  return [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+}
+
+/**
+ * Get localized gender labels
+ * @param locale - Current locale
+ * @returns Object with male and female labels
+ */
+export function getLocalizedGenders(locale: Locale): { male: string; female: string } {
+  if (locale === 'ar') {
+    return { male: 'ذكر', female: 'أنثى' };
+  }
+  return { male: 'Male', female: 'Female' };
+}
+
+/**
+ * Format date with Arabic locale support
+ * @param date - Date to format
+ * @param locale - Current locale
+ * @param format - Date format type
+ * @returns Formatted date string
+ */
+export function formatLocalizedDate(date: Date | string, locale: Locale, format: 'short' | 'long' | 'time' = 'short'): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  if (locale === 'ar') {
+    const months = getLocalizedMonths(locale);
+    const day = toArabicNumerals(dateObj.getDate(), locale);
+    const month = months[dateObj.getMonth()];
+    const year = toArabicNumerals(dateObj.getFullYear(), locale);
+
+    if (format === 'time') {
+      const hours = toArabicNumerals(dateObj.getHours().toString().padStart(2, '0'), locale);
+      const minutes = toArabicNumerals(dateObj.getMinutes().toString().padStart(2, '0'), locale);
+      return `${hours}:${minutes}`;
+    } else if (format === 'long') {
+      return `${day} ${month} ${year}`;
+    } else {
+      return `${day}/${toArabicNumerals(dateObj.getMonth() + 1, locale)}/${year}`;
+    }
+  } else {
+    if (format === 'time') {
+      return dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } else if (format === 'long') {
+      return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } else {
+      return dateObj.toLocaleDateString('en-US');
+    }
+  }
+}
+
+/**
+ * Format numbers with proper RTL/LTR handling
+ * @param value - Number to format
+ * @param locale - Current locale
+ * @param options - Formatting options
+ * @returns Formatted number string with proper directionality
+ */
+export function formatLocalizedNumber(value: number | string, locale: Locale, options?: {
+  style?: 'decimal' | 'currency' | 'percent';
+  currency?: string;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+}): string {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  if (locale === 'ar') {
+    let formatted: string;
+
+    if (options?.style === 'currency') {
+      formatted = numValue.toFixed(options.minimumFractionDigits || 0);
+      const arabicNumber = toArabicNumerals(formatted, locale);
+      const currency = options.currency || 'ل.س';
+      // Use LTR mark to keep number formatting but place in RTL context
+      return `\u202D${arabicNumber}\u202C ${currency}`;
+    } else if (options?.style === 'percent') {
+      formatted = (numValue * 100).toFixed(options.minimumFractionDigits || 0);
+      const arabicNumber = toArabicNumerals(formatted, locale);
+      return `\u202D${arabicNumber}%\u202C`;
+    } else {
+      formatted = numValue.toLocaleString('ar-EG', options);
+      return `\u202D${toArabicNumerals(formatted, locale)}\u202C`;
+    }
+  } else {
+    if (options?.style === 'currency') {
+      return numValue.toLocaleString('en-US', {
+        style: 'currency',
+        currency: options.currency || 'USD',
+        ...options
+      });
+    } else {
+      return numValue.toLocaleString('en-US', options);
+    }
+  }
+}
+
 export const translations = {
   en: {
     // Navigation
@@ -1672,6 +1801,9 @@ export const translations = {
     cd_no_patient_registration: "No patient registration information found",
     cd_registration_details_appear: "Patient registration details will appear here when available",
     cd_close: "Close",
+    cd_notes: "Notes",
+    cd_registered_date: "Registered",
+    cd_last_updated_date: "Last Updated",
   },
   ar: {
     // Navigation
@@ -3253,6 +3385,9 @@ export const translations = {
     cd_no_patient_registration: "لم يتم العثور على معلومات تسجيل المريض",
     cd_registration_details_appear: "ستظهر تفاصيل تسجيل المريض هنا عند توفرها",
     cd_close: "إغلاق",
+    cd_notes: "ملاحظات",
+    cd_registered_date: "مسجل",
+    cd_last_updated_date: "آخر تحديث",
   },
 } as const
 

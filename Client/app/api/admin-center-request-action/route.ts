@@ -28,82 +28,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the center request
-    const { data: centerRequest, error: fetchError } = await supabase
-      .from('center_requests')
+    // Get the center from the centers table
+    const { data: center, error: fetchError } = await supabase
+      .from('centers')
       .select('*')
       .eq('id', requestId)
       .single();
 
-    if (fetchError || !centerRequest) {
+    if (fetchError || !center) {
       console.error('❌ [Center Request Action] Fetch error:', fetchError);
       return NextResponse.json(
-        { error: 'Center request not found', success: false },
+        { error: 'Center not found', success: false },
         { status: 404 }
       );
     }
 
-    // Update the center request status
+    // Update the center approval status
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     
     const { error: updateError } = await supabase
-      .from('center_requests')
+      .from('centers')
       .update({
-        status: newStatus,
-        reviewed_at: new Date().toISOString(),
+        approval_status: newStatus,
         updated_at: new Date().toISOString()
       })
       .eq('id', requestId);
 
     if (updateError) {
       console.error('❌ [Center Request Action] Update error:', updateError);
-      throw new Error(updateError.message || 'Failed to update center request');
-    }
-
-    // If approved, create the center in the centers table (if not already exists)
-    if (action === 'approve') {
-      // Check if center already exists
-      const { data: existingCenter } = await supabase
-        .from('centers')
-        .select('id')
-        .eq('email', centerRequest.email)
-        .single();
-
-      if (!existingCenter) {
-        // Create center
-        const centerData = {
-          id: centerRequest.center_id || require('crypto').randomUUID(),
-          name: centerRequest.name,
-          name_ar: centerRequest.name_ar,
-          address: centerRequest.address,
-          phone: centerRequest.phone,
-          email: centerRequest.email,
-          center_type: centerRequest.center_type || 'generic',
-          offers_labs: centerRequest.offers_labs || false,
-          offers_imaging: centerRequest.offers_imaging || false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        const { error: centerError } = await supabase
-          .from('centers')
-          .insert([centerData]);
-
-        if (centerError) {
-          console.error('⚠️ [Center Request Action] Center creation error:', centerError);
-          // Don't fail the approval if center creation fails
-        } else {
-          console.log('✅ [Center Request Action] Center created successfully');
-          
-          // Update user with center_id if user exists
-          if (centerRequest.user_id) {
-            await supabase
-              .from('users')
-              .update({ center_id: centerData.id })
-              .eq('id', centerRequest.user_id);
-          }
-        }
-      }
+      throw new Error(updateError.message || 'Failed to update center');
     }
 
     console.log(`✅ [Center Request Action] Request ${action}d successfully:`, requestId);

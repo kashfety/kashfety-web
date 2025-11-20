@@ -42,7 +42,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('📥 [Lab Test Types] POST request body:', body);
 
-    const { name, name_ar, name_ku, category, description, code } = body;
+    const { 
+      name, 
+      name_ar, 
+      name_ku, 
+      category, 
+      description, 
+      code,
+      default_duration,
+      default_fee,
+      display_order
+    } = body;
 
     // Validate required fields
     if (!name || !name_ar) {
@@ -72,8 +82,11 @@ export async function POST(request: NextRequest) {
     const labTestData: any = {
       name: name.trim(),
       name_ar: name_ar.trim(),
-      category: category || 'general',
+      category: category || 'lab',
       is_active: true,
+      default_duration: default_duration || 30,
+      default_fee: default_fee || 0,
+      display_order: display_order || 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -132,7 +145,76 @@ export async function DELETE(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Delete the lab test type
+    // Check if the lab test type is in use
+    const { data: labBookings, error: bookingsCheckError } = await supabase
+      .from('lab_bookings')
+      .select('id')
+      .eq('lab_test_type_id', id)
+      .limit(1);
+
+    if (bookingsCheckError) {
+      console.error('Error checking lab bookings:', bookingsCheckError);
+      throw new Error('Failed to check if lab test type is in use');
+    }
+
+    if (labBookings && labBookings.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete lab test type that is being used in lab bookings. Please archive it instead or contact support.',
+          success: false,
+          inUse: true
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if the lab test type is used in center_lab_services
+    const { data: centerServices, error: servicesCheckError } = await supabase
+      .from('center_lab_services')
+      .select('id')
+      .eq('lab_test_type_id', id)
+      .limit(1);
+
+    if (servicesCheckError) {
+      console.error('Error checking center services:', servicesCheckError);
+      throw new Error('Failed to check if lab test type is in use');
+    }
+
+    if (centerServices && centerServices.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete lab test type that is configured in center services. Please remove it from all centers first.',
+          success: false,
+          inUse: true
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if the lab test type is used in center_lab_schedules
+    const { data: centerSchedules, error: schedulesCheckError } = await supabase
+      .from('center_lab_schedules')
+      .select('id')
+      .eq('lab_test_type_id', id)
+      .limit(1);
+
+    if (schedulesCheckError) {
+      console.error('Error checking center schedules:', schedulesCheckError);
+      throw new Error('Failed to check if lab test type is in use');
+    }
+
+    if (centerSchedules && centerSchedules.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete lab test type that is configured in center schedules. Please remove it from all centers first.',
+          success: false,
+          inUse: true
+        },
+        { status: 400 }
+      );
+    }
+
+    // If not in use anywhere, proceed with deletion
     const { error } = await supabase
       .from('lab_test_types')
       .delete()

@@ -16,6 +16,14 @@ interface LabTestType {
   id: string;
   name: string;
   name_ar: string;
+  name_ku?: string;
+  code?: string;
+  category: string;
+  description?: string;
+  default_duration?: number;
+  default_fee?: number;
+  is_active: boolean;
+  display_order?: number;
   created_at: string;
 }
 
@@ -25,7 +33,17 @@ export default function LabTestTypesManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newTestType, setNewTestType] = useState({ name: '', name_ar: '', category: 'lab' });
+  const [newTestType, setNewTestType] = useState({ 
+    name: '', 
+    name_ar: '', 
+    name_ku: '',
+    code: '',
+    category: 'lab',
+    description: '',
+    default_duration: 30,
+    default_fee: 0,
+    display_order: 0
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const { alertConfig, isOpen, showSuccess, showError, hideAlert } = useCustomAlert();
@@ -75,7 +93,13 @@ export default function LabTestTypesManagement() {
         body: JSON.stringify({
           name: newTestType.name.trim(),
           name_ar: newTestType.name_ar.trim(),
-          category: newTestType.category
+          name_ku: newTestType.name_ku?.trim() || null,
+          code: newTestType.code?.trim() || null,
+          category: newTestType.category,
+          description: newTestType.description?.trim() || null,
+          default_duration: newTestType.default_duration || 30,
+          default_fee: newTestType.default_fee || 0,
+          display_order: newTestType.display_order || 0
         })
       });
 
@@ -91,7 +115,17 @@ export default function LabTestTypesManagement() {
         'Lab test type added successfully',
         () => {
           setLabTestTypes([data.labTestType, ...labTestTypes]);
-          setNewTestType({ name: '', name_ar: '', category: 'lab' });
+          setNewTestType({ 
+            name: '', 
+            name_ar: '', 
+            name_ku: '',
+            code: '',
+            category: 'lab',
+            description: '',
+            default_duration: 30,
+            default_fee: 0,
+            display_order: 0
+          });
           setIsAddingNew(false);
         }
       );
@@ -175,7 +209,7 @@ export default function LabTestTypesManagement() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">English Name</Label>
+                <Label htmlFor="name">English Name *</Label>
                 <Input
                   id="name"
                   value={newTestType.name}
@@ -185,7 +219,7 @@ export default function LabTestTypesManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="name_ar">Arabic Name</Label>
+                <Label htmlFor="name_ar">Arabic Name *</Label>
                 <Input
                   id="name_ar"
                   value={newTestType.name_ar}
@@ -195,23 +229,96 @@ export default function LabTestTypesManagement() {
                   disabled={submitting}
                 />
               </div>
+              <div>
+                <Label htmlFor="name_ku">Kurdish Name</Label>
+                <Input
+                  id="name_ku"
+                  value={newTestType.name_ku}
+                  onChange={(e) => setNewTestType({ ...newTestType, name_ku: e.target.value })}
+                  placeholder="Kurdish name (optional)"
+                  disabled={submitting}
+                />
+              </div>
+              <div>
+                <Label htmlFor="code">Test Code</Label>
+                <Input
+                  id="code"
+                  value={newTestType.code}
+                  onChange={(e) => setNewTestType({ ...newTestType, code: e.target.value })}
+                  placeholder="e.g., CBC-001"
+                  disabled={submitting}
+                />
+              </div>
             </div>
             
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={newTestType.category}
+                  onValueChange={(value) => setNewTestType({ ...newTestType, category: value })}
+                  disabled={submitting}
+                >
+                  <SelectTrigger id="category">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lab">Lab Tests</SelectItem>
+                    <SelectItem value="imaging">Imaging</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="default_duration">Default Duration (minutes)</Label>
+                <Input
+                  id="default_duration"
+                  type="number"
+                  value={newTestType.default_duration}
+                  onChange={(e) => setNewTestType({ ...newTestType, default_duration: parseInt(e.target.value) || 30 })}
+                  placeholder="30"
+                  min="1"
+                  disabled={submitting}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <Label htmlFor="default_fee">Default Fee</Label>
+                <Input
+                  id="default_fee"
+                  type="number"
+                  value={newTestType.default_fee}
+                  onChange={(e) => setNewTestType({ ...newTestType, default_fee: parseFloat(e.target.value) || 0 })}
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                  disabled={submitting}
+                />
+              </div>
+              <div>
+                <Label htmlFor="display_order">Display Order</Label>
+                <Input
+                  id="display_order"
+                  type="number"
+                  value={newTestType.display_order}
+                  onChange={(e) => setNewTestType({ ...newTestType, display_order: parseInt(e.target.value) || 0 })}
+                  placeholder="0"
+                  min="0"
+                  disabled={submitting}
+                />
+              </div>
+            </div>
+
             <div className="mt-4">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={newTestType.category}
-                onValueChange={(value) => setNewTestType({ ...newTestType, category: value })}
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={newTestType.description}
+                onChange={(e) => setNewTestType({ ...newTestType, description: e.target.value })}
+                placeholder="Optional description..."
                 disabled={submitting}
-              >
-                <SelectTrigger id="category">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="lab">Lab Tests</SelectItem>
-                  <SelectItem value="imaging">Imaging</SelectItem>
-                </SelectContent>
-              </Select>
+              />
             </div>
             
             <div className="flex gap-2 mt-4">
@@ -225,7 +332,17 @@ export default function LabTestTypesManagement() {
               <Button
                 onClick={() => {
                   setIsAddingNew(false);
-                  setNewTestType({ name: '', name_ar: '', category: 'lab' });
+                  setNewTestType({ 
+                    name: '', 
+                    name_ar: '', 
+                    name_ku: '',
+                    code: '',
+                    category: 'lab',
+                    description: '',
+                    default_duration: 30,
+                    default_fee: 0,
+                    display_order: 0
+                  });
                 }}
                 variant="outline"
                 disabled={submitting}

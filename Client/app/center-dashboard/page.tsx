@@ -264,7 +264,7 @@ function CenterOverview({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
@@ -459,9 +459,9 @@ function CenterPatients({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="relative p-6 rounded-2xl glass-effect">
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="p-2 rounded-xl gradient-emerald animate-glow">
             <Users className="h-5 w-5 text-white" />
           </div>
@@ -799,7 +799,7 @@ function CenterAnalytics({
   const completionRate = totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header with Theme Toggle */}
       <div className="relative p-6 rounded-2xl glass-effect">
         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -829,10 +829,10 @@ function CenterAnalytics({
         <Card className="border-0 shadow-lg">
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_total_revenue') || 'Total Revenue'}</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {totalRevenue.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} {t('currency') || 'SYP'}
+                  {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                 </p>
                 <p className="text-xs text-gray-500">{t('today') || 'Today'}: {todayRevenue.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} {t('currency') || 'SYP'}</p>
               </div>
@@ -844,10 +844,10 @@ function CenterAnalytics({
         <Card className="border-0 shadow-lg">
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_total_bookings') || 'Total Bookings'}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {totalBookings.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                  {formatLocalizedNumber(totalBookings, locale)}
                 </p>
                 <p className="text-xs text-gray-500">{t('today') || 'Today'}: {todayBookings}</p>
               </div>
@@ -859,10 +859,10 @@ function CenterAnalytics({
         <Card className="border-0 shadow-lg">
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_completion_rate') || 'Completion Rate'}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  {completionRate}%
+                  {formatLocalizedNumber(completionRate, locale)}%
                 </p>
                 <p className="text-xs text-gray-500">{completedBookings} {t('of') || 'of'} {totalBookings}</p>
               </div>
@@ -874,10 +874,10 @@ function CenterAnalytics({
         <Card className="border-0 shadow-lg">
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                  {totalPatients.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                  {formatLocalizedNumber(totalPatients, locale)}
                 </p>
                 <p className="text-xs text-gray-500">{t('cd_unique_patients_served') || 'Unique patients served'}</p>
               </div>
@@ -1522,7 +1522,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {selectedServices.length === 0 ? (
         <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardContent className="pt-6">
@@ -1597,9 +1597,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                   <p className="text-sm text-gray-600 dark:text-gray-400">{t('test_type_selection_desc') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'}</p>
                 </div>
 
-                <Select value={selectedTestType} onValueChange={handleTypeSelection}>
+                <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a lab test type to configure schedule..." />
+                    <SelectValue placeholder={t('choose_test_type_placeholder') || 'Choose a lab test type to configure schedule...'} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedServices.length === 0 ? (
@@ -1630,8 +1630,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                   <div className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium text-blue-700 dark:text-blue-300">
-                        Selected: {selectedServices.find(t => t.id === selectedTestType)?.name}
+                      <span className="font-medium text-blue-700 dark:text-blue-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                        {t('selected') || 'Selected'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
                     </div>
                   </div>
@@ -1685,6 +1685,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.startTime || '09:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'startTime', e.target.value)}
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
                               <div>
@@ -1694,6 +1695,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.endTime || '17:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'endTime', e.target.value)}
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
                               <div>
@@ -1706,6 +1708,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.duration || 30}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'duration', parseInt(e.target.value))}
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  placeholder={locale === 'ar' ? toArabicNumerals('30') : '30'}
                                 />
                               </div>
                             </div>
@@ -1719,6 +1723,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.breakStart || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakStart', e.target.value)}
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
                               <div>
@@ -1728,6 +1733,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.breakEnd || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakEnd', e.target.value)}
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
                             </div>
@@ -1740,13 +1746,13 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 </Label>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {slots.slice(0, 8).map((slot, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {slot.time}
+                                    <Badge key={index} variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {locale === 'ar' ? toArabicNumerals(slot.time) : slot.time}
                                     </Badge>
                                   ))}
                                   {slots.length > 8 && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {(t('more_count') || '+{count} more').replace('{count}', String(slots.length - 8))}
+                                    <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {(t('more_count') || '+{count} more').replace('{count}', formatLocalizedNumber(slots.length - 8, locale))}
                                     </Badge>
                                   )}
                                 </div>
@@ -1789,11 +1795,11 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('working_days') || 'Working Days'}</Label>
-                      <p className="text-lg font-semibold">{Object.values(scheduleConfig).filter(config => config.isAvailable).length} {t('days') || 'days'}</p>
+                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)} {t('days') || 'days'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                      <p className="text-lg font-semibold">{DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0)} {t('slots') || 'slots'}</p>
+                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)} {t('slots') || 'slots'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('test_type') || 'Test Type'}</Label>
@@ -3330,6 +3336,7 @@ export default function CenterDashboardPage() {
                               <Select
                                 value={newTestType.category}
                                 onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
                                 <SelectTrigger id="category">
                                   <SelectValue />
@@ -3347,7 +3354,8 @@ export default function CenterDashboardPage() {
                                 type="number"
                                 value={newTestType.default_fee}
                                 onChange={(e) => setNewTestType(prev => ({ ...prev, default_fee: e.target.value }))}
-                                placeholder="0.00"
+                                placeholder={locale === 'ar' ? toArabicNumerals('0.00') : '0.00'}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               />
                             </div>
                           </div>
@@ -3463,10 +3471,10 @@ export default function CenterDashboardPage() {
                                     <h4 className="font-semibold text-gray-900 dark:text-white">{displayName}</h4>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{testType.description}</p>
                                     <div className="flex items-center gap-4 mt-2">
-                                      <span className="text-xs text-gray-500">
-                                        {t('duration') || 'Duration'}: {testType.default_duration || '30'} {t('minutes') || 'minutes'}
+                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        {t('duration') || 'Duration'}: {formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes') || 'minutes'}
                                       </span>
-                                      <span className="text-xs text-gray-500">
+                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {t('category') || 'Category'}: {testType.category || 'General'}
                                       </span>
                                     </div>
@@ -3481,7 +3489,7 @@ export default function CenterDashboardPage() {
                                       <Input
                                         id={`fee-${testType.id}`}
                                         type="number"
-                                        placeholder="0.00"
+                                        placeholder={locale === 'ar' ? toArabicNumerals('0.00') : '0.00'}
                                         value={state.fee || ''}
                                         onChange={(e) => {
                                           setServiceStates(prev => ({
@@ -3492,6 +3500,7 @@ export default function CenterDashboardPage() {
                                         className="w-24 text-center"
                                         min="0"
                                         step="0.01"
+                                        dir={isRTL ? 'rtl' : 'ltr'}
                                       />
                                     </div>
                                   </div>
@@ -3629,27 +3638,27 @@ export default function CenterDashboardPage() {
                                       {testType.description}
                                     </p>
                                     <div className="space-y-2">
-                                      <div className="flex items-center justify-between text-xs">
-                                        <span className="text-gray-500">Duration:</span>
-                                        <span className="font-medium">{testType.default_duration || '30'} min</span>
+                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <span className="text-gray-500">{t('duration') || 'Duration'}:</span>
+                                        <span className="font-medium">{formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes_short') || 'min'}</span>
                                       </div>
-                                      <div className="flex items-center justify-between text-xs">
-                                        <span className="text-gray-500">Fee:</span>
+                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <span className="text-gray-500">{t('fee') || 'Fee'}:</span>
                                         <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                                          ${state.fee || '0.00'}
+                                          {formatLocalizedNumber(parseFloat(state.fee || '0') || 0, locale, { style: 'currency', currency: 'SYP' })}
                                         </span>
                                       </div>
-                                      <div className="flex items-center justify-between text-xs">
-                                        <span className="text-gray-500">Category:</span>
+                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <span className="text-gray-500">{t('category') || 'Category'}:</span>
                                         <Badge variant="secondary" className="text-xs">
-                                          {testType.category || 'General'}
+                                          {t(`category_${testType.category}`) || testType.category || t('category_general') || 'General'}
                                         </Badge>
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="ml-2">
+                                  <div className={isRTL ? 'mr-2' : 'ml-2'}>
                                     <Badge variant="default" className="text-xs bg-green-500">
-                                      Active
+                                      {t('active') || 'Active'}
                                     </Badge>
                                   </div>
                                 </div>

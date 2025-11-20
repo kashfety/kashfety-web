@@ -126,13 +126,13 @@ function TopNav({
         {nextAppointment && (
           <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Clock className="w-4 h-4" />
-            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} {nextAppointment.time}</span>
+            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} <span dir="ltr">{formatLocalizedTime(nextAppointment.time, locale)}</span></span>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-4 text-sm">
+      <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center gap-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
@@ -272,10 +272,10 @@ function CenterOverview({
             <Card key={index} className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400">{stat.change} {t('cd_from_last_month') || 'from last month'}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white" dir="ltr">{stat.value}</p>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month') || 'from last month'}</p>
                   </div>
                   <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600`}>
                     <Icon className="w-6 h-6 text-white" />
@@ -334,11 +334,11 @@ function CenterOverview({
                       const percentage = todayStats.appointments.length > 0 ? (count / todayStats.appointments.length) * 100 : 0;
 
                       return (
-                        <div key={status} className="flex items-center gap-3">
+                        <div key={status} className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <div className={`w-3 h-3 rounded-full ${color}`}></div>
-                          <div className="flex-1 flex justify-between items-center">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
-                            <div className="flex items-center gap-2">
+                          <div className={`flex-1 flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <span className={`text-sm text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>{label}</span>
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <span className="text-sm font-medium text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(count, locale)}</span>
                               <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                 <div
@@ -397,7 +397,7 @@ function CenterOverview({
           <CardContent>
             <div className="space-y-4">
               {todayStats?.appointments?.slice(0, 3)?.map((appointment: any, index: number) => (
-                <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <div key={index} className={`flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-2 h-2 rounded-full ${appointment.status === 'completed' ? 'bg-green-500' :
                     appointment.status === 'confirmed' ? 'bg-blue-500' :
                       appointment.status === 'cancelled' ? 'bg-red-500' :
@@ -490,10 +490,10 @@ function CenterPatients({
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="font-medium text-gray-900 dark:text-white">{getPatientDisplayName(patient)}</p>
-                    <p className="text-sm text-gray-500">
-                      {patient.age ? `${t('age') || 'Age'}: ${patient.age}` : ''}
+                    <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                      {patient.age ? <><span>{t('age') || 'Age'}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
-                      {patient.last_visit ? `${t('cd_last_visit') || 'Last visit'}: ${new Date(patient.last_visit).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')}` : t('cd_no_recent_visits') || 'No recent visits'}
+                      {patient.last_visit ? `${t('cd_last_visit') || 'Last visit'}: ${formatLocalizedDate(patient.last_visit, locale)}` : t('cd_no_recent_visits') || 'No recent visits'}
                     </p>
                   </div>
                 </div>

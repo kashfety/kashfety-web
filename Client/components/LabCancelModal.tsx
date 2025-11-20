@@ -13,6 +13,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from '@/components/providers/locale-provider';
+import { toArabicNumerals } from '@/lib/i18n';
 
 interface LabBooking {
   id: string;
@@ -22,8 +23,9 @@ interface LabBooking {
   duration?: number;
   notes?: string;
   fee?: number;
-  center?: { id: string; name: string; address: string };
-  type?: { id: string; name: string; category: string };
+  center?: { id: string; name: string; name_ar?: string; name_ku?: string; address: string };
+  type?: { id: string; name: string; name_ar?: string; name_ku?: string; category: string };
+  lab_test_type?: { id: string; name: string; name_ar?: string; name_ku?: string; category: string };
 }
 
 interface LabCancelModalProps {
@@ -37,8 +39,16 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale, isRTL } = useLocale();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
+
+  // Helper function to get localized name
+  const getLocalizedName = (item: any) => {
+    if (!item) return '';
+    if (locale === 'ar' && item.name_ar) return item.name_ar;
+    if (locale === 'ku' && item.name_ku) return item.name_ku;
+    return item.name || '';
+  };
 
   // Check if cancellation is within 24 hours
   const canCancel = () => {
@@ -149,22 +159,26 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      <span className="font-medium text-red-900 dark:text-red-100">{booking.type?.name}</span>
+                      <span className="font-medium text-red-900 dark:text-red-100">
+                        {getLocalizedName(booking.type || booking.lab_test_type)}
+                      </span>
                       <Badge className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 text-xs">
-                        {booking.type?.category?.toUpperCase()}
+                        {((booking.type || booking.lab_test_type)?.category || '').toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      <span className="text-red-900 dark:text-red-100">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
+                      <span className="text-red-900 dark:text-red-100">
+                        {new Date(booking.booking_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')} {t('at') || 'at'} {toArabicNumerals(booking.booking_time, locale)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      <span className="text-red-900 dark:text-red-100">{booking.center?.name}</span>
+                      <span className="text-red-900 dark:text-red-100">{getLocalizedName(booking.center)}</span>
                     </div>
                     {booking.fee && (
                       <div className="text-red-700 dark:text-red-300 font-medium">
-                        Fee: ${booking.fee}
+                        {t('center_lab_fee') || 'Fee'}: ${toArabicNumerals(booking.fee.toString(), locale)}
                       </div>
                     )}
                   </div>

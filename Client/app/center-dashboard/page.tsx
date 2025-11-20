@@ -1094,7 +1094,7 @@ function CenterAnalytics({
                           backdropFilter: "blur(12px)",
                           WebkitBackdropFilter: "blur(12px)",
                           zIndex: 9999,
-                          textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
+                          textShadow: isDark ? "0 1px 2px rgba(255, 255, 255, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
                         }}
                         wrapperStyle={{
                           zIndex: 9999,

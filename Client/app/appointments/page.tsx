@@ -14,6 +14,7 @@ import RescheduleModal from "@/components/RescheduleModal"
 import CancelModal from "@/components/CancelModal"
 import ReviewModal from "@/components/ReviewModal"
 import VisitSummaryModal from "@/components/VisitSummaryModal"
+import BookingModal from "@/components/BookingModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
@@ -88,6 +89,7 @@ export default function MyAppointmentsPage() {
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   const { t, locale, isRTL } = useLocale()
 
@@ -217,10 +219,7 @@ export default function MyAppointmentsPage() {
       if (doctor.first_name_ar) return doctor.first_name_ar;
     }
     
-    // Fallback to English name
-    if (doctor.first_name && doctor.last_name) {
-      return `${doctor.first_name} ${doctor.last_name}`;
-    }
+    // For English, use 'name' field directly (full name from database)
     return doctor.name || 'Doctor';
   }
 
@@ -514,7 +513,7 @@ export default function MyAppointmentsPage() {
                 <RefreshCw size={16} className={appointmentsLoading ? 'animate-spin' : ''} />
                 {appointmentsLoading ? (t('loading') || 'Loading...') : (t('appointments_refresh') || 'Refresh')}
               </Button>
-              <Button onClick={() => router.push('/')} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
+              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
                 <Plus size={16} />
                 {t('appointments_book_new') || 'Book New Appointment'}
               </Button>
@@ -585,7 +584,7 @@ export default function MyAppointmentsPage() {
               <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
               <p className="text-muted-foreground mb-6">{t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}</p>
-              <Button onClick={() => router.push('/')} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
+              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -718,6 +717,7 @@ export default function MyAppointmentsPage() {
       <CancelModal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} appointment={selectedAppointment} onSuccess={handleModalSuccess} />
       <ReviewModal isOpen={reviewOpen} onClose={() => setReviewOpen(false)} appointmentId={selectedAppointment?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} patientId={user?.id || ''} onSuccess={() => { setReviewOpen(false); setReviewedIds(prev => new Set(prev).add(selectedAppointment?.id || '')); }} />
       <VisitSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} appointmentId={selectedAppointment?.id || ''} patientId={user?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} />
+      <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} initialMode="doctor" />
     </div>
   )
 }

@@ -53,14 +53,9 @@ export default function MedicalRecordsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-      {/* Main Content */}
+      {/* Main Content - No transform, sidebar overlays on top */}
       <div 
-        className="flex flex-col min-h-screen transition-all duration-300"
-        style={{
-          transform: isRTL 
-            ? `translateX(${sidebarOpen ? -280 : 0}px)` 
-            : `translateX(${sidebarOpen ? 280 : 0}px)`
-        }}
+        className="flex flex-col min-h-screen"
       >
         {/* Header */}
         <div className="w-full px-4 sm:px-6 lg:px-8 pt-6">

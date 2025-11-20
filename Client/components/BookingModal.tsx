@@ -402,6 +402,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
         setSelectedDoctor(doctor);
         setSelectedSpecialty(doctor.specialty);
+        setSelectedLocation("clinic"); // Set location to clinic
+        setSearchMethod("doctors"); // Set search method
 
         // Fetch centers for this doctor
         await fetchDoctorCenters(doctorId, "clinic");

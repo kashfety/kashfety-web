@@ -218,15 +218,8 @@ export default function PatientLabsPage() {
                 />
             )}
 
-            {/* Main Content */}
-            <div
-                className="transition-all duration-300"
-                style={{
-                    transform: isRTL
-                        ? `translateX(${sidebarOpen ? -280 : 0}px)`
-                        : `translateX(${sidebarOpen ? 280 : 0}px)`
-                }}
-            >
+            {/* Main Content - No transform, sidebar overlays on top */}
+            <div>
                 {/* Header */}
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
                     <Header onMenuToggle={toggleSidebar} />

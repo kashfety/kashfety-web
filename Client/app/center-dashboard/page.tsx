@@ -553,9 +553,9 @@ function CenterAnalytics({
 
   function getGenderColor(gender: string) {
     const colorMap: Record<string, string> = {
-      'male': '#3B82F6',
-      'female': '#EC4899',
-      'other': '#8B5CF6'
+      'male': '#10B981',     // Emerald-500 - matches site primary
+      'female': '#EC4899',   // Pink-500 - complementary color
+      'other': '#8B5CF6'     // Purple-500 - tertiary color
     };
     return colorMap[gender.toLowerCase()] || '#6B7280';
   }
@@ -1040,68 +1040,91 @@ function CenterAnalytics({
           <CardContent>
             {genderData.length > 0 ? (
               <div>
-                <div className="h-[150px] flex items-center justify-center">
+                <div className="h-[200px] flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={genderData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={30}
-                        outerRadius={60}
-                        paddingAngle={5}
+                        innerRadius={40}
+                        outerRadius={80}
+                        paddingAngle={3}
                         dataKey="value"
+                        animationBegin={0}
+                        animationDuration={1200}
+                        animationEasing="ease-out"
                       >
                         {genderData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.fill}
+                            stroke={isDark ? "#1f2937" : "#ffffff"}
+                            strokeWidth={2}
+                          />
                         ))}
                       </Pie>
                       <Tooltip
                         formatter={(value, name) => {
                           const formattedValue = formatLocalizedNumber(Number(value), locale);
-                          return [`${formattedValue} ${t('cd_patients') || 'patients'}`, name];
+                          const percentage = ((Number(value) / genderData.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1);
+                          return [
+                            `${formattedValue} ${t('cd_patients') || 'patients'} (${formatLocalizedNumber(Number(percentage), locale)}%)`,
+                            name
+                          ];
                         }}
                         labelFormatter={(label) => `${t('cd_gender')}: ${label}`}
                         contentStyle={{
-                          backgroundColor: isDark ? "#1f2937" : "#ffffff",
-                          border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-                          borderRadius: "8px",
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                          color: isDark ? "#ffffff" : "#000000",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          zIndex: 9999,
-                          position: "relative"
+                          backgroundColor: isDark ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
+                          border: `1px solid ${isDark ? "#10B981" : "#10B981"}`,
+                          borderRadius: "12px",
+                          boxShadow: isDark ? "0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)" : "0 20px 25px -5px rgba(16, 185, 129, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+                          color: isDark ? "#ffffff" : "#1f2937",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          padding: "12px 16px",
+                          backdropFilter: "blur(8px)",
+                          WebkitBackdropFilter: "blur(8px)",
+                          zIndex: 9999
                         }}
                         wrapperStyle={{
                           zIndex: 9999,
-                          position: "relative"
+                          outline: "none"
                         }}
+                        cursor={{ fill: "transparent" }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className={`flex justify-center gap-4 mt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  {genderData.map((entry, index) => (
-                    <div key={entry.name} className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: entry.fill }}
-                      ></div>
-                      <span className={`text-xs text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <span className="font-medium">{entry.name}</span>
-                        <span className="mx-1 opacity-60">•</span>
-                        <span className="font-mono" dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
-                      </span>
-                    </div>
-                  ))}
+                <div className={`flex justify-center gap-6 mt-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  {genderData.map((entry, index) => {
+                    const total = genderData.reduce((sum, item) => sum + item.value, 0);
+                    const percentage = ((entry.value / total) * 100).toFixed(1);
+                    return (
+                      <div key={entry.name} className={`flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/30 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div
+                          className="w-4 h-4 rounded-full ring-2 ring-white dark:ring-gray-800 shadow-sm"
+                          style={{ backgroundColor: entry.fill }}
+                        ></div>
+                        <div className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white">{entry.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            <span dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
+                            <span className="mx-1 opacity-60">•</span>
+                            <span dir="ltr">{formatLocalizedNumber(Number(percentage), locale)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500">
+              <div className="h-[280px] flex items-center justify-center text-gray-500">
                 <div className="text-center">
-                  <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm">{t('cd_no_gender_data') || 'No gender data available'}</p>
+                  <Users className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-base font-medium text-gray-600 dark:text-gray-400 mb-1">{t('cd_no_gender_data') || 'No gender data available'}</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500">{t('cd_data_will_appear_patients') || 'Data will appear when patients register'}</p>
                 </div>
               </div>
             )}

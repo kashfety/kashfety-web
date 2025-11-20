@@ -297,14 +297,20 @@ export default function PatientDoctorsPage() {
                                             setSpecialtyFilter(e.target.value)
                                             setCurrentPage(1)
                                         }}
-                                        className="w-full h-10 px-3 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/20 appearance-none cursor-pointer transition-all shadow-sm hover:shadow-md font-medium"
+                                        size={4}
+                                        className="w-full px-3 py-2 rounded-lg border-2 border-[#4DBCC4]/40 bg-gradient-to-r from-[#4DBCC4]/5 to-[#3da8b0]/5 dark:from-[#4DBCC4]/10 dark:to-[#3da8b0]/10 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-sm hover:shadow-md font-medium [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:py-2 [&>option]:px-3 [&>option:hover]:bg-[#4DBCC4]/20 [&>option:checked]:bg-[#4DBCC4] [&>option:checked]:text-white"
                                         style={{
-                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                                            backgroundRepeat: 'no-repeat',
-                                            backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
-                                            paddingLeft: isRTL ? '2rem' : '0.75rem',
-                                            paddingRight: isRTL ? '0.75rem' : '2rem',
-                                            maxHeight: '200px'
+                                            height: '40px',
+                                            overflow: 'hidden'
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.height = 'auto';
+                                            e.target.style.maxHeight = '160px';
+                                            e.target.style.overflow = 'auto';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.height = '40px';
+                                            e.target.style.overflow = 'hidden';
                                         }}
                                     >
                                         <option value="">{t('all_specialties') || 'All Specialties'}</option>

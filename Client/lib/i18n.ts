@@ -978,6 +978,11 @@ export const translations = {
     registration_success: "Registration successful",
     profile_updated: "Profile updated successfully",
 
+    // Country Selector
+    country_selector_search: "Search countries...",
+    country_selector_valid: "Valid {country} phone number",
+    country_selector_invalid: "Please enter a valid phone number for {country}",
+
     // Medical Records Form (en)
     complete_medical_profile: "Complete Your Medical Profile",
     help_us_provide_care: "Help us provide better care by sharing your medical information. All information is confidential and secure.",
@@ -2393,6 +2398,11 @@ export const translations = {
     medical_records_failed: "فشل حفظ السجل الطبي. يرجى المحاولة مرة أخرى.",
     registration_success: "تم التسجيل بنجاح",
     profile_updated: "تم تحديث الملف الشخصي بنجاح",
+
+    // Country Selector
+    country_selector_search: "ابحث عن الدول...",
+    country_selector_valid: "رقم هاتف {country} صحيح",
+    country_selector_invalid: "يرجى إدخال رقم هاتف صحيح لـ {country}",
 
     // Medical Records Form (ar)
     complete_medical_profile: "أكمل ملفك الطبي",

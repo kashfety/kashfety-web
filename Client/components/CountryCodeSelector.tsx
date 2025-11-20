@@ -3,64 +3,66 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
+import { useLocale } from '@/components/providers/locale-provider'
 
 interface Country {
   code: string
   name: string
+  nameAr: string
   flag: string
   phoneCode: string
 }
 
 const countries: Country[] = [
-  { code: 'US', name: 'United States', flag: '🇺🇸', phoneCode: '+1' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', phoneCode: '+44' },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', phoneCode: '+1' },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺', phoneCode: '+61' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', phoneCode: '+49' },
-  { code: 'FR', name: 'France', flag: '🇫🇷', phoneCode: '+33' },
-  { code: 'IT', name: 'Italy', flag: '🇮🇹', phoneCode: '+39' },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸', phoneCode: '+34' },
-  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', phoneCode: '+31' },
-  { code: 'SE', name: 'Sweden', flag: '🇸🇪', phoneCode: '+46' },
-  { code: 'NO', name: 'Norway', flag: '🇳🇴', phoneCode: '+47' },
-  { code: 'DK', name: 'Denmark', flag: '🇩🇰', phoneCode: '+45' },
-  { code: 'FI', name: 'Finland', flag: '🇫🇮', phoneCode: '+358' },
-  { code: 'PL', name: 'Poland', flag: '🇵🇱', phoneCode: '+48' },
-  { code: 'CZ', name: 'Czech Republic', flag: '🇨🇿', phoneCode: '+420' },
-  { code: 'AT', name: 'Austria', flag: '🇦🇹', phoneCode: '+43' },
-  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', phoneCode: '+41' },
-  { code: 'BE', name: 'Belgium', flag: '🇧🇪', phoneCode: '+32' },
-  { code: 'PT', name: 'Portugal', flag: '🇵🇹', phoneCode: '+351' },
-  { code: 'GR', name: 'Greece', flag: '🇬🇷', phoneCode: '+30' },
-  { code: 'TR', name: 'Turkey', flag: '🇹🇷', phoneCode: '+90' },
-  { code: 'RU', name: 'Russia', flag: '🇷🇺', phoneCode: '+7' },
-  { code: 'CN', name: 'China', flag: '🇨🇳', phoneCode: '+86' },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵', phoneCode: '+81' },
-  { code: 'KR', name: 'South Korea', flag: '🇰🇷', phoneCode: '+82' },
-  { code: 'IN', name: 'India', flag: '🇮🇳', phoneCode: '+91' },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', phoneCode: '+55' },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', phoneCode: '+52' },
-  { code: 'AR', name: 'Argentina', flag: '🇦🇷', phoneCode: '+54' },
-  { code: 'CL', name: 'Chile', flag: '🇨🇱', phoneCode: '+56' },
-  { code: 'CO', name: 'Colombia', flag: '🇨🇴', phoneCode: '+57' },
-  { code: 'PE', name: 'Peru', flag: '🇵🇪', phoneCode: '+51' },
-  { code: 'ZA', name: 'South Africa', flag: '🇿🇦', phoneCode: '+27' },
-  { code: 'EG', name: 'Egypt', flag: '🇪🇬', phoneCode: '+20' },
-  { code: 'MA', name: 'Morocco', flag: '🇲🇦', phoneCode: '+212' },
-  { code: 'NG', name: 'Nigeria', flag: '🇳🇬', phoneCode: '+234' },
-  { code: 'KE', name: 'Kenya', flag: '🇰🇪', phoneCode: '+254' },
-  { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦', phoneCode: '+966' },
-  { code: 'AE', name: 'United Arab Emirates', flag: '🇦🇪', phoneCode: '+971' },
-  { code: 'QA', name: 'Qatar', flag: '🇶🇦', phoneCode: '+974' },
-  { code: 'KW', name: 'Kuwait', flag: '🇰🇼', phoneCode: '+965' },
-  { code: 'BH', name: 'Bahrain', flag: '🇧🇭', phoneCode: '+973' },
-  { code: 'OM', name: 'Oman', flag: '🇴🇲', phoneCode: '+968' },
-  { code: 'JO', name: 'Jordan', flag: '🇯🇴', phoneCode: '+962' },
-  { code: 'LB', name: 'Lebanon', flag: '🇱🇧', phoneCode: '+961' },
-  { code: 'SY', name: 'Syria', flag: '🇸🇾', phoneCode: '+963' },
-  { code: 'IQ', name: 'Iraq', flag: '🇮🇶', phoneCode: '+964' },
-  { code: 'IL', name: 'Israel', flag: '🇮🇱', phoneCode: '+972' },
-  { code: 'PS', name: 'Palestine', flag: '🇵🇸', phoneCode: '+970' },
+  { code: 'US', name: 'United States', nameAr: 'الولايات المتحدة', flag: '🇺🇸', phoneCode: '+1' },
+  { code: 'GB', name: 'United Kingdom', nameAr: 'المملكة المتحدة', flag: '🇬🇧', phoneCode: '+44' },
+  { code: 'CA', name: 'Canada', nameAr: 'كندا', flag: '🇨🇦', phoneCode: '+1' },
+  { code: 'AU', name: 'Australia', nameAr: 'أستراليا', flag: '🇦🇺', phoneCode: '+61' },
+  { code: 'DE', name: 'Germany', nameAr: 'ألمانيا', flag: '🇩🇪', phoneCode: '+49' },
+  { code: 'FR', name: 'France', nameAr: 'فرنسا', flag: '🇫🇷', phoneCode: '+33' },
+  { code: 'IT', name: 'Italy', nameAr: 'إيطاليا', flag: '🇮🇹', phoneCode: '+39' },
+  { code: 'ES', name: 'Spain', nameAr: 'إسبانيا', flag: '🇪🇸', phoneCode: '+34' },
+  { code: 'NL', name: 'Netherlands', nameAr: 'هولندا', flag: '🇳🇱', phoneCode: '+31' },
+  { code: 'SE', name: 'Sweden', nameAr: 'السويد', flag: '🇸🇪', phoneCode: '+46' },
+  { code: 'NO', name: 'Norway', nameAr: 'النرويج', flag: '🇳🇴', phoneCode: '+47' },
+  { code: 'DK', name: 'Denmark', nameAr: 'الدنمارك', flag: '🇩🇰', phoneCode: '+45' },
+  { code: 'FI', name: 'Finland', nameAr: 'فنلندا', flag: '🇫🇮', phoneCode: '+358' },
+  { code: 'PL', name: 'Poland', nameAr: 'بولندا', flag: '🇵🇱', phoneCode: '+48' },
+  { code: 'CZ', name: 'Czech Republic', nameAr: 'التشيك', flag: '🇨🇿', phoneCode: '+420' },
+  { code: 'AT', name: 'Austria', nameAr: 'النمسا', flag: '🇦🇹', phoneCode: '+43' },
+  { code: 'CH', name: 'Switzerland', nameAr: 'سويسرا', flag: '🇨🇭', phoneCode: '+41' },
+  { code: 'BE', name: 'Belgium', nameAr: 'بلجيكا', flag: '🇧🇪', phoneCode: '+32' },
+  { code: 'PT', name: 'Portugal', nameAr: 'البرتغال', flag: '🇵🇹', phoneCode: '+351' },
+  { code: 'GR', name: 'Greece', nameAr: 'اليونان', flag: '🇬🇷', phoneCode: '+30' },
+  { code: 'TR', name: 'Turkey', nameAr: 'تركيا', flag: '🇹🇷', phoneCode: '+90' },
+  { code: 'RU', name: 'Russia', nameAr: 'روسيا', flag: '🇷🇺', phoneCode: '+7' },
+  { code: 'CN', name: 'China', nameAr: 'الصين', flag: '🇨🇳', phoneCode: '+86' },
+  { code: 'JP', name: 'Japan', nameAr: 'اليابان', flag: '🇯🇵', phoneCode: '+81' },
+  { code: 'KR', name: 'South Korea', nameAr: 'كوريا الجنوبية', flag: '🇰🇷', phoneCode: '+82' },
+  { code: 'IN', name: 'India', nameAr: 'الهند', flag: '🇮🇳', phoneCode: '+91' },
+  { code: 'BR', name: 'Brazil', nameAr: 'البرازيل', flag: '🇧🇷', phoneCode: '+55' },
+  { code: 'MX', name: 'Mexico', nameAr: 'المكسيك', flag: '🇲🇽', phoneCode: '+52' },
+  { code: 'AR', name: 'Argentina', nameAr: 'الأرجنتين', flag: '🇦🇷', phoneCode: '+54' },
+  { code: 'CL', name: 'Chile', nameAr: 'تشيلي', flag: '🇨🇱', phoneCode: '+56' },
+  { code: 'CO', name: 'Colombia', nameAr: 'كولومبيا', flag: '🇨🇴', phoneCode: '+57' },
+  { code: 'PE', name: 'Peru', nameAr: 'بيرو', flag: '🇵🇪', phoneCode: '+51' },
+  { code: 'ZA', name: 'South Africa', nameAr: 'جنوب أفريقيا', flag: '🇿🇦', phoneCode: '+27' },
+  { code: 'EG', name: 'Egypt', nameAr: 'مصر', flag: '🇪🇬', phoneCode: '+20' },
+  { code: 'MA', name: 'Morocco', nameAr: 'المغرب', flag: '🇲🇦', phoneCode: '+212' },
+  { code: 'NG', name: 'Nigeria', nameAr: 'نيجيريا', flag: '🇳🇬', phoneCode: '+234' },
+  { code: 'KE', name: 'Kenya', nameAr: 'كينيا', flag: '🇰🇪', phoneCode: '+254' },
+  { code: 'SA', name: 'Saudi Arabia', nameAr: 'السعودية', flag: '🇸🇦', phoneCode: '+966' },
+  { code: 'AE', name: 'United Arab Emirates', nameAr: 'الإمارات', flag: '🇦🇪', phoneCode: '+971' },
+  { code: 'QA', name: 'Qatar', nameAr: 'قطر', flag: '🇶🇦', phoneCode: '+974' },
+  { code: 'KW', name: 'Kuwait', nameAr: 'الكويت', flag: '🇰🇼', phoneCode: '+965' },
+  { code: 'BH', name: 'Bahrain', nameAr: 'البحرين', flag: '🇧🇭', phoneCode: '+973' },
+  { code: 'OM', name: 'Oman', nameAr: 'عمان', flag: '🇴🇲', phoneCode: '+968' },
+  { code: 'JO', name: 'Jordan', nameAr: 'الأردن', flag: '🇯🇴', phoneCode: '+962' },
+  { code: 'LB', name: 'Lebanon', nameAr: 'لبنان', flag: '🇱🇧', phoneCode: '+961' },
+  { code: 'SY', name: 'Syria', nameAr: 'سوريا', flag: '🇸🇾', phoneCode: '+963' },
+  { code: 'IQ', name: 'Iraq', nameAr: 'العراق', flag: '🇮🇶', phoneCode: '+964' },
+  { code: 'IL', name: 'Israel', nameAr: 'إسرائيل', flag: '🇮🇱', phoneCode: '+972' },
+  { code: 'PS', name: 'Palestine', nameAr: 'فلسطين', flag: '🇵🇸', phoneCode: '+970' },
 ]
 
 interface CountryCodeSelectorProps {
@@ -83,13 +85,15 @@ export default function CountryCodeSelector({
   label = "Phone Number"
 }: CountryCodeSelectorProps) {
   const { theme } = useTheme()
+  const { t, locale } = useLocale()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    country.phoneCode.includes(searchTerm)
-  )
+  const filteredCountries = countries.filter(country => {
+    const countryName = locale === 'ar' ? country.nameAr : country.name
+    return countryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      country.phoneCode.includes(searchTerm)
+  })
 
   const validatePhoneNumber = (phone: string, countryCode: string) => {
     // Remove any non-digit characters except + and spaces
@@ -169,7 +173,7 @@ export default function CountryCodeSelector({
                 <div className={`p-3 border-b ${theme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}>
                   <input
                     type="text"
-                    placeholder="Search countries..."
+                    placeholder={t('country_selector_search') || "Search countries..."}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className={`w-full px-3 py-2 bg-white/10 border border-white/20 rounded ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-500'} focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm`}
@@ -197,7 +201,7 @@ export default function CountryCodeSelector({
                         {country.phoneCode}
                       </span>
                       <span className={`text-sm truncate ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
-                        {country.name}
+                        {locale === 'ar' ? country.nameAr : country.name}
                       </span>
                     </motion.button>
                   ))}
@@ -231,7 +235,7 @@ export default function CountryCodeSelector({
           animate={{ opacity: 1, y: 0 }}
           className="text-sm text-red-400"
         >
-          {error || `Please enter a valid phone number for ${selectedCountry.name}`}
+          {error || t('country_selector_invalid')?.replace('{country}', locale === 'ar' ? selectedCountry.nameAr : selectedCountry.name) || `Please enter a valid phone number for ${selectedCountry.name}`}
         </motion.p>
       )}
 
@@ -242,7 +246,7 @@ export default function CountryCodeSelector({
           animate={{ opacity: 1, y: 0 }}
           className="text-sm text-emerald-400"
         >
-          ✓ Valid {selectedCountry.name} phone number
+          ✓ {t('country_selector_valid')?.replace('{country}', locale === 'ar' ? selectedCountry.nameAr : selectedCountry.name) || `Valid ${selectedCountry.name} phone number`}
         </motion.p>
       )}
     </div>

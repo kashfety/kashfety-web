@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Hero from "@/components/Hero";
@@ -12,6 +13,7 @@ import BookingModal from "@/components/BookingModal";
 import ScrollToTop from "@/components/ScrollToTop";
 import CursorTrail from "@/components/CursorTrail";
 import { useLocale } from "@/components/providers/locale-provider";
+import { useAuth } from "@/lib/providers/auth-provider";
 
 export default function HomePage() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -19,14 +21,24 @@ export default function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const { t, isRTL } = useLocale();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   // Helper functions for opening modal in different modes
   const openDoctorBooking = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     setBookingModalMode('doctor');
     setIsBookingModalOpen(true);
   };
 
   const openLabBooking = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     setBookingModalMode('lab');
     setIsBookingModalOpen(true);
   };

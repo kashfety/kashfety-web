@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle } from "lucide-react";
+import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle, User, Building } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
@@ -1504,7 +1504,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1529,7 +1529,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 </DialogHeader>
               </motion.div>
 
-              <div className="p-6 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-900">
+              <div className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-900">
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
                   <Button
@@ -1699,7 +1699,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             onClick={() => setSearchMethod("centers")}
                           >
                             <CardContent className="p-7 text-center">
-                              <MapPin className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
+                              <Building className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
                               <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_centers') || 'Find Centers'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_centers_desc') || 'Browse medical centers first, then view their doctors'}</div>
                             </CardContent>
@@ -1710,7 +1710,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             onClick={() => setSearchMethod("doctors")}
                           >
                             <CardContent className="p-7 text-center">
-                              <Home className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
+                              <User className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
                               <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_doctors') || 'Find Doctors'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_doctors_desc') || 'Browse doctors directly based on your specialty'}</div>
                             </CardContent>
@@ -1765,9 +1765,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           })
                           .map((center) => (
                             <Card key={center.id} className="transition-all duration-200 hover:shadow-2xl hover:scale-[1.02] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]">
-                              <CardContent className="p-6">
-                                <div className="flex items-start gap-4">
-                                  <div className="flex-1">
+                              <CardContent className="p-3 sm:p-6">
+                                <div className="flex flex-col sm:flex-row items-start gap-4">
+                                  <div className="flex-1 w-full">
                                     <div className="flex items-center justify-between gap-4 mb-3">
                                       <div className="flex-1">
                                         <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{getLocalizedName(center)}</h4>

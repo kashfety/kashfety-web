@@ -683,7 +683,7 @@ export default function MyAppointmentsPage() {
                           </div>
                         )}
 
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-wrap gap-2 pt-2">
                           <Button variant="outline" size="sm" className="text-[#4DBCC4] border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:text-[#4DBCC4] dark:border-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20" onClick={() => handleReschedule(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
                             {t('appointments_reschedule_button') || 'Reschedule'}
                           </Button>

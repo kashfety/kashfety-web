@@ -323,7 +323,7 @@ function CenterOverview({
 
                   {/* Appointment Status Breakdown */}
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900 dark:text-white">{t('cd_upcoming_appointments') || 'Upcoming Appointments'} {t('cd_status') || 'Status'}</h4>
+                    <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_upcoming_appointments') || 'Upcoming Appointments'} {t('cd_status') || 'Status'}</h4>
                     {[
                       { status: 'completed', label: t('completed'), color: 'bg-green-500' },
                       { status: 'confirmed', label: t('cd_confirmed'), color: 'bg-blue-500' },
@@ -389,7 +389,7 @@ function CenterOverview({
 
         <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <Clock className="w-5 h-5" />
               {t('cd_recent_bookings') || 'Recent Bookings'}
             </CardTitle>
@@ -478,7 +478,7 @@ function CenterPatients({
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
-          <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
+          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -815,11 +815,6 @@ function CenterAnalytics({
                 {t('cd_center_performance_insights') || 'Center performance insights and patient demographics'}
               </p>
             </div>
-          </div>
-
-          {/* Theme Toggle Button */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -1599,7 +1594,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('choose_test_type_placeholder') || 'Choose a lab test type to configure schedule...'} />
+                    <SelectValue placeholder={t('cd_test_type_desc_schedule') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedServices.length === 0 ? (
@@ -1665,8 +1660,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                     return (
                       <div key={day.value} className="space-y-4 p-4 border rounded-lg">
                         {/* Day Header */}
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium">{t(day.labelKey) || day.label}</h3>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <h3 className={`text-lg font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{t(day.labelKey) || day.label}</h3>
                           <Switch
                             checked={config.isAvailable || false}
                             onCheckedChange={(checked) => updateDayConfigWithPersistence(day.value, 'isAvailable', checked)}
@@ -1675,11 +1670,11 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         </div>
 
                         {config.isAvailable && (
-                          <div className="space-y-4 ml-4">
+                          <div className={`space-y-4 ${isRTL ? 'mr-4' : 'ml-4'}`}>
                             {/* Time Range */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div>
-                                <Label>{t('start_time') || 'Start Time'}</Label>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('start_time') || 'Start Time'}</Label>
                                 <Input
                                   type="time"
                                   value={config.startTime || '09:00'}
@@ -1688,8 +1683,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
-                              <div>
-                                <Label>{t('end_time') || 'End Time'}</Label>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('end_time') || 'End Time'}</Label>
                                 <Input
                                   type="time"
                                   value={config.endTime || '17:00'}
@@ -1698,8 +1693,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
-                              <div>
-                                <Label>{t('slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
                                 <Input
                                   type="number"
                                   min="15"
@@ -1708,16 +1703,17 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   value={config.duration || 30}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'duration', parseInt(e.target.value))}
                                   disabled={loading}
-                                  dir={isRTL ? 'rtl' : 'ltr'}
-                                  placeholder={locale === 'ar' ? toArabicNumerals('30') : '30'}
+                                  dir="ltr"
+                                  className={isRTL ? 'text-right' : 'text-left'}
+                                  placeholder={formatLocalizedNumber(30, locale)}
                                 />
                               </div>
                             </div>
 
                             {/* Break Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>{t('break_start_optional') || 'Break Start (optional)'}</Label>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('break_start_optional') || 'Break Start (optional)'}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakStart || ''}
@@ -1726,8 +1722,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 />
                               </div>
-                              <div>
-                                <Label>{t('break_end_optional') || 'Break End (optional)'}</Label>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('break_end_optional') || 'Break End (optional)'}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakEnd || ''}
@@ -1740,9 +1736,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                             {/* Generated Slots Preview */}
                             {slots.length > 0 && (
-                              <div>
-                                <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  {(t('generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', String(slots.length))}
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                  {(t('generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', formatLocalizedNumber(slots.length, locale))}
                                 </Label>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {slots.slice(0, 8).map((slot, index) => (
@@ -4023,7 +4019,7 @@ export default function CenterDashboardPage() {
               {/* Patient Basic Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">{t('cd_patient_information')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_information')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
@@ -4050,7 +4046,7 @@ export default function CenterDashboardPage() {
               {/* Past Lab Tests History with This Center */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">{t('cd_lab_test_history')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_lab_test_history')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.labHistory?.length > 0 ? (
@@ -4110,7 +4106,7 @@ export default function CenterDashboardPage() {
               {/* Patient Registration & Medical Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">{t('cd_patient_registration_info')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_registration_info')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.medicalRecords?.length > 0 ? (

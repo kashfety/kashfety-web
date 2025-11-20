@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('📥 [Lab Test Types] POST request body:', body);
 
-    const { name, name_ar } = body;
+    const { name, name_ar, name_ku, category, description, code } = body;
 
     // Validate required fields
     if (!name || !name_ar) {
@@ -68,16 +68,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prepare lab test type data
+    const labTestData: any = {
+      name: name.trim(),
+      name_ar: name_ar.trim(),
+      category: category || 'general',
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Add optional fields if provided
+    if (name_ku) labTestData.name_ku = name_ku.trim();
+    if (description) labTestData.description = description.trim();
+    if (code) labTestData.code = code.trim();
+
     // Insert new lab test type
     const { data: newLabTestType, error } = await supabase
       .from('lab_test_types')
-      .insert([
-        {
-          name: name.trim(),
-          name_ar: name_ar.trim(),
-          created_at: new Date().toISOString()
-        }
-      ])
+      .insert([labTestData])
       .select()
       .single();
 
@@ -96,6 +105,53 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ [Lab Test Types] POST error:', error);
+    return NextResponse.json(
+      {
+        error: error.message || 'Internal server error',
+        success: false
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Delete a lab test type (using query parameter instead of dynamic route)
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    console.log('📥 [Lab Test Types] DELETE request for ID:', id);
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Lab test type ID is required', success: false },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Delete the lab test type
+    const { error } = await supabase
+      .from('lab_test_types')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting lab test type:', error);
+      throw new Error(error.message || 'Failed to delete lab test type');
+    }
+
+    console.log('✅ [Lab Test Types] Deleted successfully:', id);
+
+    return NextResponse.json({
+      message: 'Lab test type deleted successfully',
+      success: true
+    });
+
+  } catch (error: any) {
+    console.error('❌ [Lab Test Types] DELETE error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

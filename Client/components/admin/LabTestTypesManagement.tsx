@@ -73,7 +73,8 @@ export default function LabTestTypesManagement() {
         },
         body: JSON.stringify({
           name: newTestType.name.trim(),
-          name_ar: newTestType.name_ar.trim()
+          name_ar: newTestType.name_ar.trim(),
+          category: 'general'
         })
       });
 
@@ -110,7 +111,7 @@ export default function LabTestTypesManagement() {
       `Are you sure you want to delete "${name}"? This action cannot be undone.`,
       async () => {
         try {
-          const response = await fetch(`/api/admin/lab-test-types/${id}`, {
+          const response = await fetch(`/api/admin/lab-test-types?id=${id}`, {
             method: 'DELETE'
           });
 

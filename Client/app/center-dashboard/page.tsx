@@ -1666,6 +1666,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             checked={config.isAvailable || false}
                             onCheckedChange={(checked) => updateDayConfigWithPersistence(day.value, 'isAvailable', checked)}
                             disabled={loading}
+                            isRTL={isRTL}
                           />
                         </div>
 
@@ -3476,9 +3477,9 @@ export default function CenterDashboardPage() {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="text-right">
-                                    <div className="flex items-center gap-2">
+                                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                  <div className={isRTL ? 'text-left' : 'text-right'}>
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                       <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium">
                                         {t('fee') || 'Fee'} ($)
                                       </Label>
@@ -3500,7 +3501,7 @@ export default function CenterDashboardPage() {
                                       />
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
+                                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                     <Label htmlFor={`service-${testType.id}`} className="text-sm font-medium">
                                       {state.active ? t('enabled') || 'Enabled' : t('disabled') || 'Disabled'}
                                     </Label>
@@ -3513,6 +3514,7 @@ export default function CenterDashboardPage() {
                                           [testType.id]: { ...prev[testType.id], active: checked }
                                         }));
                                       }}
+                                      isRTL={isRTL}
                                     />
                                   </div>
                                 </div>
@@ -3765,8 +3767,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('cd_profile_settings') || 'Profile Settings'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('cd_update_center_info') || 'Update your center information and preferences'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_profile_settings') || 'Profile Settings'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_update_center_info') || 'Update your center information and preferences'}</p>
                     </div>
                   </div>
                 </div>

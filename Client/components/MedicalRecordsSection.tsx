@@ -727,12 +727,6 @@ export default function MedicalRecordsSection() {
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
                     {t('mr_tab_consultations') || 'Consultations'}
                   </CardTitle>
-                  {medicalRecords.length === 0 && (
-                    <Button onClick={handleCreateRecord} size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t('mr_add_consultation') || 'Add Consultation'}
-                    </Button>
-                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -745,10 +739,6 @@ export default function MedicalRecordsSection() {
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">{t('mr_no_consultations') || 'No consultations found'}</p>
-                    <Button onClick={handleCreateRecord} className="mt-4" variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t('mr_add_first_consultation') || 'Add Your First Consultation'}
-                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -773,25 +763,6 @@ export default function MedicalRecordsSection() {
                                   <span>{toArabicNumerals(new Date(record.record_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</span>
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditRecord(record)}
-                                title={t('mr_edit') || 'Edit'}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteRecord(record.id)}
-                                className="text-red-600 hover:text-red-700"
-                                title={t('mr_delete') || 'Delete'}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
                             </div>
                           </div>
                         </CardHeader>

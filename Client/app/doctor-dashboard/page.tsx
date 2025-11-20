@@ -151,12 +151,18 @@ interface Appointment {
   status: string;
   symptoms?: string;
   chief_complaint?: string;
-  consultation_fee?: number;
+  consultation_fee: number;
   notes?: string;
   diagnosis?: string;
   treatment?: string;
   prescription?: string;
   cancellation_reason?: string;
+  name?: string;
+  name_ar?: string;
+  first_name?: string;
+  first_name_ar?: string;
+  last_name?: string;
+  last_name_ar?: string;
 }
 
 interface MedicalRecord {
@@ -215,16 +221,16 @@ function getLocalizedSpecialty(
   specialty_name_ar?: string
 ): string {
   if (!specialtyName) return '';
-  
+
   // First, check if we have specialty_name_ar directly from API (for doctor profile)
   if (locale === 'ar' && specialty_name_ar) {
     return specialty_name_ar;
   }
-  
+
   // Otherwise, look it up in the specialtiesMap
   const specialtyData = specialtiesMap.get(specialtyName);
   if (!specialtyData) return specialtyName;
-  
+
   if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
   if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
   return specialtyName;
@@ -446,8 +452,8 @@ function ProfileHeader({
                 {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {(locale === 'ar' && doctorProfile?.specialty_name_ar) 
-                  ? doctorProfile.specialty_name_ar 
+                {(locale === 'ar' && doctorProfile?.specialty_name_ar)
+                  ? doctorProfile.specialty_name_ar
                   : (doctorProfile?.specialty || 'General Medicine')}
               </div>
             </div>
@@ -521,23 +527,23 @@ export default function DoctorDashboard() {
 
   const getLocalizedPatientName = (appointment: any) => {
     if (!appointment) return 'Unknown Patient';
-    
+
     if (locale === 'ar') {
       // Try name_ar first
       if (appointment.name_ar) return appointment.name_ar;
-      
+
       // Build from first_name_ar + last_name_ar
       if (appointment.first_name_ar || appointment.last_name_ar) {
         return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
       }
-      
+
       // Check users object
       if (appointment.users?.name_ar) return appointment.users.name_ar;
       if (appointment.users?.first_name_ar || appointment.users?.last_name_ar) {
         return [appointment.users.first_name_ar, appointment.users.last_name_ar].filter(Boolean).join(' ').trim();
       }
     }
-    
+
     // Fallback to English name
     if (appointment.name) return appointment.name;
     if (appointment.first_name || appointment.last_name) {
@@ -592,7 +598,7 @@ export default function DoctorDashboard() {
           const data = await response.json();
           const specialtiesList = data.specialties || data; // Handle both response formats
           const map = new Map();
-          
+
           if (Array.isArray(specialtiesList)) {
             specialtiesList.forEach((specialty: any) => {
               map.set(specialty.name, {
@@ -1605,8 +1611,8 @@ export default function DoctorDashboard() {
                                     {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
                                   </p>
                                   <p className="text-sm text-gray-500 dark:text-gray-500">
-                                    {appointment.appointment_type === 'home' 
-                                      ? (t('dd_home_visit') || 'Home Visit') 
+                                    {appointment.appointment_type === 'home'
+                                      ? (t('dd_home_visit') || 'Home Visit')
                                       : (t('dd_clinic_visit') || 'Clinic Visit')}
                                   </p>
                                   {appointment.symptoms && (
@@ -1951,66 +1957,66 @@ export default function DoctorDashboard() {
                           {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => {
                             const patientName = getLocalizedName(patient, locale);
                             return (
-                            <div
-                              key={patient.id}
-                              className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                  <span className="text-white font-medium">
-                                    {patientName?.charAt(0)?.toUpperCase() || 'P'}
-                                  </span>
-                                </div>
-                                <div>
-                                  <h4 className="font-medium text-gray-900 dark:text-white">
-                                    {patientName}
-                                  </h4>
-                                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <span className="flex items-center gap-1">
-                                      <Mail className="w-3 h-3" />
-                                      {patient.email}
+                              <div
+                                key={patient.id}
+                                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <span className="text-white font-medium">
+                                      {patientName?.charAt(0)?.toUpperCase() || 'P'}
                                     </span>
-                                    <span className="flex items-center gap-1">
-                                      <Phone className="w-3 h-3" />
-                                      {formatPhoneNumber(patient.phone, locale)}
-                                    </span>
-                                    {patient.age && (
-                                      <span>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
-                                    )}
                                   </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
-                                    </Badge>
-                                    {patient.lastAppointment && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
-                                          year: 'numeric',
-                                          month: 'short',
-                                          day: 'numeric'
-                                        })}
-                                      </Badge>
-                                    )}
-                                    {patient.gender && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-900 dark:text-white">
+                                      {patientName}
+                                    </h4>
+                                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                      <span className="flex items-center gap-1">
+                                        <Mail className="w-3 h-3" />
+                                        {patient.email}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Phone className="w-3 h-3" />
+                                        {formatPhoneNumber(patient.phone, locale)}
+                                      </span>
+                                      {patient.age && (
+                                        <span>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1">
                                       <Badge variant="outline" className="text-xs">
-                                        {patient.gender}
+                                        {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
                                       </Badge>
-                                    )}
+                                      {patient.lastAppointment && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                          })}
+                                        </Badge>
+                                      )}
+                                      {patient.gender && (
+                                        <Badge variant="outline" className="text-xs">
+                                          {patient.gender}
+                                        </Badge>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewPatient(patient.id)}
+                                  >
+                                    <FileText className="w-4 h-4 mr-1" />
+                                    {t('medical_records') || 'Records'}
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewPatient(patient.id)}
-                                >
-                                  <FileText className="w-4 h-4 mr-1" />
-                                  {t('medical_records') || 'Records'}
-                                </Button>
-                              </div>
-                            </div>
-                          );
+                            );
                           })}
 
                           {patients.length > 10 && (
@@ -2341,10 +2347,10 @@ export default function DoctorDashboard() {
                                       'secondary'
                                 }>
                                   {appointment.status === 'completed' ? t('dd_status_completed') :
-                                   appointment.status === 'scheduled' ? t('dd_status_scheduled') :
-                                   appointment.status === 'confirmed' ? t('dd_status_confirmed') :
-                                   appointment.status === 'cancelled' ? t('dd_status_cancelled') :
-                                   appointment.status}
+                                    appointment.status === 'scheduled' ? t('dd_status_scheduled') :
+                                      appointment.status === 'confirmed' ? t('dd_status_confirmed') :
+                                        appointment.status === 'cancelled' ? t('dd_status_cancelled') :
+                                          appointment.status}
                                 </Badge>
                               </div>
                               {appointment.symptoms && (

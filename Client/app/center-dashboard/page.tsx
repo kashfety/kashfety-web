@@ -72,6 +72,25 @@ import {
 } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
+// Utility function for getting localized names
+function getLocalizedNameUtil(item: any, currentLocale: string, fallbackField = 'name') {
+  if (!item) return '';
+
+  // For Arabic locale, try various Arabic name fields
+  if (currentLocale === 'ar') {
+    return item.name_ar || item.name_arabic || item.arabic_name ||
+      item.first_name_ar || item.last_name_ar ||
+      (item.first_name_ar && item.last_name_ar ? `${item.first_name_ar} ${item.last_name_ar}` : '') ||
+      item[fallbackField] || item.name || '';
+  }
+
+  // For English or other locales, use English fields
+  return item.name_en || item.english_name ||
+    item[fallbackField] || item.name ||
+    (item.first_name && item.last_name ? `${item.first_name} ${item.last_name}` : '') ||
+    item.first_name || item.last_name || '';
+}
+
 // TopNav Component
 function TopNav({
   centerProfile,
@@ -89,16 +108,24 @@ function TopNav({
   const displayAppointments = todayStats?.stats?.todayAppointments || 0;
   const nextAppointment = todayStats?.stats?.nextAppointment;
 
+  // Helper function to get localized center name
+  const getCenterDisplayName = () => {
+    if (locale === 'ar' && centerProfile?.name_ar) {
+      return centerProfile.name_ar;
+    }
+    return centerProfile?.name || t('cd_medical_center') || 'Medical Center';
+  };
+
   return (
-    <div className="h-16 border-b border-gray-200 dark:border-[#1F1F23] bg-white dark:bg-[#1A1A1A] flex items-center justify-between px-6">
-      <div className="flex items-center gap-4">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-          {t('cd_welcome_back') || 'Welcome back'}, {centerProfile?.name || t('cd_medical_center') || 'Medical Center'}
+    <div className={`h-16 border-b border-gray-200 dark:border-[#1F1F23] bg-white dark:bg-[#1A1A1A] flex items-center justify-between px-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <h1 className={`text-xl font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('cd_welcome_back') || 'Welcome back'}, {getCenterDisplayName()}
         </h1>
         {nextAppointment && (
           <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Clock className="w-4 h-4" />
-            <span>{t('cd_next') || 'Next'}: {nextAppointment.patient_name} {t('at') || 'at'} {nextAppointment.time}</span>
+            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} {nextAppointment.time}</span>
           </div>
         )}
       </div>
@@ -194,7 +221,12 @@ function CenterOverview({
   serviceStates: Record<string, { active: boolean; fee?: string }>;
   analytics: any;
 }) {
-  const { t, locale } = useLocale();
+  const { t, locale, isRTL } = useLocale();
+
+  // Helper function to get localized name with fallback
+  const getLocalizedName = (item: any, currentLocale?: string, fallbackField = 'name') => {
+    return getLocalizedNameUtil(item, currentLocale || locale, fallbackField);
+  };
 
   // Calculate active services count from serviceStates
   const activeServicesCount = Object.values(serviceStates).filter(state => state.active).length;
@@ -326,7 +358,7 @@ function CenterOverview({
                     <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
                       <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-1">{t('dd_next_appointment') || 'Next Appointment'}</h4>
                       <p className="text-sm text-emerald-700 dark:text-emerald-300">
-                        {todayStats.stats.nextAppointment.patient_name} • {todayStats.stats.nextAppointment.type}
+                        {getLocalizedNameUtil(todayStats.stats.nextAppointment, locale, 'patient_name')} • {todayStats.stats.nextAppointment.type}
                       </p>
                       <p className="text-xs text-emerald-600 dark:text-emerald-400">
                         {new Date(todayStats.stats.nextAppointment.date + ' ' + todayStats.stats.nextAppointment.time).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US', {
@@ -378,7 +410,7 @@ function CenterOverview({
                             t('appointments_status_scheduled')}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {appointment.patient_name} • {appointment.test_type_name} • {
+                      {getLocalizedNameUtil(appointment, locale, 'patient_name')} • {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {
                         appointment.booking_date && appointment.booking_time ?
                           `${new Date(appointment.booking_date).toLocaleDateString()} at ${appointment.booking_time}` :
                           t('time_tbd') || 'Time TBD'
@@ -413,7 +445,15 @@ function CenterPatients({
   patients: any[];
   onViewPatient: (patientId: string, patientName?: string) => void;
 }) {
-  const { t, isRTL } = useLocale();
+  const { t, locale, isRTL } = useLocale();
+
+  // Helper function to get localized patient name
+  const getPatientDisplayName = (patient: any) => {
+    if (locale === 'ar' && patient.name_ar) {
+      return patient.name_ar;
+    }
+    return patient.name || `${t('patient') || 'Patient'} ${patient.id}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -446,7 +486,7 @@ function CenterPatients({
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="font-medium text-gray-900 dark:text-white">{patient.name || `${t('patient') || 'Patient'} ${patient.id}`}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{getPatientDisplayName(patient)}</p>
                     <p className="text-sm text-gray-500">
                       {patient.age ? `${t('age') || 'Age'}: ${patient.age}` : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
@@ -879,6 +919,7 @@ function CenterAnalytics({
                     borderRadius: "12px",
                     boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
                     color: isDark ? "#ffffff" : "#000000",
+                    direction: isRTL ? 'rtl' : 'ltr',
                   }}
                   formatter={(value, name) => [
                     name === 'revenue' ? `${Number(value).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} ${t('currency') || 'SYP'}` : value,
@@ -1079,7 +1120,7 @@ function CenterAnalytics({
 function CenterScheduleManagement({ selectedServices }: { selectedServices: any[] }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale, isRTL } = useLocale();
 
   // Define schedule config type (similar to doctor dashboard)
   type DayConfig = {
@@ -1256,7 +1297,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   // Handle test type selection with auto-save (like doctor-dashboard center switching)
   const handleTypeSelection = async (newTypeId: string) => {
     console.log('🔄 [CenterSchedule] Switching test type from', selectedTestType, 'to', newTypeId);
-    
+
     // If switching away from a previously selected type, auto-save current schedule
     if (selectedTestType && selectedTestType !== newTypeId) {
       try {
@@ -1278,7 +1319,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
     if (newTypeId) {
       console.log('🔄 [CenterSchedule] Loading schedule from server for test type:', newTypeId);
       await loadScheduleForType(newTypeId);
-      
+
       // Mark as initialized after loading
       if (!initializedTypes.has(newTypeId)) {
         console.log('✅ [CenterSchedule] Marking test type as initialized:', newTypeId);
@@ -1332,7 +1373,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         console.log('✅ [CenterSchedule] Converted schedule config:', newConfig);
         console.log('✅ [CenterSchedule] Setting schedule config state for test type:', testTypeId);
         setScheduleConfig(newConfig);
-        
+
         // Also update typeFormStates to persist the loaded config
         setTypeFormStates(prev => ({
           ...prev,
@@ -1451,10 +1492,10 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       ) : (
         <>
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Clock className="h-5 w-5" />
-              <h2 className="text-xl font-semibold">{t('center_schedule_management') || 'Lab Schedule Management'}</h2>
+              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('center_schedule_management') || 'Lab Schedule Management'}</h2>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -1504,15 +1545,19 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         <p className="text-xs text-gray-400">{t('select_services_first') || 'Please enable services in the Services tab first'}</p>
                       </div>
                     ) : (
-                      selectedServices.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          <div className="flex items-center gap-2">
-                            <TestTube className="h-4 w-4" />
-                            <span>{type.name}</span>
-                            {type.category && <Badge variant="secondary" className="text-xs">{type.category}</Badge>}
-                          </div>
-                        </SelectItem>
-                      ))
+                      selectedServices.map((type) => {
+                        // Get localized name with fallback
+                        const displayName = locale === 'ar' && type.name_ar ? type.name_ar : type.name;
+                        return (
+                          <SelectItem key={type.id} value={type.id}>
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <TestTube className="h-4 w-4" />
+                              <span className={isRTL ? 'text-right' : 'text-left'}>{displayName}</span>
+                              {type.category && <Badge variant="secondary" className="text-xs">{type.category}</Badge>}
+                            </div>
+                          </SelectItem>
+                        );
+                      })
                     )}
                   </SelectContent>
                 </Select>
@@ -2589,9 +2634,9 @@ export default function CenterDashboardPage() {
       });
       return updated;
     });
-    toast({ 
-      title: t('success') || 'Success', 
-      description: `${selectedTestTypes.size} ${t('test_types_enabled') || 'test types enabled'}` 
+    toast({
+      title: t('success') || 'Success',
+      description: `${selectedTestTypes.size} ${t('test_types_enabled') || 'test types enabled'}`
     });
   };
 
@@ -2607,9 +2652,9 @@ export default function CenterDashboardPage() {
       });
       return updated;
     });
-    toast({ 
-      title: t('success') || 'Success', 
-      description: `${selectedTestTypes.size} ${t('test_types_disabled') || 'test types disabled'}` 
+    toast({
+      title: t('success') || 'Success',
+      description: `${selectedTestTypes.size} ${t('test_types_disabled') || 'test types disabled'}`
     });
   };
 
@@ -2629,9 +2674,9 @@ export default function CenterDashboardPage() {
       });
       return updated;
     });
-    toast({ 
-      title: t('success') || 'Success', 
-      description: `${t('fee_set_for') || 'Fee set for'} ${selectedTestTypes.size} ${t('test_types') || 'test types'}` 
+    toast({
+      title: t('success') || 'Success',
+      description: `${t('fee_set_for') || 'Fee set for'} ${selectedTestTypes.size} ${t('test_types') || 'test types'}`
     });
   };
 
@@ -2641,7 +2686,7 @@ export default function CenterDashboardPage() {
       toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
       return;
     }
-    
+
     setCreating(true);
     try {
       const response = await labService.createLabTestType({
@@ -2650,25 +2695,25 @@ export default function CenterDashboardPage() {
         category: newTestType.category,
         default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
       });
-      
+
       const newType = response.data;
       console.log('✅ [Frontend] Created new lab test type:', newType);
-      
+
       toast({ title: 'Success', description: 'Lab test type created successfully' });
-      
+
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
       setShowCreateDialog(false);
-      
+
       // Reload all data from server to get the fresh list with the new test type
       console.log('🔄 [Frontend] Reloading data to fetch new test type from server...');
       await loadCenterData();
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
-      toast({ 
-        title: 'Error', 
+      toast({
+        title: 'Error',
         description: error.response?.data?.error || 'Failed to create lab test type',
-        variant: 'destructive' 
+        variant: 'destructive'
       });
     } finally {
       setCreating(false);
@@ -3043,7 +3088,7 @@ export default function CenterDashboardPage() {
                                     'bg-yellow-500'
                                 }`}></div>
                               <div>
-                                <p className="font-medium text-gray-900 dark:text-white">{appointment.patient_name}</p>
+                                <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500">
                                   {appointment.test_type_name} • {appointment.appointment_time} • ${appointment.fee}
                                 </p>
@@ -3344,10 +3389,12 @@ export default function CenterDashboardPage() {
                         {allTestTypes.map((testType: any) => {
                           const state = serviceStates[testType.id] || { active: false, fee: '' };
                           const isSelected = selectedTestTypes.has(testType.id);
+                          // Get localized name with fallback
+                          const displayName = locale === 'ar' && testType.name_ar ? testType.name_ar : testType.name;
                           return (
                             <div key={testType.id} className={`p-4 border rounded-lg transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600'}`}>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                   <Checkbox
                                     checked={isSelected}
                                     onCheckedChange={() => toggleTestTypeSelection(testType.id)}
@@ -3355,8 +3402,8 @@ export default function CenterDashboardPage() {
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900 dark:to-emerald-800 flex items-center justify-center">
                                     <TestTube className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                                   </div>
-                                  <div>
-                                    <h4 className="font-semibold text-gray-900 dark:text-white">{testType.name}</h4>
+                                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h4 className="font-semibold text-gray-900 dark:text-white">{displayName}</h4>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{testType.description}</p>
                                     <div className="flex items-center gap-4 mt-2">
                                       <span className="text-xs text-gray-500">
@@ -3506,18 +3553,20 @@ export default function CenterDashboardPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {activeServices.map(testType => {
                             const state = serviceStates[testType.id];
+                            // Get localized name with fallback
+                            const displayName = locale === 'ar' && testType.name_ar ? testType.name_ar : testType.name;
                             return (
                               <div
                                 key={testType.id}
                                 className="p-4 border rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700"
                               >
-                                <div className="flex items-start justify-between">
+                                <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                                   <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
+                                    <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
                                         <TestTube className="w-4 h-4 text-white" />
                                       </div>
-                                      <h3 className="font-medium text-sm">{testType.name}</h3>
+                                      <h3 className={`font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{displayName}</h3>
                                     </div>
                                     <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
                                       {testType.description}
@@ -3764,11 +3813,12 @@ export default function CenterDashboardPage() {
                             onChange={(e) => updateProfileForm('name', e.target.value)}
                             className="mt-1"
                             required
+                            dir="ltr"
                           />
                           <p className="text-xs text-gray-500 mt-1">{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
                         </div>
                         <div>
-                          <Label htmlFor="centerNameAr">{t('center_name_arabic') || 'Center Name (Arabic)'}</Label>
+                          <Label htmlFor="centerNameAr">{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
                           <Input
                             id="centerNameAr"
                             placeholder={centerProfile?.name_ar ? `${t('current_prefix') || 'Current:'} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
@@ -3777,7 +3827,7 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir="rtl"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_name_appears_arabic') || 'Arabic name for multilingual support'}</p>
+                          <p className="text-xs text-gray-500 mt-1">{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
                         </div>
                         <div>
                           <Label htmlFor="email">{t('email') || 'Email'} *</Label>
@@ -3859,6 +3909,7 @@ export default function CenterDashboardPage() {
                             if (centerProfile) {
                               setProfileForm({
                                 name: centerProfile.name || '',
+                                name_ar: centerProfile.name_ar || '',
                                 email: centerProfile.email || user?.email || '',
                                 phone: centerProfile.phone || '',
                                 address: centerProfile.address || '',
@@ -3977,8 +4028,8 @@ export default function CenterDashboardPage() {
                   ) : (
                     <div className="text-center py-8">
                       <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500">No lab test history with our center</p>
-                      <p className="text-sm text-gray-400 mt-1">Patient hasn't had any tests at this center yet</p>
+                      <p className="text-gray-500">{t('cd_no_lab_history')}</p>
+                      <p className="text-sm text-gray-400 mt-1">{t('cd_no_tests_yet')}</p>
                     </div>
                   )}
                 </CardContent>
@@ -3987,7 +4038,7 @@ export default function CenterDashboardPage() {
               {/* Patient Registration & Medical Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Patient Registration Information</CardTitle>
+                  <CardTitle className="text-lg">{t('cd_patient_registration_info')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.medicalRecords?.length > 0 ? (
@@ -3997,55 +4048,55 @@ export default function CenterDashboardPage() {
                           {/* Personal Information */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className="font-medium text-gray-900 dark:text-white mb-3">Personal Details</h4>
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_personal_details')}</h4>
                               <div className="space-y-2">
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>Full Name:</strong> {record.name || 'Not provided'}
+                                  <strong>{t('cd_patient_full_name')}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>Gender:</strong> {record.gender || 'Not provided'}
+                                  <strong>{t('cd_patient_gender')}:</strong> {record.gender || t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>Date of Birth:</strong> {record.date_of_birth ? new Date(record.date_of_birth).toLocaleDateString() : 'Not provided'}
+                                  <strong>{t('cd_patient_dob')}:</strong> {record.date_of_birth ? new Date(record.date_of_birth).toLocaleDateString() : t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>Phone:</strong> {record.phone || 'Not provided'}
+                                  <strong>{t('cd_patient_phone')}:</strong> {record.phone || t('cd_value_not_provided')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>Email:</strong> {record.email || 'Not provided'}
+                                  <strong>{t('cd_patient_email')}:</strong> {record.email || t('cd_value_not_provided')}
                                 </p>
                               </div>
                             </div>
 
                             {/* Emergency Contact */}
                             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className="font-medium text-gray-900 dark:text-white mb-3">Emergency Contact</h4>
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_emergency_contact')}</h4>
                               <div className="space-y-2">
                                 {record.emergency_contact && Object.keys(record.emergency_contact).length > 0 ? (
                                   <>
                                     {record.emergency_contact.name && (
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        <strong>Name:</strong> {record.emergency_contact.name}
+                                        <strong>{t('cd_contact_name')}:</strong> {record.emergency_contact.name}
                                       </p>
                                     )}
                                     {record.emergency_contact.phone && (
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        <strong>Phone:</strong> {record.emergency_contact.phone}
+                                        <strong>{t('cd_patient_phone')}:</strong> {record.emergency_contact.phone}
                                       </p>
                                     )}
                                     {record.emergency_contact.relationship && (
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        <strong>Relationship:</strong> {record.emergency_contact.relationship}
+                                        <strong>{t('cd_contact_relationship')}:</strong> {record.emergency_contact.relationship}
                                       </p>
                                     )}
                                     {record.emergency_contact.email && (
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        <strong>Email:</strong> {record.emergency_contact.email}
+                                        <strong>{t('cd_patient_email')}:</strong> {record.emergency_contact.email}
                                       </p>
                                     )}
                                   </>
                                 ) : (
-                                  <p className="text-sm text-gray-500">No emergency contact information provided</p>
+                                  <p className="text-sm text-gray-500">{t('cd_no_emergency_contact')}</p>
                                 )}
                               </div>
                             </div>
@@ -4053,24 +4104,24 @@ export default function CenterDashboardPage() {
 
                           {/* Medical History */}
                           <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-3">Medical History</h4>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_medical_history')}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Medical History</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('cd_medical_history')}</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {record.medical_history || 'No medical history provided'}
+                                  {record.medical_history || t('cd_no_medical_history')}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Allergies</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('cd_patient_allergies')}</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {record.allergies || 'No allergies recorded'}
+                                  {record.allergies || t('cd_no_allergies')}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Medications</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('cd_current_medications')}</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {record.medications || 'No medications recorded'}
+                                  {record.medications || t('cd_no_medications')}
                                 </p>
                               </div>
                             </div>
@@ -4078,13 +4129,13 @@ export default function CenterDashboardPage() {
 
                           {/* Registration Details */}
                           <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-3">Registration Details</h4>
-                            <div className="space-y-2">
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_registration_details')}</h4>
+                            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                <strong>Registered:</strong> {record.created_at ? new Date(record.created_at).toLocaleDateString() : 'Unknown'}
+                                <strong>{t('cd_registered')}:</strong> {record.created_at ? new Date(record.created_at).toLocaleDateString() : t('cd_unknown')}
                               </p>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                <strong>Last Updated:</strong> {record.updated_at ? new Date(record.updated_at).toLocaleDateString() : 'Not updated'}
+                                <strong>{t('cd_last_updated')}:</strong> {record.updated_at ? new Date(record.updated_at).toLocaleDateString() : t('cd_not_updated')}
                               </p>
                             </div>
                           </div>
@@ -4094,15 +4145,15 @@ export default function CenterDashboardPage() {
                   ) : (
                     <div className="text-center py-8">
                       <Heart className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500">No patient registration information found</p>
-                      <p className="text-sm text-gray-400 mt-1">Patient registration details will appear here when available</p>
+                      <p className="text-gray-500">{t('cd_no_patient_registration')}</p>
+                      <p className="text-sm text-gray-400 mt-1">{t('cd_registration_details_appear')}</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={() => setShowPatientModal(false)}>Close</Button>
+              <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
+                <Button variant="outline" onClick={() => setShowPatientModal(false)}>{t('cd_close')}</Button>
               </div>
             </div>
           </div>
@@ -4113,9 +4164,9 @@ export default function CenterDashboardPage() {
       {showUploadModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-2xl mx-4">
-            <div className="flex items-center justify-between mb-6">
+            <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Upload Lab Result: {selectedAppointment.patient_name}
+                {t('cd_upload_lab_result')}: {getLocalizedNameUtil(selectedAppointment, locale, 'patient_name')}
               </h3>
               <Button variant="outline" size="sm" onClick={() => setShowUploadModal(false)}>
                 <XCircle className="w-4 h-4" />
@@ -4126,30 +4177,30 @@ export default function CenterDashboardPage() {
               {/* Appointment Details */}
               <Card>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div>
-                      <Label>Patient Name</Label>
-                      <Input value={selectedAppointment.patient_name} readOnly />
+                      <Label>{t('cd_modal_patient_name')}</Label>
+                      <Input value={getLocalizedNameUtil(selectedAppointment, locale, 'patient_name')} readOnly />
                     </div>
                     <div>
-                      <Label>Test Type</Label>
-                      <Input value={selectedAppointment.test_type_name} readOnly />
+                      <Label>{t('cd_modal_test_type')}</Label>
+                      <Input value={getLocalizedNameUtil(selectedAppointment, locale, 'test_type_name') || selectedAppointment.test_type_name} readOnly />
                     </div>
                     <div>
-                      <Label>Appointment Date</Label>
-                      <Input value={selectedAppointment.booking_date || 'N/A'} readOnly />
+                      <Label>{t('cd_appointment_date')}</Label>
+                      <Input value={selectedAppointment.booking_date || t('cd_na')} readOnly />
                     </div>
                     <div>
-                      <Label>Appointment Time</Label>
-                      <Input value={selectedAppointment.booking_time || 'N/A'} readOnly />
+                      <Label>{t('cd_appointment_time')}</Label>
+                      <Input value={selectedAppointment.booking_time || t('cd_na')} readOnly />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Upload Section */}
-              <div>
-                <Label>Upload Lab Result (PDF)</Label>
+              <div dir={isRTL ? 'rtl' : 'ltr'}>
+                <Label>{t('cd_upload_lab_result_pdf')}</Label>
                 <Input
                   type="file"
                   accept=".pdf"
@@ -4157,34 +4208,34 @@ export default function CenterDashboardPage() {
                   onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Upload the PDF lab result for this test
+                  {t('cd_upload_pdf_hint')}
                 </p>
               </div>
 
-              <div>
-                <Label>Result Notes (Optional)</Label>
+              <div dir={isRTL ? 'rtl' : 'ltr'}>
+                <Label>{t('cd_result_notes_optional')}</Label>
                 <textarea
                   className="w-full p-3 border rounded-lg mt-2 resize-none"
                   rows={4}
-                  placeholder="Add any notes about the lab results or recommendations..."
+                  placeholder={t('cd_notes_placeholder')}
                   value={uploadNotes}
                   onChange={(e) => setUploadNotes(e.target.value)}
                 ></textarea>
               </div>
 
-              <div className="flex gap-4">
+              <div className={`flex gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button
                   onClick={handleFileUpload}
                   disabled={!uploadFile || uploading}
                 >
-                  {uploading ? 'Uploading...' : 'Upload Result'}
+                  {uploading ? t('cd_uploading') : t('cd_modal_upload_result')}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setShowUploadModal(false)}
                   disabled={uploading}
                 >
-                  Cancel
+                  {t('cd_modal_cancel')}
                 </Button>
               </div>
             </div>

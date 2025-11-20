@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, formatLocalizedNumber } from "@/lib/i18n"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -516,9 +516,9 @@ export default function PatientLabsPage() {
                                                                             {test.category === 'lab' ? (t('lab_test_singular') || 'Lab Test') : (t('imaging') || 'Imaging')}
                                                                         </Badge>
                                                                     </div>
-                                                                    <div className="text-right">
-                                                                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                                            ${toArabicNumerals(test.default_fee, locale)}
+                                                                    <div className={isRTL ? 'text-left' : 'text-right'}>
+                                                                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+                                                                            {formatLocalizedNumber(test.default_fee, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}
                                                                         </p>
                                                                     </div>
                                                                 </div>

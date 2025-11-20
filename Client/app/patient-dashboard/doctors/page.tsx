@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, formatLocalizedNumber } from "@/lib/i18n"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -391,9 +391,9 @@ export default function PatientDoctorsPage() {
                                                 </div>
 
                                                 {/* Consultation Fee */}
-                                                <div className="flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold">
+                                                <div className={`flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold ${isRTL ? 'flex-row-reverse' : ''}`}>
                                                     <DollarSign className="w-4 h-4" />
-                                                    <span>${toArabicNumerals(doctor.consultation_fee || 0, locale)}</span>
+                                                    <span dir="ltr">{formatLocalizedNumber(doctor.consultation_fee || 0, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                                                 </div>
 
                                                 {/* Action Button */}
@@ -547,8 +547,8 @@ export default function PatientDoctorsPage() {
                                                     <DollarSign className="w-4 h-4" />
                                                     {t('consultation_fee') || 'Consultation Fee'}
                                                 </h3>
-                                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${toArabicNumerals(selectedDoctor.consultation_fee || 0, locale)}
+                                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+                                                    {formatLocalizedNumber(selectedDoctor.consultation_fee || 0, locale)} {locale === 'ar' ? 'ل.س' : 'SYP'}
                                                 </p>
                                             </div>
                                         </TabsContent>

@@ -132,7 +132,7 @@ export default function CountryCodeSelector({
 
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-200">
+      <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
         {label}
       </label>
       <div className="flex space-x-2">
@@ -143,7 +143,7 @@ export default function CountryCodeSelector({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="flex items-center space-x-2 px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
+            className={`flex items-center space-x-2 px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all`}
           >
             <span className="text-lg">{selectedCountry.flag}</span>
             <span className="text-sm">{selectedCountry.phoneCode}</span>

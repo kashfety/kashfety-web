@@ -259,7 +259,8 @@ export default function PatientLabsPage() {
                                             setCategoryFilter(e.target.value as '' | 'lab' | 'imaging')
                                             setCurrentPage(1)
                                         }}
-                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-[#4DBCC4] focus:border-[#4DBCC4] appearance-none cursor-pointer transition-colors"
+                                        size={1}
+                                        className="w-full h-10 px-3 rounded-md border-2 border-[#4DBCC4]/30 bg-background text-foreground hover:bg-[#4DBCC4]/5 hover:border-[#4DBCC4] focus:outline-none focus:ring-2 focus:ring-[#4DBCC4]/50 focus:border-[#4DBCC4] appearance-none cursor-pointer transition-all"
                                         style={{
                                             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
                                             backgroundRepeat: 'no-repeat',
@@ -268,9 +269,9 @@ export default function PatientLabsPage() {
                                             paddingRight: isRTL ? '0.75rem' : '2rem'
                                         }}
                                     >
-                                        <option value="">{t('all_services') || 'All Services'}</option>
-                                        <option value="lab">{t('lab_tests') || 'Lab Tests'}</option>
-                                        <option value="imaging">{t('imaging') || 'Imaging'}</option>
+                                        <option value="" className="bg-background text-foreground hover:bg-[#4DBCC4]/10">{t('all_services') || 'All Services'}</option>
+                                        <option value="lab" className="bg-background text-foreground hover:bg-[#4DBCC4]/10">{t('lab_tests') || 'Lab Tests'}</option>
+                                        <option value="imaging" className="bg-background text-foreground hover:bg-[#4DBCC4]/10">{t('imaging') || 'Imaging'}</option>
                                     </select>
                                 </div>
                             </div>

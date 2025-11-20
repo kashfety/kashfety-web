@@ -50,6 +50,13 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
     return item.name || '';
   };
 
+  // Helper function to get localized category
+  const getLocalizedCategory = (category: string) => {
+    if (!category) return '';
+    const lowerCategory = category.toLowerCase();
+    return t(lowerCategory) || category.toUpperCase();
+  };
+
   // Check if cancellation is within 24 hours
   const canCancel = () => {
     if (!booking?.booking_date || !booking?.booking_time) return true; // Allow if date/time missing
@@ -163,7 +170,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                         {getLocalizedName(booking.type || booking.lab_test_type)}
                       </span>
                       <Badge className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200 text-xs">
-                        {((booking.type || booking.lab_test_type)?.category || '').toUpperCase()}
+                        {getLocalizedCategory((booking.type || booking.lab_test_type)?.category || '')}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">

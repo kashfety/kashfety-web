@@ -186,7 +186,7 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="font-medium text-gray-900 dark:text-gray-100">Dr. {appointment.doctorName}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{t('mr_dr') || 'Dr.'} {appointment.doctorName}</span>
                 <Badge variant="outline" className="text-xs">{appointment.specialty}</Badge>
               </div>
               <div className="flex items-center gap-2">

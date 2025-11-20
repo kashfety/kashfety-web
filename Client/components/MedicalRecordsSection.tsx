@@ -475,7 +475,7 @@ export default function MedicalRecordsSection() {
           <p className="text-muted-foreground">{t('mr_section_subtitle') || 'Keep your health information up to date'}</p>
         </div>
         {!editing ? (
-          <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+          <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
             <Edit className="w-4 h-4 mr-2" />
             {t('mr_edit') || 'Edit'}
           </Button>
@@ -485,7 +485,7 @@ export default function MedicalRecordsSection() {
               <Save className="w-4 h-4 mr-2" />
               {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
             </Button>
-            <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+            <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
               <X className="w-4 h-4 mr-2" />
               {t('mr_cancel') || 'Cancel'}
             </Button>

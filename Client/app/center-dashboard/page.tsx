@@ -3834,7 +3834,7 @@ export default function CenterDashboardPage() {
                           <>
                             {centerProfile.website && (
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm text-gray-500">{t('website') || 'Website'}</p>
+                                <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website') || 'Website'}</p>
                                 <p className="font-medium text-blue-600 hover:text-blue-800">
                                   <a href={centerProfile.website} target="_blank" rel="noopener noreferrer">
                                     {centerProfile.website}
@@ -3843,9 +3843,9 @@ export default function CenterDashboardPage() {
                               </div>
                             )}
                             {centerProfile.description && (
-                              <div className="col-span-full">
-                                <p className="text-sm text-gray-500">{t('description') || 'Description'}</p>
-                                <p className="font-medium">{centerProfile.description}</p>
+                              <div className={`col-span-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description') || 'Description'}</p>
+                                <p className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{centerProfile.description}</p>
                               </div>
                             )}
                           </>
@@ -3857,7 +3857,7 @@ export default function CenterDashboardPage() {
 
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <Edit className="w-5 h-5" />
                       {t('center_profile') || 'Edit Center Profile'}
                     </CardTitle>
@@ -3868,8 +3868,8 @@ export default function CenterDashboardPage() {
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="centerName">{t('center_name') || 'Center Name (English)'} *</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'}>{t('center_name') || 'Center Name (English)'} *</Label>
                           <Input
                             id="centerName"
                             placeholder={centerProfile?.name ? `${t('current_prefix') || 'Current:'} ${centerProfile.name}` : (t('enter_center_name') || 'Enter center name in English')}
@@ -3879,10 +3879,10 @@ export default function CenterDashboardPage() {
                             required
                             dir="ltr"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
                         </div>
-                        <div>
-                          <Label htmlFor="centerNameAr">{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'}>{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
                           <Input
                             id="centerNameAr"
                             placeholder={centerProfile?.name_ar ? `${t('current_prefix') || 'Current:'} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
@@ -3891,10 +3891,10 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir="rtl"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
                         </div>
-                        <div>
-                          <Label htmlFor="email">{t('email') || 'Email'} *</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'}>{t('email') || 'Email'} *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -3904,10 +3904,10 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             required
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
                         </div>
-                        <div>
-                          <Label htmlFor="phone">{t('phone') || 'Phone'}</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'}>{t('phone') || 'Phone'}</Label>
                           <Input
                             id="phone"
                             placeholder={centerProfile?.phone ? `${t('current_prefix') || 'Current:'} ${centerProfile.phone}` : (t('enter_phone') || 'Enter phone number')}
@@ -3915,12 +3915,12 @@ export default function CenterDashboardPage() {
                             onChange={(e) => updateProfileForm('phone', e.target.value)}
                             className="mt-1"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="address">{t('address') || 'Address'}</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'}>{t('address') || 'Address'}</Label>
                           <Input
                             id="address"
                             placeholder={centerProfile?.address ? `${t('current_prefix') || 'Current:'} ${centerProfile.address}` : (t('enter_address') || 'Enter center address')}
@@ -3928,10 +3928,10 @@ export default function CenterDashboardPage() {
                             onChange={(e) => updateProfileForm('address', e.target.value)}
                             className="mt-1"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_physical_location') || 'Physical location for patient visits'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_physical_location') || 'Physical location for patient visits'}</p>
                         </div>
-                        <div>
-                          <Label htmlFor="website">{t('website') || 'Website'}</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'}>{t('website') || 'Website'}</Label>
                           <Input
                             id="website"
                             placeholder={centerProfile?.website ? `${t('current_prefix') || 'Current:'} ${centerProfile.website}` : (t('enter_website') || 'Enter website URL')}
@@ -3939,28 +3939,29 @@ export default function CenterDashboardPage() {
                             onChange={(e) => updateProfileForm('website', e.target.value)}
                             className="mt-1"
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_optional_website') || 'Optional website for more information'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_optional_website') || 'Optional website for more information'}</p>
                         </div>
-                        <div>
-                          <Label htmlFor="description">{t('description') || 'Description'}</Label>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'}>{t('description') || 'Description'}</Label>
                           <textarea
                             id="description"
                             placeholder={centerProfile?.description ? `${t('current_prefix') || 'Current:'} ${centerProfile.description}` : (t('enter_description') || 'Enter center description')}
                             value={profileForm.description}
                             onChange={(e) => updateProfileForm('description', e.target.value)}
-                            className="mt-1 w-full p-3 border rounded-lg resize-none"
+                            className={`mt-1 w-full p-3 border rounded-lg resize-none ${isRTL ? 'text-right' : 'text-left'}`}
                             rows={3}
+                            dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className="text-xs text-gray-500 mt-1">{t('cd_brief_description') || 'Brief description of services and specialties'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_brief_description') || 'Brief description of services and specialties'}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="border-t pt-6">
-                      <div className="flex gap-4">
+                      <div className={`flex gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Button
                           onClick={saveProfile}
-                          className="flex items-center gap-2"
+                          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           disabled={profileSaving}
                         >
                           <Save className="w-4 h-4" />
@@ -3968,7 +3969,7 @@ export default function CenterDashboardPage() {
                         </Button>
                         <Button
                           variant="outline"
-                          className="flex items-center gap-2"
+                          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           onClick={() => {
                             if (centerProfile) {
                               setProfileForm({
@@ -3988,7 +3989,7 @@ export default function CenterDashboardPage() {
                         </Button>
                         <Button
                           variant="outline"
-                          className="flex items-center gap-2"
+                          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           onClick={() => setActiveTab('services')}
                         >
                           <TestTube className="w-4 h-4" />

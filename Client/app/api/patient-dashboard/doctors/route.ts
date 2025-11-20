@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
             .order('rating', { ascending: false })
             .range(offset, offset + limit - 1);
 
-        // Apply search filter
+        // Apply search filter - include Arabic fields
         if (search) {
-            query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,specialty.ilike.%${search}%`);
+            query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,first_name_ar.ilike.%${search}%,last_name_ar.ilike.%${search}%,name_ar.ilike.%${search}%,specialty.ilike.%${search}%`);
         }
 
         // Apply specialty filter

@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
             .order('name', { ascending: true })
             .range(offset, offset + limit - 1);
 
-        // Apply search filter
+        // Apply search filter - include Arabic name
         if (search) {
-            centersQuery = centersQuery.or(`name.ilike.%${search}%,address.ilike.%${search}%`);
+            centersQuery = centersQuery.or(`name.ilike.%${search}%,name_ar.ilike.%${search}%,address.ilike.%${search}%`);
         }
 
         const { data: centers, error: centersError, count } = await centersQuery;

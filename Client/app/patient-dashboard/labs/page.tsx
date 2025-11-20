@@ -259,9 +259,9 @@ export default function PatientLabsPage() {
                                             setCategoryFilter(e.target.value as '' | 'lab' | 'imaging')
                                             setCurrentPage(1)
                                         }}
-                                        className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-[#4DBCC4] focus:border-[#4DBCC4] appearance-none cursor-pointer transition-colors"
                                         style={{
-                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
                                             backgroundRepeat: 'no-repeat',
                                             backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
                                             paddingLeft: isRTL ? '2rem' : '0.75rem',

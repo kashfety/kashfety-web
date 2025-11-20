@@ -509,7 +509,7 @@ export default function MedicalRecordsSection() {
             <TabsTrigger value="allergies">{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
             <TabsTrigger value="medications">{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
             <TabsTrigger value="emergency">{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
-            <TabsTrigger value="records">{t('mr_tab_records') || 'Medical Records'}</TabsTrigger>
+            <TabsTrigger value="records">{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -725,12 +725,14 @@ export default function MedicalRecordsSection() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
-                    {t('mr_tab_records') || t('mr_medical_records') || 'Medical Records'}
+                    {t('mr_tab_consultations') || 'Consultations'}
                   </CardTitle>
-                  <Button onClick={handleCreateRecord} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('mr_add_record') || 'Add Record'}
-                  </Button>
+                  {medicalRecords.length === 0 && (
+                    <Button onClick={handleCreateRecord} size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      {t('mr_add_consultation') || 'Add Consultation'}
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -742,10 +744,10 @@ export default function MedicalRecordsSection() {
                 ) : medicalRecords.length === 0 ? (
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">{t('mr_no_records') || 'No medical records found'}</p>
+                    <p className="text-muted-foreground">{t('mr_no_consultations') || 'No consultations found'}</p>
                     <Button onClick={handleCreateRecord} className="mt-4" variant="outline">
                       <Plus className="w-4 h-4 mr-2" />
-                      {t('mr_add_first_record') || 'Add Your First Record'}
+                      {t('mr_add_first_consultation') || 'Add Your First Consultation'}
                     </Button>
                   </div>
                 ) : (

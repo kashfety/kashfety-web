@@ -4,9 +4,10 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { centerId: string; doctorId: string } }
+  { params }: { params: Promise<{ centerId: string; doctorId: string }> }
 ) {
   try {
+    const { centerId, doctorId } = await params;
     const { searchParams } = new URL(request.url);
     const start = searchParams.get('start_date') || undefined;
     const end = searchParams.get('end_date') || undefined;
@@ -15,7 +16,7 @@ export async function GET(
     if (start) qs.set('start_date', start);
     if (end) qs.set('end_date', end);
 
-    const url = `${BACKEND_URL}/api/centers/${params.centerId}/doctors/${params.doctorId}/available-dates${qs.toString() ? `?${qs.toString()}` : ''}`;
+    const url = `${BACKEND_URL}/api/centers/${centerId}/doctors/${doctorId}/available-dates${qs.toString() ? `?${qs.toString()}` : ''}`;
     const response = await fetch(url, { method: 'GET' });
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

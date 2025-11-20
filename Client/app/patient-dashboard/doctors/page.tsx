@@ -220,9 +220,10 @@ export default function PatientDoctorsPage() {
         if (locale === 'ar' && doctor.specialty_ar) {
             return doctor.specialty_ar
         }
-        if (locale === 'ku' && doctor.specialty_ku) {
-            return doctor.specialty_ku
-        }
+        // Kurdish locale not currently supported
+        // if (locale === 'ku' && doctor.specialty_ku) {
+        //     return doctor.specialty_ku
+        // }
         // For English, use 'specialty' field which is the English name
         return doctor.specialty
     }

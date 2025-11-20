@@ -46,7 +46,8 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
   const getLocalizedName = (item: any) => {
     if (!item) return '';
     if (locale === 'ar' && item.name_ar) return item.name_ar;
-    if (locale === 'ku' && item.name_ku) return item.name_ku;
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && item.name_ku) return item.name_ku;
     return item.name || '';
   };
 
@@ -60,22 +61,22 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
   // Check if cancellation is within 24 hours
   const canCancel = () => {
     if (!booking?.booking_date || !booking?.booking_time) return true; // Allow if date/time missing
-    
+
     const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
     const now = new Date();
     const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
+
     // Can cancel if more than 24 hours away, or if booking is in the past (though API will block past)
     return hoursUntilBooking > 24 || hoursUntilBooking < 0;
   };
 
   const getTimeUntilBooking = () => {
     if (!booking?.booking_date || !booking?.booking_time) return null;
-    
+
     const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
     const now = new Date();
     const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
+
     if (hoursUntilBooking <= 24 && hoursUntilBooking > 0) {
       return Math.ceil(hoursUntilBooking);
     }
@@ -129,7 +130,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
               initial={{ scale: 0.7, opacity: 0, y: 50 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.7, opacity: 0, y: 50 }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 duration: 0.5,
                 bounce: 0.3
@@ -161,7 +162,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                 {/* Booking Details */}
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                   <h3 className="font-semibold text-red-900 dark:text-red-100 mb-3">
-                                        {t("lab_booking_to_cancel") || "Lab Test to Cancel"}
+                    {t("lab_booking_to_cancel") || "Lab Test to Cancel"}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
@@ -198,7 +199,7 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                       <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                       <div className="text-yellow-800 dark:text-yellow-200">
                         <p className="font-medium text-sm">
-                                                  {t("lab_cancel_warning_title") || "Cancellation Policy"}
+                          {t("lab_cancel_warning_title") || "Cancellation Policy"}
                         </p>
                         <p className="text-xs mt-1">
                           {t('cancel_warning_message') || 'Cancellations within 24 hours of the appointment may incur a fee. Please review our cancellation policy.'}
@@ -238,8 +239,8 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
                 <Button variant="outline" onClick={handleClose} disabled={loading}>
                   {t('lab_keep_booking') || 'Keep Booking'}
                 </Button>
-                <Button 
-                  onClick={handleCancel} 
+                <Button
+                  onClick={handleCancel}
                   disabled={loading || !canCancel()}
                   className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >

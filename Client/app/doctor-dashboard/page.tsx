@@ -813,8 +813,8 @@ export default function DoctorDashboard() {
     } catch (error) {
       console.error('Failed to fetch doctor data:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load dashboard data. Please try again.',
+        title: t('error') || 'Error',
+        description: t('dd_error_load_dashboard') || 'Failed to load dashboard data. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -868,15 +868,15 @@ export default function DoctorDashboard() {
         setShowPatientModal(true);
       } else {
         toast({
-          title: "Error",
-          description: "Failed to load patient details",
+          title: t('error') || "Error",
+          description: t('dd_error_load_patient') || "Failed to load patient details",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to load patient details",
+        title: t('error') || "Error",
+        description: t('dd_error_load_patient') || "Failed to load patient details",
         variant: "destructive",
       });
     }
@@ -924,8 +924,8 @@ export default function DoctorDashboard() {
         await handleUpdateAppointmentStatus(selectedAppointment.id, 'completed');
 
         toast({
-          title: "Success",
-          description: "Medical record saved and appointment completed",
+          title: t('success') || "Success",
+          description: t('dd_success_medical_record') || "Medical record saved and appointment completed",
         });
 
         setShowMedicalRecordForm(false);
@@ -937,15 +937,15 @@ export default function DoctorDashboard() {
         console.error('❌ Failed to save medical record:', errorData);
 
         toast({
-          title: "Error",
-          description: errorData.error || "Failed to save medical record",
+          title: t('error') || "Error",
+          description: errorData.error || t('dd_error_save_medical_record') || "Failed to save medical record",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save medical record",
+        title: t('error') || "Error",
+        description: t('dd_error_save_medical_record') || "Failed to save medical record",
         variant: "destructive",
       });
     }
@@ -987,8 +987,8 @@ export default function DoctorDashboard() {
 
       if (response.ok) {
         toast({
-          title: "Success",
-          description: "Appointment cancelled successfully",
+          title: t('success') || "Success",
+          description: t('dd_success_appointment_cancelled') || "Appointment cancelled successfully",
         });
 
         setShowCancelModal(false);
@@ -998,16 +998,16 @@ export default function DoctorDashboard() {
       } else {
         const errorData = await response.json();
         toast({
-          title: "Error",
-          description: errorData.message || "Failed to cancel appointment",
+          title: t('error') || "Error",
+          description: errorData.message || t('dd_error_cancel_appointment') || "Failed to cancel appointment",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error cancelling appointment:', error);
       toast({
-        title: "Error",
-        description: "Failed to cancel appointment",
+        title: t('error') || "Error",
+        description: t('dd_error_cancel_appointment') || "Failed to cancel appointment",
         variant: "destructive",
       });
     }
@@ -1021,8 +1021,8 @@ export default function DoctorDashboard() {
 
       if (!doctorId) {
         toast({
-          title: "Error",
-          description: "Doctor ID not found",
+          title: t('error') || "Error",
+          description: t('dd_error_doctor_id') || "Doctor ID not found",
           variant: "destructive",
         });
         return;
@@ -1043,24 +1043,24 @@ export default function DoctorDashboard() {
       if (response.ok) {
         console.log('✅ Appointment status updated successfully');
         toast({
-          title: "Success",
-          description: `Appointment status updated to ${status}`,
+          title: t('success') || "Success",
+          description: `${t('dd_success_status_updated') || 'Appointment status updated'} ${status}`,
         });
         // Refresh data to show updated status on both doctor and patient sides
         fetchDoctorData();
       } else {
         console.error('❌ Failed to update appointment status:', result);
         toast({
-          title: "Error",
-          description: result.message || result.error || "Failed to update appointment status",
+          title: t('error') || "Error",
+          description: result.message || result.error || t('dd_error_update_status') || "Failed to update appointment status",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast({
-        title: "Error",
-        description: "Failed to update appointment status",
+        title: t('error') || "Error",
+        description: t('dd_error_update_status') || "Failed to update appointment status",
         variant: "destructive",
       });
     }

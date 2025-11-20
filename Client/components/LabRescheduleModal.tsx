@@ -40,12 +40,12 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   const { t, locale } = useLocale();
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
-  
+
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState<Array<{time: string, is_available: boolean, is_booked: boolean}>>([]);
+  const [availableSlots, setAvailableSlots] = useState<Array<{ time: string, is_available: boolean, is_booked: boolean }>>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
 
@@ -53,7 +53,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   const getLocalizedTestName = (test: LabBooking['type']) => {
     if (!test) return '';
     if (locale === 'ar' && test.name_ar) return test.name_ar;
-    if (locale === 'ku' && test.name_ku) return test.name_ku;
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && test.name_ku) return test.name_ku;
     if (test.name_en) return test.name_en;
     return test.name;
   };
@@ -78,7 +79,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       setReason("");
       setAvailableSlots([]);
       setAvailableDates([]);
-      
+
       // Fetch available dates for this lab type and center
       fetchAvailableDates();
     }
@@ -88,28 +89,28 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
     // Try to get center_id and type_id from various possible locations
     const centerId = booking?.center?.id || (booking as any)?.center_id || (booking as any)?.centers?.id;
     const typeId = booking?.type?.id || (booking as any)?.lab_test_type_id || (booking as any)?.lab_test_type?.id;
-    
+
     if (!centerId || !typeId) {
-      console.error('❌ LabRescheduleModal - Missing center_id or type_id for available dates:', { 
-        centerId, 
-        typeId, 
-        booking: booking 
+      console.error('❌ LabRescheduleModal - Missing center_id or type_id for available dates:', {
+        centerId,
+        typeId,
+        booking: booking
       });
       return;
     }
-    
+
     try {
       const startDate = new Date();
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      
+
       console.log('🔬 LabRescheduleModal - Fetching available dates for:', { centerId, typeId });
-      
-      const res = await labService.getAvailableDates(centerId, typeId, { 
-        start_date: fmt(startDate), 
-        end_date: fmt(endDate) 
+
+      const res = await labService.getAvailableDates(centerId, typeId, {
+        start_date: fmt(startDate),
+        end_date: fmt(endDate)
       });
-      
+
       const dates = (res as any)?.available_dates || (res as any)?.data?.available_dates || [];
       console.log('🔬 LabRescheduleModal - Received available dates:', dates);
       setAvailableDates(dates.map((d: any) => d.date || d));
@@ -123,12 +124,12 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
     // Try to get center_id and type_id from various possible locations
     const centerId = booking?.center?.id || (booking as any)?.center_id || (booking as any)?.centers?.id;
     const typeId = booking?.type?.id || (booking as any)?.lab_test_type_id || (booking as any)?.lab_test_type?.id;
-    
+
     if (!centerId || !typeId) {
-      console.error('❌ LabRescheduleModal - Missing center_id or type_id:', { 
-        centerId, 
-        typeId, 
-        booking: booking 
+      console.error('❌ LabRescheduleModal - Missing center_id or type_id:', {
+        centerId,
+        typeId,
+        booking: booking
       });
       showError(
         t('reschedule_error_title') || "Error",
@@ -141,15 +142,15 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
     try {
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const dateString = fmt(date);
-      
+
       console.log('🔬 LabRescheduleModal - Fetching slots for:', { centerId, typeId, dateString, bookingId: booking?.id });
-      
+
       // Fetch available slots, excluding the current booking ID for rescheduling
       const res = await labService.getAvailableSlots(centerId, typeId, dateString, booking.id);
       const data = (res as any)?.data || res;
-      
+
       console.log('🔬 LabRescheduleModal - Received slots data:', data);
-      
+
       const availableSlots = data?.available_slots || [];
       setAvailableSlots(availableSlots.map((slot: any) => ({
         time: slot.time,
@@ -189,9 +190,9 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       };
 
       const dateString = formatDateForAPI(selectedDate);
-      
+
       await labService.reschedule(booking.id, dateString, selectedTime);
-      
+
       showSuccess(
         t('reschedule_success_title') || "Reschedule Successful!",
         t('reschedule_success_message') || "Your lab test has been successfully rescheduled.",
@@ -231,7 +232,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
               initial={{ scale: 0.7, opacity: 0, y: 50 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.7, opacity: 0, y: 50 }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 duration: 0.5,
                 bounce: 0.3
@@ -285,7 +286,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                       disabled={(date) => {
                         // Disable past dates
                         if (date < new Date()) return true;
-                        
+
                         // Only enable dates returned by lab schedule
                         const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                         return !availableDates.includes(d);
@@ -320,13 +321,12 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                                 size="sm"
                                 onClick={() => setSelectedTime(slot.time)}
                                 disabled={slot.is_booked || !slot.is_available}
-                                className={`w-full ${
-                                  slot.is_booked || !slot.is_available
+                                className={`w-full ${slot.is_booked || !slot.is_available
                                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                                     : selectedTime === slot.time
-                                    ? "bg-emerald-600 hover:bg-emerald-700"
-                                    : "hover:bg-emerald-50"
-                                }`}
+                                      ? "bg-emerald-600 hover:bg-emerald-700"
+                                      : "hover:bg-emerald-50"
+                                  }`}
                               >
                                 {slot.time}
                                 {slot.is_booked && (
@@ -385,8 +385,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                 <Button variant="outline" onClick={handleClose} disabled={loading}>
                   {t('cancel') || 'Cancel'}
                 </Button>
-                <Button 
-                  onClick={handleReschedule} 
+                <Button
+                  onClick={handleReschedule}
                   disabled={!selectedDate || !selectedTime || loading}
                   className="bg-emerald-600 hover:bg-emerald-700"
                 >

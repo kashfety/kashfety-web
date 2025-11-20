@@ -12,6 +12,22 @@ import { Calendar, Clock, Phone, Mail, FileText, AlertCircle, CheckCircle, Arrow
 import Link from "next/link"
 import { useState } from "react"
 
+// Helper function to get badge variant based on status
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case "confirmed":
+    case "completed":
+      return "success";
+    case "cancelled":
+    case "no-show":
+      return "destructive";
+    case "pending":
+      return "outline";
+    default:
+      return "default";
+  }
+};
+
 // Mock data - in real app this would come from API
 const getAppointmentData = (id: string) => {
   const appointments = {
@@ -63,6 +79,7 @@ const getAppointmentData = (id: string) => {
       duration: "30 min",
       type: "Consultation",
       status: "upcoming",
+      notes: "",
       phone: "(555) 345-6789",
       email: "omar.nasser@email.com",
       reason: "First visit - general consultation",
@@ -357,7 +374,7 @@ export default function AppointmentDetailPage() {
 
                     <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg min-h-[200px]">
                       <p className="text-gray-600 dark:text-gray-400">
-                        {appointment.notes || "No notes have been added for this appointment."}
+                        {appointment?.notes || "No notes have been added for this appointment."}
                       </p>
                     </div>
 

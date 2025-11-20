@@ -71,7 +71,8 @@ export default function PatientLabsPage() {
 
     const getLocalizedTestName = (test: LabTest) => {
         if (locale === 'ar' && test.name_ar) return test.name_ar
-        if (locale === 'ku' && test.name_ku) return test.name_ku
+        // Kurdish locale not currently supported
+        // if (locale === 'ku' && test.name_ku) return test.name_ku
         if (test.name_en) return test.name_en
         return test.name
     }

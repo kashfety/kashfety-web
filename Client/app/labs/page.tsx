@@ -72,36 +72,37 @@ export default function MyLabsPage() {
 
   // Helper functions for localized names
   const getLocalizedTestName = (booking: LabBooking) => {
-    if (!booking.type) return t('unknown_test') || 'Unknown Test'
-    
+    if (!booking.type) return t('unknown_test') || 'Unknown Test';
+
     if (locale === 'ar' && booking.type.name_ar) {
-      return booking.type.name_ar
+      return booking.type.name_ar;
     }
-    if (locale === 'ku' && booking.type.name_ku) {
-      return booking.type.name_ku
-    }
-    return booking.type.name || t('unknown_test') || 'Unknown Test'
-  }
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && booking.type.name_ku) {
+    //   return booking.type.name_ku;
+    // }
+    return booking.type.name || t('unknown_test') || 'Unknown Test';
+  };
 
   const getLocalizedCenterName = (booking: LabBooking) => {
-    if (!booking.center) return t('unknown_center') || 'Unknown Center'
-    
+    if (!booking.center) return t('unknown_center') || 'Unknown Center';
+
     if (locale === 'ar' && booking.center.name_ar) {
-      return booking.center.name_ar
+      return booking.center.name_ar;
     }
-    return booking.center.name || t('unknown_center') || 'Unknown Center'
-  }
+    return booking.center.name || t('unknown_center') || 'Unknown Center';
+  };
 
   const getLocalizedStatus = (status: string) => {
-    const statusLower = (status || '').toLowerCase()
-    const statusKey = `appointments_status_${statusLower}`
-    return t(statusKey) || status.toUpperCase()
-  }
+    const statusLower = (status || '').toLowerCase();
+    const statusKey = `appointments_status_${statusLower}`;
+    return t(statusKey) || status.toUpperCase();
+  };
 
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
     const catOk = (b: LabBooking) => categoryFilter === 'all' || (b.type?.category || '').toLowerCase() === categoryFilter;
-    const toDate = (d: string) => { try { return new Date(d).setHours(0,0,0,0);} catch { return NaN; } };
+    const toDate = (d: string) => { try { return new Date(d).setHours(0, 0, 0, 0); } catch { return NaN; } };
     const dateOk = (b: LabBooking) => {
       const d = toDate(b.booking_date);
       if (startDate) { const s = toDate(startDate); if (!isNaN(s) && d < s) return false; }
@@ -171,244 +172,245 @@ export default function MyLabsPage() {
       </div>
     );
   }
+
   if (!user) return null;
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      
+
       {/* Main Content - No transform, sidebar overlays on top */}
       <div onClick={() => sidebarOpen && toggleSidebar()}>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Header onMenuToggle={toggleSidebar} />
         </div>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="outline" size="sm" onClick={() => router.push('/')} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
-              <ArrowLeft size={16} /> {t('appointments_back_home') || 'Back to Home'}
-            </Button>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{t('my_labs_title') || 'My Lab Tests & Scans'}</h1>
-              <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || t('labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={refresh} variant="outline" className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
-                <RefreshCw size={16} /> {t('appointments_refresh') || 'Refresh'}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-4">
+              <Button variant="outline" size="sm" onClick={() => router.push('/')} className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+                <ArrowLeft size={16} /> {t('appointments_back_home') || 'Back to Home'}
               </Button>
             </div>
-          </div>
-        </div>
-
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_status_label') || 'Status'}</label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger><SelectValue placeholder={t('appointments_status_placeholder') || 'All'} /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('appointments_status_all') || 'All'}</SelectItem>
-                    <SelectItem value="scheduled">{t('appointments_status_scheduled') || 'Scheduled'}</SelectItem>
-                    <SelectItem value="confirmed">{t('appointments_status_confirmed') || 'Confirmed'}</SelectItem>
-                    <SelectItem value="completed">{t('appointments_status_completed') || 'Completed'}</SelectItem>
-                    <SelectItem value="cancelled">{t('appointments_status_cancelled') || 'Cancelled'}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <h1 className="text-3xl font-bold text-foreground">{t('my_labs_title') || 'My Lab Tests & Scans'}</h1>
+                <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || t('labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
               </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('type') || 'Type'}</label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger><SelectValue placeholder={t('appointments_type_placeholder') || 'All'} /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('appointments_type_all') || 'All'}</SelectItem>
-                    <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
-                    <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
-                <Input placeholder={t('search') || 'Search'} value={searchText} onChange={e => setSearchText(e.target.value)} />
+              <div className="flex gap-2">
+                <Button onClick={refresh} variant="outline" className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
+                  <RefreshCw size={16} /> {t('appointments_refresh') || 'Refresh'}
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {filtered.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground">{t('no_labs') || 'No Lab/Imaging Bookings'}</h3>
-              <p className="text-muted-foreground mb-6">{t('no_labs_desc') || "You haven't booked any lab tests yet."}</p>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_status_label') || 'Status'}</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger><SelectValue placeholder={t('appointments_status_placeholder') || 'All'} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('appointments_status_all') || 'All'}</SelectItem>
+                      <SelectItem value="scheduled">{t('appointments_status_scheduled') || 'Scheduled'}</SelectItem>
+                      <SelectItem value="confirmed">{t('appointments_status_confirmed') || 'Confirmed'}</SelectItem>
+                      <SelectItem value="completed">{t('appointments_status_completed') || 'Completed'}</SelectItem>
+                      <SelectItem value="cancelled">{t('appointments_status_cancelled') || 'Cancelled'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('type') || 'Type'}</label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger><SelectValue placeholder={t('appointments_type_placeholder') || 'All'} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('appointments_type_all') || 'All'}</SelectItem>
+                      <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
+                      <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
+                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
+                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
+                  <Input placeholder={t('search') || 'Search'} value={searchText} onChange={e => setSearchText(e.target.value)} />
+                </div>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="space-y-6">
-            {filtered.map((booking) => (
-              <Card key={booking.id} className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-xl text-foreground flex items-center gap-2">
-                        {getLocalizedTestName(booking)}
-                        {booking.rating && (
-                          <div className="flex items-center gap-1 ml-2">
-                            <Star size={16} className="text-yellow-500 fill-current" />
-                            <span className="text-sm text-yellow-600">{toArabicNumerals(booking.rating, locale)}</span>
+
+          {filtered.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground">{t('no_labs') || 'No Lab/Imaging Bookings'}</h3>
+                <p className="text-muted-foreground mb-6">{t('no_labs_desc') || "You haven't booked any lab tests yet."}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {filtered.map((booking) => (
+                <Card key={booking.id} className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-xl text-foreground flex items-center gap-2">
+                          {getLocalizedTestName(booking)}
+                          {booking.rating && (
+                            <div className="flex items-center gap-1 ml-2">
+                              <Star size={16} className="text-yellow-500 fill-current" />
+                              <span className="text-sm text-yellow-600">{toArabicNumerals(booking.rating, locale)}</span>
+                            </div>
+                          )}
+                        </CardTitle>
+                        <CardDescription className="text-emerald-600 font-medium">
+                          {booking.type?.category === 'imaging' ? (t('imaging') || 'Imaging') : (t('lab') || 'Lab')}
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {booking.result_file_url && (
+                          <div className="flex items-center">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span className="text-xs text-green-600 ml-1">{t('results') || 'Results'}</span>
                           </div>
                         )}
-                      </CardTitle>
-                      <CardDescription className="text-emerald-600 font-medium">
-                        {booking.type?.category === 'imaging' ? (t('imaging') || 'Imaging') : (t('lab') || 'Lab')}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {booking.result_file_url && (
-                        <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <span className="text-xs text-green-600 ml-1">{t('results') || 'Results'}</span>
-                        </div>
-                      )}
-                      <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <Calendar className="w-5 h-5 text-emerald-600" />
-                        <div>
-                          <div className="font-medium">{toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</div>
-                          <div className="text-sm text-gray-500">{t('appointments_date_label') || 'Date'}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-muted-foreground">
-                        <Clock className="w-5 h-5 text-emerald-600" />
-                        <div>
-                          <div className="font-medium">{(() => { try { const [h,m] = (booking.booking_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return booking.booking_time; } })()} ({toArabicNumerals(booking.duration || 30, locale)} {t('minutes_short') || 'min'})</div>
-                          <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
-                        <div>
-                          <div className="font-medium">{getLocalizedCenterName(booking)}</div>
-                          <div className="text-sm text-gray-500">{booking.center?.address}</div>
-                        </div>
+                        <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      {booking.notes && (
-                        <div>
-                          <div className="text-sm font-medium text-foreground mb-1">{t('appointments_notes_label') || 'Notes'}</div>
-                          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{booking.notes}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Calendar className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <div className="font-medium">{toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</div>
+                            <div className="text-sm text-gray-500">{t('appointments_date_label') || 'Date'}</div>
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Action Buttons */}
-                      <div className="space-y-3">
-                        {/* Primary Actions */}
-                        <div className="flex gap-2 flex-wrap">
-                          {booking.status === 'completed' && booking.result_file_url && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleViewResult(booking)}
-                              className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white"
-                            >
-                              <FileText className="w-4 h-4 mr-2" />
-                              {t('view_results') || 'View Results'}
-                            </Button>
-                          )}
-                          
-                          {booking.result_file_url && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => window.open(booking.result_file_url!, '_blank')}
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Clock className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <div className="font-medium">{(() => { try { const [h, m] = (booking.booking_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return booking.booking_time; } })()} ({toArabicNumerals(booking.duration || 30, locale)} {t('minutes_short') || 'min'})</div>
+                            <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                          <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
+                          <div>
+                            <div className="font-medium">{getLocalizedCenterName(booking)}</div>
+                            <div className="text-sm text-gray-500">{booking.center?.address}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {booking.notes && (
+                          <div>
+                            <div className="text-sm font-medium text-foreground mb-1">{t('appointments_notes_label') || 'Notes'}</div>
+                            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{booking.notes}</p>
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="space-y-3">
+                          {/* Primary Actions */}
+                          <div className="flex gap-2 flex-wrap">
+                            {booking.status === 'completed' && booking.result_file_url && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleViewResult(booking)}
+                                className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white"
+                              >
+                                <FileText className="w-4 h-4 mr-2" />
+                                {t('view_results') || 'View Results'}
+                              </Button>
+                            )}
+
+                            {booking.result_file_url && (
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(booking.result_file_url!, '_blank')}
+                                variant="outline"
+                                className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20"
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                {t('download_results') || 'Download PDF'}
+                              </Button>
+                            )}
+                          </div>
+
+                          {/* Secondary Actions */}
+                          <div className="flex gap-2">
+                            <Button
                               variant="outline"
-                              className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20"
+                              size="sm"
+                              disabled={booking.status === 'cancelled' || booking.status === 'completed'}
+                              onClick={() => handleReschedule(booking)}
                             >
-                              <Download className="w-4 h-4 mr-2" />
-                              {t('download_results') || 'Download PDF'}
+                              {t('appointments_reschedule_button') || 'Reschedule'}
                             </Button>
-                          )}
-                        </div>
-                        
-                        {/* Secondary Actions */}
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            disabled={booking.status === 'cancelled' || booking.status === 'completed'} 
-                            onClick={() => handleReschedule(booking)}
-                          >
-                            {t('appointments_reschedule_button') || 'Reschedule'}
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-red-600 border-red-600 hover:bg-red-50" 
-                            disabled={booking.status === 'cancelled' || booking.status === 'completed'} 
-                            onClick={() => handleCancel(booking)}
-                          >
-                            {t('appointments_cancel_button') || 'Cancel'}
-                          </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-600 hover:bg-red-50"
+                              disabled={booking.status === 'cancelled' || booking.status === 'completed'}
+                              onClick={() => handleCancel(booking)}
+                            >
+                              {t('appointments_cancel_button') || 'Cancel'}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Lab Result Modal */}
-      <LabResultModal
-        isOpen={resultModalOpen}
-        onClose={() => {
-          setResultModalOpen(false);
-          setSelectedBooking(null);
-        }}
-        booking={selectedBooking}
-      />
+        {/* Lab Result Modal */}
+        <LabResultModal
+          isOpen={resultModalOpen}
+          onClose={() => {
+            setResultModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          booking={selectedBooking}
+        />
 
-      {/* Lab Reschedule Modal */}
-      <LabRescheduleModal
-        isOpen={rescheduleModalOpen}
-        onClose={() => {
-          setRescheduleModalOpen(false);
-          setSelectedBooking(null);
-        }}
-        booking={selectedBooking}
-        onSuccess={handleRescheduleSuccess}
-      />
+        {/* Lab Reschedule Modal */}
+        <LabRescheduleModal
+          isOpen={rescheduleModalOpen}
+          onClose={() => {
+            setRescheduleModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          booking={selectedBooking}
+          onSuccess={handleRescheduleSuccess}
+        />
 
-      {/* Lab Cancel Modal */}
-      <LabCancelModal
-        isOpen={cancelModalOpen}
-        onClose={() => {
-          setCancelModalOpen(false);
-          setSelectedBooking(null);
-        }}
-        booking={selectedBooking}
-        onSuccess={handleCancelSuccess}
-      />
+        {/* Lab Cancel Modal */}
+        <LabCancelModal
+          isOpen={cancelModalOpen}
+          onClose={() => {
+            setCancelModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          booking={selectedBooking}
+          onSuccess={handleCancelSuccess}
+        />
 
-      {/* Close main content wrapper */}
+        {/* Close main content wrapper */}
       </div>
     </div>
   );

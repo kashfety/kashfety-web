@@ -412,6 +412,42 @@ export const translations = {
     services_category_lab: "Lab",
     services_category_imaging: "Imaging",
     services_choose_category: "Choose a category...",
+    services_fill_required_fields: "Please fill in all required fields",
+    services_created_successfully: "Lab test type created successfully",
+    services_failed_create: "Failed to create lab test type",
+
+    // Doctor Dashboard Messages
+    dd_error_load_dashboard: "Failed to load dashboard data. Please try again.",
+    dd_error_load_patient: "Failed to load patient details",
+    dd_success_medical_record: "Medical record saved and appointment completed",
+    dd_error_save_medical_record: "Failed to save medical record",
+    dd_success_appointment_cancelled: "Appointment cancelled successfully",
+    dd_error_cancel_appointment: "Failed to cancel appointment",
+    dd_error_doctor_id: "Doctor ID not found",
+    dd_success_status_updated: "Appointment status updated",
+    dd_error_update_status: "Failed to update appointment status",
+
+    // Certificate Upload Messages
+    cert_invalid_file_type: "Invalid File Type",
+    cert_invalid_file_desc: "Please upload a PDF, JPG, JPEG, or PNG file",
+    cert_file_too_large: "File Too Large",
+    cert_file_too_large_desc: "Please upload a file smaller than 10MB",
+
+    // Medical Records Messages
+    med_records_error_fetch_info: "Failed to fetch medical information",
+    med_records_success_update: "Medical information updated successfully",
+    med_records_error_update: "Failed to update medical information",
+    med_records_error_fetch_records: "Failed to fetch medical records",
+    med_records_error_required: "Diagnosis and treatment are required",
+
+    // Medical Center Management Messages
+    med_center_error_load: "Failed to load medical centers.",
+    med_center_validation_error: "Validation Error",
+    med_center_validation_desc: "Please fill in the required fields.",
+    med_center_success_add: "Medical center added successfully.",
+    med_center_error_add: "Failed to add medical center.",
+    med_center_success_update: "Medical center updated successfully.",
+    med_center_error_update: "Failed to update medical center.",
 
     // Units / common UI
     minutes_short: "min",
@@ -2054,6 +2090,44 @@ export const translations = {
     services_category_lab: "مخبري",
     services_category_imaging: "تصوير",
     services_choose_category: "اختر فئة...",
+    services_fill_required_fields: "يرجى ملء جميع الحقول المطلوبة",
+    services_created_successfully: "تم إنشاء نوع الفحص المخبري بنجاح",
+    services_failed_create: "فشل في إنشاء نوع الفحص المخبري",
+
+    // Doctor Dashboard Messages (Arabic)
+    dd_error_load_dashboard: "فشل في تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى.",
+    dd_error_load_patient: "فشل في تحميل تفاصيل المريض",
+    dd_success_medical_record: "تم حفظ السجل الطبي وإكمال الموعد",
+    dd_error_save_medical_record: "فشل في حفظ السجل الطبي",
+    dd_success_appointment_cancelled: "تم إلغاء الموعد بنجاح",
+    dd_error_cancel_appointment: "فشل في إلغاء الموعد",
+    dd_error_doctor_id: "لم يتم العثور على معرف الطبيب",
+    dd_success_status_updated: "تم تحديث حالة الموعد",
+    dd_error_update_status: "فشل في تحديث حالة الموعد",
+    dd_opening_booking_for_patient: "فتح حجز الموعد للمريض...",
+    dd_opening_booking_form: "فتح نموذج حجز الموعد...",
+
+    // Certificate Upload Messages (Arabic)
+    cert_invalid_file_type: "نوع ملف غير صحيح",
+    cert_invalid_file_desc: "يرجى تحميل ملف PDF أو JPG أو JPEG أو PNG",
+    cert_file_too_large: "الملف كبير جداً",
+    cert_file_too_large_desc: "يرجى تحميل ملف أصغر من 10 ميجابايت",
+
+    // Medical Records Messages (Arabic)
+    med_records_error_fetch_info: "فشل في جلب المعلومات الطبية",
+    med_records_success_update: "تم تحديث المعلومات الطبية بنجاح",
+    med_records_error_update: "فشل في تحديث المعلومات الطبية",
+    med_records_error_fetch_records: "فشل في جلب السجلات الطبية",
+    med_records_error_required: "التشخيص والعلاج مطلوبان",
+
+    // Medical Center Management Messages (Arabic)
+    med_center_error_load: "فشل في تحميل المراكز الطبية.",
+    med_center_validation_error: "خطأ في التحقق",
+    med_center_validation_desc: "يرجى ملء الحقول المطلوبة.",
+    med_center_success_add: "تم إضافة المركز الطبي بنجاح.",
+    med_center_error_add: "فشل في إضافة المركز الطبي.",
+    med_center_success_update: "تم تحديث المركز الطبي بنجاح.",
+    med_center_error_update: "فشل في تحديث المركز الطبي.",
 
     // Units / common UI
     minutes_short: "د",
@@ -2279,8 +2353,6 @@ export const translations = {
     dd_relationship_label: "القرابة:",
     dd_no_emergency_contact: "لم يتم تقديم جهة اتصال طارئة",
     dd_book_appointment_title: "حجز موعد",
-    dd_opening_booking_for_patient: "فتح نموذج حجز الموعد للمريض...",
-    dd_opening_booking_form: "فتح نموذج حجز الموعد...",
     dd_collapse_sidebar: "طي الشريط الجانبي",
     dd_expand_sidebar: "توسيع الشريط الجانبي",
     dd_patient_details: "تفاصيل المريض",

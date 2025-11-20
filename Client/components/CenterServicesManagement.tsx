@@ -45,7 +45,8 @@ export default function CenterServicesManagement() {
   const getLocalizedTestTypeName = (testType: TypeRow) => {
     if (locale === 'ar' && testType.name_ar) return testType.name_ar;
     if (locale === 'en' && testType.name_en) return testType.name_en;
-    return testType.name || testType.name_en || testType.name_ar;
+    // Fallback: use name_en if available, otherwise name_ar, otherwise the generic name field
+    return testType.name_en || testType.name_ar || testType.name;
   };
   const [loading, setLoading] = useState(true);
   const [types, setTypes] = useState<TypeRow[]>([]);
@@ -99,7 +100,7 @@ export default function CenterServicesManagement() {
 
   const handleCreateTestType = async () => {
     if (!newTestType.code || !newTestType.name) {
-      toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
+      toast({ title: t('error') || 'Error', description: t('services_fill_required_fields') || 'Please fill in all required fields', variant: 'destructive' });
       return;
     }
 
@@ -126,7 +127,7 @@ export default function CenterServicesManagement() {
         }
       }));
 
-      toast({ title: 'Success', description: 'Lab test type created successfully' });
+      toast({ title: t('success') || 'Success', description: t('services_created_successfully') || 'Lab test type created successfully' });
 
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
@@ -134,8 +135,8 @@ export default function CenterServicesManagement() {
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
       toast({
-        title: 'Error',
-        description: error.response?.data?.error || 'Failed to create lab test type',
+        title: t('error') || 'Error',
+        description: error.response?.data?.error || t('services_failed_create') || 'Failed to create lab test type',
         variant: 'destructive'
       });
     } finally {

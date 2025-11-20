@@ -61,7 +61,7 @@ export default function MedicalRecordsSection() {
   const { user, isAuthenticated } = useAuth();
   const { t, locale } = useLocale();
   const { toast } = useToast();
-  
+
   const [medicalInfo, setMedicalInfo] = useState<MedicalInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -82,7 +82,7 @@ export default function MedicalRecordsSection() {
   // Helper function for localized doctor names
   const getLocalizedDoctorName = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return t('unknown_doctor') || 'Unknown Doctor';
-    
+
     if (locale === 'ar') {
       if (doctor.name_ar) return doctor.name_ar;
       if (doctor.first_name_ar && doctor.last_name_ar) {
@@ -95,28 +95,28 @@ export default function MedicalRecordsSection() {
 
   const getLocalizedSpecialty = (doctor: MedicalRecord['doctor']) => {
     if (!doctor) return '';
-    
+
     // If specialty_ar is already in the doctor object, use it
     if (locale === 'ar' && doctor.specialty_ar) {
       return doctor.specialty_ar;
     }
-    if (locale === 'ku' && doctor.specialty_ku) {
-      return doctor.specialty_ku;
-    }
+    // Kurdish locale not currently supported
+    // if (locale === 'ku' && doctor.specialty_ku) {
+    //   return doctor.specialty_ku;
+    // }
     if (doctor.specialty_en) {
       return doctor.specialty_en;
     }
-    
+
     // Otherwise, try to get it from specialtiesMap
     if (doctor.specialty) {
       const specialtyData = specialtiesMap.get(doctor.specialty);
       if (specialtyData) {
         if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
-        if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
         if (specialtyData.name_en) return specialtyData.name_en;
       }
     }
-    
+
     return doctor.specialty || '';
   };
 
@@ -151,7 +151,7 @@ export default function MedicalRecordsSection() {
     try {
       const response = await fetch('/api/specialties');
       const result = await response.json();
-      
+
       if (result.success && result.specialties) {
         const map = new Map();
         result.specialties.forEach((specialty: any) => {
@@ -171,7 +171,7 @@ export default function MedicalRecordsSection() {
 
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/patient/medical-info?userId=${user.id}`);
@@ -189,7 +189,7 @@ export default function MedicalRecordsSection() {
             phone: result.medical_info.emergency_contact?.phone || ''
           }
         });
-        
+
         // Parse lists
         setAllergiesList(result.medical_info.allergies ? result.medical_info.allergies.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
         setMedicationsList(result.medical_info.medications ? result.medical_info.medications.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
@@ -208,7 +208,7 @@ export default function MedicalRecordsSection() {
 
   const handleSave = async () => {
     if (!user?.id) return;
-    
+
     setLoading(true);
     try {
       const updateData = {
@@ -293,7 +293,7 @@ export default function MedicalRecordsSection() {
   // Fetch medical records from medical_records table
   const fetchMedicalRecords = async () => {
     if (!user?.id) return;
-    
+
     setRecordsLoading(true);
     try {
       const response = await fetch(`/api/patient-medical-records?patient_id=${user.id}`);
@@ -319,7 +319,7 @@ export default function MedicalRecordsSection() {
   // Handle create/update medical record
   const handleSaveRecord = async () => {
     if (!user?.id) return;
-    
+
     if (!recordForm.diagnosis || !recordForm.treatment) {
       toast({
         title: "Error",
@@ -331,20 +331,20 @@ export default function MedicalRecordsSection() {
 
     setRecordsLoading(true);
     try {
-      const url = editingRecord 
+      const url = editingRecord
         ? '/api/patient-medical-records'
         : '/api/patient-medical-records';
-      
+
       const method = editingRecord ? 'PUT' : 'POST';
       const body = editingRecord
         ? {
-            record_id: editingRecord.id,
-            ...recordForm
-          }
+          record_id: editingRecord.id,
+          ...recordForm
+        }
         : {
-            patient_id: user.id,
-            ...recordForm
-          };
+          patient_id: user.id,
+          ...recordForm
+        };
 
       const response = await fetch(url, {
         method,
@@ -574,8 +574,8 @@ export default function MedicalRecordsSection() {
                       {allergiesList.map((allergy, index) => (
                         <Badge key={index} variant="destructive" className="flex items-center gap-1">
                           {allergy}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
+                          <X
+                            className="w-3 h-3 cursor-pointer"
                             onClick={() => removeAllergy(allergy)}
                           />
                         </Badge>
@@ -626,8 +626,8 @@ export default function MedicalRecordsSection() {
                       {medicationsList.map((medication, index) => (
                         <Badge key={index} variant="secondary" className="flex items-center gap-1">
                           {medication}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
+                          <X
+                            className="w-3 h-3 cursor-pointer"
                             onClick={() => removeMedication(medication)}
                           />
                         </Badge>

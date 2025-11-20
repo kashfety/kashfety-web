@@ -31,11 +31,11 @@ export default function SignupPage() {
   const [isSubmittingMedicalRecords, setIsSubmittingMedicalRecords] = useState(false)
   const [specialties, setSpecialties] = useState<{ id: string, name: string, name_en: string, name_ar: string, name_ku: string, description: string }[]>([])
   const [loadingSpecialties, setLoadingSpecialties] = useState(false)
-  
+
   // OTP verification state
   const [showOTPVerification, setShowOTPVerification] = useState(false)
   const [pendingUserData, setPendingUserData] = useState<any>(null)
-  
+
   // Validation state
   const [validationErrors, setValidationErrors] = useState({
     name: '',
@@ -47,7 +47,7 @@ export default function SignupPage() {
     gender: '',
     dateOfBirth: ''
   })
-  
+
   // Country code selector state
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0])
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -295,20 +295,20 @@ export default function SignupPage() {
   const handleOTPVerificationSuccess = async (verificationData: any) => {
     try {
       setIsLoading(true);
-      
+
       console.log('🔍 Full verification data received:', JSON.stringify(verificationData, null, 2));
-      
+
       if (!pendingUserData) {
         throw new Error('No pending user data found');
       }
 
       // Extract Supabase user ID from verification data - try multiple possible paths
-      let supabaseUserId = verificationData?.session?.user?.id || 
-                          verificationData?.user?.id || 
-                          verificationData?.id;
-      
+      let supabaseUserId = verificationData?.session?.user?.id ||
+        verificationData?.user?.id ||
+        verificationData?.id;
+
       console.log('🆔 Extracted user ID:', supabaseUserId);
-      
+
       if (!supabaseUserId) {
         console.error('❌ Verification data structure:', verificationData);
         throw new Error('Failed to get user ID from verification data');
@@ -318,7 +318,7 @@ export default function SignupPage() {
       // Try fallback route first (for Vercel compatibility)
       let response: Response;
       let result: any;
-      
+
       try {
         console.log('🔄 Trying register-verified fallback route');
         response = await fetch('/api/auth/register-verified', {
@@ -334,7 +334,7 @@ export default function SignupPage() {
         });
 
         result = await response.json();
-        
+
         if (response.ok && (result.success || result.user)) {
           console.log('✅ Fallback route worked for register-verified');
         } else {
@@ -342,11 +342,11 @@ export default function SignupPage() {
         }
       } catch (fallbackError: any) {
         console.log('❌ Fallback failed, trying backend route:', fallbackError);
-        
+
         // Fallback to original backend route
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
         const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-        
+
         response = await fetch(`${baseUrl}/auth/register-verified`, {
           method: 'POST',
           headers: {
@@ -361,7 +361,7 @@ export default function SignupPage() {
 
         result = await response.json();
       }
-      
+
       if (!response.ok) {
         throw new Error(result.error || result.message || 'Failed to create user profile');
       }
@@ -372,18 +372,18 @@ export default function SignupPage() {
       }
 
       const role = pendingUserData.role;
-      
+
       if (role === 'patient') {
-        setRegisteredPatient({ 
-          id: result.user.id, 
-          name: result.user.name || pendingUserData.name 
+        setRegisteredPatient({
+          id: result.user.id,
+          name: result.user.name || pendingUserData.name
         });
         setShowMedicalForm(true);
         setShowOTPVerification(false);
         setSuccess(t('registration_success') || 'Registration successful! Please complete your medical records.');
       } else if (role === 'doctor') {
-        setRegisteredDoctor({ 
-          id: result.user.id, 
+        setRegisteredDoctor({
+          id: result.user.id,
           name: result.user.name || pendingUserData.name,
           token: result.token || ''
         });
@@ -394,7 +394,7 @@ export default function SignupPage() {
         // For all other roles, redirect to login page after successful registration
         setShowOTPVerification(false);
         setSuccess(t('registration_success') || 'Registration successful! Redirecting to login...');
-        
+
         // Redirect to login page after showing success message
         setTimeout(() => {
           router.push('/login');
@@ -420,15 +420,15 @@ export default function SignupPage() {
   const handleMedicalRecordsComplete = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get email and password from pendingUserData (stored during signup)
       const email = pendingUserData?.email || formData.email;
       const password = pendingUserData?.password || formData.password;
-      
+
       if (!email || !password) {
         throw new Error('Email or password not found. Please login manually.');
       }
-      
+
       // Try to login automatically
       try {
         await login(email, password);
@@ -495,9 +495,9 @@ export default function SignupPage() {
     try {
       // Mark certificate as skipped in the backend
       if (registeredDoctor?.token) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
         const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
-        
+
         await fetch(`${baseUrl}/auth/doctor/skip-certificate`, {
           method: 'POST',
           headers: {
@@ -510,7 +510,7 @@ export default function SignupPage() {
       console.error('Error marking certificate as skipped:', error);
       // Continue anyway - user can still upload later
     }
-    
+
     setShowDoctorCertificateForm(false);
     setSuccess('Registration completed! You can upload certificates later. Note: You must upload and get approval before you can login.');
     setTimeout(() => {
@@ -675,9 +675,8 @@ export default function SignupPage() {
                     handleChange(e)
                     clearValidationError('name')
                   }}
-                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
-                    validationErrors.name ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.name ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                    }`}
                   placeholder={t('auth_name_placeholder') || "John Doe"}
                 />
                 {validationErrors.name && (
@@ -737,9 +736,8 @@ export default function SignupPage() {
                     handleChange(e)
                     clearValidationError('email')
                   }}
-                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
-                    validationErrors.email ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.email ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                    }`}
                   placeholder={t('auth_email_placeholder') || "john@example.com"}
                 />
                 {validationErrors.email && (
@@ -1122,9 +1120,8 @@ export default function SignupPage() {
                     handleChange(e)
                     clearValidationError('password')
                   }}
-                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
-                    validationErrors.password ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.password ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                    }`}
                   placeholder={t('auth_password_placeholder') || 'Enter strong password'}
                 />
                 {validationErrors.password && (
@@ -1142,8 +1139,8 @@ export default function SignupPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
                   >
-                    {validatePassword(formData.password) 
-                      ? "✓ Strong password" 
+                    {validatePassword(formData.password)
+                      ? "✓ Strong password"
                       : "Password must be 8+ chars with uppercase, lowercase, and number"
                     }
                   </motion.p>
@@ -1172,9 +1169,8 @@ export default function SignupPage() {
                     handleChange(e)
                     clearValidationError('confirmPassword')
                   }}
-                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
-                    validationErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                    }`}
                   placeholder={t('auth_password_confirm_placeholder') || 'Confirm your password'}
                 />
                 {validationErrors.confirmPassword && (

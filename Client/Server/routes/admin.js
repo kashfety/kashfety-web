@@ -678,7 +678,7 @@ router.post('/centers', async (req, res) => {
         console.log('📝 Admin: Request data:', requestData);
 
         // Validate required fields for center creation
-        const { name, address, phone, email, password } = requestData;
+        const { name, name_ar, address, phone, email, password } = requestData;
         
         if (!name || !address || !phone || !email || !password) {
             return res.status(400).json({ 
@@ -708,6 +708,7 @@ router.post('/centers', async (req, res) => {
             first_name: name.split(' ')[0] || name,
             last_name: name.split(' ').slice(1).join(' ') || '',
             name: name,
+            name_ar: name_ar,
             email: email,
             password_hash: hashedPassword,
             is_first_login: true,
@@ -730,6 +731,7 @@ router.post('/centers', async (req, res) => {
         // Create center record
         const centerData = {
             name,
+            name_ar,
             address,
             phone,
             email,
@@ -808,7 +810,7 @@ router.put('/centers/:id', async (req, res) => {
 
         // Filter out fields that don't exist in the centers table
         const allowedFields = [
-            'name', 'address', 'phone', 'email', 'operating_hours', 
+            'name', 'name_ar', 'address', 'phone', 'email', 'operating_hours', 
             'services', 'center_type', 'approval_status', 'offers_labs', 
             'offers_imaging', 'updated_at'
         ];

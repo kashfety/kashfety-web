@@ -15,6 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 
 interface LabBooking {
   id: string;
@@ -24,8 +25,8 @@ interface LabBooking {
   duration?: number;
   notes?: string;
   fee?: number;
-  center?: { id: string; name: string; address: string };
-  type?: { id: string; name: string; category: string };
+  center?: { id: string; name: string; name_ar?: string; address: string };
+  type?: { id: string; name: string; name_ar?: string; name_ku?: string; name_en?: string; category: string };
 }
 
 interface LabRescheduleModalProps {
@@ -36,7 +37,7 @@ interface LabRescheduleModalProps {
 }
 
 export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess }: LabRescheduleModalProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
   
@@ -47,6 +48,27 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   const [availableSlots, setAvailableSlots] = useState<Array<{time: string, is_available: boolean, is_booked: boolean}>>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
+
+  // Helper functions for localization
+  const getLocalizedTestName = (test: LabBooking['type']) => {
+    if (!test) return '';
+    if (locale === 'ar' && test.name_ar) return test.name_ar;
+    if (locale === 'ku' && test.name_ku) return test.name_ku;
+    if (test.name_en) return test.name_en;
+    return test.name;
+  };
+
+  const getLocalizedCenterName = (center: LabBooking['center']) => {
+    if (!center) return '';
+    if (locale === 'ar' && center.name_ar) return center.name_ar;
+    return center.name;
+  };
+
+  const getLocalizedStatus = (status: string) => {
+    const statusLower = (status || '').toLowerCase();
+    const statusKey = `appointments_status_${statusLower}`;
+    return t(statusKey) || status.toUpperCase();
+  };
 
   // Reset form when booking changes
   useEffect(() => {
@@ -231,19 +253,19 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <CalendarIcon className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-900 font-medium">{booking.type?.name}</span>
+                        <span className="text-blue-900 font-medium">{getLocalizedTestName(booking.type)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-900">{new Date(booking.booking_date).toLocaleDateString()} at {booking.booking_time}</span>
+                        <span className="text-blue-900">{toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} {t('at') || 'at'} {toArabicNumerals(booking.booking_time, locale)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-900">{booking.center?.name}</span>
+                        <span className="text-blue-900">{getLocalizedCenterName(booking.center)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-blue-100 text-blue-800">
-                          {booking.status?.toUpperCase()}
+                          {getLocalizedStatus(booking.status)}
                         </Badge>
                       </div>
                     </div>

@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation"
 interface User {
   id: string
   name: string
+  name_ar?: string
+  first_name?: string
+  last_name?: string
+  first_name_ar?: string
+  last_name_ar?: string
   phone: string
   email?: string
   role: 'patient' | 'doctor' | 'admin' | 'center' | 'super_admin'
@@ -119,6 +124,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const updatedUser = {
             id: result.user.id,
             name: fullName || 'User',
+            name_ar: result.user.name_ar,
+            first_name: result.user.first_name,
+            last_name: result.user.last_name,
+            first_name_ar: result.user.first_name_ar,
+            last_name_ar: result.user.last_name_ar,
             phone: result.user.phone,
             email: result.user.email,
             role: result.user.role,

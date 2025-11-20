@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         // Fetch doctor details
         const { data: doctor, error: doctorError } = await supabase
             .from('users')
-            .select('id, name, first_name, last_name, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, qualifications')
+            .select('id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, qualifications')
             .eq('id', doctorId)
             .eq('role', 'doctor')
             .single();
@@ -35,6 +35,22 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // Fetch specialty translation
+        const { data: specialtyData } = await supabase
+            .from('specialties')
+            .select('name, name_en, name_ar, name_ku')
+            .or(`name.ilike.${doctor.specialty},name_en.ilike.${doctor.specialty}`)
+            .eq('is_active', true)
+            .limit(1)
+            .single();
+
+        // Enrich doctor with specialty translations
+        if (specialtyData) {
+            doctor.specialty_ar = specialtyData.name_ar;
+            doctor.specialty_ku = specialtyData.name_ku;
+            doctor.specialty_en = specialtyData.name_en || doctor.specialty;
+        }
+
         // Fetch associated centers
         const { data: doctorCenters, error: centersError } = await supabase
             .from('doctor_centers')
@@ -43,6 +59,7 @@ export async function GET(request: NextRequest) {
                 centers (
                     id,
                     name,
+                    name_ar,
                     address,
                     phone
                 )
@@ -62,6 +79,7 @@ export async function GET(request: NextRequest) {
                 .map((center: any) => ({
                     id: center.id,
                     name: center.name,
+                    name_ar: center.name_ar,
                     address: center.address,
                     phone: center.phone
                 }))

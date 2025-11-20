@@ -47,6 +47,11 @@ export async function GET(request: NextRequest) {
         users!appointments_patient_id_fkey (
           id,
           name,
+          name_ar,
+          first_name,
+          first_name_ar,
+          last_name,
+          last_name_ar,
           email,
           phone,
           gender,
@@ -70,6 +75,11 @@ export async function GET(request: NextRequest) {
         .select(`
           id,
           name,
+          name_ar,
+          first_name,
+          first_name_ar,
+          last_name,
+          last_name_ar,
           email,
           phone,
           gender,

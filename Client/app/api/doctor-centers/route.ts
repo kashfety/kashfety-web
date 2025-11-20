@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     // Fetch all centers
     const { data: allCenters, error: centersError } = await supabase
       .from('centers')
-      .select('id, name, address, phone, email, center_type, owner_doctor_id, approval_status, created_at, updated_at')
+      .select('id, name, name_ar, address, phone, email, center_type, owner_doctor_id, approval_status, created_at, updated_at')
       .eq('approval_status', 'approved');
 
     if (centersError) {

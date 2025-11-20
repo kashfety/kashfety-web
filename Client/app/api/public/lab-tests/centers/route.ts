@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
         lab_test_type_id,
         base_fee,
         is_active,
-        centers(id, name, address, phone, email),
-        lab_test_types(id, name, description, category, default_fee)
+        centers(id, name, name_ar, address, phone, email),
+        lab_test_types(id, name, name_en, name_ar, name_ku, description, category, default_fee)
       `)
       .eq('is_active', true);
 
@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
         centersMap.set(centerId, {
           id: center.id,
           name: center.name,
+          name_ar: center.name_ar,
           address: center.address,
           phone: center.phone,
           email: center.email,

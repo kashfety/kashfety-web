@@ -17,9 +17,12 @@ function generateToken(user: any): string {
     phone: user.phone,
     email: user.email,
     name: user.name,
+    name_ar: user.name_ar,
     role: user.role,
     first_name: user.first_name,
     last_name: user.last_name,
+    first_name_ar: user.first_name_ar,
+    last_name_ar: user.last_name_ar,
     center_id: user.center_id || null
   };
   

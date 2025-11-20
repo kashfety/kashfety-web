@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { data: specialties, error } = await supabase
       .from('specialties')
-      .select('id, name, description')
+      .select('id, name, name_en, name_ar, name_ku, description')
       .eq('is_active', true)
       .order('display_order', { ascending: true });
 

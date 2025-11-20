@@ -61,7 +61,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
-import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n";
+import { localizeDoctorName, localizeSpecialty, toArabicNumerals, formatPhoneNumber, formatCurrency } from "@/lib/i18n";
 
 // Import dashboard components
 import FirstTimeDoctorSetup from "@/components/FirstTimeDoctorSetup";
@@ -74,8 +74,16 @@ import AppointmentDetailsModal from "@/components/AppointmentDetailsModal";
 interface DoctorProfile {
   id: string;
   name: string;
+  name_ar?: string;
+  first_name?: string;
+  first_name_ar?: string;
+  last_name?: string;
+  last_name_ar?: string;
   email: string;
   specialty?: string;
+  specialty_name?: string;
+  specialty_name_ar?: string;
+  specialty_name_en?: string;
   experience_years?: number;
   consultation_fee?: number;
   bio?: string;
@@ -185,6 +193,41 @@ interface PatientDetails {
   created_at?: string;
   medicalRecords?: MedicalRecord[];
   appointmentHistory?: Appointment[];
+}
+
+// Helper functions for localized names
+function getLocalizedName(
+  item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null,
+  locale: string
+): string {
+  if (!item) return '';
+  if (locale === 'ar') {
+    if (item.name_ar) return item.name_ar;
+    if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+  }
+  return item.name || '';
+}
+
+function getLocalizedSpecialty(
+  specialtyName: string | undefined,
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>,
+  locale: string,
+  specialty_name_ar?: string
+): string {
+  if (!specialtyName) return '';
+  
+  // First, check if we have specialty_name_ar directly from API (for doctor profile)
+  if (locale === 'ar' && specialty_name_ar) {
+    return specialty_name_ar;
+  }
+  
+  // Otherwise, look it up in the specialtiesMap
+  const specialtyData = specialtiesMap.get(specialtyName);
+  if (!specialtyData) return specialtyName;
+  
+  if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+  if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+  return specialtyName;
 }
 
 // Sidebar Component
@@ -370,11 +413,13 @@ function Sidebar({
 function ProfileHeader({
   doctorProfile,
   setActiveTab,
-  toast
+  toast,
+  specialtiesMap
 }: {
   doctorProfile: DoctorProfile | null;
   setActiveTab: (tab: string) => void;
   toast: any;
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) {
   const { t, locale } = useLocale();
   const { logout } = useAuth();
@@ -398,10 +443,12 @@ function ProfileHeader({
             </div>
             <div className="hidden sm:block text-left">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {localizeDoctorName(locale, doctorProfile?.name || 'Doctor')}
+                {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {localizeSpecialty(locale, doctorProfile?.specialty || 'General Medicine')}
+                {(locale === 'ar' && doctorProfile?.specialty_name_ar) 
+                  ? doctorProfile.specialty_name_ar 
+                  : (doctorProfile?.specialty || 'General Medicine')}
               </div>
             </div>
           </div>
@@ -418,7 +465,7 @@ function ProfileHeader({
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
-                  {localizeDoctorName(locale, doctorProfile?.name || 'Doctor')}
+                  {getLocalizedName(doctorProfile, locale) || 'Doctor'}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {doctorProfile?.email || ''}
@@ -472,6 +519,33 @@ export default function DoctorDashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { t, locale } = useLocale();
 
+  const getLocalizedPatientName = (appointment: any) => {
+    if (!appointment) return 'Unknown Patient';
+    
+    if (locale === 'ar') {
+      // Try name_ar first
+      if (appointment.name_ar) return appointment.name_ar;
+      
+      // Build from first_name_ar + last_name_ar
+      if (appointment.first_name_ar || appointment.last_name_ar) {
+        return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
+      }
+      
+      // Check users object
+      if (appointment.users?.name_ar) return appointment.users.name_ar;
+      if (appointment.users?.first_name_ar || appointment.users?.last_name_ar) {
+        return [appointment.users.first_name_ar, appointment.users.last_name_ar].filter(Boolean).join(' ').trim();
+      }
+    }
+    
+    // Fallback to English name
+    if (appointment.name) return appointment.name;
+    if (appointment.first_name || appointment.last_name) {
+      return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
+    }
+    return appointment.patient_name || appointment.users?.name || 'Unknown Patient';
+  };
+
   // States
   const [doctorProfile, setDoctorProfile] = useState<DoctorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -483,6 +557,7 @@ export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
 
   // Pagination states
   const [showAllAppointments, setShowAllAppointments] = useState(false);
@@ -506,6 +581,34 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Fetch specialties for localization
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const response = await fetch('/api/specialties');
+        if (response.ok) {
+          const data = await response.json();
+          const specialtiesList = data.specialties || data; // Handle both response formats
+          const map = new Map();
+          
+          if (Array.isArray(specialtiesList)) {
+            specialtiesList.forEach((specialty: any) => {
+              map.set(specialty.name, {
+                name_ar: specialty.name_ar,
+                name_ku: specialty.name_ku
+              });
+            });
+            setSpecialtiesMap(map);
+            console.log('✅ Loaded specialties map:', map.size, 'entries');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+    fetchSpecialties();
   }, []);
 
   useEffect(() => {
@@ -607,6 +710,13 @@ export default function DoctorDashboard() {
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
         console.log('Profile data received:', profileData);
+        console.log('Doctor specialty fields:', {
+          specialty: profileData.doctor?.specialty,
+          specialty_name_ar: profileData.doctor?.specialty_name_ar,
+          name_ar: profileData.doctor?.name_ar,
+          first_name_ar: profileData.doctor?.first_name_ar,
+          last_name_ar: profileData.doctor?.last_name_ar
+        });
         setDoctorProfile(profileData.doctor);
 
         // Check if this is first time setup (no specialty set)
@@ -1006,7 +1116,7 @@ export default function DoctorDashboard() {
       <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F12] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('dd_loading_dashboard') || 'Loading your dashboard...'}</p>
         </div>
       </div>
     );
@@ -1030,6 +1140,7 @@ export default function DoctorDashboard() {
               doctorProfile={doctorProfile}
               setActiveTab={setActiveTab}
               toast={toast}
+              specialtiesMap={specialtiesMap}
             />
           </header>
 
@@ -1041,7 +1152,7 @@ export default function DoctorDashboard() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {t('dd_welcome_back') || 'Welcome back'}, {localizeDoctorName(t ? (t as any).locale || 'en' : 'en', doctorProfile?.name || 'Doctor')}
+                      {t('dd_welcome_back') || 'Welcome back'}, {locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
                       {t('dd_whats_happening') || "Here's what's happening in your practice today"}
@@ -1080,7 +1191,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_todays_appointments') || "Today's Appointments"}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            {todayStats?.stats?.todayAppointments || 0}
+                            {toArabicNumerals(todayStats?.stats?.todayAppointments || 0, locale)}
                           </p>
                         </div>
                         <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -1092,7 +1203,8 @@ export default function DoctorDashboard() {
                           <TrendingUp className="w-4 h-4 mr-1" />
                           {(() => {
                             const today = todayStats?.stats?.todayAppointments || 0;
-                            return today > 0 ? '+' + Math.round(today * 10) + '%' : '0%';
+                            const percentage = today > 0 ? `+${Math.round(today * 10)}%` : '0%';
+                            return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
                         <span className="text-gray-600 dark:text-gray-400 ml-2">{t('dd_from_yesterday') || 'from yesterday'}</span>
@@ -1106,7 +1218,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            {analytics?.analytics?.totalPatients || 0}
+                            {toArabicNumerals(analytics?.analytics?.totalPatients || 0, locale)}
                           </p>
                         </div>
                         <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -1118,7 +1230,8 @@ export default function DoctorDashboard() {
                           <TrendingUp className="w-4 h-4 mr-1" />
                           {(() => {
                             const thisMonth = analytics?.analytics?.thisMonthAppointments || 0;
-                            return thisMonth > 0 ? '+' + Math.round(thisMonth * 2) + '%' : '0%';
+                            const percentage = thisMonth > 0 ? `+${Math.round(thisMonth * 2)}%` : '0%';
+                            return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
                         <span className="text-gray-600 dark:text-gray-400 ml-2">{t('dd_this_month') || 'this month'}</span>
@@ -1132,7 +1245,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_monthly_revenue') || 'Monthly Revenue'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            ${analytics?.analytics?.totalRevenue?.toLocaleString() || '0'}
+                            ${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}
                           </p>
                         </div>
                         <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -1144,7 +1257,8 @@ export default function DoctorDashboard() {
                           <TrendingUp className="w-4 h-4 mr-1" />
                           {(() => {
                             const revenue = analytics?.analytics?.totalRevenue || 0;
-                            return revenue > 0 ? '+' + Math.round(revenue / 100) + '%' : '0%';
+                            const percentage = revenue > 0 ? `+${Math.round(revenue / 100)}%` : '0%';
+                            return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
                         <span className="text-gray-600 dark:text-gray-400 ml-2">{t('vsLastWeek') || 'from last month'}</span>
@@ -1158,7 +1272,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            {analytics?.analytics?.avgRating?.toFixed(2) || '0.00'}★
+                            {toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}★
                           </p>
                         </div>
                         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
@@ -1201,7 +1315,7 @@ export default function DoctorDashboard() {
                           const nextDate = new Date(`${next.appointment_date}T${(next.appointment_time || '00:00')}:00`)
                           minutes = Math.max(0, Math.round((nextDate.getTime() - now.getTime()) / 60000))
                         }
-                        return `${t('dd_you_have') || 'You have'} ${total} ${t('dd_upcoming_appointments') || 'upcoming appointments'} • ${t('dd_next_patient_in') || 'Next patient in'} ${minutes || 0} ${t('dd_minutes') || 'minutes'}`
+                        return `${t('dd_you_have') || 'You have'} ${locale === 'ar' ? toArabicNumerals(total.toString()) : total} ${t('dd_upcoming_appointments') || 'upcoming appointments'} • ${t('dd_next_patient_in') || 'Next patient in'} ${locale === 'ar' ? toArabicNumerals((minutes || 0).toString()) : (minutes || 0)} ${t('dd_minutes') || 'minutes'}`
                       })()}
                     </span>
                   </div>
@@ -1279,13 +1393,13 @@ export default function DoctorDashboard() {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-900 dark:text-white">
-                                  {patient.name}
+                                  {getLocalizedName(patient, locale)}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${patient.lastAppointment}` : (t('no_recent_visit') || 'No recent visit')}
+                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-500">
-                                  {patient.totalAppointments || 0} {t('dd_appointments_word') || 'appointments'} • {patient.phone}
+                                  {toArabicNumerals((patient.totalAppointments || 0).toString(), locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
                                 </p>
                               </div>
                             </div>
@@ -1321,8 +1435,8 @@ export default function DoctorDashboard() {
                     <BarChart2 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Practice Analytics</h1>
-                    <p className="text-emerald-600/80 dark:text-emerald-400/80">Insights and performance metrics for your medical practice</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dd_practice_analytics') || 'Practice Analytics'}</h1>
+                    <p className="text-emerald-600/80 dark:text-emerald-400/80">{t('dd_practice_analytics_subtitle') || 'Insights and performance metrics for your medical practice'}</p>
                   </div>
                 </div>
 
@@ -1330,26 +1444,26 @@ export default function DoctorDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                     <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Patient Satisfaction</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{(analytics?.analytics?.avgRating || 0).toFixed(2)}/5</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_patient_satisfaction') || 'Patient Satisfaction'}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}/٥</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                     <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Completion Rate</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{analytics?.analytics?.completionRate || 0}%</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_completion_rate') || 'Completion Rate'}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.completionRate || 0).toString(), locale)}%</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                     <CardContent className="p-6">
                       <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_this_month') || 'This Month'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{analytics?.analytics?.thisMonthAppointments || 0} {t('dd_appts') || 'appts'}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.thisMonthAppointments || 0).toString(), locale)} {t('dd_appts') || 'appts'}</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                     <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Revenue</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${analytics?.analytics?.totalRevenue?.toLocaleString() || 0}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_revenue') || 'Revenue'}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -1392,13 +1506,13 @@ export default function DoctorDashboard() {
                 {/* Demographics */}
                 <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
                   <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">Patient Demographics</CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">Breakdown of your patient population</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">{t('dd_patient_demographics') || 'Patient Demographics'}</CardTitle>
+                    <CardDescription className="text-gray-600 dark:text-gray-400">{t('dd_patient_demographics_subtitle') || 'Breakdown of your patient population'}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
-                        <p className="font-medium mb-2">Age Distribution</p>
+                        <p className="font-medium mb-2">{t('dd_age_distribution') || 'Age Distribution'}</p>
                         {(() => {
                           // Derive age groups from patients (DB)
                           const ageGroups: Record<string, number> = { '0-18': 0, '19-35': 0, '36-50': 0, '51-65': 0, '65+': 0 }
@@ -1410,38 +1524,38 @@ export default function DoctorDashboard() {
                           const order = ["0-18", "19-35", "36-50", "51-65", "65+"]
                           return order.map(k => (
                             <div key={k} className="flex justify-between text-sm">
-                              <span>{k === '0-18' ? 'Under 18' : k === '65+' ? 'Over 65' : k}</span>
-                              <span>{Math.round(((ageGroups[k] || 0) / total) * 100)}%</span>
+                              <span>{k === '0-18' ? (t('dd_under_18') || 'Under 18') : k === '65+' ? (t('dd_over_65') || 'Over 65') : k}</span>
+                              <span>{toArabicNumerals(Math.round(((ageGroups[k] || 0) / total) * 100).toString(), locale)}%</span>
                             </div>
                           ))
                         })()}
                       </div>
                       <div>
-                        <p className="font-medium mb-2">Gender</p>
+                        <p className="font-medium mb-2">{t('dd_gender') || 'Gender'}</p>
                         {(() => {
                           const g: Record<string, number> = { female: 0, male: 0, other: 0 }
                             ; (patients || []).forEach((p: any) => { const gender = (p.gender || '').toLowerCase(); if (g[gender] === undefined) g.other++; else g[gender]++ })
                           const total = Math.max(1, Object.values(g).reduce((a, b) => a + b, 0))
-                          const rows = [{ label: 'Female', key: 'female' }, { label: 'Male', key: 'male' }, { label: 'Other', key: 'other' }]
+                          const rows = [{ label: t('dd_female') || 'Female', key: 'female' }, { label: t('dd_male') || 'Male', key: 'male' }, { label: t('dd_other') || 'Other', key: 'other' }]
                           return rows.map(r => (
                             <div key={r.key} className="flex justify-between text-sm">
                               <span>{r.label}</span>
-                              <span>{Math.round(((g[r.key] || 0) / total) * 100)}%</span>
+                              <span>{toArabicNumerals(Math.round(((g[r.key] || 0) / total) * 100).toString(), locale)}%</span>
                             </div>
                           ))
                         })()}
                       </div>
                       <div>
-                        <p className="font-medium mb-2">Appointment Types</p>
+                        <p className="font-medium mb-2">{t('dd_appointment_types') || 'Appointment Types'}</p>
                         {(() => {
                           const tps: Record<string, number> = { clinic: 0, home: 0, telemedicine: 0 }
                             ; (allAppointments || []).forEach((a: any) => { const k = (a.appointment_type || a.type || 'clinic').toString().toLowerCase(); if (tps[k] === undefined) tps.clinic++; else tps[k]++ })
                           const total = Math.max(1, Object.values(tps).reduce((a, b) => a + b, 0))
-                          const rows = [{ label: 'Clinic', key: 'clinic' }, { label: 'Home', key: 'home' }, { label: 'Telemedicine', key: 'telemedicine' }]
+                          const rows = [{ label: t('dd_clinic') || 'Clinic', key: 'clinic' }, { label: t('dd_home') || 'Home', key: 'home' }, { label: t('dd_telemedicine') || 'Telemedicine', key: 'telemedicine' }]
                           return rows.map(r => (
                             <div key={r.key} className="flex justify-between text-sm">
                               <span>{r.label}</span>
-                              <span>{Math.round(((tps[r.key] || 0) / total) * 100)}%</span>
+                              <span>{toArabicNumerals(Math.round(((tps[r.key] || 0) / total) * 100).toString(), locale)}%</span>
                             </div>
                           ))
                         })()}
@@ -1485,13 +1599,15 @@ export default function DoctorDashboard() {
                                 </div>
                                 <div>
                                   <h4 className="font-medium text-gray-900 dark:text-white">
-                                    {appointment.patient_name}
+                                    {getLocalizedPatientName(appointment)}
                                   </h4>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {new Date(appointment.appointment_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
+                                    {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
                                   </p>
                                   <p className="text-sm text-gray-500 dark:text-gray-500">
-                                    {localizeSpecialty(locale, appointment.appointment_type || 'Clinic')}
+                                    {appointment.appointment_type === 'home' 
+                                      ? (t('dd_home_visit') || 'Home Visit') 
+                                      : (t('dd_clinic_visit') || 'Clinic Visit')}
                                   </p>
                                   {appointment.symptoms && (
                                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
@@ -1525,7 +1641,7 @@ export default function DoctorDashboard() {
                                 </Badge>
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
-                                    ${appointment.consultation_fee}
+                                    ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
                                   </Badge>
                                 )}
                                 <div className="flex items-center gap-1">
@@ -1747,7 +1863,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.length || 0}
+                              {toArabicNumerals((patients?.length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                           </div>
@@ -1763,7 +1879,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0}
+                              {toArabicNumerals((patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('active_30_days') || 'Active (30 days)'}</p>
                           </div>
@@ -1779,7 +1895,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0}
+                              {toArabicNumerals((patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('total_visits') || 'Total Visits'}</p>
                           </div>
@@ -1795,7 +1911,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                              {(() => {
+                              {toArabicNumerals(((() => {
                                 const dist = analytics?.analytics?.patientDemographics?.genderDistribution as Record<string, number> | undefined
                                 if (dist && Object.keys(dist).length > 0) {
                                   const total = Object.values(dist).reduce((a, b) => a + (Number(b) || 0), 0)
@@ -1812,7 +1928,7 @@ export default function DoctorDashboard() {
                                     if (g === 'female' || g === 'f') female += 1
                                   })
                                 return total ? Math.round((female / total) * 100) : 0
-                              })()}%
+                              })()).toString(), locale)}%
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('female_patients') || 'Female Patients'}</p>
                           </div>
@@ -1832,7 +1948,9 @@ export default function DoctorDashboard() {
                     <CardContent>
                       {patients && patients.length > 0 ? (
                         <div className="space-y-4">
-                          {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => (
+                          {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => {
+                            const patientName = getLocalizedName(patient, locale);
+                            return (
                             <div
                               key={patient.id}
                               className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
@@ -1840,12 +1958,12 @@ export default function DoctorDashboard() {
                               <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                   <span className="text-white font-medium">
-                                    {patient.name?.charAt(0)?.toUpperCase() || 'P'}
+                                    {patientName?.charAt(0)?.toUpperCase() || 'P'}
                                   </span>
                                 </div>
                                 <div>
                                   <h4 className="font-medium text-gray-900 dark:text-white">
-                                    {patient.name}
+                                    {patientName}
                                   </h4>
                                   <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                                     <span className="flex items-center gap-1">
@@ -1854,19 +1972,23 @@ export default function DoctorDashboard() {
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <Phone className="w-3 h-3" />
-                                      {patient.phone}
+                                      {formatPhoneNumber(patient.phone, locale)}
                                     </span>
                                     {patient.age && (
-                                      <span>{patient.age} {t('years_old') || 'years old'}</span>
+                                      <span>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-2 mt-1">
                                     <Badge variant="outline" className="text-xs">
-                                      {patient.totalAppointments || 0} {t('visits') || 'visits'}
+                                      {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
                                     </Badge>
                                     {patient.lastAppointment && (
                                       <Badge variant="secondary" className="text-xs">
-                                        {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale || 'en-US')}
+                                        {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric'
+                                        })}
                                       </Badge>
                                     )}
                                     {patient.gender && (
@@ -1888,7 +2010,8 @@ export default function DoctorDashboard() {
                                 </Button>
                               </div>
                             </div>
-                          ))}
+                          );
+                          })}
 
                           {patients.length > 10 && (
                             <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -1965,7 +2088,7 @@ export default function DoctorDashboard() {
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
                     <div>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_reviews_title') || 'Reviews & Ratings'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_view_patient_reviews') || 'View all patient reviews and ratings'}</p>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_reviews_subtitle') || 'View feedback from your patients'}</p>
                     </div>
                   </div>
                 </div>
@@ -1973,6 +2096,7 @@ export default function DoctorDashboard() {
                 {reviewsLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="ml-3 text-gray-600 dark:text-gray-400">{t('dd_loading_reviews') || 'Loading reviews...'}</p>
                   </div>
                 ) : reviews.length === 0 ? (
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
@@ -1982,7 +2106,7 @@ export default function DoctorDashboard() {
                         {t('dd_no_reviews') || 'No Reviews Yet'}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        {t('dd_no_reviews_description') || 'You haven\'t received any reviews from patients yet.'}
+                        {t('dd_no_reviews_desc') || 'Patient reviews will appear here after completed appointments'}
                       </p>
                     </CardContent>
                   </Card>
@@ -1995,12 +2119,15 @@ export default function DoctorDashboard() {
                           <div>
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                              {reviews.length > 0
-                                ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(2)
-                                : '0.00'}★
+                              {toArabicNumerals(
+                                reviews.length > 0
+                                  ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(2)
+                                  : '0.00',
+                                locale
+                              )}★
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                              {reviews.length} {reviews.length === 1 ? (t('dd_review') || 'review') : (t('dd_reviews') || 'reviews')}
+                              {toArabicNumerals(reviews.length, locale)} {reviews.length === 1 ? (t('dd_review') || 'review') : (t('reviews') || 'reviews')}
                             </p>
                           </div>
                           <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
@@ -2013,7 +2140,9 @@ export default function DoctorDashboard() {
                     {/* Reviews List */}
                     <div className="space-y-4">
                       {reviews.map((review) => {
-                        const patientName = review.patient_name || review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient';
+                        const patientName = locale === 'ar' && review.patient_name_ar
+                          ? review.patient_name_ar
+                          : (review.patient_name || review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient');
                         return (
                           <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
                             <CardContent className="p-6">
@@ -2046,7 +2175,7 @@ export default function DoctorDashboard() {
                                     />
                                   ))}
                                   <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                                    {review.rating?.toFixed(1)}
+                                    {toArabicNumerals((review.rating || 0).toFixed(1), locale)}
                                   </span>
                                 </div>
                               </div>
@@ -2093,7 +2222,7 @@ export default function DoctorDashboard() {
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Patient Details: {selectedPatient.name}
+                        {t('dd_patient_details')}: {getLocalizedPatientName(selectedPatient)}
                       </h2>
                       <Button
                         variant="ghost"
@@ -2111,20 +2240,20 @@ export default function DoctorDashboard() {
                       <div className="space-y-3">
                         <h3 className="font-medium text-gray-900 dark:text-white">{t('dd_basic_info') || 'Basic Information'}</h3>
                         <div className="space-y-2 text-sm">
-                          <p><span className="font-medium">{t('dd_name_label') || 'Name:'}</span> {selectedPatient.name}</p>
+                          <p><span className="font-medium">{t('dd_name_label') || 'Name:'}</span> {getLocalizedPatientName(selectedPatient)}</p>
                           <p><span className="font-medium">{t('dd_email_label') || 'Email:'}</span> {selectedPatient.email}</p>
-                          <p><span className="font-medium">{t('dd_phone_label') || 'Phone:'}</span> {selectedPatient.phone}</p>
-                          <p><span className="font-medium">{t('dd_age_label') || 'Age:'}</span> {selectedPatient.age || 'N/A'}</p>
+                          <p><span className="font-medium">{t('dd_phone_label') || 'Phone:'}</span> {formatPhoneNumber(selectedPatient.phone, locale)}</p>
+                          <p><span className="font-medium">{t('dd_age_label') || 'Age:'}</span> {selectedPatient.age ? toArabicNumerals(selectedPatient.age, locale) : 'N/A'}</p>
                           <p><span className="font-medium">{t('dd_gender_label') || 'Gender:'}</span> {selectedPatient.gender || 'N/A'}</p>
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <h3 className="font-medium text-gray-900 dark:text-white">Medical History</h3>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{t('dd_medical_history')}</h3>
                         <div className="space-y-2 text-sm">
-                          <p><span className="font-medium">Allergies:</span> {selectedPatient.allergies || 'None reported'}</p>
-                          <p><span className="font-medium">Current Medications:</span> {selectedPatient.medications || 'None reported'}</p>
-                          <p><span className="font-medium">Medical History:</span> {selectedPatient.medical_history || 'None reported'}</p>
+                          <p><span className="font-medium">{t('dd_allergies')}:</span> {selectedPatient.allergies || t('dd_none_reported')}</p>
+                          <p><span className="font-medium">{t('dd_current_medications')}:</span> {selectedPatient.medications || t('dd_none_reported')}</p>
+                          <p><span className="font-medium">{t('dd_medical_history')}:</span> {selectedPatient.medical_history || t('dd_none_reported')}</p>
                         </div>
                       </div>
 
@@ -2134,7 +2263,7 @@ export default function DoctorDashboard() {
                           {selectedPatient.emergency_contact ? (
                             <>
                               <p><span className="font-medium">{t('dd_name_label') || 'Name:'}</span> {selectedPatient.emergency_contact.name}</p>
-                              <p><span className="font-medium">{t('dd_phone_label') || 'Phone:'}</span> {selectedPatient.emergency_contact.phone}</p>
+                              <p><span className="font-medium">{t('dd_phone_label') || 'Phone:'}</span> {formatPhoneNumber(selectedPatient.emergency_contact.phone, locale)}</p>
                               <p><span className="font-medium">{t('dd_relationship_label') || 'Relationship:'}</span> {selectedPatient.emergency_contact.relationship}</p>
                             </>
                           ) : (
@@ -2146,45 +2275,49 @@ export default function DoctorDashboard() {
 
                     {/* Medical Records */}
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">Medical Records</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">{t('dd_medical_records')}</h3>
                       {selectedPatient.medicalRecords && selectedPatient.medicalRecords.length > 0 ? (
                         <div className="space-y-3">
                           {selectedPatient.medicalRecords.map((record) => (
                             <div key={record.id} className="border border-gray-200 dark:border-[#1F1F23] rounded-lg p-4">
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                  <p className="font-medium text-sm">Diagnosis</p>
+                                  <p className="font-medium text-sm">{t('dd_diagnosis')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.diagnosis}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm">Treatment</p>
+                                  <p className="font-medium text-sm">{t('dd_treatment')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.treatment}</p>
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm">Prescription</p>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">{record.prescription || 'None'}</p>
+                                  <p className="font-medium text-sm">{t('dd_prescription')}</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">{record.prescription || t('dd_none')}</p>
                                 </div>
                               </div>
                               {record.notes && (
                                 <div className="mt-2">
-                                  <p className="font-medium text-sm">Notes</p>
+                                  <p className="font-medium text-sm">{t('dd_notes')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{record.notes}</p>
                                 </div>
                               )}
                               <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                {new Date(record.created_at).toLocaleDateString()}
+                                {new Date(record.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
                               </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">No medical records found</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_records_found')}</p>
                       )}
                     </div>
 
                     {/* Appointment History with Symptoms */}
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">Appointment History & Symptoms</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">{t('dd_appointment_history_symptoms')}</h3>
                       {selectedPatient.appointmentHistory && selectedPatient.appointmentHistory.length > 0 ? (
                         <div className="space-y-3">
                           {selectedPatient.appointmentHistory.map((appointment) => (
@@ -2192,10 +2325,14 @@ export default function DoctorDashboard() {
                               <div className="flex items-center justify-between mb-2">
                                 <div>
                                   <p className="font-medium text-sm">
-                                    {appointment.appointment_date} at {appointment.appointment_time}
+                                    {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })} {t('dd_at')} {appointment.appointment_time}
                                   </p>
                                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                                    {appointment.appointment_type} • {appointment.type}
+                                    {appointment.appointment_type === 'Clinic' ? t('dd_clinic_visit') : t('dd_home_visit')} • {appointment.type}
                                   </p>
                                 </div>
                                 <Badge variant={
@@ -2203,18 +2340,22 @@ export default function DoctorDashboard() {
                                     appointment.status === 'cancelled' ? 'destructive' :
                                       'secondary'
                                 }>
-                                  {appointment.status}
+                                  {appointment.status === 'completed' ? t('dd_status_completed') :
+                                   appointment.status === 'scheduled' ? t('dd_status_scheduled') :
+                                   appointment.status === 'confirmed' ? t('dd_status_confirmed') :
+                                   appointment.status === 'cancelled' ? t('dd_status_cancelled') :
+                                   appointment.status}
                                 </Badge>
                               </div>
                               {appointment.symptoms && (
                                 <div>
-                                  <p className="font-medium text-sm">Symptoms</p>
+                                  <p className="font-medium text-sm">{t('dd_symptoms')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.symptoms}</p>
                                 </div>
                               )}
                               {appointment.cancellation_reason && (
                                 <div className="mt-2">
-                                  <p className="font-medium text-sm text-red-600 dark:text-red-400">Cancellation Reason</p>
+                                  <p className="font-medium text-sm text-red-600 dark:text-red-400">{t('dd_cancellation_reason')}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.cancellation_reason}</p>
                                 </div>
                               )}
@@ -2222,7 +2363,7 @@ export default function DoctorDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">No appointment history found</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_appointment_history')}</p>
                       )}
                     </div>
                   </div>
@@ -2236,10 +2377,10 @@ export default function DoctorDashboard() {
                 <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full">
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Complete Consultation - {selectedAppointment.patient_name}
+                      {t('dd_complete_consultation') || 'Complete Consultation'} - {getLocalizedPatientName(selectedAppointment)}
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {selectedAppointment.appointment_date} at {selectedAppointment.appointment_time}
+                      {new Date(selectedAppointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {selectedAppointment.appointment_time}
                     </p>
                   </div>
 
@@ -2248,7 +2389,7 @@ export default function DoctorDashboard() {
                     {selectedAppointment.symptoms && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Patient Symptoms
+                          {t('dd_patient_symptoms') || 'Patient Symptoms'}
                         </label>
                         <p className="text-sm text-gray-600 dark:text-gray-400 p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg">
                           {selectedAppointment.symptoms}
@@ -2259,14 +2400,14 @@ export default function DoctorDashboard() {
                     {/* Diagnosis */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Diagnosis *
+                        {t('dd_diagnosis') || 'Diagnosis'} *
                       </label>
                       <textarea
                         value={medicalRecordForm.diagnosis}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, diagnosis: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter diagnosis..."
+                        placeholder={t('dd_diagnosis_placeholder') || 'Enter diagnosis...'}
                         required
                       />
                     </div>
@@ -2274,14 +2415,14 @@ export default function DoctorDashboard() {
                     {/* Treatment */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Treatment *
+                        {t('dd_treatment') || 'Treatment'} *
                       </label>
                       <textarea
                         value={medicalRecordForm.treatment}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, treatment: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter treatment plan..."
+                        placeholder={t('dd_treatment_placeholder') || 'Enter treatment plan...'}
                         required
                       />
                     </div>
@@ -2289,28 +2430,28 @@ export default function DoctorDashboard() {
                     {/* Prescription */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Prescription
+                        {t('dd_prescription') || 'Prescription'}
                       </label>
                       <textarea
                         value={medicalRecordForm.prescription}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, prescription: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Enter prescription details..."
+                        placeholder={t('dd_prescription_placeholder') || 'Enter prescription details...'}
                       />
                     </div>
 
                     {/* Additional Notes */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Additional Notes
+                        {t('dd_additional_notes') || 'Additional Notes'}
                       </label>
                       <textarea
                         value={medicalRecordForm.notes}
                         onChange={(e) => setMedicalRecordForm(prev => ({ ...prev, notes: e.target.value }))}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={2}
-                        placeholder="Additional notes..."
+                        placeholder={t('dd_notes_placeholder') || 'Additional notes...'}
                       />
                     </div>
 
@@ -2321,7 +2462,7 @@ export default function DoctorDashboard() {
                         className="flex-1"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Complete Consultation
+                        {t('dd_complete_consultation') || 'Complete Consultation'}
                       </Button>
                       <Button
                         variant="outline"
@@ -2331,7 +2472,7 @@ export default function DoctorDashboard() {
                           setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
                         }}
                       >
-                        Cancel
+                        {t('dd_cancel') || 'Cancel'}
                       </Button>
                     </div>
                   </div>
@@ -2345,24 +2486,24 @@ export default function DoctorDashboard() {
                 <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-md w-full">
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Cancel Appointment
+                      {t('cancel_appointment') || 'Cancel Appointment'}
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {selectedAppointment.patient_name} - {selectedAppointment.appointment_date} at {selectedAppointment.appointment_time}
+                      {selectedAppointment.patient_name} - {selectedAppointment.appointment_date} {t('at') || 'at'} {selectedAppointment.appointment_time}
                     </p>
                   </div>
 
                   <div className="p-6 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Cancellation Reason (Optional)
+                        {t('cancel_reason_label_doctor') || 'Cancellation Reason (Optional)'}
                       </label>
                       <textarea
                         value={cancelReason}
                         onChange={(e) => setCancelReason(e.target.value)}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Reason for cancellation (will be visible to patient)..."
+                        placeholder={t('cancel_reason_placeholder_doctor') || 'Reason for cancellation (will be visible to patient)...'}
                       />
                     </div>
 
@@ -2373,7 +2514,7 @@ export default function DoctorDashboard() {
                         className="flex-1"
                       >
                         <XCircle className="w-4 h-4 mr-2" />
-                        Cancel Appointment
+                        {t('cancel_appointment') || 'Cancel Appointment'}
                       </Button>
                       <Button
                         variant="outline"
@@ -2383,7 +2524,7 @@ export default function DoctorDashboard() {
                           setCancelReason('');
                         }}
                       >
-                        Keep Appointment
+                        {t('keep_appointment') || 'Keep Appointment'}
                       </Button>
                     </div>
                   </div>

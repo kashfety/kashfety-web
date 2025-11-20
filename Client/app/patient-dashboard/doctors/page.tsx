@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
+import { toArabicNumerals } from "@/lib/i18n"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,7 +42,13 @@ interface Doctor {
     name: string
     first_name?: string
     last_name?: string
+    first_name_ar?: string
+    last_name_ar?: string
+    name_ar?: string
     specialty: string
+    specialty_ar?: string
+    specialty_ku?: string
+    specialty_en?: string
     consultation_fee: number
     rating: number
     experience_years: number
@@ -55,6 +62,7 @@ interface Doctor {
 interface Center {
     id: string
     name: string
+    name_ar?: string
     address: string
     phone?: string
 }
@@ -65,7 +73,7 @@ interface DoctorDetails extends Doctor {
 
 export default function PatientDoctorsPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth()
-    const { t, isRTL } = useLocale()
+    const { t, isRTL, locale } = useLocale()
     const router = useRouter()
 
     const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -95,12 +103,12 @@ export default function PatientDoctorsPage() {
         }
     }, [authLoading, isAuthenticated, user, router])
 
-    // Fetch doctors
+    // Fetch doctors when locale changes to refresh localized data
     useEffect(() => {
         if (isAuthenticated && user?.role === 'patient') {
             fetchDoctors()
         }
-    }, [currentPage, searchQuery, specialtyFilter, isAuthenticated, user])
+    }, [currentPage, searchQuery, specialtyFilter, isAuthenticated, user, locale])
 
     const fetchDoctors = async () => {
         try {
@@ -190,6 +198,35 @@ export default function PatientDoctorsPage() {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     }
 
+    const getLocalizedDoctorName = (doctor: Doctor) => {
+        if (locale === 'ar') {
+            if (doctor.name_ar) return doctor.name_ar
+            if (doctor.first_name_ar && doctor.last_name_ar) {
+                return `${doctor.first_name_ar} ${doctor.last_name_ar}`
+            }
+            if (doctor.first_name_ar) return doctor.first_name_ar
+        }
+        return doctor.name || `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim()
+    }
+
+    const getLocalizedCenterName = (center: Center) => {
+        if (locale === 'ar' && center.name_ar) {
+            return center.name_ar
+        }
+        return center.name
+    }
+
+    const getLocalizedSpecialty = (doctor: Doctor) => {
+        if (locale === 'ar' && doctor.specialty_ar) {
+            return doctor.specialty_ar
+        }
+        if (locale === 'ku' && doctor.specialty_ku) {
+            return doctor.specialty_ku
+        }
+        // For English, use 'specialty' field which is the English name
+        return doctor.specialty
+    }
+
     const getUniqueSpecialties = () => {
         const specialties = doctors.map(d => d.specialty).filter(Boolean)
         return [...new Set(specialties)]
@@ -200,7 +237,7 @@ export default function PatientDoctorsPage() {
             <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F12] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('loading') || 'Loading...'}</p>
                 </div>
             </div>
         )
@@ -211,23 +248,8 @@ export default function PatientDoctorsPage() {
             {/* Sidebar */}
             <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-            {/* Overlay for mobile when sidebar is open */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-                    onClick={toggleSidebar}
-                />
-            )}
-
-            {/* Main Content */}
-            <div
-                className="transition-all duration-300"
-                style={{
-                    transform: isRTL
-                        ? `translateX(${sidebarOpen ? -280 : 0}px)`
-                        : `translateX(${sidebarOpen ? 280 : 0}px)`
-                }}
-            >
+            {/* Main Content - No transform, sidebar overlays on top */}
+            <div onClick={() => sidebarOpen && toggleSidebar()}>
                 {/* Header */}
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
                     <Header onMenuToggle={toggleSidebar} />
@@ -238,10 +260,10 @@ export default function PatientDoctorsPage() {
                     {/* Page Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground">
-                            {t('find_doctors') || 'Find Doctors'}
+                            {t('find_doctors') || t('doctors') || 'Find Doctors'}
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            {t('browse_doctors_desc') || 'Browse our network of qualified healthcare professionals'}
+                            {t('browse_doctors_desc') || t('doctors_subtitle') || 'Browse our network of qualified healthcare professionals'}
                         </p>
                     </div>
 
@@ -277,18 +299,23 @@ export default function PatientDoctorsPage() {
                                         className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">{t('all_specialties') || 'All Specialties'}</option>
-                                        {getUniqueSpecialties().map((specialty) => (
-                                            <option key={specialty} value={specialty}>
-                                                {specialty}
-                                            </option>
-                                        ))}
+                                        {getUniqueSpecialties().map((specialty) => {
+                                            // Find a doctor with this specialty to get localized name
+                                            const doctorWithSpecialty = doctors.find(d => d.specialty === specialty);
+                                            const localizedName = doctorWithSpecialty ? getLocalizedSpecialty(doctorWithSpecialty) : specialty;
+                                            return (
+                                                <option key={specialty} value={specialty}>
+                                                    {localizedName}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                             </div>
 
                             {/* Results count */}
                             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                                {t('showing_results') || 'Showing'} {doctors.length} {t('of') || 'of'} {totalDoctors} {t('doctors') || 'doctors'}
+                                {t('showing_results') || 'Showing'} {toArabicNumerals(doctors.length, locale)} {t('of') || 'of'} {toArabicNumerals(totalDoctors, locale)} {t('doctors') || 'doctors'}
                             </div>
                         </CardContent>
                     </Card>
@@ -342,30 +369,30 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Name */}
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                                                    {doctor.name}
+                                                    {getLocalizedDoctorName(doctor)}
                                                 </h3>
 
                                                 {/* Specialty */}
                                                 <Badge variant="secondary" className="mb-3">
-                                                    {doctor.specialty}
+                                                    {getLocalizedSpecialty(doctor)}
                                                 </Badge>
 
                                                 {/* Rating & Experience */}
                                                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
                                                     <div className="flex items-center gap-1">
                                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span>{doctor.rating?.toFixed(1) || '0.0'}</span>
+                                                        <span>{toArabicNumerals(doctor.rating?.toFixed(1) || '0.0', locale)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        <Briefcase className="w-4 h-4" />
-                                                        <span>{doctor.experience_years || 0}y</span>
+                                                        <Briefcase className="w-4 h-4 text-blue-500" />
+                                                        <span>{toArabicNumerals(doctor.experience_years || 0, locale)}{t('year_short') || 'y'}</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Consultation Fee */}
                                                 <div className="flex items-center gap-2 mb-4 text-blue-600 dark:text-blue-400 font-semibold">
                                                     <DollarSign className="w-4 h-4" />
-                                                    <span>${doctor.consultation_fee || 0}</span>
+                                                    <span>${toArabicNumerals(doctor.consultation_fee || 0, locale)}</span>
                                                 </div>
 
                                                 {/* Action Button */}
@@ -414,7 +441,7 @@ export default function PatientDoctorsPage() {
                                                         onClick={() => setCurrentPage(page)}
                                                         className={currentPage === page ? "bg-blue-600" : ""}
                                                     >
-                                                        {page}
+                                                        {toArabicNumerals(page, locale)}
                                                     </Button>
                                                 )
                                             } else if (page === currentPage - 2 || page === currentPage + 2) {
@@ -456,18 +483,18 @@ export default function PatientDoctorsPage() {
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{selectedDoctor.name}</DialogTitle>
+                                                <DialogTitle className="text-2xl">{getLocalizedDoctorName(selectedDoctor)}</DialogTitle>
                                                 <DialogDescription className="text-lg mt-1">
-                                                    {selectedDoctor.specialty}
+                                                    {getLocalizedSpecialty(selectedDoctor)}
                                                 </DialogDescription>
                                                 <div className="flex items-center gap-4 mt-2">
                                                     <div className="flex items-center gap-1 text-sm">
                                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span className="font-medium">{selectedDoctor.rating?.toFixed(1) || '0.0'}</span>
+                                                        <span className="font-medium">{toArabicNumerals(selectedDoctor.rating?.toFixed(1) || '0.0', locale)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />
-                                                        <span>{selectedDoctor.experience_years || 0} years experience</span>
+                                                        <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} {t('years_experience') || 'years experience'}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -507,6 +534,12 @@ export default function PatientDoctorsPage() {
                                                 </div>
                                             )}
 
+                                            {!selectedDoctor.bio && !selectedDoctor.qualifications && (
+                                                <p className="text-gray-500 dark:text-gray-400 italic text-center py-4">
+                                                    {t('no_additional_info') || 'No additional information available'}
+                                                </p>
+                                            )}
+
                                             {/* Consultation Fee */}
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
@@ -514,7 +547,7 @@ export default function PatientDoctorsPage() {
                                                     {t('consultation_fee') || 'Consultation Fee'}
                                                 </h3>
                                                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${selectedDoctor.consultation_fee || 0}
+                                                    ${toArabicNumerals(selectedDoctor.consultation_fee || 0, locale)}
                                                 </p>
                                             </div>
                                         </TabsContent>
@@ -529,16 +562,16 @@ export default function PatientDoctorsPage() {
                                                                     <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-1" />
                                                                     <div className="flex-1">
                                                                         <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                                            {center.name}
+                                                                            {getLocalizedCenterName(center)}
                                                                         </h4>
                                                                         <div className="flex items-start gap-2 mt-1 text-sm text-gray-600 dark:text-gray-400">
                                                                             <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                                                                             <span>{center.address}</span>
                                                                         </div>
                                                                         {center.phone && (
-                                                                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                                                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                                                                 <Phone className="w-4 h-4" />
-                                                                                <span>{center.phone}</span>
+                                                                                <span>{toArabicNumerals(center.phone, locale)}</span>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -577,7 +610,11 @@ export default function PatientDoctorsPage() {
                                                                 {t('phone') || 'Phone'}
                                                             </p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
-                                                                {selectedDoctor.phone}
+                                                                {toArabicNumerals(
+                                                                    // Clean phone number: remove any _DOCTOR_ or UUID suffixes
+                                                                    selectedDoctor.phone.split('_DOCTOR_')[0].split('_')[0],
+                                                                    locale
+                                                                )}
                                                             </p>
                                                         </div>
                                                     </div>

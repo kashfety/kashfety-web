@@ -54,7 +54,7 @@ export default function DoctorProfileSettings({
   doctorId, 
   onProfileUpdate 
 }: DoctorProfileSettingsProps) {
-  const { t, isRTL } = useLocale()
+  const { t, isRTL, locale } = useLocale()
 
   const [profile, setProfile] = useState<DoctorProfileData | null>(null);
   const [certificates, setCertificates] = useState<DoctorCertificate[]>([]);
@@ -65,6 +65,7 @@ export default function DoctorProfileSettings({
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    name_ar: "",
     specialty: "",
     bio: "",
     experience_years: 0,
@@ -74,6 +75,17 @@ export default function DoctorProfileSettings({
 
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
+
+  // Helper function to get localized certificate type
+  const getLocalizedCertificateType = (type: string): string => {
+    const typeKey = `dc_${type.toLowerCase()}`;
+    const translated = t(typeKey);
+    if (translated && translated !== typeKey) {
+      return translated;
+    }
+    // Fallback to formatted English name
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
 
   // Load doctor profile on component mount
   useEffect(() => {
@@ -113,6 +125,7 @@ export default function DoctorProfileSettings({
         setProfile(doctorProfile);
         setFormData({
           name: doctorProfile.name || "",
+          name_ar: doctorProfile.name_ar || "",
           specialty: doctorProfile.specialty || "",
           bio: doctorProfile.bio || "",
           experience_years: doctorProfile.experience_years || 0,
@@ -154,13 +167,51 @@ export default function DoctorProfileSettings({
       if (response.ok) {
         const data = await response.json();
         setCertificates(data.certificates || []);
+        return data.certificates || [];
       } else {
         console.error('Failed to load certificates:', response.status);
+        return [];
       }
     } catch (error) {
       console.error('Error loading certificates:', error);
+      return [];
     } finally {
       setLoadingCertificates(false);
+    }
+  };
+
+  const handleViewCertificate = async (certificateId: string, currentUrl: string) => {
+    try {
+      // Refresh certificates to get fresh signed URLs
+      const freshCertificates = await loadDoctorCertificates();
+      const freshCert = freshCertificates.find((c: any) => c.id === certificateId);
+      const urlToOpen = freshCert?.certificate_file_url || currentUrl;
+      window.open(urlToOpen, '_blank');
+    } catch (error) {
+      console.error('Error opening certificate:', error);
+      // Fallback to current URL if refresh fails
+      window.open(currentUrl, '_blank');
+    }
+  };
+
+  const handleDownloadCertificate = async (certificateId: string, currentUrl: string, fileName: string) => {
+    try {
+      // Refresh certificates to get fresh signed URLs
+      const freshCertificates = await loadDoctorCertificates();
+      const freshCert = freshCertificates.find((c: any) => c.id === certificateId);
+      const urlToDownload = freshCert?.certificate_file_url || currentUrl;
+      
+      const link = document.createElement('a');
+      link.href = urlToDownload;
+      link.download = fileName;
+      link.click();
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      // Fallback to current URL if refresh fails
+      const link = document.createElement('a');
+      link.href = currentUrl;
+      link.download = fileName;
+      link.click();
     }
   };
 
@@ -328,10 +379,10 @@ export default function DoctorProfileSettings({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className={`flex items-center justify-center p-8 ${isRTL ? 'rtl' : 'ltr'}`}>
         <div className="flex flex-col items-center gap-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-sm text-gray-500">Loading profile...</span>
+          <span className="text-sm text-gray-500">{t('dd_loading_profile') || 'Loading profile...'}</span>
         </div>
       </div>
     );
@@ -339,25 +390,25 @@ export default function DoctorProfileSettings({
 
   if (!profile) {
     return (
-      <div className="text-center p-8">
-        <p className="text-gray-500">Unable to load profile data.</p>
+      <div className={`text-center p-8 ${isRTL ? 'rtl' : 'ltr'}`}>
+        <p className="text-gray-500">{t('dd_unable_load_profile') || 'Unable to load profile data.'}</p>
         <Button onClick={loadDoctorProfile} className="mt-4">
-          Try Again
+          {t('dd_retry') || 'Retry'}
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
-          <p className="text-gray-600">Manage your professional profile and consultation fees</p>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={isRTL ? 'text-right' : 'text-left'}>
+          <h2 className="text-2xl font-bold text-gray-900">{t('profile_settings_title') || 'Profile Settings'}</h2>
+          <p className="text-gray-600">{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
         </div>
         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          Doctor Profile
+          {t('doctor_profile') || 'Doctor Profile'}
         </Badge>
       </div>
 
@@ -366,44 +417,57 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Basic Information
+            {t('dd_basic_info') || 'Basic Information'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">t('fullName')</Label>
+              <Label htmlFor="name">{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter your full name"
+                placeholder={t('fullNamePlaceholder') || "Enter your full name in English"}
               />
             </div>
             <div>
-              <Label htmlFor="specialty">Specialty</Label>
+              <Label htmlFor="name_ar">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
+              <Input
+                id="name_ar"
+                value={formData.name_ar}
+                onChange={(e) => handleInputChange('name_ar', e.target.value)}
+                placeholder={t('fullNameArabicPlaceholder') || "أدخل اسمك الكامل بالعربية"}
+                dir="rtl"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="specialty">{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
                 onChange={(e) => handleInputChange('specialty', e.target.value)}
-                placeholder="e.g., Cardiology, Dermatology"
+                placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
               />
             </div>
           </div>
           
           <div>
-            <Label htmlFor="bio">Professional Bio</Label>
+            <Label htmlFor="bio">{t('professionalBio') || 'Professional Bio'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder="Describe your background, expertise, and approach to patient care..."
+              placeholder={t('professionalBioPlaceholder') || "Describe your background, expertise, and approach to patient care..."}
               rows={4}
             />
           </div>
 
           <div>
-            <Label htmlFor="experience">Years of Experience</Label>
+            <Label htmlFor="experience">{t('yearsOfExperience') || 'Years of Experience'}</Label>
             <Input
               id="experience"
               type="number"
@@ -411,7 +475,7 @@ export default function DoctorProfileSettings({
               max="50"
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-              placeholder="Enter years of experience"
+              placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
             />
           </div>
         </CardContent>
@@ -422,17 +486,17 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-emerald-800">
             <DollarSign className="w-5 h-5" />
-            Consultation Fee Settings
+            {t('dd_consultation_fee_settings') || 'Consultation Fee Settings'}
           </CardTitle>
           <p className="text-sm text-emerald-600">
-            Set your consultation fee that will be displayed to patients and used in billing
+            {t('dd_consultation_fee_desc') || 'Set your consultation fee that will be displayed to patients and used in billing'}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="consultation_fee" className="text-base font-medium">
-                Consultation Fee (USD)
+                {t('consultationFeeUSD') || 'Consultation Fee (USD)'}
               </Label>
               <div className="mt-1 flex items-center gap-2">
                 <button
@@ -487,24 +551,24 @@ export default function DoctorProfileSettings({
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                This fee will be displayed to patients when booking appointments
+                {t('consultationFeeNote') || 'This fee will be displayed to patients when booking appointments'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
-              <h4 className="font-medium text-emerald-800 mb-2">Fee Preview</h4>
+              <h4 className="font-medium text-emerald-800 mb-2">{t('feePreview') || 'Fee Preview'}</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Clinic Consultation:</span>
+                  <span>{t('clinicConsultation') || 'Clinic Consultation'}:</span>
                   <span className="font-medium">${formData.consultation_fee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Home Visit:</span>
+                  <span>{t('homeVisit') || 'Home Visit'}:</span>
                   <span className="font-medium">${(formData.consultation_fee + 50).toFixed(2)}</span>
                 </div>
                 <Separator className="my-2" />
                 <p className="text-xs text-gray-600">
-                  Home visits include additional travel fee
+                  {t('homeVisitNote') || 'Home visits include additional travel fee'}
                 </p>
               </div>
             </div>
@@ -513,11 +577,10 @@ export default function DoctorProfileSettings({
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
             <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Fee Change Notice
+              {t('feeChangeNotice') || 'Fee Change Notice'}
             </h4>
             <p className="text-sm text-blue-700">
-              Changes to your consultation fee will apply to all new appointments. 
-              Existing scheduled appointments will keep their original pricing.
+              {t('feeChangeNoticeText') || 'Changes to your consultation fee will apply to all new appointments. Existing scheduled appointments will keep their original pricing.'}
             </p>
           </div>
 
@@ -529,7 +592,7 @@ export default function DoctorProfileSettings({
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Save className="w-4 h-4 mr-2" />
-              {saving ? "Saving..." : "Save Consultation Fee"}
+              {saving ? (t('saving') || "Saving...") : (t('saveConsultationFee') || "Save Consultation Fee")}
             </Button>
           </div>
         </CardContent>
@@ -540,7 +603,7 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="w-5 h-5" />
-            Qualifications & Certifications
+            {t('dd_qualifications_certifications') || 'Qualifications & Certifications'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -552,11 +615,11 @@ export default function DoctorProfileSettings({
                 </Badge>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">No qualifications listed</p>
+              <p className="text-gray-500 text-sm">{t('dd_no_qualifications') || 'No qualifications listed'}</p>
             )}
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Contact support to update your qualifications and certifications
+            {t('dd_contact_support_qualifications') || 'Contact support to update your qualifications and certifications'}
           </p>
         </CardContent>
       </Card>
@@ -577,11 +640,11 @@ export default function DoctorProfileSettings({
           ) : certificates.length > 0 ? (
             <div className="space-y-4">
               {certificates.map((certificate) => (
-                <div key={certificate.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between">
+                <div key={certificate.id} className={`border rounded-lg p-4 space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className="space-y-2">
-                      <h3 className="font-medium capitalize">
-                        {certificate.certificate_type.replace('_', ' ')}
+                      <h3 className="font-medium">
+                        {getLocalizedCertificateType(certificate.certificate_type)}
                       </h3>
                       {certificate.certificate_number && (
                         <p className="text-sm text-gray-600">
@@ -593,20 +656,20 @@ export default function DoctorProfileSettings({
                           <strong>{t('issuing_authority') || 'Issuing Authority'}:</strong> {certificate.issuing_authority}
                         </p>
                       )}
-                      <div className="flex gap-4 text-sm text-gray-600">
+                      <div className={`flex gap-4 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         {certificate.issue_date && (
                           <span>
-                            <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString()}
+                            <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         )}
                         {certificate.expiry_date && (
                           <span>
-                            <strong>{t('expiry_date') || 'Expires'}:</strong> {new Date(certificate.expiry_date).toLocaleDateString()}
+                            <strong>{t('expiry_date') || 'Expires'}:</strong> {new Date(certificate.expiry_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-gray-500">
-                        {t('certificate_uploaded_on') || 'Uploaded on'}: {new Date(certificate.submitted_at).toLocaleDateString()}
+                        {t('certificate_uploaded_on') || 'Uploaded on'}: {new Date(certificate.submitted_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -637,7 +700,7 @@ export default function DoctorProfileSettings({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(certificate.certificate_file_url, '_blank')}
+                          onClick={() => handleViewCertificate(certificate.id, certificate.certificate_file_url)}
                           className="flex items-center gap-1"
                         >
                           <Eye className="w-3 h-3" />
@@ -646,12 +709,7 @@ export default function DoctorProfileSettings({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = certificate.certificate_file_url;
-                            link.download = certificate.certificate_file_name;
-                            link.click();
-                          }}
+                          onClick={() => handleDownloadCertificate(certificate.id, certificate.certificate_file_url, certificate.certificate_file_name)}
                           className="flex items-center gap-1"
                         >
                           <Download className="w-3 h-3" />
@@ -773,15 +831,15 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
         <Button 
           onClick={handleSaveProfile}
           disabled={saving}
           className="bg-emerald-600 hover:bg-emerald-700"
           size="lg"
         >
-          <Save className="w-4 h-4 mr-2" />
-          {saving ? "Saving..." : "Save Profile"}
+          <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {saving ? (t('dd_save_profile_saving') || "Saving...") : (t('dd_save_profile') || "Save Profile")}
         </Button>
       </div>
 

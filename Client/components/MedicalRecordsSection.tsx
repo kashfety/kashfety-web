@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, AlertTriangle, Pill, Phone, Edit, Save, X, Plus, FileText, Trash2, Calendar, User } from "lucide-react";
 import { useAuth } from "@/lib/providers/auth-provider";
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
@@ -44,13 +45,21 @@ interface MedicalRecord {
   doctor?: {
     id: string;
     name: string;
+    name_ar?: string;
+    first_name?: string;
+    last_name?: string;
+    first_name_ar?: string;
+    last_name_ar?: string;
     specialty?: string;
+    specialty_ar?: string;
+    specialty_ku?: string;
+    specialty_en?: string;
   };
 }
 
 export default function MedicalRecordsSection() {
   const { user, isAuthenticated } = useAuth();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { toast } = useToast();
   
   const [medicalInfo, setMedicalInfo] = useState<MedicalInfo | null>(null);
@@ -66,6 +75,50 @@ export default function MedicalRecordsSection() {
       phone: ''
     }
   });
+
+  // States for specialties mapping
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string; name_en?: string }>>(new Map());
+
+  // Helper function for localized doctor names
+  const getLocalizedDoctorName = (doctor: MedicalRecord['doctor']) => {
+    if (!doctor) return t('unknown_doctor') || 'Unknown Doctor';
+    
+    if (locale === 'ar') {
+      if (doctor.name_ar) return doctor.name_ar;
+      if (doctor.first_name_ar && doctor.last_name_ar) {
+        return `${doctor.first_name_ar} ${doctor.last_name_ar}`;
+      }
+      if (doctor.first_name_ar) return doctor.first_name_ar;
+    }
+    return doctor.name || `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+  };
+
+  const getLocalizedSpecialty = (doctor: MedicalRecord['doctor']) => {
+    if (!doctor) return '';
+    
+    // If specialty_ar is already in the doctor object, use it
+    if (locale === 'ar' && doctor.specialty_ar) {
+      return doctor.specialty_ar;
+    }
+    if (locale === 'ku' && doctor.specialty_ku) {
+      return doctor.specialty_ku;
+    }
+    if (doctor.specialty_en) {
+      return doctor.specialty_en;
+    }
+    
+    // Otherwise, try to get it from specialtiesMap
+    if (doctor.specialty) {
+      const specialtyData = specialtiesMap.get(doctor.specialty);
+      if (specialtyData) {
+        if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+        if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+        if (specialtyData.name_en) return specialtyData.name_en;
+      }
+    }
+    
+    return doctor.specialty || '';
+  };
 
   // States for managing lists
   const [allergyInput, setAllergyInput] = useState('');
@@ -90,8 +143,31 @@ export default function MedicalRecordsSection() {
     if (isAuthenticated && user?.id) {
       fetchMedicalInfo();
       fetchMedicalRecords();
+      fetchSpecialties();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, locale]);
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await fetch('/api/specialties');
+      const result = await response.json();
+      
+      if (result.success && result.specialties) {
+        const map = new Map();
+        result.specialties.forEach((specialty: any) => {
+          // Map by name (which is the key used in medical records)
+          map.set(specialty.name, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku,
+            name_en: specialty.name_en || specialty.name
+          });
+        });
+        setSpecialtiesMap(map);
+      }
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
 
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;
@@ -290,17 +366,17 @@ export default function MedicalRecordsSection() {
           record_date: new Date().toISOString().split('T')[0]
         });
         toast({
-          title: "Success",
-          description: editingRecord ? "Medical record updated successfully" : "Medical record created successfully"
+          title: t('success') || "Success",
+          description: editingRecord ? (t('mr_record_updated') || "Medical record updated successfully") : (t('mr_record_created') || "Medical record created successfully")
         });
       } else {
-        throw new Error(result.error || 'Failed to save medical record');
+        throw new Error(result.error || (t('mr_failed_save') || 'Failed to save medical record'));
       }
     } catch (error: any) {
       console.error('Error saving medical record:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to save medical record",
+        title: t('error') || "Error",
+        description: error.message || (t('mr_failed_save') || "Failed to save medical record"),
         variant: "destructive"
       });
     } finally {
@@ -310,7 +386,7 @@ export default function MedicalRecordsSection() {
 
   // Handle delete medical record
   const handleDeleteRecord = async (recordId: string) => {
-    if (!confirm('Are you sure you want to delete this medical record?')) {
+    if (!confirm(t('mr_confirm_delete') || 'Are you sure you want to delete this medical record?')) {
       return;
     }
 
@@ -325,17 +401,17 @@ export default function MedicalRecordsSection() {
       if (result.success) {
         await fetchMedicalRecords();
         toast({
-          title: "Success",
-          description: "Medical record deleted successfully"
+          title: t('success') || "Success",
+          description: t('mr_record_deleted') || "Medical record deleted successfully"
         });
       } else {
-        throw new Error(result.error || 'Failed to delete medical record');
+        throw new Error(result.error || (t('mr_failed_delete') || 'Failed to delete medical record'));
       }
     } catch (error: any) {
       console.error('Error deleting medical record:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete medical record",
+        title: t('error') || "Error",
+        description: error.message || (t('mr_failed_delete') || "Failed to delete medical record"),
         variant: "destructive"
       });
     } finally {
@@ -649,7 +725,7 @@ export default function MedicalRecordsSection() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
-                    {t('mr_medical_records') || 'Medical Records'}
+                    {t('mr_tab_records') || t('mr_medical_records') || 'Medical Records'}
                   </CardTitle>
                   <Button onClick={handleCreateRecord} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -684,15 +760,15 @@ export default function MedicalRecordsSection() {
                                 {record.doctor && (
                                   <div className="flex items-center gap-1">
                                     <User className="w-4 h-4" />
-                                    <span>Dr. {record.doctor.name}</span>
-                                    {record.doctor.specialty && (
-                                      <Badge variant="outline" className="ml-1">{record.doctor.specialty}</Badge>
+                                    <span>{t('mr_dr') || 'Dr.'} {getLocalizedDoctorName(record.doctor)}</span>
+                                    {getLocalizedSpecialty(record.doctor) && (
+                                      <Badge variant="outline" className="ml-1">{getLocalizedSpecialty(record.doctor)}</Badge>
                                     )}
                                   </div>
                                 )}
                                 <div className="flex items-center gap-1">
                                   <Calendar className="w-4 h-4" />
-                                  <span>{new Date(record.record_date).toLocaleDateString()}</span>
+                                  <span>{toArabicNumerals(new Date(record.record_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</span>
                                 </div>
                               </div>
                             </div>
@@ -701,6 +777,7 @@ export default function MedicalRecordsSection() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleEditRecord(record)}
+                                title={t('mr_edit') || 'Edit'}
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -709,6 +786,7 @@ export default function MedicalRecordsSection() {
                                 size="sm"
                                 onClick={() => handleDeleteRecord(record.id)}
                                 className="text-red-600 hover:text-red-700"
+                                title={t('mr_delete') || 'Delete'}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -717,18 +795,18 @@ export default function MedicalRecordsSection() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div>
-                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}:</Label>
+                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}</Label>
                             <p className="text-foreground mt-1">{record.treatment}</p>
                           </div>
                           {record.prescription && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}:</Label>
+                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}</Label>
                               <p className="text-foreground mt-1">{record.prescription}</p>
                             </div>
                           )}
                           {record.notes && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}:</Label>
+                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}</Label>
                               <p className="text-foreground mt-1 whitespace-pre-wrap">{record.notes}</p>
                             </div>
                           )}

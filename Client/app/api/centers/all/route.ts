@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from('centers')
-      .select('id, name, address, phone, email, services, operating_hours')
+      .select('id, name, name_ar, address, phone, email, services, operating_hours')
       .order('name', { ascending: true });
 
     if (error) throw error;

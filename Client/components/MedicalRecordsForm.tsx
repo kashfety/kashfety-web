@@ -144,7 +144,8 @@ export default function MedicalRecordsForm({
 
       console.log('Submitting medical data:', medicalData);
 
-      const response = await fetch('http://localhost:5000/api/auth/medical-records', {
+      // Use the medical records API endpoint
+      const response = await fetch('/api/medical-records', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,9 +192,9 @@ export default function MedicalRecordsForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
+        <DialogHeader className={isRTL ? 'text-right' : 'text-left'}>
+          <DialogTitle className={`text-2xl font-bold flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <Heart className="w-6 h-6 text-red-500" />
             {t('complete_medical_profile') || 'Complete Your Medical Profile'}
           </DialogTitle>
@@ -223,7 +224,7 @@ export default function MedicalRecordsForm({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="emergency-relationship">Relationship</Label>
+                  <Label htmlFor="emergency-relationship">{t('mr_relationship') || 'Relationship'}</Label>
                   <Select
                     value={emergencyContact.relationship}
                     onValueChange={(value) => setEmergencyContact({...emergencyContact, relationship: value})}
@@ -232,12 +233,12 @@ export default function MedicalRecordsForm({
                       <SelectValue placeholder={t('mr_select_relationship_placeholder') || 'Select relationship'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="spouse">Spouse</SelectItem>
-                      <SelectItem value="parent">Parent</SelectItem>
-                      <SelectItem value="child">Child</SelectItem>
-                      <SelectItem value="sibling">Sibling</SelectItem>
-                      <SelectItem value="friend">Friend</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="spouse">{t('mr_relationship_spouse') || 'Spouse'}</SelectItem>
+                      <SelectItem value="parent">{t('mr_relationship_parent') || 'Parent'}</SelectItem>
+                      <SelectItem value="child">{t('mr_relationship_child') || 'Child'}</SelectItem>
+                      <SelectItem value="sibling">{t('mr_relationship_sibling') || 'Sibling'}</SelectItem>
+                      <SelectItem value="friend">{t('mr_relationship_friend') || 'Friend'}</SelectItem>
+                      <SelectItem value="other">{t('mr_relationship_other') || 'Other'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -358,7 +359,7 @@ export default function MedicalRecordsForm({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="record-type">Record Type</Label>
+                  <Label htmlFor="record-type">{t('mr_record_type') || 'Record Type'}</Label>
                   <Select
                     value={currentRecord.record_type}
                     onValueChange={(value) => setCurrentRecord({...currentRecord, record_type: value})}
@@ -367,16 +368,16 @@ export default function MedicalRecordsForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="consultation">{t('consultation')}</SelectItem>
-                      <SelectItem value="lab_result">Lab Result</SelectItem>
-                      <SelectItem value="prescription">Prescription</SelectItem>
-                      <SelectItem value="diagnosis">Diagnosis</SelectItem>
-                      <SelectItem value="treatment_plan">Treatment Plan</SelectItem>
+                      <SelectItem value="consultation">{t('mr_record_type_consultation') || 'Consultation'}</SelectItem>
+                      <SelectItem value="lab_result">{t('mr_record_type_lab_result') || 'Lab Result'}</SelectItem>
+                      <SelectItem value="prescription">{t('mr_record_type_prescription') || 'Prescription'}</SelectItem>
+                      <SelectItem value="diagnosis">{t('mr_record_type_diagnosis') || 'Diagnosis'}</SelectItem>
+                      <SelectItem value="treatment_plan">{t('mr_record_type_treatment_plan') || 'Treatment Plan'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="record-date">{t('date')}</Label>
+                  <Label htmlFor="record-date">{t('date') || 'Date'}</Label>
                   <Input
                     id="record-date"
                     type="date"
@@ -387,7 +388,7 @@ export default function MedicalRecordsForm({
               </div>
               
               <div>
-                <Label htmlFor="record-title">Title</Label>
+                <Label htmlFor="record-title">{t('mr_record_title') || 'Title'}</Label>
                 <Input
                   id="record-title"
                   value={currentRecord.title}
@@ -397,7 +398,7 @@ export default function MedicalRecordsForm({
               </div>
               
               <div>
-                <Label htmlFor="record-description">Description</Label>
+                <Label htmlFor="record-description">{t('mr_record_description') || 'Description'}</Label>
                 <Textarea
                   id="record-description"
                   value={currentRecord.description}
@@ -418,7 +419,7 @@ export default function MedicalRecordsForm({
 
               {records.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium">Added Records:</h4>
+                  <h4 className="font-medium">{t('mr_added_records') || 'Added Records:'}</h4>
                   {records.map((record, index) => (
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>

@@ -14,10 +14,11 @@ import RescheduleModal from "@/components/RescheduleModal"
 import CancelModal from "@/components/CancelModal"
 import ReviewModal from "@/components/ReviewModal"
 import VisitSummaryModal from "@/components/VisitSummaryModal"
+import BookingModal from "@/components/BookingModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n"
+import { toArabicNumerals } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -39,11 +40,25 @@ interface Appointment {
   center_id?: string
   doctor?: {
     name: string
+    first_name?: string
+    last_name?: string
+    first_name_ar?: string
+    last_name_ar?: string
+    name_ar?: string
     specialty: string
+    specialty_ar?: string
+    specialty_ku?: string
+    specialty_en?: string
     phone: string
   }
   centers?: {
     name: string
+    name_ar?: string
+    address: string
+  }
+  center?: {
+    name: string
+    name_ar?: string
     address: string
   }
 }
@@ -74,6 +89,7 @@ export default function MyAppointmentsPage() {
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set())
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   const { t, locale, isRTL } = useLocale()
 
@@ -129,7 +145,33 @@ export default function MyAppointmentsPage() {
     return appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 
-  const showingCountText = `${locale === 'ar' ? 'عرض' : 'Showing'} ${filteredAppointments.length} ${locale === 'ar' ? 'من' : 'of'} ${appointments.length}`
+  const showingCountText = useMemo(() => {
+    return `${locale === 'ar' ? 'عرض' : 'Showing'} ${toArabicNumerals(filteredAppointments.length, locale)} ${locale === 'ar' ? 'من' : 'of'} ${toArabicNumerals(appointments.length, locale)}`
+  }, [filteredAppointments.length, appointments.length, locale])
+
+  // Helper functions for localized names
+  const getLocalizedDoctorName = (appointment: Appointment) => {
+    if (!appointment.doctor) return appointment.doctorName || t('unknown_doctor') || 'Unknown Doctor'
+    
+    if (locale === 'ar') {
+      if (appointment.doctor.name_ar) return appointment.doctor.name_ar
+      if (appointment.doctor.first_name_ar && appointment.doctor.last_name_ar) {
+        return `${appointment.doctor.first_name_ar} ${appointment.doctor.last_name_ar}`
+      }
+      if (appointment.doctor.first_name_ar) return appointment.doctor.first_name_ar
+    }
+    return appointment.doctor.name || appointment.doctorName || t('unknown_doctor') || 'Unknown Doctor'
+  }
+
+  const getLocalizedCenterName = (appointment: Appointment) => {
+    const center = appointment.center || appointment.centers
+    if (!center) return appointment.location || t('unknown_location') || 'Unknown Location'
+    
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar
+    }
+    return center.name || appointment.location || t('unknown_location') || 'Unknown Location'
+  }
 
   // Function to fetch reviewed appointment IDs
   const fetchReviewedAppointments = async (appointmentIds: string[]) => {
@@ -150,6 +192,45 @@ export default function MyAppointmentsPage() {
   // Function to refresh appointments
   const refreshAppointments = async () => {
     if (!user) return
+
+  // Helper to get localized specialty from doctor object
+  const getLocalizedSpecialty = (doctor: any) => {
+    if (!doctor) return 'General Medicine';
+    if (locale === 'ar' && doctor.specialty_ar) {
+      return doctor.specialty_ar;
+    }
+    if (locale === 'ku' && doctor.specialty_ku) {
+      return doctor.specialty_ku;
+    }
+    // For English, use 'name' field which is the English name
+    return doctor.specialty || 'General Medicine';
+  }
+
+  // Helper to get localized doctor name from doctor object
+  const getLocalizedDoctorName = (doctor: any) => {
+    if (!doctor) return locale === 'ar' ? 'د. طبيب' : 'Dr. Doctor';
+    
+    if (locale === 'ar') {
+      // If we have Arabic name, use it
+      if (doctor.name_ar) return doctor.name_ar;
+      if (doctor.first_name_ar && doctor.last_name_ar) {
+        return `${doctor.first_name_ar} ${doctor.last_name_ar}`;
+      }
+      if (doctor.first_name_ar) return doctor.first_name_ar;
+    }
+    
+    // For English, use 'name' field directly (full name from database)
+    return doctor.name || 'Doctor';
+  }
+
+  // Helper to get localized center name
+  const getLocalizedCenterName = (center: any) => {
+    if (!center) return '';
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar;
+    }
+    return center.name || '';
+  }
     
     try {
       setAppointmentsLoading(true)
@@ -204,8 +285,8 @@ export default function MyAppointmentsPage() {
         
         const appointmentTime = apt.appointment_time
         
-        // Format date
-        const formattedDate = appointmentDate.toLocaleDateString(locale || 'en-US', {
+        // Format date with proper locale
+        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : locale === 'ku' ? 'ku-IQ' : 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
@@ -219,32 +300,30 @@ export default function MyAppointmentsPage() {
           const [hours, minutes] = appointmentTime.split(':');
           const timeObj = new Date();
           timeObj.setHours(parseInt(hours), parseInt(minutes), 0);
-          formattedTime = timeObj.toLocaleTimeString(locale || 'en-US', {
+          formattedTime = toArabicNumerals(timeObj.toLocaleTimeString(locale || 'en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: locale !== 'ar'
-          });
+          }), locale);
         } catch {
-          formattedTime = appointmentTime;
+          formattedTime = toArabicNumerals(appointmentTime, locale);
         }
         
         // Get doctor and center information
-        const doctorName = apt.doctor?.name || apt.doctor_name || 'Doctor';
-        const doctorSpecialty = apt.doctor?.specialty || apt.doctor_specialty || apt.specialty || 'General Medicine';
         const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
         let center = apt.center || apt.centers || null;
-        let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (center?.name || apt.center_name || '');
+        let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (getLocalizedCenterName(center) || apt.center_name || '');
         let centerAddress = isHomeVisit ? (apt.patient_address || '') : (center?.address || apt.center_address || '');
         if (!isHomeVisit && !centerName && apt.center_id) centerName = t('appointments_type_clinic_consultation') || 'Clinic Consultation'
         
         return {
           id: apt.id,
-          doctorName: localizeDoctorName(locale, doctorName),
-          specialty: localizeSpecialty(locale, doctorSpecialty),
+          doctorName: getLocalizedDoctorName(apt.doctor),
+          specialty: getLocalizedSpecialty(apt.doctor),
           date: formattedDate,
           time: formattedTime,
-          duration: `${apt.duration || 30} ${t('minutes_short') || 'min'}`,
+          duration: `${toArabicNumerals(apt.duration || 30, locale)} ${t('minutes_short') || 'min'}`,
           type: isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (t('appointments_type_clinic_consultation') || 'Clinic Consultation'),
           status: apt.status || 'scheduled',
           location: centerName || (t('appointments_type_clinic_consultation') || 'Clinic Consultation'),
@@ -287,10 +366,10 @@ export default function MyAppointmentsPage() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user])
 
-  // Fetch appointments when user is loaded
+  // Fetch appointments when user is loaded OR when locale changes
   useEffect(() => {
     if (user && !loading) refreshAppointments()
-  }, [user, loading])
+  }, [user, loading, locale])
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -406,15 +485,8 @@ export default function MyAppointmentsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
-      {/* Main Content */}
-      <div 
-        className="transition-all duration-300"
-        style={{
-          transform: isRTL 
-            ? `translateX(${sidebarOpen ? -280 : 0}px)` 
-            : `translateX(${sidebarOpen ? 280 : 0}px)`
-        }}
-      >
+      {/* Main Content - No transform, sidebar overlays on top */}
+      <div onClick={() => sidebarOpen && toggleSidebar()}>
         {/* Header */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Header onMenuToggle={toggleSidebar} />
@@ -441,7 +513,7 @@ export default function MyAppointmentsPage() {
                 <RefreshCw size={16} className={appointmentsLoading ? 'animate-spin' : ''} />
                 {appointmentsLoading ? (t('loading') || 'Loading...') : (t('appointments_refresh') || 'Refresh')}
               </Button>
-              <Button onClick={() => router.push('/')} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
+              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white flex items-center gap-2">
                 <Plus size={16} />
                 {t('appointments_book_new') || 'Book New Appointment'}
               </Button>
@@ -483,11 +555,11 @@ export default function MyAppointmentsPage() {
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
@@ -512,7 +584,7 @@ export default function MyAppointmentsPage() {
               <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
               <p className="text-muted-foreground mb-6">{t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}</p>
-              <Button onClick={() => router.push('/')} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
+              <Button onClick={() => setIsBookingModalOpen(true)} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t('appointments_book_first') || 'Book Your First Appointment'}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -524,7 +596,7 @@ export default function MyAppointmentsPage() {
                     <div>
                       <CardTitle className="text-xl text-foreground flex items-center gap-2">
                         <User className="w-5 h-5 text-emerald-600" />
-                        {appointment.doctorName}
+                        {getLocalizedDoctorName(appointment)}
                       </CardTitle>
                       <CardDescription className="text-emerald-600 font-medium">
                         {appointment.specialty}
@@ -565,7 +637,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Clock className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{(() => { try { const [h,m] = (appointment.appointment_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })()} ({appointment.duration})</div>
+                          <div className="font-medium">{toArabicNumerals((() => { try { const [h,m] = (appointment.appointment_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
                           <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                         </div>
                       </div>
@@ -573,7 +645,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-start gap-3 text-muted-foreground">
                         <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
                         <div>
-                          <div className="font-medium">{appointment.location}</div>
+                          <div className="font-medium">{getLocalizedCenterName(appointment)}</div>
                           <div className="text-sm text-gray-500">{appointment.address}</div>
                           {appointment.isHomeVisit && (
                             <Badge variant="secondary" className="mt-1 text-xs bg-green-100 text-green-800">
@@ -589,7 +661,7 @@ export default function MyAppointmentsPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Phone className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{appointment.phone}</div>
+                          <div className="font-medium">{toArabicNumerals(appointment.phone, locale)}</div>
                           <div className="text-sm text-gray-500">{t('appointments_contact_number_label') || 'Contact Number'}</div>
                         </div>
                       </div>
@@ -645,6 +717,7 @@ export default function MyAppointmentsPage() {
       <CancelModal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} appointment={selectedAppointment} onSuccess={handleModalSuccess} />
       <ReviewModal isOpen={reviewOpen} onClose={() => setReviewOpen(false)} appointmentId={selectedAppointment?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} patientId={user?.id || ''} onSuccess={() => { setReviewOpen(false); setReviewedIds(prev => new Set(prev).add(selectedAppointment?.id || '')); }} />
       <VisitSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} appointmentId={selectedAppointment?.id || ''} patientId={user?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} />
+      <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} initialMode="doctor" />
     </div>
   )
 }

@@ -20,6 +20,12 @@ interface Appointment {
     notes?: string;
     patient_id: string;
     patient_name: string;
+    name?: string;
+    name_ar?: string;
+    first_name?: string;
+    first_name_ar?: string;
+    last_name?: string;
+    last_name_ar?: string;
     patient_phone?: string;
     patient_email?: string;
 }
@@ -39,9 +45,32 @@ export default function AppointmentDetailsModal({
     onStatusUpdate,
     onStartConsultation
 }: AppointmentDetailsModalProps) {
-    const { t } = useLocale();
+    const { t, locale, isRTL } = useLocale();
 
     if (!appointment) return null;
+
+    // Get localized patient name
+    const getLocalizedPatientName = (appointment: Appointment) => {
+        if (locale === 'ar') {
+            // Try name_ar first
+            if (appointment.name_ar) return appointment.name_ar;
+            // Try first_name_ar + last_name_ar
+            if (appointment.first_name_ar || appointment.last_name_ar) {
+                const firstName = appointment.first_name_ar || '';
+                const lastName = appointment.last_name_ar || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                if (fullName) return fullName;
+            }
+        }
+        // Fall back to English
+        if (appointment.name) return appointment.name;
+        if (appointment.first_name || appointment.last_name) {
+            const firstName = appointment.first_name || '';
+            const lastName = appointment.last_name || '';
+            return `${firstName} ${lastName}`.trim();
+        }
+        return appointment.patient_name;
+    };
 
     // Get status color
     const getStatusColor = (status: string) => {
@@ -59,11 +88,25 @@ export default function AppointmentDetailsModal({
         }
     };
 
+    // Get localized status text
+    const getLocalizedStatus = (status: string): string => {
+        const statusLower = status.toLowerCase();
+        const key = `dd_status_${statusLower}`;
+        return t(key) || status;
+    };
+
     // Format time for display
     const formatTime = (time: string) => {
         if (!time) return '';
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
+        
+        if (locale === 'ar') {
+            // Arabic 24-hour format
+            return `${toArabicNumerals(hour)}:${toArabicNumerals(parseInt(minutes))}`;
+        }
+        
+        // English AM/PM format
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
         return `${displayHour}:${minutes} ${ampm}`;
@@ -72,7 +115,7 @@ export default function AppointmentDetailsModal({
     // Format date for display
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr + 'T00:00:00');
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -80,18 +123,44 @@ export default function AppointmentDetailsModal({
         });
     };
 
+    // Convert numbers to Arabic numerals
+    const toArabicNumerals = (num: number) => {
+        if (locale !== 'ar') return num.toString();
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return num.toString().split('').map(digit => arabicNumerals[parseInt(digit)] || digit).join('');
+    };
+
+    // Localize appointment type
+    const getLocalizedAppointmentType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
+        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
+        return type;
+    };
+
+    // Localize consultation type
+    const getLocalizedConsultationType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
+        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
+        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
+        return type;
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-3">
+            <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
+                <DialogHeader className={isRTL ? 'text-right' : 'text-left'}>
+                    <DialogTitle className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <User className="w-5 h-5 text-white" />
                         </div>
-                        <div>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                             <div className="text-xl font-bold">{t('dd_appointment_details') || 'Appointment Details'}</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400 font-normal">
-                                {appointment.patient_name}
+                                {getLocalizedPatientName(appointment)}
                             </div>
                         </div>
                     </DialogTitle>
@@ -99,9 +168,9 @@ export default function AppointmentDetailsModal({
 
                 <div className="space-y-6">
                     {/* Status and Quick Actions */}
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         <Badge className={`px-3 py-1 rounded-full font-medium ${getStatusColor(appointment.status)}`}>
-                            {appointment.status}
+                            {getLocalizedStatus(appointment.status)}
                         </Badge>
                         <div className="flex gap-2">
                             {appointment.status === 'confirmed' && onStartConsultation && (
@@ -171,7 +240,7 @@ export default function AppointmentDetailsModal({
                                             {t('dd_type') || 'Type'}
                                         </p>
                                         <p className="font-semibold text-gray-900 dark:text-white">
-                                            {appointment.appointment_type} • {appointment.type}
+                                            {getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}
                                         </p>
                                     </div>
                                 </div>
@@ -184,7 +253,7 @@ export default function AppointmentDetailsModal({
                                             {t('dd_fee') || 'Consultation Fee'}
                                         </p>
                                         <p className="font-semibold text-gray-900 dark:text-white">
-                                            ${appointment.consultation_fee}
+                                            ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee) : appointment.consultation_fee}
                                         </p>
                                     </div>
                                 </div>
@@ -206,10 +275,7 @@ export default function AppointmentDetailsModal({
                                     </div>
                                     <div>
                                         <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                            {appointment.patient_name}
-                                        </p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {t('dd_patient_id') || 'Patient ID'}: {appointment.patient_id}
+                                            {getLocalizedPatientName(appointment)}
                                         </p>
                                     </div>
                                 </div>

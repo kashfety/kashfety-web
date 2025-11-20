@@ -66,9 +66,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch certificates' }, { status: 500 });
     }
 
+    // Generate fresh signed URLs for all certificates (valid for 1 hour)
+    const certificatesWithFreshUrls = await Promise.all(
+      (certificates || []).map(async (cert) => {
+        try {
+          // Extract the storage path from the URL
+          // URL format: https://<supabase-url>/storage/v1/object/sign/medical-documents/certificates/<doctor-id>/<file>?token=...
+          let filePath = cert.certificate_file_name;
+          
+          if (cert.certificate_file_url) {
+            // Try to extract path after 'medical-documents/'
+            const urlParts = cert.certificate_file_url.split('/medical-documents/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1].split('?')[0]; // Get path before query params
+            } else {
+              // Fallback: try to extract just after 'certificates/'
+              const certParts = cert.certificate_file_url.split('/certificates/');
+              if (certParts.length > 1) {
+                filePath = 'certificates/' + certParts[1].split('?')[0];
+              }
+            }
+          }
+          
+          // Generate a fresh signed URL valid for 1 hour
+          const { data: signedUrlData, error: signError } = await supabase.storage
+            .from('medical-documents')
+            .createSignedUrl(filePath, 3600); // 3600 seconds = 1 hour
+
+          if (signError) {
+            console.error('Error signing URL for certificate:', cert.id, signError);
+            return cert;
+          }
+
+          return {
+            ...cert,
+            certificate_file_url: signedUrlData?.signedUrl || cert.certificate_file_url
+          };
+        } catch (err) {
+          console.error('Error generating signed URL for certificate:', cert.id, err);
+          return cert; // Return original if signing fails
+        }
+      })
+    );
+
     return NextResponse.json({ 
       success: true, 
-      certificates: certificates || [] 
+      certificates: certificatesWithFreshUrls || [] 
     });
 
   } catch (error: any) {

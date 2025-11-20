@@ -26,6 +26,7 @@ export async function GET(req: Request) {
             .select(`
                 id,
                 name,
+                name_ar,
                 address,
                 phone,
                 email,
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
         const formattedCenters = centers?.map(center => ({
             id: center.id,
             name: center.name,
+            name_ar: center.name_ar,
             address: center.address,
             phone: center.phone,
             services: center.services && center.services.length > 0 

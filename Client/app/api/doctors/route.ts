@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Users table holds doctors per schema; optional join to doctor_centers for center filter
     let baseQuery = supabase
       .from('users')
-      .select('id, name, first_name, last_name, specialty, consultation_fee, profile_picture_url, home_visits_available, rating, experience_years')
+      .select('id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, specialty, consultation_fee, profile_picture_url, home_visits_available, rating, experience_years')
       .eq('role', 'doctor');
 
     if (specialty) {

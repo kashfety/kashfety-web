@@ -19,6 +19,7 @@ import { useLocale } from "@/components/providers/locale-provider";
 interface Center {
   id: string;
   name: string;
+  name_ar?: string;
   address: string;
   phone?: string;
   email?: string;
@@ -32,7 +33,7 @@ interface Center {
 
 export default function DoctorCenterManagement() {
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [centers, setCenters] = useState<Center[]>([]);
@@ -40,6 +41,14 @@ export default function DoctorCenterManagement() {
   const [primaryCenter, setPrimaryCenter] = useState<string>('');
   const [creating, setCreating] = useState(false);
   const [newCenter, setNewCenter] = useState<{ name: string; address?: string; phone?: string; email?: string; center_type: 'generic'|'personal'; set_as_primary: boolean }>({ name: '', address: '', phone: '', email: '', center_type: 'generic', set_as_primary: false });
+
+  // Helper to get localized center name
+  const getLocalizedCenterName = (center: Center) => {
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar;
+    }
+    return center.name;
+  };
 
   useEffect(() => {
     fetchCenters();
@@ -299,7 +308,7 @@ export default function DoctorCenterManagement() {
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-base">{center.name}</CardTitle>
+                  <CardTitle className="text-base">{getLocalizedCenterName(center)}</CardTitle>
                   <div className="flex items-center gap-1">
                     {isSelected && (
                       <CheckCircle className="h-5 w-5 text-blue-500" />

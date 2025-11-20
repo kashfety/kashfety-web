@@ -13,7 +13,7 @@ import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Searc
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
-import { localizeSpecialty } from '@/lib/i18n';
+import { localizeSpecialty, toArabicNumerals, formatCurrency } from '@/lib/i18n';
 import { appointmentService, labService } from '@/lib/api';
 import { useToast } from "@/hooks/use-toast";
 import { useCustomAlert } from "@/hooks/use-custom-alert";
@@ -23,6 +23,11 @@ import { motion, AnimatePresence } from "framer-motion";
 interface Doctor {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
+  first_name_ar?: string;
+  last_name_ar?: string;
+  name_ar?: string;
   specialty: string;
   experience_years: number;
   profile_picture: string;
@@ -35,6 +40,7 @@ interface Doctor {
 interface Center {
   id: string;
   name: string;
+  name_ar?: string;
   address: string;
   phone?: string;
   email?: string;
@@ -45,6 +51,9 @@ interface Center {
 interface LabTestType {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
+  name_ku?: string;
   description?: string;
   category?: 'lab' | 'imaging';
   is_active?: boolean;
@@ -53,6 +62,9 @@ interface LabTestType {
 interface Specialty {
   id: string;
   name: string;
+  name_en?: string;
+  name_ar?: string;
+  name_ku?: string;
   description: string;
 }
 
@@ -94,6 +106,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loadingSpecialties, setLoadingSpecialties] = useState(false);
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
   // Lab-related state
   const [labTypes, setLabTypes] = useState<LabTestType[]>([]);
   const [labCentersByType, setLabCentersByType] = useState<Record<string, Center[]>>({});
@@ -109,6 +122,47 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [doctorWorkingDays, setDoctorWorkingDays] = useState<number[]>([]);
   const [actualConsultationFee, setActualConsultationFee] = useState<number>(0);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // Helper function to get localized name
+  const getLocalizedName = (item: { name?: string; name_en?: string; name_ar?: string; name_ku?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
+    if (!item) return '';
+    
+    // For Arabic locale
+    if (locale === 'ar') {
+      // If it's a doctor with first_name_ar/last_name_ar
+      if (item.first_name_ar && item.last_name_ar) {
+        return `${item.first_name_ar} ${item.last_name_ar}`;
+      }
+      // If it has name_ar (for centers, etc)
+      if (item.name_ar) return item.name_ar;
+    }
+    
+    // For Kurdish locale
+    if (locale === 'ku' && item.name_ku) return item.name_ku;
+    
+    // Default to English name
+    return item.name || item.name_en || '';
+  };
+
+  // Helper to get localized specialty name from doctor's specialty string
+  const getLocalizedSpecialtyName = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
+  };
+
+  // Helper to get localized lab test type name
+  const getLocalizedLabTestName = (labTest: LabTestType | null) => {
+    if (!labTest) return '';
+    
+    if (locale === 'ar' && labTest.name_ar) return labTest.name_ar;
+    if (locale === 'ku' && labTest.name_ku) return labTest.name_ku;
+    if (labTest.name_en) return labTest.name_en;
+    return labTest.name;
+  };
 
   // Restore booking data on modal open
   useEffect(() => {
@@ -226,6 +280,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (response.ok) {
         const data = await response.json();
         setSpecialties(data.specialties);
+        
+        // Build specialties map for localization
+        const map = new Map();
+        data.specialties.forEach((specialty: Specialty) => {
+          map.set(specialty.name, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku
+          });
+        });
+        setSpecialtiesMap(map);
       } else {
         console.error('Failed to fetch specialties');
       }
@@ -295,6 +359,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         .map((s: any) => ({
           id: s.lab_test_type_id || s.lab_test_types.id,
           name: s.lab_test_types.name,
+          name_en: s.lab_test_types.name_en || s.lab_test_types.name,
+          name_ar: s.lab_test_types.name_ar,
+          name_ku: s.lab_test_types.name_ku,
           description: s.lab_test_types.description,
           category: s.lab_test_types.category,
           is_active: s.lab_test_types.is_active,
@@ -321,6 +388,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const doctor: Doctor = {
           id: data.doctor.id,
           name: data.doctor.name,
+          first_name_ar: data.doctor.first_name_ar,
+          last_name_ar: data.doctor.last_name_ar,
+          name_ar: data.doctor.name_ar,
           specialty: data.doctor.specialty,
           experience_years: data.doctor.experience_years || 0,
           profile_picture: data.doctor.profile_picture || '/default-avatar.jpg',
@@ -332,6 +402,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
         setSelectedDoctor(doctor);
         setSelectedSpecialty(doctor.specialty);
+        setSelectedLocation("clinic"); // Set location to clinic
+        setSearchMethod("doctors"); // Set search method
 
         // Fetch centers for this doctor
         await fetchDoctorCenters(doctorId, "clinic");
@@ -357,6 +429,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const center: Center = {
           id: data.center.id,
           name: data.center.name,
+          name_ar: data.center.name_ar,
           address: data.center.address,
           phone: data.center.phone,
           email: data.center.email,
@@ -393,10 +466,18 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const response = await fetch(`/api/doctors?${params.toString()}`);
       const result = await response.json();
 
+      console.log('API Response:', result);
+      console.log('First doctor raw data:', result.doctors?.[0]);
+
       if (result && result.success) {
         let filteredDoctors = (result.doctors || []).map((d: any) => ({
           id: d.id,
           name: d.name,
+          first_name: d.first_name,
+          last_name: d.last_name,
+          first_name_ar: d.first_name_ar,
+          last_name_ar: d.last_name_ar,
+          name_ar: d.name_ar,
           specialty: d.specialty,
           experience_years: d.experience_years || 0,
           profile_picture: d.profile_picture_url || '/default-avatar.jpg',
@@ -405,6 +486,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           home_available: !!d.home_visits_available,
           has_schedule: true,
         }));
+
+        console.log('Mapped first doctor:', filteredDoctors[0]);
 
         // Filter for home visits if requested
         if (visitType === 'home') {
@@ -502,6 +585,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         let filteredDoctors = (result.doctors || []).map((d: any) => ({
           id: d.id,
           name: d.name,
+          first_name: d.first_name,
+          last_name: d.last_name,
+          first_name_ar: d.first_name_ar,
+          last_name_ar: d.last_name_ar,
+          name_ar: d.name_ar,
           specialty: d.specialty,
           experience_years: d.experience_years || 0,
           profile_picture: d.profile_picture_url || '/default-avatar.jpg',
@@ -1463,7 +1551,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 {/* Debug Info - Remove after testing */}
                 {process.env.NODE_ENV === 'development' && (
                   <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded mb-4">
-                    Step: {currentStep} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
+                    Step: {toArabicNumerals(currentStep.toString(), locale)} | Mode: {isLabMode ? 'Lab' : 'Doctor'} | Search: {searchMethod} |
                     Doctor: {selectedDoctor ? '✓' : '✗'} | Center: {selectedCenter ? '✓' : '✗'} |
                     Location: {selectedLocation || 'none'}
                   </div>
@@ -1476,8 +1564,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   transition={{ delay: 0.2, duration: 0.3 }}
                   className="flex justify-center mb-8"
                 >
-                  <div className="flex items-center space-x-4">
-                    {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index) => (
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''} gap-0`}>
+                    {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index, array) => (
                       <motion.div
                         key={step}
                         initial={{ opacity: 0, scale: 0 }}
@@ -1494,14 +1582,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           animate={currentStep >= step ? { scale: [1, 1.08, 1] } : {}}
                           transition={{ duration: 0.4 }}
                         >
-                          {step}
+                          {toArabicNumerals(step.toString(), locale)}
                         </motion.div>
-                        {step < (isLabMode ? 3 : 4) && (
+                        {index < array.length - 1 && (
                           <motion.div
                             className={`w-12 h-1.5 mx-2 rounded-full transition-all duration-500 ${currentStep > step ? 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0]' : 'bg-gray-300 dark:bg-gray-700'}`}
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: currentStep > step ? 1 : 0 }}
-                            style={{ originX: 0 }}
+                            style={{ originX: isRTL ? 1 : 0 }}
                           />
                         )}
                       </motion.div>
@@ -1539,7 +1627,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             >
                               <CardContent className="p-5 text-center">
                                 <div className={`text-base font-semibold ${selectedSpecialty === specialty.name ? 'text-[#4DBCC4] dark:text-[#4DBCC4]' : 'text-gray-800 dark:text-gray-200'}`}>
-                                  {localizeSpecialty(locale, specialty.name)}
+                                  {getLocalizedName(specialty)}
                                 </div>
                               </CardContent>
                             </Card>
@@ -1645,7 +1733,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     <div className="flex items-center justify-between gap-4 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-4 rounded-lg border-l-4 border-[#4DBCC4]">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{t('booking_select_medical_center') || 'Select Medical Center'}</h3>
-                        <div className="text-base text-gray-700 dark:text-gray-300 font-medium">{selectedSpecialty} • {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}</div>
+                        <div className="text-base text-gray-700 dark:text-gray-300 font-medium">{getLocalizedSpecialtyName(selectedSpecialty)} • {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}</div>
                       </div>
                       <div className="flex-1 min-w-[240px]">
                         <input
@@ -1669,6 +1757,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             const filterQuery = (centerFilter || '').toLowerCase();
                             return !filterQuery ||
                               center.name.toLowerCase().includes(filterQuery) ||
+                              (center.name_ar || '').toLowerCase().includes(filterQuery) ||
                               (center.address || '').toLowerCase().includes(filterQuery);
                           })
                           .map((center) => (
@@ -1678,7 +1767,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1">
                                     <div className="flex items-center justify-between gap-4 mb-3">
                                       <div className="flex-1">
-                                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{center.name}</h4>
+                                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{getLocalizedName(center)}</h4>
                                         <p className="text-base text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-1">
                                           <MapPin className="w-5 h-5 text-[#4DBCC4] flex-shrink-0" />
                                           <span>{center.address}</span>
@@ -1730,7 +1819,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-4 rounded-lg border-l-4 border-[#4DBCC4]">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_doctor') || 'Select Doctor'}</h3>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">{selectedSpecialty} • {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">{getLocalizedSpecialtyName(selectedSpecialty)} • {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}</div>
                       </div>
                       <div className="flex-1 min-w-[220px] grid grid-cols-1 md:grid-cols-2 gap-2">
                         <input
@@ -1766,7 +1855,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
-                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
+                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.name_ar || '').toLowerCase().includes(filterQuery) || (d.first_name_ar || '').toLowerCase().includes(filterQuery) || (d.last_name_ar || '').toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
                             // Ensure rating is a number for proper comparison
                             const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
                             const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
@@ -1780,24 +1869,24 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-5 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-4">
                                   <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={doctor.name} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-3">
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{doctor.name}</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{localizeSpecialty(locale, doctor.specialty)}</p>
+                                        <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{getLocalizedName(doctor)}</h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-0.5">{getLocalizedSpecialtyName(doctor.specialty)}</p>
                                         <div className="flex items-center gap-2 mt-2">
                                           <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded">
                                             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{doctor.rating || 0}</span>
+                                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{toArabicNumerals(doctor.rating || 0, locale)}</span>
                                           </div>
                                           <span className="text-gray-400 dark:text-gray-500">•</span>
-                                          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{doctor.experience_years || 0} {t('booking_years') || 'years'}</span>
+                                          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{toArabicNumerals(doctor.experience_years || 0, locale)} {t('booking_years') || 'years'}</span>
                                         </div>
                                       </div>
                                       <div className="text-sm text-right flex-shrink-0">
-                                        <div className="text-lg font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{doctor.consultation_fee} {t('currency') || 'SYP'}</div>
+                                        <div className="text-lg font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{formatCurrency(doctor.consultation_fee, locale)}</div>
                                         {selectedLocation === 'home' && doctor.home_available && (
                                           <Badge variant="secondary" className="mt-1 bg-[#4DBCC4]/10 text-[#4DBCC4] border-[#4DBCC4]/20">{t('booking_badge_home_visits') || 'Home visits'}</Badge>
                                         )}
@@ -1842,10 +1931,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_doctor') || 'Select Doctor'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
-                          {t('booking_at') || 'at'} <span className="font-semibold text-[#4DBCC4]">{selectedCenter.name}</span>
+                          {t('booking_at') || 'at'} <span className="font-semibold text-[#4DBCC4]">{getLocalizedName(selectedCenter)}</span>
                         </p>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
-                          <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{selectedSpecialty}</span>
+                          <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{getLocalizedSpecialtyName(selectedSpecialty)}</span>
                           <span>•</span>
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">
                             {selectedLocation === 'home' ? (t('booking_home_visit') || 'Home Visit') : (t('booking_clinic_visit') || 'Clinic Visit')}
@@ -1856,7 +1945,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(2)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back to Centers'}
@@ -1898,7 +1987,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
-                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
+                            const textMatch = !filterQuery || d.name.toLowerCase().includes(filterQuery) || (d.name_ar || '').toLowerCase().includes(filterQuery) || (d.first_name_ar || '').toLowerCase().includes(filterQuery) || (d.last_name_ar || '').toLowerCase().includes(filterQuery) || (d.specialty || '').toLowerCase().includes(filterQuery);
                             // Ensure rating is a number for proper comparison
                             const doctorRating = typeof d.rating === 'number' ? d.rating : (typeof d.rating === 'string' ? parseFloat(d.rating) || 0 : 0);
                             const minRatingValue = typeof minRating === 'number' ? minRating : parseFloat(String(minRating)) || 0;
@@ -1912,26 +2001,26 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-5">
                                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-[#4DBCC4] transition-all">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={doctor.name} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{doctor.name}</h4>
-                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{localizeSpecialty(locale, doctor.specialty)}</p>
+                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{getLocalizedName(doctor)}</h4>
+                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{getLocalizedSpecialtyName(doctor.specialty)}</p>
                                       </div>
                                       <div className="text-right flex-shrink-0">
-                                        <div className="text-2xl font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{doctor.consultation_fee} {t('currency') || 'SYP'}</div>
+                                        <div className="text-2xl font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{formatCurrency(doctor.consultation_fee, locale)}</div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('booking_consultation_fee') || 'Consultation'}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-3 mb-3">
                                       <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/30 px-3 py-1.5 rounded-lg">
                                         <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 mr-1.5" />
-                                        <span className="text-base font-bold text-gray-900 dark:text-gray-100">{doctor.rating || 0}</span>
+                                        <span className="text-base font-bold text-gray-900 dark:text-gray-100">{toArabicNumerals(doctor.rating || 0, locale)}</span>
                                       </div>
                                       <span className="text-gray-400 dark:text-gray-500">•</span>
-                                      <span className="text-base text-gray-600 dark:text-gray-400 font-medium">{doctor.experience_years || 0} {t('booking_years') || 'years'}</span>
+                                      <span className="text-base text-gray-600 dark:text-gray-400 font-medium">{toArabicNumerals(doctor.experience_years || 0, locale)} {t('booking_years') || 'years'}</span>
                                       {selectedLocation === 'home' && doctor.home_available && (
                                         <>
                                           <span className="text-gray-400 dark:text-gray-500">•</span>
@@ -1981,10 +2070,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_center') || 'Select Center'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
-                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">Dr. {selectedDoctor.name}</span>
+                          {t('booking_for') || 'for'} <span className="font-semibold text-[#4DBCC4]">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</span>
                         </p>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">
-                          <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{selectedSpecialty}</span>
+                          <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">{getLocalizedSpecialtyName(selectedSpecialty)}</span>
                           <span>•</span>
                           <span className="px-2 py-1 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600">
                             {t('booking_clinic_visit') || 'Clinic Visit'}
@@ -1995,7 +2084,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(2)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back to Doctors'}
@@ -2024,7 +2113,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
                                       <div className="flex-1">
-                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
                                         <p className="text-base text-gray-700 dark:text-gray-300 flex items-start gap-2">
                                           <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                                           <span>{center.address}</span>
@@ -2122,6 +2211,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             if (!filterQuery) return true;
                             return (
                               center.name.toLowerCase().includes(filterQuery) ||
+                              (center.name_ar || '').toLowerCase().includes(filterQuery) ||
                               center.address?.toLowerCase().includes(filterQuery)
                             );
                           });
@@ -2139,7 +2229,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       <MapPin className="w-6 h-6 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{center.name}</h4>
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
                                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
                                         <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                                         <span>{center.address}</span>
@@ -2147,7 +2237,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       {center.phone && (
                                         <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                           <span className="text-gray-500 dark:text-gray-400">📞</span>
-                                          <span className="font-medium">{center.phone}</span>
+                                          <span className="font-medium">{toArabicNumerals(center.phone, locale)}</span>
                                         </p>
                                       )}
                                     </div>
@@ -2188,14 +2278,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_test_type') || 'Select Test Type'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
-                          {t('booking_available_tests_at') || 'Available tests at'} <span className="font-semibold text-[#4DBCC4]">{selectedCenter.name}</span>
+                          {t('booking_available_tests_at') || 'Available tests at'} <span className="font-semibold text-[#4DBCC4]">{getLocalizedName(selectedCenter)}</span>
                         </p>
                       </div>
                       <Button
                         variant="outline"
                         onClick={() => setCurrentStep(1)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back_to_centers') || 'Back to Centers'}
@@ -2223,13 +2313,13 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
-                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{type.name}</h4>
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{getLocalizedLabTestName(type)}</h4>
                                       {type.category && (
                                         <Badge
                                           variant="outline"
                                           className="capitalize text-xs font-semibold border-2 border-[#4DBCC4] text-[#4DBCC4] bg-[#4DBCC4]/5 dark:bg-[#4DBCC4]/10"
                                         >
-                                          {type.category}
+                                          {type.category === 'lab' ? (t('lab') || 'Lab') : (t('imaging') || 'Imaging')}
                                         </Badge>
                                       )}
                                     </div>
@@ -2253,7 +2343,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             <Button
                               variant="outline"
                               onClick={() => setCurrentStep(1)}
-                              className="mt-6 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold"
+                              className="mt-6 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                             >
                               <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                               {t('booking_choose_different_center') || 'Choose Different Center'}
@@ -2331,10 +2421,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('booking_select_date_time') || 'Select Date & Time'}</h3>
                         <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
                           {isLabMode
-                            ? `${selectedLabType?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
+                            ? `${selectedLabType?.name || ''} ${t('booking_at') || 'at'} ${getLocalizedName(selectedCenter)}`
                             : selectedLocation === "home"
-                              ? `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} - ${t('booking_home_visit') || 'Home Visit'}`
-                              : `${t('booking_with') || 'with'} Dr. ${selectedDoctor?.name || ''} ${t('booking_at') || 'at'} ${selectedCenter?.name || ''}`
+                              ? `${t('booking_with') || 'with'} ${locale === 'ar' ? 'دكتور' : 'Dr.'} ${getLocalizedName(selectedDoctor)} - ${t('booking_home_visit') || 'Home Visit'}`
+                              : `${t('booking_with') || 'with'} ${locale === 'ar' ? 'دكتور' : 'Dr.'} ${getLocalizedName(selectedDoctor)} ${t('booking_at') || 'at'} ${getLocalizedName(selectedCenter)}`
                           }
                         </p>
                       </div>
@@ -2342,7 +2432,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         variant="outline"
                         onClick={() => setCurrentStep(isLabMode ? 2 : 3)}
                         size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 font-semibold"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
                       >
                         <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
                         {t('booking_back') || 'Back'}
@@ -2376,7 +2466,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           {!isLabMode && doctorWorkingDays.length > 0 && selectedDoctor && (
                             <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
                               <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
-                                <strong className="text-[#4DBCC4]">Dr. {selectedDoctor?.name}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
+                                <strong className="text-[#4DBCC4]">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
                                 <span className="font-semibold">
                                   {doctorWorkingDays.map(day => {
                                     const dayNames = [
@@ -2460,8 +2550,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                 ${slot.is_booked || !slot.is_available
                                             ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
                                             : selectedTime === slot.time
-                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
-                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
+                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                       >
                                         {slot.time}
@@ -2538,11 +2628,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_doctor') || 'Doctor:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">Dr. {selectedDoctor!.name}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(selectedDoctor)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_specialty') || 'Specialty:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{localizeSpecialty(locale, selectedDoctor!.specialty)}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{getLocalizedSpecialtyName(selectedDoctor!.specialty)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_type') || 'Type:'}</span>
@@ -2553,21 +2643,21 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_test') || 'Test:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{selectedLabType!.name}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{getLocalizedLabTestName(selectedLabType)}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                                   <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_center') || 'Center:'}</span>
-                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{selectedCenter?.name}</span>
+                                  <span className="text-gray-900 dark:text-gray-100 font-semibold">{getLocalizedName(selectedCenter)}</span>
                                 </div>
                               </>
                             )}
                             <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                               <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_date') || 'Date:'}</span>
-                              <span className="text-gray-900 dark:text-gray-100 font-semibold">{selectedDate.toLocaleDateString()}</span>
+                              <span className="text-gray-900 dark:text-gray-100 font-semibold">{toArabicNumerals(selectedDate.toLocaleDateString(), locale)}</span>
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-[#4DBCC4]/20">
                               <span className="text-gray-600 dark:text-gray-400 font-medium">{t('booking_summary_time') || 'Time:'}</span>
-                              <span className="text-gray-900 dark:text-gray-100 font-semibold">{selectedTime}</span>
+                              <span className="text-gray-900 dark:text-gray-100 font-semibold">{toArabicNumerals(selectedTime, locale)}</span>
                             </div>
                             {symptoms.trim() && (
                               <div className="flex flex-col gap-2 pt-3">
@@ -2582,16 +2672,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <span className="text-[#4DBCC4] text-xl">
                                 {!isLabMode ? (
                                   selectedLocation === "home"
-                                    ? ((actualConsultationFee || selectedDoctor!.consultation_fee || 0) + 50).toFixed(2)
-                                    : (actualConsultationFee || selectedDoctor!.consultation_fee || 0).toFixed(2)
+                                    ? formatCurrency((actualConsultationFee || selectedDoctor!.consultation_fee || 0) + 50, locale)
+                                    : formatCurrency(actualConsultationFee || selectedDoctor!.consultation_fee || 0, locale)
                                 ) : (
-                                  (actualConsultationFee || 0).toFixed(2)
-                                )} {t('currency') || 'SYP'}
+                                  formatCurrency(actualConsultationFee || 0, locale)
+                                )}
                               </span>
                             </div>
                             {!isLabMode && selectedLocation === "home" && selectedDoctor && (
                               <div className="text-xs text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded">
-                                <span className="font-medium">{t('booking_base_fee') || 'Base fee:'}</span> {(actualConsultationFee || selectedDoctor!.consultation_fee || 0).toFixed(2)} {t('currency') || 'SYP'} + <span className="font-medium">{t('booking_travel_fee') || 'Travel fee:'}</span> 50.00 {t('currency') || 'SYP'}
+                                <span className="font-medium">{t('booking_base_fee') || 'Base fee:'}</span> {formatCurrency(actualConsultationFee || selectedDoctor!.consultation_fee || 0, locale)} + <span className="font-medium">{t('booking_travel_fee') || 'Travel fee:'}</span> {formatCurrency(50, locale)}
                               </div>
                             )}
                           </div>

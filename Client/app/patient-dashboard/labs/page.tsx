@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useLocale } from "@/components/providers/locale-provider"
+import { toArabicNumerals } from "@/lib/i18n"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +34,9 @@ import BookingModal from "@/components/BookingModal"
 interface LabTest {
     id: string
     name: string
+    name_en?: string
+    name_ar?: string
+    name_ku?: string
     description?: string
     category: 'lab' | 'imaging'
     default_fee: number
@@ -41,6 +45,7 @@ interface LabTest {
 interface Center {
     id: string
     name: string
+    name_ar?: string
     address: string
     phone?: string
     email?: string
@@ -55,8 +60,21 @@ interface CenterWithTests extends Center {
 
 export default function PatientLabsPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth()
-    const { t, isRTL } = useLocale()
+    const { t, isRTL, locale } = useLocale()
     const router = useRouter()
+
+    // Helper functions for localized names
+    const getLocalizedCenterName = (center: Center) => {
+        if (locale === 'ar' && center.name_ar) return center.name_ar
+        return center.name
+    }
+
+    const getLocalizedTestName = (test: LabTest) => {
+        if (locale === 'ar' && test.name_ar) return test.name_ar
+        if (locale === 'ku' && test.name_ku) return test.name_ku
+        if (test.name_en) return test.name_en
+        return test.name
+    }
 
     const [centers, setCenters] = useState<CenterWithTests[]>([])
     const [loading, setLoading] = useState(true)
@@ -168,11 +186,12 @@ export default function PatientLabsPage() {
     }
 
     const getCenterInitials = (center: Center) => {
-        const words = center.name.split(' ')
+        const name = getLocalizedCenterName(center)
+        const words = name.split(' ')
         if (words.length >= 2) {
             return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase()
         }
-        return center.name.substring(0, 2).toUpperCase()
+        return name.substring(0, 2).toUpperCase()
     }
 
     if (authLoading || (isAuthenticated && user?.role !== 'patient')) {
@@ -191,23 +210,8 @@ export default function PatientLabsPage() {
             {/* Sidebar */}
             <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-            {/* Overlay for mobile when sidebar is open */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-                    onClick={toggleSidebar}
-                />
-            )}
-
-            {/* Main Content */}
-            <div
-                className="transition-all duration-300"
-                style={{
-                    transform: isRTL
-                        ? `translateX(${sidebarOpen ? -280 : 0}px)`
-                        : `translateX(${sidebarOpen ? 280 : 0}px)`
-                }}
-            >
+            {/* Main Content - No transform, sidebar overlays on top */}
+            <div onClick={() => sidebarOpen && toggleSidebar()}>
                 {/* Header */}
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
                     <Header onMenuToggle={toggleSidebar} />
@@ -265,7 +269,7 @@ export default function PatientLabsPage() {
 
                             {/* Results count */}
                             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                                {t('showing_results') || 'Showing'} {centers.length} {t('of') || 'of'} {totalCenters} {t('centers') || 'centers'}
+                                {t('showing_results') || 'Showing'} {toArabicNumerals(centers.length, locale)} {t('of') || 'of'} {toArabicNumerals(totalCenters, locale)} {t('centers') || 'centers'}
                             </div>
                         </CardContent>
                     </Card>
@@ -318,7 +322,7 @@ export default function PatientLabsPage() {
 
                                                 {/* Name */}
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                                    {center.name}
+                                                    {getLocalizedCenterName(center)}
                                                 </h3>
 
                                                 {/* Location */}
@@ -332,13 +336,13 @@ export default function PatientLabsPage() {
                                                     {center.offers_labs && (
                                                         <Badge variant="secondary" className="text-xs">
                                                             <TestTube className="w-3 h-3 mr-1" />
-                                                            Lab Tests
+                                                            {t('lab_tests') || 'Lab Tests'}
                                                         </Badge>
                                                     )}
                                                     {center.offers_imaging && (
                                                         <Badge variant="secondary" className="text-xs">
                                                             <Activity className="w-3 h-3 mr-1" />
-                                                            Imaging
+                                                            {t('imaging') || 'Imaging'}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -346,7 +350,7 @@ export default function PatientLabsPage() {
                                                 {/* Tests Count */}
                                                 {center.tests && center.tests.length > 0 && (
                                                     <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-4">
-                                                        {center.tests.length} tests available
+                                                        {toArabicNumerals(center.tests.length, locale)} {t('tests_available') || 'tests available'}
                                                     </p>
                                                 )}
 
@@ -396,7 +400,7 @@ export default function PatientLabsPage() {
                                                         onClick={() => setCurrentPage(page)}
                                                         className={currentPage === page ? "bg-blue-600" : ""}
                                                     >
-                                                        {page}
+                                                        {toArabicNumerals(page, locale)}
                                                     </Button>
                                                 )
                                             } else if (page === currentPage - 2 || page === currentPage + 2) {
@@ -437,7 +441,7 @@ export default function PatientLabsPage() {
                                                 </span>
                                             </div>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{selectedCenter.name}</DialogTitle>
+                                                <DialogTitle className="text-2xl">{getLocalizedCenterName(selectedCenter)}</DialogTitle>
                                                 <DialogDescription className="text-lg mt-1">
                                                     <MapPin className="w-4 h-4 inline mr-1" />
                                                     {selectedCenter.address}
@@ -449,7 +453,7 @@ export default function PatientLabsPage() {
                                     <Tabs defaultValue="overview" className="mt-6">
                                         <TabsList className="grid w-full grid-cols-3">
                                             <TabsTrigger value="overview">{t('overview') || 'Overview'}</TabsTrigger>
-                                            <TabsTrigger value="tests">{t('tests') || 'Tests Available'}</TabsTrigger>
+                                            <TabsTrigger value="tests">{t('tests_tab') || 'Tests Available'}</TabsTrigger>
                                             <TabsTrigger value="contact">{t('contact') || 'Contact'}</TabsTrigger>
                                         </TabsList>
 
@@ -463,13 +467,13 @@ export default function PatientLabsPage() {
                                                     {selectedCenter.offers_labs && (
                                                         <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
                                                             <TestTube className="w-4 h-4 mr-1" />
-                                                            Lab Tests
+                                                            {t('lab_tests') || 'Lab Tests'}
                                                         </Badge>
                                                     )}
                                                     {selectedCenter.offers_imaging && (
                                                         <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
                                                             <Activity className="w-4 h-4 mr-1" />
-                                                            Imaging Services
+                                                            {t('imaging_services') || 'Imaging Services'}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -500,7 +504,7 @@ export default function PatientLabsPage() {
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex-1">
                                                                         <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                                            {test.name}
+                                                                            {getLocalizedTestName(test)}
                                                                         </h4>
                                                                         {test.description && (
                                                                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -508,12 +512,12 @@ export default function PatientLabsPage() {
                                                                             </p>
                                                                         )}
                                                                         <Badge variant="outline" className="mt-2">
-                                                                            {test.category === 'lab' ? 'Lab Test' : 'Imaging'}
+                                                                            {test.category === 'lab' ? (t('lab_test_singular') || 'Lab Test') : (t('imaging') || 'Imaging')}
                                                                         </Badge>
                                                                     </div>
                                                                     <div className="text-right">
                                                                         <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                                            ${test.default_fee}
+                                                                            ${toArabicNumerals(test.default_fee, locale)}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -538,7 +542,7 @@ export default function PatientLabsPage() {
                                                                 {t('phone') || 'Phone'}
                                                             </p>
                                                             <p className="font-medium text-gray-900 dark:text-white">
-                                                                {selectedCenter.phone}
+                                                                {toArabicNumerals(selectedCenter.phone, locale)}
                                                             </p>
                                                         </div>
                                                     </div>

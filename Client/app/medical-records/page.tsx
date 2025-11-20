@@ -15,7 +15,7 @@ import Link from "next/link";
 export default function MedicalRecordsPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
-  const { t, isRTL } = useLocale();
+  const { t, isRTL, locale } = useLocale();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -23,8 +23,8 @@ export default function MedicalRecordsPage() {
   };
 
   useEffect(() => {
-    document.title = `Medical Records | Kashfety`;
-  }, []);
+    document.title = `${t('medical_records') || 'Medical Records'} | Kashfety`;
+  }, [t]);
 
   // Redirect non-authenticated users
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function MedicalRecordsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4DBCC4] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('loading') || 'Loading...'}</p>
         </div>
       </div>
     );
@@ -53,14 +53,10 @@ export default function MedicalRecordsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-      {/* Main Content */}
+      {/* Main Content - No transform, sidebar overlays on top */}
       <div 
-        className="flex flex-col min-h-screen transition-all duration-300"
-        style={{
-          transform: isRTL 
-            ? `translateX(${sidebarOpen ? -280 : 0}px)` 
-            : `translateX(${sidebarOpen ? 280 : 0}px)`
-        }}
+        className="flex flex-col min-h-screen"
+        onClick={() => sidebarOpen && toggleSidebar()}
       >
         {/* Header */}
         <div className="w-full px-4 sm:px-6 lg:px-8 pt-6">
@@ -81,7 +77,7 @@ export default function MedicalRecordsPage() {
                 <Link href="/">
                   <Button variant="outline" size="sm" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Home
+                    {t('appointments_back_home') || 'Back to Home'}
                   </Button>
                 </Link>
               </div>
@@ -96,8 +92,8 @@ export default function MedicalRecordsPage() {
                   <Heart className="w-8 h-8 text-[#4DBCC4]" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">Medical Records</h1>
-                  <p className="text-muted-foreground mt-1">Manage your health information and medical history</p>
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">{t('medical_records') || 'Medical Records'}</h1>
+                  <p className="text-muted-foreground mt-1">{t('medical_records_subtitle') || 'Manage your health information and medical history'}</p>
                 </div>
               </motion.div>
             </div>
@@ -108,7 +104,7 @@ export default function MedicalRecordsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <MedicalRecordsSection />
+              <MedicalRecordsSection key={locale} />
             </motion.div>
           </motion.div>
         </div>

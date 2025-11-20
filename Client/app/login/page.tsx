@@ -354,13 +354,14 @@ export default function LoginPage() {
               </div>
 
               <div className="text-sm">
-                <motion.a
-                  href="#"
-                  whileHover={{ scale: 1.05 }}
-                  className="font-medium text-[#4DBCC4] hover:text-[#4DBCC4]/80 dark:text-[#4DBCC4] dark:hover:text-[#4DBCC4]/80 transition-colors"
-                >
-                  {t('auth_forgot_password') || 'Forgot your password?'}
-                </motion.a>
+                <Link href="/forgot-password">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    className="font-medium text-[#4DBCC4] hover:text-[#4DBCC4]/80 dark:text-[#4DBCC4] dark:hover:text-[#4DBCC4]/80 transition-colors cursor-pointer inline-block"
+                  >
+                    {t('auth_forgot_password') || 'Forgot your password?'}
+                  </motion.span>
+                </Link>
               </div>
             </motion.div>
 

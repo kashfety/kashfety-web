@@ -19,7 +19,7 @@ import { supabase } from '@/lib/supabase'
 export default function SignupPage() {
   const router = useRouter()
   const { register, login } = useAuth()
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const { theme } = useTheme()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -29,7 +29,7 @@ export default function SignupPage() {
   const [registeredPatient, setRegisteredPatient] = useState<{ id: string, name: string } | null>(null)
   const [registeredDoctor, setRegisteredDoctor] = useState<{ id: string, name: string, token: string } | null>(null)
   const [isSubmittingMedicalRecords, setIsSubmittingMedicalRecords] = useState(false)
-  const [specialties, setSpecialties] = useState<{ id: string, name: string, description: string }[]>([])
+  const [specialties, setSpecialties] = useState<{ id: string, name: string, name_en: string, name_ar: string, name_ku: string, description: string }[]>([])
   const [loadingSpecialties, setLoadingSpecialties] = useState(false)
   
   // OTP verification state
@@ -54,6 +54,7 @@ export default function SignupPage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    name_ar: '', // Arabic name
     email: '',
     password: '',
     confirmPassword: '',
@@ -235,11 +236,19 @@ export default function SignupPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || firstName;
 
+      // Parse Arabic name if provided
+      const namePartsAr = formData.name_ar ? formData.name_ar.trim().split(' ') : [];
+      const firstNameAr = namePartsAr[0] || '';
+      const lastNameAr = namePartsAr.slice(1).join(' ') || firstNameAr;
+
       // Store user data for after OTP verification
       const userData = {
         first_name: firstName,
         last_name: lastName,
         name: formData.name,
+        first_name_ar: firstNameAr,
+        last_name_ar: lastNameAr,
+        name_ar: formData.name_ar,
         email: formData.email,
         password: formData.password,
         role: formData.role.toLowerCase(),
@@ -686,6 +695,30 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 1.05 }}
+            >
+              <label htmlFor="name_ar" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                {t('auth_full_name_arabic_label') || 'Full Name (Arabic)'}
+              </label>
+              <div className="mt-1">
+                <motion.input
+                  whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                  transition={{ duration: 0.2 }}
+                  id="name_ar"
+                  name="name_ar"
+                  type="text"
+                  dir="rtl"
+                  value={formData.name_ar}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                  placeholder={t('auth_name_arabic_placeholder') || "جون دو"}
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 1.1 }}
             >
               <label htmlFor="email" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
@@ -756,17 +789,17 @@ export default function SignupPage() {
                   onChange={handleChange}
                   className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                   style={{
-                    backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>')}")`,
+                    backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'right 0.5rem center',
                     backgroundSize: '1.5em 1.5em'
                   }}
                 >
-                  <option value="patient" className="bg-gray-800 text-white">{t('auth_patient') || 'Patient'}</option>
-                  <option value="doctor" className="bg-gray-800 text-white">{t('auth_doctor') || 'Doctor'}</option>
-                  <option value="center" className="bg-gray-800 text-white">{t('auth_center') || 'Medical Center'}</option>
-                  <option value="admin" className="bg-gray-800 text-white">{t('auth_admin') || 'Admin'}</option>
-                  <option value="super_admin" className="bg-gray-800 text-white">{t('auth_super_admin') || 'Super Admin'}</option>
+                  <option value="patient" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_patient') || 'Patient'}</option>
+                  <option value="doctor" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_doctor') || 'Doctor'}</option>
+                  <option value="center" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_center') || 'Medical Center'}</option>
+                  <option value="admin" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_admin') || 'Admin'}</option>
+                  <option value="super_admin" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_super_admin') || 'Super Admin'}</option>
                 </motion.select>
               </div>
             </motion.div>
@@ -798,16 +831,16 @@ export default function SignupPage() {
                         onChange={handleChange}
                         className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         style={{
-                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>')}")`,
+                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                           backgroundRepeat: 'no-repeat',
                           backgroundPosition: 'right 0.5rem center',
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >
-                        <option value="" className="bg-gray-800 text-white">{t('auth_select_gender') || 'Select Gender'}</option>
-                        <option value="male" className="bg-gray-800 text-white">{t('auth_male') || 'Male'}</option>
-                        <option value="female" className="bg-gray-800 text-white">{t('auth_female') || 'Female'}</option>
-                        <option value="other" className="bg-gray-800 text-white">{t('auth_other') || 'Other'}</option>
+                        <option value="" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_select_gender') || 'Select Gender'}</option>
+                        <option value="male" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_male') || 'Male'}</option>
+                        <option value="female" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_female') || 'Female'}</option>
+                        <option value="other" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_other') || 'Other'}</option>
                       </motion.select>
                     </div>
                   </motion.div>
@@ -865,19 +898,19 @@ export default function SignupPage() {
                         onChange={handleChange}
                         className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         style={{
-                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>')}")`,
+                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                           backgroundRepeat: 'no-repeat',
                           backgroundPosition: 'right 0.5rem center',
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >
-                        <option value="" className="bg-gray-800 text-white">{t('auth_select_specialty') || 'Select Specialty'}</option>
+                        <option value="" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_select_specialty') || 'Select Specialty'}</option>
                         {loadingSpecialties ? (
-                          <option disabled className="bg-gray-800 text-white">{t('auth_loading_specialties') || 'Loading specialties...'}</option>
+                          <option disabled className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_loading_specialties') || 'Loading specialties...'}</option>
                         ) : (
                           specialties.map((specialty) => (
-                            <option key={specialty.id} value={specialty.name} className="bg-gray-800 text-white">
-                              {specialty.name}
+                            <option key={specialty.id} value={specialty.name} className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+                              {locale === 'ar' && specialty.name_ar ? specialty.name_ar : specialty.name}
                             </option>
                           ))
                         )}
@@ -903,7 +936,7 @@ export default function SignupPage() {
                         required
                         value={formData.bio}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         placeholder={t('auth_bio_placeholder') || "Brief description of your background and expertise..."}
                       />
                     </div>
@@ -929,7 +962,7 @@ export default function SignupPage() {
                         required
                         value={formData.experience_years}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         placeholder={t('auth_experience_placeholder') || "5"}
                       />
                     </div>
@@ -955,7 +988,7 @@ export default function SignupPage() {
                         required
                         value={formData.consultation_fee}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         placeholder={t('auth_fee_placeholder') || "100.00"}
                       />
                     </div>
@@ -978,8 +1011,8 @@ export default function SignupPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                   >
-                    <label htmlFor="center_address" className="block text-sm font-medium text-gray-200">
-                      Center Address *
+                    <label htmlFor="center_address" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                      {t('auth_center_address_label') || 'Center Address'} *
                     </label>
                     <div className="mt-1">
                       <motion.textarea
@@ -991,7 +1024,7 @@ export default function SignupPage() {
                         rows={3}
                         value={formData.center_address}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         placeholder={t('auth_address_placeholder') || "123 Main Street, City, State, ZIP"}
                       />
                     </div>
@@ -1002,8 +1035,8 @@ export default function SignupPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <label htmlFor="center_type" className="block text-sm font-medium text-gray-200">
-                      Center Type
+                    <label htmlFor="center_type" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                      {t('auth_center_type_label') || 'Center Type'}
                     </label>
                     <div className="mt-1">
                       <motion.select
@@ -1013,10 +1046,16 @@ export default function SignupPage() {
                         name="center_type"
                         value={formData.center_type}
                         onChange={handleChange}
-                        className="appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all"
+                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 0.5rem center',
+                          backgroundSize: '1.5em 1.5em'
+                        }}
                       >
-                        <option value="generic">Generic Medical Center</option>
-                        <option value="personal">Personal Practice</option>
+                        <option value="generic" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_center_type_generic') || 'Generic Medical Center'}</option>
+                        <option value="personal" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_center_type_personal') || 'Personal Practice'}</option>
                       </motion.select>
                     </div>
                   </motion.div>
@@ -1038,8 +1077,8 @@ export default function SignupPage() {
                         onChange={(e) => setFormData(prev => ({ ...prev, offers_labs: e.target.checked }))}
                         className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                       />
-                      <label htmlFor="offers_labs" className="ml-2 block text-sm text-gray-200">
-                        Offers Lab Tests
+                      <label htmlFor="offers_labs" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                        {t('auth_offers_labs_label') || 'Offers Lab Tests'}
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -1053,8 +1092,8 @@ export default function SignupPage() {
                         onChange={(e) => setFormData(prev => ({ ...prev, offers_imaging: e.target.checked }))}
                         className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                       />
-                      <label htmlFor="offers_imaging" className="ml-2 block text-sm text-gray-200">
-                        Offers Imaging
+                      <label htmlFor="offers_imaging" className={`ml-2 block text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                        {t('auth_offers_imaging_label') || 'Offers Imaging'}
                       </label>
                     </div>
                   </motion.div>
@@ -1101,7 +1140,7 @@ export default function SignupPage() {
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-gray-400"
+                    className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
                   >
                     {validatePassword(formData.password) 
                       ? "✓ Strong password" 
@@ -1133,7 +1172,7 @@ export default function SignupPage() {
                     handleChange(e)
                     clearValidationError('confirmPassword')
                   }}
-                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
+                  className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${
                     validationErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
                   }`}
                   placeholder={t('auth_password_confirm_placeholder') || 'Confirm your password'}

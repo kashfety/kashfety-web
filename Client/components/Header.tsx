@@ -3,13 +3,25 @@
 import { Button } from "@/components/ui/button";
 import { CircleUserRound, Menu, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/providers/auth-provider";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "./theme-toggle";
 import { LocaleSwitcher } from "./ui/locale-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+
+// Helper to get localized user name
+const getLocalizedUserName = (user: any, locale: string) => {
+  if (!user) return '';
+  if (locale === 'ar') {
+    if (user.name_ar) return user.name_ar;
+    if (user.first_name_ar && user.last_name_ar) return `${user.first_name_ar} ${user.last_name_ar}`;
+    if (user.first_name_ar) return user.first_name_ar;
+  }
+  return user.name || user.first_name || 'User';
+};
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -18,8 +30,14 @@ interface HeaderProps {
 const Header = ({ onMenuToggle }: HeaderProps) => {
   const { user, logout, loading } = useAuth();
   const router = useRouter();
-  const { t } = useLocale();
+  const pathname = usePathname();
+  const { t, locale } = useLocale();
   const { theme } = useTheme();
+  const [isLandingPage, setIsLandingPage] = useState(false);
+
+  useEffect(() => {
+    setIsLandingPage(pathname === '/');
+  }, [pathname]);
 
   const handleAuthAction = () => {
     if (user) {
@@ -66,7 +84,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex items-center -ml-1"
+            className="flex items-center -ms-1"
           >
             {/* Logo - switches between light and dark mode */}
             <div className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48">
@@ -81,6 +99,51 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           </motion.div>
         </div>
 
+        {/* Center: Navigation Links (only on landing page) */}
+        {isLandingPage && (
+          <nav className="hidden lg:flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const servicesSection = document.getElementById('services');
+                if (servicesSection) {
+                  servicesSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_services') || 'Services'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const aboutSection = document.getElementById('about');
+                if (aboutSection) {
+                  aboutSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_about') || 'About us'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const reviewsSection = document.getElementById('reviews');
+                if (reviewsSection) {
+                  reviewsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+            >
+              {t('header_reviews') || 'Reviews'}
+            </Button>
+          </nav>
+        )}
+
         {/* Right side: Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden sm:block">
@@ -94,7 +157,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
           ) : user ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="hidden lg:block text-foreground/80 font-medium text-sm">
-                {t('header_hello') || 'Hello,'} {user.name}
+                {t('header_hello') || 'Hello,'} {getLocalizedUserName(user, locale)}
               </span>
               <Button 
                 variant="outline" 

@@ -73,6 +73,7 @@ interface Center {
 
 interface CenterFormData {
     name: string;
+    name_ar?: string; // Arabic name
     address: string;
     phone: string;
     email: string;
@@ -101,7 +102,9 @@ export default function CenterManagement() {
     const [showCenterDetails, setShowCenterDetails] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [editingCenter, setEditingCenter] = useState<Center | null>(null);
+    const [deletingCenter, setDeletingCenter] = useState<Center | null>(null);
     const [formData, setFormData] = useState<CenterFormData>({
         name: '',
         address: '',
@@ -263,9 +266,9 @@ export default function CenterManagement() {
 
             // Removed password length restriction for now
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            const response = await fetch(`${baseUrl}/auth/admin/centers`, {
+            // Use static Next.js API route (Vercel compatible)
+            // See VERCEL_DYNAMIC_ROUTE_FIX.md for why we use static routes
+            const response = await fetch('/api/admin-create-center', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -275,7 +278,8 @@ export default function CenterManagement() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create center');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to create center');
             }
 
             toast({
@@ -314,26 +318,27 @@ export default function CenterManagement() {
     const updateCenter = async (centerId: string, updates: any) => {
         console.log('updateCenter called with centerId:', centerId, 'updates:', updates);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-            const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
-            console.log('Making PUT request to:', `${baseUrl}/auth/admin/centers/${centerId}`);
-
-            const response = await fetch(`${baseUrl}/auth/admin/centers/${centerId}`, {
-                method: 'PUT',
+            // Use static Next.js API route (Vercel compatible)
+            // See VERCEL_DYNAMIC_ROUTE_FIX.md for why we use static routes
+            const response = await fetch('/api/admin-update-center', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(updates)
+                body: JSON.stringify({
+                    centerId,
+                    ...updates
+                })
             });
 
             console.log('Response status:', response.status);
             console.log('Response ok:', response.ok);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error('Failed to update center');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error response:', errorData);
+                throw new Error(errorData.error || 'Failed to update center');
             }
 
             const result = await response.json();
@@ -361,22 +366,27 @@ export default function CenterManagement() {
         }
     };
 
-    const deleteCenter = async (centerId: string) => {
-        if (!confirm(t('admin_confirm_delete_center') || 'Are you sure you want to delete this center? This action cannot be undone.')) {
-            return;
-        }
+    const openDeleteDialog = (center: Center) => {
+        setDeletingCenter(center);
+        setShowDeleteDialog(true);
+    };
+
+    const deleteCenter = async () => {
+        if (!deletingCenter) return;
 
         try {
-            console.log('🔄 Deleting center:', centerId);
+            console.log('🔄 Deleting center:', deletingCenter.id);
 
             // Use adminService for center deletion
-            await adminService.deleteCenter(centerId);
+            await adminService.deleteCenter(deletingCenter.id);
 
             toast({
                 title: t('admin_success') || "Success",
                 description: t('admin_center_deleted_successfully') || "Center deleted successfully",
             });
 
+            setShowDeleteDialog(false);
+            setDeletingCenter(null);
             fetchCenters();
         } catch (error) {
             console.error('❌ Error deleting center:', error);
@@ -445,6 +455,7 @@ export default function CenterManagement() {
     const handleCreateCenter = () => {
         setFormData({
             name: '',
+            name_ar: '',
             address: '',
             phone: '',
             email: '',
@@ -466,6 +477,7 @@ export default function CenterManagement() {
         setEditingCenter(center);
         setFormData({
             name: center.name,
+            name_ar: (center as any).name_ar || '',
             address: center.address,
             phone: center.phone,
             email: center.email,
@@ -687,7 +699,7 @@ export default function CenterManagement() {
                                                     {t('admin_edit_center') || 'Edit Center'}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    onClick={() => deleteCenter(center.id)}
+                                                    onClick={() => openDeleteDialog(center)}
                                                     className="text-red-600"
                                                 >
                                                     <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -852,6 +864,25 @@ export default function CenterManagement() {
                                 />
                             </div>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <label className="text-sm font-medium">{t('admin_center_name_arabic') || 'Center Name (Arabic)'}</label>
+                                <Input
+                                    value={formData.name_ar}
+                                    onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
+                                    placeholder={t('admin_enter_center_name_arabic') || 'أدخل اسم المركز بالعربية'}
+                                    dir="rtl"
+                                />
+                            </div>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                                <label className="text-sm font-medium">{t('admin_phone') || 'Phone'}</label>
+                                <Input
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    placeholder={t('admin_enter_phone_number') || 'Enter phone number'}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <label className="text-sm font-medium">{t('admin_email') || 'Email'}</label>
                                 <Input
                                     type="email"
@@ -895,14 +926,6 @@ export default function CenterManagement() {
                             </div>
                         )}
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <label className="text-sm font-medium">{t('admin_phone') || 'Phone'}</label>
-                            <Input
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                placeholder={t('admin_enter_phone_number') || 'Enter phone number'}
-                            />
-                        </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
                             <label className="text-sm font-medium">{t('admin_address') || 'Address'}</label>
                             <Input
                                 value={formData.address}
@@ -938,6 +961,51 @@ export default function CenterManagement() {
                                 disabled={!formData.name || !formData.email || !formData.phone || !formData.address}
                             >
                                 {editingCenter ? (t('admin_update_center') || 'Update Center') : (t('admin_create_center') || 'Create Center')}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600 flex items-center gap-2">
+                            <Trash2 className="h-5 w-5" />
+                            {t('admin_delete_center') || 'Delete Center'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-muted-foreground">
+                            {t('admin_confirm_delete_center') || 'Are you sure you want to delete this center? This action cannot be undone.'}
+                        </p>
+                        {deletingCenter && (
+                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                <p className="font-semibold text-red-900 dark:text-red-100">
+                                    {deletingCenter.name}
+                                </p>
+                                <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                                    {deletingCenter.address}
+                                </p>
+                            </div>
+                        )}
+                        <div className={`flex ${isRTL ? 'justify-start space-x-reverse space-x-2' : 'justify-end space-x-2'}`}>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setShowDeleteDialog(false);
+                                    setDeletingCenter(null);
+                                }}
+                            >
+                                {t('admin_cancel') || 'Cancel'}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={deleteCenter}
+                            >
+                                <Trash2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                {t('admin_delete') || 'Delete'}
                             </Button>
                         </div>
                     </div>

@@ -13,6 +13,7 @@ import { labService } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 import LabResultModal from "@/components/LabResultModal";
 import LabRescheduleModal from "@/components/LabRescheduleModal";
 import LabCancelModal from "@/components/LabCancelModal";
@@ -25,8 +26,8 @@ interface LabBooking {
   duration?: number;
   notes?: string;
   fee?: number;
-  center?: { id: string; name: string; address: string };
-  type?: { id: string; name: string; category: string };
+  center?: { id: string; name: string; name_ar?: string; address: string };
+  type?: { id: string; name: string; name_ar?: string; name_ku?: string; category: string };
   result_file_url?: string | null;
   rating?: number;
   review?: string;
@@ -68,6 +69,34 @@ export default function MyLabsPage() {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
+
+  // Helper functions for localized names
+  const getLocalizedTestName = (booking: LabBooking) => {
+    if (!booking.type) return t('unknown_test') || 'Unknown Test'
+    
+    if (locale === 'ar' && booking.type.name_ar) {
+      return booking.type.name_ar
+    }
+    if (locale === 'ku' && booking.type.name_ku) {
+      return booking.type.name_ku
+    }
+    return booking.type.name || t('unknown_test') || 'Unknown Test'
+  }
+
+  const getLocalizedCenterName = (booking: LabBooking) => {
+    if (!booking.center) return t('unknown_center') || 'Unknown Center'
+    
+    if (locale === 'ar' && booking.center.name_ar) {
+      return booking.center.name_ar
+    }
+    return booking.center.name || t('unknown_center') || 'Unknown Center'
+  }
+
+  const getLocalizedStatus = (status: string) => {
+    const statusLower = (status || '').toLowerCase()
+    const statusKey = `appointments_status_${statusLower}`
+    return t(statusKey) || status.toUpperCase()
+  }
 
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
@@ -129,7 +158,7 @@ export default function MyLabsPage() {
   // Remove the convertToAppointment function as we're using lab-specific modals now
 
   useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | Kashfety`; }, [t]);
-  useEffect(() => { if (user && !loading) refresh(); }, [user, loading]);
+  useEffect(() => { if (user && !loading) refresh(); }, [user, loading, locale]);
   useEffect(() => { if (!loading && !user) router.push('/login'); }, [user, loading, router]);
 
   if (loading || isLoading) {
@@ -149,15 +178,8 @@ export default function MyLabsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
-      {/* Main Content */}
-      <div 
-        className="transition-all duration-300"
-        style={{
-          transform: isRTL 
-            ? `translateX(${sidebarOpen ? -280 : 0}px)` 
-            : `translateX(${sidebarOpen ? 280 : 0}px)`
-        }}
-      >
+      {/* Main Content - No transform, sidebar overlays on top */}
+      <div onClick={() => sidebarOpen && toggleSidebar()}>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Header onMenuToggle={toggleSidebar} />
         </div>
@@ -171,7 +193,7 @@ export default function MyLabsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground">{t('my_labs_title') || 'My Lab Tests & Scans'}</h1>
-              <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
+              <p className="text-muted-foreground mt-1">{t('my_labs_subtitle') || t('labs_subtitle') || 'View and manage your lab test and imaging bookings'}</p>
             </div>
             <div className="flex gap-2">
               <Button onClick={refresh} variant="outline" className="flex items-center gap-2 border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
@@ -210,11 +232,11 @@ export default function MyLabsPage() {
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_from_label') || 'From'}</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_to_label') || 'To'}</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} lang={locale} />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">{t('appointments_search_label') || 'Search'}</label>
@@ -240,11 +262,11 @@ export default function MyLabsPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <CardTitle className="text-xl text-foreground flex items-center gap-2">
-                        {booking.type?.name}
+                        {getLocalizedTestName(booking)}
                         {booking.rating && (
                           <div className="flex items-center gap-1 ml-2">
                             <Star size={16} className="text-yellow-500 fill-current" />
-                            <span className="text-sm text-yellow-600">{booking.rating}</span>
+                            <span className="text-sm text-yellow-600">{toArabicNumerals(booking.rating, locale)}</span>
                           </div>
                         )}
                       </CardTitle>
@@ -256,10 +278,10 @@ export default function MyLabsPage() {
                       {booking.result_file_url && (
                         <div className="flex items-center">
                           <CheckCircle className="w-5 h-5 text-green-600" />
-                          <span className="text-xs text-green-600 ml-1">Results</span>
+                          <span className="text-xs text-green-600 ml-1">{t('results') || 'Results'}</span>
                         </div>
                       )}
-                      <Badge className={`${getStatusColor(booking.status)} border`}>{(booking.status || '').toUpperCase()}</Badge>
+                      <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
                     </div>
                   </div>
                 </CardHeader>
@@ -269,21 +291,21 @@ export default function MyLabsPage() {
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Calendar className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                          <div className="font-medium">{toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</div>
                           <div className="text-sm text-gray-500">{t('appointments_date_label') || 'Date'}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-muted-foreground">
                         <Clock className="w-5 h-5 text-emerald-600" />
                         <div>
-                          <div className="font-medium">{(() => { try { const [h,m] = (booking.booking_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return booking.booking_time; } })()} ({booking.duration || 30} {t('minutes_short') || 'min'})</div>
+                          <div className="font-medium">{(() => { try { const [h,m] = (booking.booking_time||'').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return booking.booking_time; } })()} ({toArabicNumerals(booking.duration || 30, locale)} {t('minutes_short') || 'min'})</div>
                           <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 text-muted-foreground">
                         <MapPin className="w-5 h-5 text-emerald-600 mt-0.5" />
                         <div>
-                          <div className="font-medium">{booking.center?.name}</div>
+                          <div className="font-medium">{getLocalizedCenterName(booking)}</div>
                           <div className="text-sm text-gray-500">{booking.center?.address}</div>
                         </div>
                       </div>

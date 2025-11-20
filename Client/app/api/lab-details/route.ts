@@ -42,6 +42,9 @@ export async function GET(request: NextRequest) {
         lab_test_types:lab_test_type_id (
           id,
           name,
+          name_en,
+          name_ar,
+          name_ku,
           description,
           category,
           default_fee

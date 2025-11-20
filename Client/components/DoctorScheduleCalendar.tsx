@@ -34,6 +34,12 @@ interface Appointment {
     notes?: string;
     patient_id: string;
     patient_name: string;
+    name?: string;
+    name_ar?: string;
+    first_name?: string;
+    first_name_ar?: string;
+    last_name?: string;
+    last_name_ar?: string;
     patient_phone?: string;
     patient_email?: string;
 }
@@ -50,15 +56,86 @@ export default function DoctorScheduleCalendar({
     onStatusUpdate
 }: DoctorScheduleCalendarProps) {
     const { toast } = useToast();
-    const { t } = useLocale();
+    const { t, locale, isRTL } = useLocale();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
 
-    // Time slots from 8 AM to 8 PM
-    const timeSlots = Array.from({ length: 13 }, (_, i) => {
-        const hour = i + 8;
-        return `${hour.toString().padStart(2, '0')}:00`;
-    });
+    // Helper to get localized patient name
+    const getLocalizedPatientName = (appointment: Appointment) => {
+        if (!appointment) return 'Unknown Patient';
+        
+        if (locale === 'ar') {
+            // Try name_ar first
+            if (appointment.name_ar) return appointment.name_ar;
+            
+            // Build from first_name_ar + last_name_ar
+            if (appointment.first_name_ar || appointment.last_name_ar) {
+                return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
+            }
+        }
+        
+        // Fallback to English name
+        if (appointment.name) return appointment.name;
+        if (appointment.first_name || appointment.last_name) {
+            return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
+        }
+        return appointment.patient_name || 'Unknown Patient';
+    };
+
+    // Helper to convert numbers to Arabic numerals
+    const toArabicNumerals = (num: number | string): string => {
+        if (locale !== 'ar') return String(num);
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+    };
+
+    // Helper to get localized status
+    const getLocalizedStatus = (status: string): string => {
+        const statusLower = status.toLowerCase();
+        const key = `dd_status_${statusLower}`;
+        return t(key) || status;
+    };
+
+    // Localize appointment type
+    const getLocalizedAppointmentType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
+        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
+        return type;
+    };
+
+    // Localize consultation type
+    const getLocalizedConsultationType = (type: string) => {
+        if (!type) return '';
+        const lowerType = type.toLowerCase();
+        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
+        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
+        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
+        return type;
+    };
+
+    // Get all unique time slots from appointments, including non-whole hours
+    const getAllTimeSlots = () => {
+        const appointmentTimes = new Set<string>();
+        appointments.forEach(apt => {
+            if (apt.appointment_time) {
+                // Extract hour:minute format (e.g., "09:30")
+                const time = apt.appointment_time.substring(0, 5);
+                appointmentTimes.add(time);
+            }
+        });
+        
+        // Add default hourly slots from 8 AM to 8 PM
+        for (let i = 8; i <= 20; i++) {
+            appointmentTimes.add(`${i.toString().padStart(2, '0')}:00`);
+        }
+        
+        // Sort times chronologically
+        return Array.from(appointmentTimes).sort();
+    };
+
+    const timeSlots = getAllTimeSlots();
 
     // Get appointments for the current view
     const getAppointmentsForView = () => {
@@ -124,6 +201,8 @@ export default function DoctorScheduleCalendar({
         switch (status.toLowerCase()) {
             case 'confirmed':
                 return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            case 'scheduled':
+                return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
             case 'cancelled':
@@ -140,6 +219,13 @@ export default function DoctorScheduleCalendar({
         if (!time) return '';
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
+        
+        if (locale === 'ar') {
+            // Arabic 24-hour format
+            return `${toArabicNumerals(hour)}:${toArabicNumerals(minutes)}`;
+        }
+        
+        // English AM/PM format
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
         return `${displayHour}:${minutes} ${ampm}`;
@@ -147,7 +233,7 @@ export default function DoctorScheduleCalendar({
 
     // Format date for display
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
             weekday: 'short',
             month: 'short',
             day: 'numeric'
@@ -274,7 +360,7 @@ export default function DoctorScheduleCalendar({
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
-                                                    {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                    {currentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                                 </div>
                                                 {isToday && (
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>
@@ -305,7 +391,7 @@ export default function DoctorScheduleCalendar({
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
-                                                    {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                    {date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' })}
                                                 </div>
                                                 {isToday && (
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>
@@ -351,7 +437,7 @@ export default function DoctorScheduleCalendar({
 
                                                             <div className="relative z-10 flex items-start justify-between mb-3">
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
-                                                                    {appointment.status}
+                                                                    {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
                                                                 <DropdownMenu>
                                                                     <DropdownMenuTrigger asChild>
@@ -379,14 +465,14 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{appointment.patient_name}</span>
+                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
                                                                 <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
                                                                     <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{appointment.appointment_type}</span>
+                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (
@@ -424,7 +510,7 @@ export default function DoctorScheduleCalendar({
 
                                                             <div className="relative z-10 flex items-start justify-between mb-3">
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
-                                                                    {appointment.status}
+                                                                    {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
                                                                 <DropdownMenu>
                                                                     <DropdownMenuTrigger asChild>
@@ -452,14 +538,14 @@ export default function DoctorScheduleCalendar({
                                                                     <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{appointment.patient_name}</span>
+                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
                                                                 <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
                                                                     <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{appointment.appointment_type}</span>
+                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (
@@ -485,16 +571,16 @@ export default function DoctorScheduleCalendar({
             </div>
 
             {/* Summary Stats */}
-            <div className="relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className={`relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
                                 <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-                                    {appointments.length}
+                                    {toArabicNumerals(appointments.length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -507,13 +593,13 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">
                                     {t('dd_confirmed') || 'Confirmed'}
                                 </p>
                                 <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                                    {appointments.filter(apt => apt.status === 'confirmed').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'confirmed').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -526,13 +612,13 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400 mb-1">
                                     {t('dd_pending') || 'Pending'}
                                 </p>
                                 <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">
-                                    {appointments.filter(apt => apt.status === 'pending').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'pending').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -545,13 +631,13 @@ export default function DoctorScheduleCalendar({
 
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                            <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-1">
                                     {t('dd_completed') || 'Completed'}
                                 </p>
                                 <p className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-                                    {appointments.filter(apt => apt.status === 'completed').length}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'completed').length)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">

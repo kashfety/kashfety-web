@@ -29,14 +29,21 @@ export async function GET(request: NextRequest) {
         patient_id,
         doctor_id,
         appointment_id,
+        record_type,
+        title,
+        description,
         diagnosis,
         treatment,
         prescription,
-        notes,
+        lab_results,
+        attachments,
         record_date,
         created_at,
         updated_at,
-        doctor:users!medical_records_doctor_id_fkey(id, name, specialty)
+        allergies,
+        medications,
+        medical_history,
+        doctor:users!medical_records_doctor_id_fkey(id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, specialty)
       `)
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false });
@@ -73,11 +80,18 @@ export async function POST(request: NextRequest) {
     const { 
       patient_id, 
       doctor_id, 
-      appointment_id, 
+      appointment_id,
+      record_type,
+      title,
+      description,
       diagnosis, 
       treatment, 
-      prescription, 
-      notes,
+      prescription,
+      lab_results,
+      attachments,
+      allergies,
+      medications,
+      medical_history,
       record_date 
     } = body;
 
@@ -88,10 +102,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    if (!diagnosis || !treatment) {
+    if (!title) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Diagnosis and treatment are required' 
+        error: 'Title is required' 
       }, { status: 400 });
     }
 
@@ -104,10 +118,17 @@ export async function POST(request: NextRequest) {
         patient_id,
         doctor_id: doctor_id || null,
         appointment_id: appointment_id || null,
-        diagnosis,
-        treatment,
+        record_type: record_type || 'consultation',
+        title,
+        description: description || null,
+        diagnosis: diagnosis || null,
+        treatment: treatment || null,
         prescription: prescription || null,
-        notes: notes || null,
+        lab_results: lab_results || null,
+        attachments: attachments || null,
+        allergies: allergies || null,
+        medications: medications || null,
+        medical_history: medical_history || null,
         record_date: record_date || new Date().toISOString().split('T')[0],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -117,14 +138,21 @@ export async function POST(request: NextRequest) {
         patient_id,
         doctor_id,
         appointment_id,
+        record_type,
+        title,
+        description,
         diagnosis,
         treatment,
         prescription,
-        notes,
+        lab_results,
+        attachments,
+        allergies,
+        medications,
+        medical_history,
         record_date,
         created_at,
         updated_at,
-        doctor:users!medical_records_doctor_id_fkey(id, name, specialty)
+        doctor:users!medical_records_doctor_id_fkey(id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, specialty)
       `)
       .single();
 
@@ -160,10 +188,17 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { 
       record_id,
+      record_type,
+      title,
+      description,
       diagnosis, 
       treatment, 
-      prescription, 
-      notes,
+      prescription,
+      lab_results,
+      attachments,
+      allergies,
+      medications,
+      medical_history,
       record_date 
     } = body;
 
@@ -181,10 +216,17 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
+    if (record_type !== undefined) updateData.record_type = record_type;
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
     if (diagnosis !== undefined) updateData.diagnosis = diagnosis;
     if (treatment !== undefined) updateData.treatment = treatment;
     if (prescription !== undefined) updateData.prescription = prescription;
-    if (notes !== undefined) updateData.notes = notes;
+    if (lab_results !== undefined) updateData.lab_results = lab_results;
+    if (attachments !== undefined) updateData.attachments = attachments;
+    if (allergies !== undefined) updateData.allergies = allergies;
+    if (medications !== undefined) updateData.medications = medications;
+    if (medical_history !== undefined) updateData.medical_history = medical_history;
     if (record_date !== undefined) updateData.record_date = record_date;
 
     // Update medical record
@@ -197,14 +239,21 @@ export async function PUT(request: NextRequest) {
         patient_id,
         doctor_id,
         appointment_id,
+        record_type,
+        title,
+        description,
         diagnosis,
         treatment,
         prescription,
-        notes,
+        lab_results,
+        attachments,
+        allergies,
+        medications,
+        medical_history,
         record_date,
         created_at,
         updated_at,
-        doctor:users!medical_records_doctor_id_fkey(id, name, specialty)
+        doctor:users!medical_records_doctor_id_fkey(id, name, name_ar, first_name, last_name, first_name_ar, last_name_ar, specialty)
       `)
       .single();
 

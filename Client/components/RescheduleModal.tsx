@@ -44,7 +44,7 @@ interface RescheduleModalProps {
 }
 
 export default function RescheduleModal({ isOpen, onClose, appointment, onSuccess, onReschedule }: RescheduleModalProps) {
-  const { t } = useLocale();
+  const { t, isRTL, locale } = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
@@ -487,7 +487,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       <AnimatePresence>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
+            <DialogContent className={`max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -497,8 +497,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
               >
                 <div className="space-y-6 p-6">
                   {/* Header Section - Matching BookingModal */}
-                  <div className="flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm">
-                    <div>
+                  <div className={`flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm ${isRTL ? 'border-r-4 border-l-0 flex-row-reverse text-right' : 'border-l-4'}`}>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('reschedule_title') || 'Reschedule Appointment'}</h3>
                       <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
                         {t('reschedule_with') || 'with'} {appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}
@@ -659,7 +659,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           selected={selectedDate}
                           onSelect={handleDateSelect}
                           disabled={isDateDisabled}
-                          className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 bg-white dark:bg-gray-800 w-full"
+                          className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 pr-4 bg-white dark:bg-gray-800 w-full"
                         />
                       </div>
 
@@ -699,8 +699,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                                 ${slot.is_booked || !slot.is_available
                                           ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
                                           : selectedTime === slot.time
-                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl text-white"
-                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
+                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                     >
                                       {slot.time}
@@ -770,7 +770,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                 </div>
 
                 <DialogFooter className="gap-2 p-6 -mb-6 bg-white dark:bg-gray-900 border-t-2 border-gray-200 dark:border-gray-700">
-                  <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold">
+                  <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold">
                     {t('reschedule_cancel') || 'Cancel'}
                   </Button>
                   <Button

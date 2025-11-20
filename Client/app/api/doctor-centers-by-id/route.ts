@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         centers (
           id,
           name,
+          name_ar,
           address,
           phone,
           operating_hours,
@@ -125,6 +126,7 @@ export async function GET(request: NextRequest) {
     const enhancedCenters = filteredCenters.map(dc => ({
       id: dc.centers?.id,
       name: dc.centers?.name,
+      name_ar: dc.centers?.name_ar,
       address: dc.centers?.address,
       phone: dc.centers?.phone,
       center_type: dc.centers?.center_type,

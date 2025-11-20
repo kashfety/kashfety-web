@@ -5,11 +5,14 @@ import Image from "next/image";
 import { Star, Award, Clock, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocale } from "@/components/providers/locale-provider";
-import { localizeDoctorName, localizeSpecialty } from "@/lib/i18n";
+import { localizeDoctorName, localizeSpecialty, toArabicNumerals, formatCurrency } from "@/lib/i18n";
 
 interface Doctor {
   id: string;
   name: string;
+  first_name_ar?: string;
+  last_name_ar?: string;
+  name_ar?: string;
   specialty: string;
   experience_years: number;
   profile_picture_url: string;
@@ -23,8 +26,29 @@ const DoctorsSection = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleDoctors, setVisibleDoctors] = useState<Set<number>>(new Set());
+  const [specialtiesMap, setSpecialtiesMap] = useState<Map<string, { name_ar?: string; name_ku?: string }>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { t, locale } = useLocale();
+
+  // Helper to get localized name
+  const getLocalizedName = (item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
+    if (!item) return '';
+    if (locale === 'ar') {
+      if (item.name_ar) return item.name_ar;
+      if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+    }
+    return item.name || '';
+  };
+
+  // Helper to get localized specialty name
+  const getLocalizedSpecialty = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
+  };
 
   // Reset visible doctors when component mounts
   useEffect(() => {
@@ -32,6 +56,7 @@ const DoctorsSection = () => {
   }, []);
 
   useEffect(() => {
+    fetchSpecialties();
     fetchDoctors();
     
     // Setup intersection observer for scroll animations
@@ -81,6 +106,26 @@ const DoctorsSection = () => {
       return () => clearTimeout(timer);
     }
   }, [doctors]);
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await fetch('/api/specialties');
+      const result = await response.json();
+      
+      if (result.success && result.specialties) {
+        const map = new Map();
+        result.specialties.forEach((specialty: any) => {
+          map.set(specialty.name, {
+            name_ar: specialty.name_ar,
+            name_ku: specialty.name_ku
+          });
+        });
+        setSpecialtiesMap(map);
+      }
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
 
   const fetchDoctors = async () => {
     try {
@@ -151,6 +196,7 @@ const DoctorsSection = () => {
               index={index}
               isVisible={visibleDoctors.has(index)}
               locale={locale}
+              specialtiesMap={specialtiesMap}
             />
           ))}
         </div>
@@ -191,17 +237,39 @@ const DoctorShowcaseCard = ({
   index, 
   isVisible,
   locale,
+  specialtiesMap,
 }: { 
   doctor: Doctor; 
   index: number; 
   isVisible: boolean;
   locale: any;
+  specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) => {
   const isEven = index % 2 === 0;
   const { t } = useLocale();
   
-  const localizedName = localizeDoctorName(locale, doctor.name)
-  const localizedSpecialty = localizeSpecialty(locale, doctor.specialty)
+  // Get localized doctor name from database
+  const getLocalizedName = (item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
+    if (!item) return '';
+    if (locale === 'ar') {
+      if (item.name_ar) return item.name_ar;
+      if (item.first_name_ar && item.last_name_ar) return `${item.first_name_ar} ${item.last_name_ar}`;
+    }
+    return item.name || '';
+  };
+
+  // Get localized specialty name from database
+  const getLocalizedSpecialty = (specialtyName: string) => {
+    const specialtyData = specialtiesMap.get(specialtyName);
+    if (!specialtyData) return specialtyName;
+    
+    if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
+    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
+    return specialtyName;
+  };
+  
+  const localizedName = getLocalizedName(doctor);
+  const localizedSpecialty = getLocalizedSpecialty(doctor.specialty)
 
   return (
     <div 
@@ -228,8 +296,8 @@ const DoctorShowcaseCard = ({
                 fill
                 className="object-cover"
               />
-              <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-[#4DBCC4] text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                ⭐ {doctor.rating || '4.8'}
+              <div className="absolute top-3 sm:top-4 end-3 sm:end-4 bg-[#4DBCC4] text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                ⭐ {toArabicNumerals(doctor.rating || '4.8', locale)}
               </div>
             </div>
             
@@ -241,7 +309,7 @@ const DoctorShowcaseCard = ({
               </div>
               <div className="bg-emerald-100 text-emerald-800 px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 dark:bg-emerald-900/30 dark:text-emerald-300">
                 <Clock className="w-3 h-3" />
-                {doctor.experience_years}+ {t('doctors_section_years') || 'years'}
+                {toArabicNumerals(doctor.experience_years, locale)}+ {t('doctors_section_years') || 'years'}
               </div>
             </div>
           </div>
@@ -249,7 +317,7 @@ const DoctorShowcaseCard = ({
       </div>
 
       {/* Doctor Information */}
-      <div className="flex-1 text-center lg:text-left px-4 sm:px-0">
+      <div className="flex-1 text-center lg:text-start px-4 sm:px-0">
         <div className="mb-4">
           <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
             {localizedName}
@@ -259,22 +327,22 @@ const DoctorShowcaseCard = ({
           </p>
           <div className="flex items-center gap-2 justify-center lg:justify-start text-muted-foreground mb-4 sm:mb-6">
             <Star className="w-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
-            <span className="text-base sm:text-lg font-medium">{doctor.rating || '4.8'}</span>
+            <span className="text-base sm:text-lg font-medium">{toArabicNumerals(doctor.rating || '4.8', locale)}</span>
             <span className="text-gray-400">•</span>
-            <span className="text-sm sm:text-base">85+ {t('doctors_section_happy_patients') || 'Happy Patients'}</span>
+            <span className="text-sm sm:text-base">{toArabicNumerals('85', locale)}+ {t('doctors_section_happy_patients') || 'Happy Patients'}</span>
           </div>
         </div>
 
         <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Award className="w-5 sm:w-6 sm:h-6 text-[#4DBCC4] mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_expert_in') || 'Expert in'} {localizedSpecialty}</p>
-              <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_years_line') || 'With'} {doctor.experience_years}+ {t('doctors_section_years') || 'years'} {t('doctors_section_dedicated_practice') || 'of dedicated practice'}</p>
+              <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_years_line') || 'With'} {toArabicNumerals(doctor.experience_years, locale)}+ {t('doctors_section_years') || 'years'} {t('doctors_section_dedicated_practice') || 'of dedicated practice'}</p>
             </div>
           </div>
           
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Heart className="w-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_compassionate_care') || 'Compassionate Care'}</p>
@@ -282,7 +350,7 @@ const DoctorShowcaseCard = ({
             </div>
           </div>
           
-          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start">
+          <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Clock className="w-5 sm:w-6 sm:h-6 text-blue-500 mt-1 flex-shrink-0" />
             <div>
               <p className="font-semibold text-foreground text-sm sm:text-base">{t('doctors_section_flexible_appointments') || 'Flexible Appointments'}</p>

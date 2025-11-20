@@ -49,6 +49,7 @@ interface ScheduleData {
 interface Center {
   id: string;
   name: string;
+  name_ar?: string;
   address: string;
   phone?: string;
   email?: string;
@@ -107,7 +108,7 @@ const generateTimeSlots = (
 
 export default function DoctorScheduleManagement({ doctorId }: ScheduleManagementProps) {
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [schedule, setSchedule] = useState<ScheduleData[]>([]);
@@ -115,6 +116,21 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const [selectedCenterId, setSelectedCenterId] = useState<string>('');
   const [homeVisitsAvailable, setHomeVisitsAvailable] = useState(false);
   const [defaultConsultationFee, setDefaultConsultationFee] = useState<number>(0);
+  
+  // Helper to get localized center name
+  const getLocalizedCenterName = (center: Center) => {
+    if (locale === 'ar' && center.name_ar) {
+      return center.name_ar;
+    }
+    return center.name;
+  };
+  
+  // Helper to convert numbers to Arabic numerals
+  const toArabicNumerals = (num: number | string): string => {
+    if (locale !== 'ar') return String(num);
+    const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+  };
   
   // Conflict dialog state
   const [showConflictDialog, setShowConflictDialog] = useState(false);
@@ -805,7 +821,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-sm">{center.name}</h3>
+                        <h3 className="font-medium text-sm">{getLocalizedCenterName(center)}</h3>
                         <div className="flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3 text-gray-500" />
                           <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -867,7 +883,10 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                {(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {centers.find(c => c.id === selectedCenterId)?.name}
+                {(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {(() => {
+                  const center = centers.find(c => c.id === selectedCenterId);
+                  return center ? getLocalizedCenterName(center) : '';
+                })()}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -943,7 +962,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                         {slots.length > 0 && (
                           <div>
                             <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                              {(t('dd_generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', String(slots.length))}
+                              {(t('dd_generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', toArabicNumerals(slots.length))}
                             </Label>
                             <div className="mt-2 flex flex-wrap gap-2">
                               {slots.slice(0, 8).map((slot, index) => (
@@ -953,7 +972,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                               ))}
                               {slots.length > 8 && (
                                 <Badge variant="secondary" className="text-xs">
-                                  {(t('dd_more_count') || '+{count} more').replace('{count}', String(slots.length - 8))}
+                                  {(t('dd_more_count') || '+{count} more').replace('{count}', toArabicNumerals(slots.length - 8))}
                                 </Badge>
                               )}
                             </div>
@@ -995,11 +1014,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_working_days') || 'Working Days'}</Label>
-                  <p className="text-lg font-semibold">{Object.values(dayConfigs).filter(config => config.isAvailable).length} {t('days') || 'days'}</p>
+                  <p className="text-lg font-semibold">{toArabicNumerals(Object.values(dayConfigs).filter(config => config.isAvailable).length)} {t('days') || 'days'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                  <p className="text-lg font-semibold">{DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0)} {t('slots') || 'slots'}</p>
+                  <p className="text-lg font-semibold">{toArabicNumerals(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0))} {t('slots') || 'slots'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_home_visits') || 'Home Visits'}</Label>
@@ -1007,7 +1026,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_default_fee') || 'Default Fee'}</Label>
-                  <p className="text-lg font-semibold">${defaultConsultationFee}</p>
+                  <p className="text-lg font-semibold">${toArabicNumerals(defaultConsultationFee)}</p>
                 </div>
               </div>
             </CardContent>

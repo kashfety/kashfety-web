@@ -46,7 +46,8 @@ import {
     Video,
     Image,
     Stethoscope,
-    Beaker
+    Beaker,
+    Crown
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -99,11 +100,13 @@ interface DashboardStats {
 function AdminSidebar({
     activeTab,
     setActiveTab,
-    toast
+    toast,
+    user
 }: {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     toast: any;
+    user: any;
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -163,12 +166,12 @@ function AdminSidebar({
                     {/* Logo */}
                     <div className={`h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-6'}`}>
                         <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'gap-3'} ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
-                                <Shield className="w-4 h-4 text-white" />
+                            <div className={`w-8 h-8 bg-gradient-to-r ${user?.role === 'super_admin' ? 'from-yellow-500 to-orange-600' : 'from-red-500 to-pink-600'} rounded-lg flex items-center justify-center`}>
+                                {user?.role === 'super_admin' ? <Crown className="w-4 h-4 text-white" /> : <Shield className="w-4 h-4 text-white" />}
                             </div>
                             {!isCollapsed && (
                                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    {t('admin_portal') || 'Admin Portal'}
+                                    {user?.role === 'super_admin' ? (t('admin_portal_super') || 'Admin Portal') : (t('admin_portal') || 'Admin Portal')}
                                 </span>
                             )}
                         </div>
@@ -374,7 +377,7 @@ function AdminTopNav({
                                     {user?.name || user?.email?.split('@')[0] || 'Admin'}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    {t('admin_role') || 'Administrator'}
+                                    {user?.role === 'super_admin' ? (t('super_admin_role') || 'Super Administrator') : (t('admin_role') || 'Administrator')}
                                 </div>
                             </div>
                         </div>
@@ -545,7 +548,7 @@ export default function AdminDashboardPage() {
         }
     };
 
-    if (!user || user.role !== 'admin') return null;
+    if (!user || !['admin', 'super_admin'].includes(user.role)) return null;
 
     return (
         <div className={`admin-dashboard ${theme === "dark" ? "dark" : ""} ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -558,7 +561,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className={`flex h-screen relative z-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} toast={toast} />
+                <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} toast={toast} user={user} />
 
                 <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
                     <header className="h-14 sm:h-16 border-b border-gray-200 dark:border-[#1F1F23] flex-shrink-0 relative">

@@ -482,7 +482,7 @@ export default function SuperAdminDashboardPage() {
             // Try fallback route first for Vercel compatibility
             let response;
             let data;
-            
+
             try {
                 console.log('📊 Trying admin-dashboard-stats fallback route');
                 response = await fetch('/api/admin-dashboard-stats', {
@@ -491,7 +491,7 @@ export default function SuperAdminDashboardPage() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (response.ok) {
                     data = await response.json();
                     if (data.success) {

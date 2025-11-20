@@ -1123,6 +1123,9 @@ export const translations = {
     cancel_appointment_success_title: "Appointment Cancelled",
     cancel_appointment_success_desc: "Your appointment has been cancelled successfully.",
     cancel_appointment_error: "Failed to cancel appointment. Please try again.",
+    cancel_reason_label_doctor: "Cancellation Reason (Optional)",
+    cancel_reason_placeholder_doctor: "Reason for cancellation (will be visible to patient)...",
+    cancel_warning_message: "Cancellations within 24 hours of the appointment may incur a fee. Please review our cancellation policy.",
 
     // Lab Result Modal (en)
     lab_result_title: "Lab Test Result",
@@ -2523,6 +2526,9 @@ export const translations = {
     cancel_appointment_success_title: "تم إلغاء الموعد",
     cancel_appointment_success_desc: "تم إلغاء موعدك بنجاح.",
     cancel_appointment_error: "فشل إلغاء الموعد. يرجى المحاولة مرة أخرى.",
+    cancel_reason_label_doctor: "سبب الإلغاء (اختياري)",
+    cancel_reason_placeholder_doctor: "سبب الإلغاء (سيكون مرئياً للمريض)...",
+    cancel_warning_message: "قد يترتب على الإلغاء في غضون 24 ساعة من الموعد رسوم. يرجى مراجعة سياسة الإلغاء الخاصة بنا.",
 
     // Lab Result Modal (ar)
     lab_result_title: "نتيجة الفحص المخبري",

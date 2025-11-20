@@ -2486,24 +2486,24 @@ export default function DoctorDashboard() {
                 <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-md w-full">
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Cancel Appointment
+                      {t('cancel_appointment') || 'Cancel Appointment'}
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {selectedAppointment.patient_name} - {selectedAppointment.appointment_date} at {selectedAppointment.appointment_time}
+                      {selectedAppointment.patient_name} - {selectedAppointment.appointment_date} {t('at') || 'at'} {selectedAppointment.appointment_time}
                     </p>
                   </div>
 
                   <div className="p-6 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Cancellation Reason (Optional)
+                        {t('cancel_reason_label_doctor') || 'Cancellation Reason (Optional)'}
                       </label>
                       <textarea
                         value={cancelReason}
                         onChange={(e) => setCancelReason(e.target.value)}
                         className="w-full p-3 border border-gray-200 dark:border-[#1F1F23] rounded-lg bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white"
                         rows={3}
-                        placeholder="Reason for cancellation (will be visible to patient)..."
+                        placeholder={t('cancel_reason_placeholder_doctor') || 'Reason for cancellation (will be visible to patient)...'}
                       />
                     </div>
 
@@ -2514,7 +2514,7 @@ export default function DoctorDashboard() {
                         className="flex-1"
                       >
                         <XCircle className="w-4 h-4 mr-2" />
-                        Cancel Appointment
+                        {t('cancel_appointment') || 'Cancel Appointment'}
                       </Button>
                       <Button
                         variant="outline"
@@ -2524,7 +2524,7 @@ export default function DoctorDashboard() {
                           setCancelReason('');
                         }}
                       >
-                        Keep Appointment
+                        {t('keep_appointment') || 'Keep Appointment'}
                       </Button>
                     </div>
                   </div>

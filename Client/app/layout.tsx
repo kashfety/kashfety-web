@@ -11,10 +11,14 @@ import { Analytics } from "@vercel/analytics/next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Healthcare Management Portal | Professional Medical Care System",
+  title: "Kashfety | Healthcare Management System",
   description: "Comprehensive healthcare management system for doctors, patients, and medical professionals. Manage appointments, patient records, analytics, and healthcare services.",
-  keywords: "healthcare management, medical portal, doctor dashboard, patient portal, appointment booking, medical records, healthcare analytics",
-  generator: 'v0.dev'
+  keywords: "kashfety, healthcare management, medical portal, doctor dashboard, patient portal, appointment booking, medical records, healthcare analytics",
+  generator: 'v0.dev',
+  icons: {
+    icon: '/logo/branding-light.png',
+    apple: '/logo/branding-light.png',
+  }
 }
 
 export default function RootLayout({

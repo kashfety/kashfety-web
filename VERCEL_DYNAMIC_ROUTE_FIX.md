@@ -97,12 +97,14 @@ fetch('/api/admin-review-certificate-action', {
 
 1. **Doctor Approvals** - Certificate approval in admin dashboard
 2. **Certificate Approval** - Detailed certificate review in certificates tab
-3. **Super Admin Dashboard** - Uses same components, inherited fix
+3. **Center Approvals** - Center request approval in admin dashboard
+4. **Super Admin Dashboard** - Uses same components, inherited fix
 
 ## Testing Checklist
 
 - [x] Doctor approval in admin-dashboard works
 - [x] Certificate review in certificates tab works
+- [x] Center approval in admin-dashboard works
 - [ ] Super admin dashboard certificate approval works
 - [ ] All certificate status changes (approve/reject/resubmit) work
 - [ ] Proper error handling and user feedback
@@ -112,18 +114,22 @@ fetch('/api/admin-review-certificate-action', {
 ```
 Client/
 ├── app/api/
-│   └── admin-review-certificate-action/
-│       └── route.ts (NEW - static route)
+│   ├── admin-review-certificate-action/
+│   │   └── route.ts (NEW - static route for certificates)
+│   └── admin-center-request-action/
+│       └── route.ts (NEW - static route for center requests)
 └── components/admin/
     ├── DoctorApprovals.tsx (UPDATED)
-    └── CertificateApproval.tsx (UPDATED)
+    ├── CertificateApproval.tsx (UPDATED)
+    └── CenterApprovals.tsx (UPDATED)
 ```
 
 ## Commit History
 
 1. `5972b1b` - Created static API route for certificate approval
-2. `[current]` - Applied fix to CertificateApproval component
-3. `[next]` - Documentation added
+2. `[previous]` - Applied fix to CertificateApproval component
+3. `[previous]` - Documentation added
+4. `[current]` - Fixed center approvals with static route
 
 ## Future Recommendations
 

@@ -139,13 +139,13 @@ export default function CenterApprovals() {
         try {
             const token = localStorage.getItem('auth_token')
             
-            const response = await fetch(`/api/admin/center-requests/${requestId}`, {
-                method: 'PUT',
+            const response = await fetch('/api/admin-center-request-action', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ action })
+                body: JSON.stringify({ requestId, action })
             })
 
             if (!response.ok) {

@@ -270,14 +270,7 @@ function AdminSidebar({
                     {/* Bottom Navigation */}
                     <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-4'}`}>
                         <div>
-                            <button
-                                onClick={() => window.open('mailto:support@adminapp.com', '_blank')}
-                                className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23] ${isCollapsed ? 'justify-center' : ''}`}
-                                title={isCollapsed ? (t('admin_help_support') || 'Help & Support') : ''}
-                            >
-                                <HelpCircle className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : isRTL ? 'ml-3' : 'mr-3'}`} />
-                                {!isCollapsed && <span className={isRTL ? 'mr-3' : 'ml-3'}>{t('admin_help_support') || 'Help & Support'}</span>}
-                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -470,7 +463,7 @@ export default function AdminDashboardPage() {
             // Try fallback route first for Vercel compatibility
             let response;
             let data;
-            
+
             try {
                 console.log('📊 Trying admin-dashboard-stats fallback route');
                 response = await fetch('/api/admin-dashboard-stats', {
@@ -479,7 +472,7 @@ export default function AdminDashboardPage() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (response.ok) {
                     data = await response.json();
                     if (data.success) {

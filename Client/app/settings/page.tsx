@@ -16,11 +16,15 @@ import { Separator } from "@/components/ui/separator"
 import React from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import LogoutButton from "@/components/LogoutButton";
+import { useLanguage } from '@/lib/i18n';
 
 export default function SettingsPage() {
+  const { t, locale, isRTL } = useLanguage()
+
   useEffect(() => {
-    document.title = "Account Settings & Preferences | Healthcare Management System"
-  }, [])
+    const title = t('settings_page_title') || "Account Settings & Preferences | Healthcare Management System"
+    document.title = title
+  }, [t])
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
@@ -30,68 +34,72 @@ export default function SettingsPage() {
   };
 
   return (
-    <MainLayout breadcrumbs={[{ label: "Settings" }]}>
-      <div className="space-y-6">
+    <MainLayout breadcrumbs={[{ label: t('settings_breadcrumb') || "Settings" }]}>
+      <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
-          <Button>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings_title') || "Settings"}</h1>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            {t('save_changes') || "Save Changes"}
           </Button>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <Card>
+          <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle>User Settings</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">{t('user_settings') || "User Settings"}</CardTitle>
                 <TabsList>
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="account">Account</TabsTrigger>
-                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  <TabsTrigger value="security">Security</TabsTrigger>
+                  <TabsTrigger value="profile">{t('profile_tab') || "Profile"}</TabsTrigger>
+                  <TabsTrigger value="account">{t('account_tab') || "Account"}</TabsTrigger>
+                  <TabsTrigger value="notifications">{t('notifications_tab') || "Notifications"}</TabsTrigger>
+                  <TabsTrigger value="security">{t('security_tab') || "Security"}</TabsTrigger>
                 </TabsList>
               </div>
-              <CardDescription>Manage your account settings and preferences</CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                {t('settings_description') || "Manage your account settings and preferences"}
+              </CardDescription>
             </CardHeader>
           </Card>
 
           <TabsContent value="profile" className="space-y-6">
-            <Card>
+            <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800">
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Update your personal information</CardDescription>
+                <CardTitle className="text-gray-900 dark:text-white">{t('profile_information') || "Profile Information"}</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  {t('update_personal_info') || "Update your personal information"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-6">
                   <div className="sm:w-[180px] flex flex-col items-center gap-3">
-                    <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-3xl">
+                    <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-300 font-bold text-3xl">
                       A
                     </div>
                     <Button variant="outline" size="sm">
-                      Change Avatar
+                      {t('change_avatar') || "Change Avatar"}
                     </Button>
                   </div>
 
                   <div className="flex-1 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">{t('first_name') || "First Name"}</Label>
                         <Input id="firstName" defaultValue="Admin" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">{t('last_name') || "Last Name"}</Label>
                         <Input id="lastName" defaultValue="User" />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="displayName">Display Name</Label>
+                      <Label htmlFor="displayName">{t('display_name') || "Display Name"}</Label>
                       <Input id="displayName" defaultValue="Admin User" />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="title">Job Title</Label>
+                      <Label htmlFor="title">{t('job_title') || "Job Title"}</Label>
                       <Input id="title" defaultValue="System Administrator" />
                     </div>
                   </div>
@@ -101,32 +109,32 @@ export default function SettingsPage() {
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
+                    <Label htmlFor="bio">{t('bio') || "Bio"}</Label>
                     <Textarea
                       id="bio"
-                      placeholder="Write a short bio about yourself"
-                      defaultValue="System administrator for EduHub platform, managing centers and user access."
+                      placeholder={t('bio_placeholder') || "Write a short bio about yourself"}
+                      defaultValue={t('bio_default') || "System administrator for EduHub platform, managing centers and user access."}
                       rows={4}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="location">{t('location') || "Location"}</Label>
                       <Input id="location" defaultValue="New York, NY" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="timezone">Timezone</Label>
+                      <Label htmlFor="timezone">{t('timezone') || "Timezone"}</Label>
                       <Select defaultValue="America/New_York">
                         <SelectTrigger id="timezone">
-                          <SelectValue placeholder="Select timezone" />
+                          <SelectValue placeholder={t('select_timezone') || "Select timezone"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                          <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                          <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                          <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                          <SelectItem value="Europe/London">Greenwich Mean Time (GMT)</SelectItem>
+                          <SelectItem value="America/New_York">{t('timezone_et') || "Eastern Time (ET)"}</SelectItem>
+                          <SelectItem value="America/Chicago">{t('timezone_ct') || "Central Time (CT)"}</SelectItem>
+                          <SelectItem value="America/Denver">{t('timezone_mt') || "Mountain Time (MT)"}</SelectItem>
+                          <SelectItem value="America/Los_Angeles">{t('timezone_pt') || "Pacific Time (PT)"}</SelectItem>
+                          <SelectItem value="Europe/London">{t('timezone_gmt') || "Greenwich Mean Time (GMT)"}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -135,25 +143,27 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800">
               <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-                <CardDescription>Update your contact details</CardDescription>
+                <CardTitle className="text-gray-900 dark:text-white">{t('contact_information') || "Contact Information"}</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  {t('update_contact_details') || "Update your contact details"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">{t('email_address') || "Email Address"}</Label>
                   <Input id="email" type="email" defaultValue="admin@eduhub.com" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">{t('phone_number') || "Phone Number"}</Label>
                   <Input id="phone" type="tel" defaultValue="+1 (555) 123-4567" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="altEmail">Alternative Email</Label>
-                  <Input id="altEmail" type="email" placeholder="Enter an alternative email" />
+                  <Label htmlFor="altEmail">{t('alternative_email') || "Alternative Email"}</Label>
+                  <Input id="altEmail" type="email" placeholder={t('enter_alternative_email') || "Enter an alternative email"} />
                 </div>
               </CardContent>
             </Card>
@@ -391,32 +401,34 @@ export default function SettingsPage() {
         </Tabs>
 
         {/* Logout section - Updated to be more prominent */}
-        <Card className="mt-6">
+        <Card className="mt-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-red-200 dark:border-red-800">
           <CardHeader>
-            <CardTitle className="text-red-600 dark:text-red-400">Account Access</CardTitle>
-            <CardDescription>Manage your account access and sessions</CardDescription>
+            <CardTitle className="text-red-600 dark:text-red-400">{t('account_access') || "Account Access"}</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              {t('manage_account_access') || "Manage your account access and sessions"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 rounded-lg">
               <div>
-                <h3 className="text-base font-medium">Sign Out</h3>
+                <h3 className="text-base font-medium text-gray-900 dark:text-white">{t('sign_out') || "Sign Out"}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Sign out of your account on this device
+                  {t('sign_out_device_desc') || "Sign out of your account on this device"}
                 </p>
               </div>
               <LogoutButton
                 variant="destructive"
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
               >
-                Sign Out
+                {t('sign_out') || "Sign Out"}
               </LogoutButton>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium">Active Sessions</h3>
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">{t('active_sessions') || "Active Sessions"}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Manage and sign out from all of your active sessions on other browsers and devices
+                  {t('manage_all_sessions') || "Manage and sign out from all of your active sessions on other browsers and devices"}
                 </p>
               </div>
               <LogoutButton
@@ -425,7 +437,7 @@ export default function SettingsPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
-                Sign out from all devices
+                {t('sign_out_all_devices') || "Sign out from all devices"}
               </LogoutButton>
             </div>
           </CardContent>

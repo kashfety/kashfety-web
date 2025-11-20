@@ -1977,14 +1977,7 @@ function Sidebar({
           {/* Bottom Navigation */}
           <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-4'}`}>
             <div className="space-y-1">
-              <button
-                onClick={() => window.open('mailto:support@doctorapp.com', '_blank')}
-                className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23] ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? (t('help_support') || 'Help & Support') : ''}
-              >
-                <HelpCircle className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-                {!isCollapsed && <span className="ml-3">{t('help_support') || 'Help & Support'}</span>}
-              </button>
+
               <button
                 onClick={onSignOut}
                 className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 ${isCollapsed ? 'justify-center' : ''}`}

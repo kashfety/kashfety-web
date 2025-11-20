@@ -281,6 +281,19 @@ export function formatLocalizedNumber(value: number | string, locale: Locale, op
   }
 }
 
+/**
+ * Format time string for appointment display with locale support
+ * @param timeString - Time string (e.g., "09:00 AM")
+ * @param locale - Current locale
+ * @returns Formatted time string
+ */
+export function formatLocalizedTime(timeString: string, locale: Locale): string {
+  if (locale === 'ar') {
+    return toArabicNumerals(timeString, locale);
+  }
+  return timeString;
+}
+
 export const translations = {
   en: {
     // Navigation
@@ -296,6 +309,108 @@ export const translations = {
     error_rate: "Error Rate",
     analytics: "Analytics",
     settings: "Settings",
+
+    // Schedule Page
+    schedule_page_title: "Doctor Schedule Management | Healthcare Appointment System",
+    schedule_breadcrumb: "Schedule",
+    today_schedule: "Today's Schedule",
+    add_appointment: "Add Appointment",
+    schedule_appointments: "Appointments",
+    manage_patient_appointments: "Manage your patient appointments",
+    search_patients: "Search patients...",
+    schedule_time: "Time",
+    schedule_patient: "Patient",
+    schedule_type: "Type",
+    schedule_duration: "Duration",
+    schedule_status: "Status",
+    schedule_contact: "Contact",
+
+    // Appointment Types
+    appointment_type_consultation: "Consultation",
+    appointment_type_follow_up: "Follow-up",
+    appointment_type_treatment: "Treatment",
+    appointment_type_emergency: "Emergency",
+
+    // Duration translations
+    duration_30_min: "30 min",
+    duration_45_min: "45 min",
+    duration_60_min: "60 min",
+
+    // Status translations
+    schedule_status_confirmed: "Confirmed",
+    schedule_status_pending: "Pending",
+    schedule_status_urgent: "Urgent",
+
+    // Settings Page
+    settings_page_title: "Account Settings & Preferences | Healthcare Management System",
+    settings_breadcrumb: "Settings",
+    settings_title: "Settings",
+    save_changes: "Save Changes",
+    user_settings: "User Settings",
+    profile_tab: "Profile",
+    account_tab: "Account",
+    notifications_tab: "Notifications",
+    security_tab: "Security",
+    settings_description: "Manage your account settings and preferences",
+
+    // Profile Information
+    profile_information: "Profile Information",
+    update_personal_info: "Update your personal information",
+    change_avatar: "Change Avatar",
+    first_name: "First Name",
+    last_name: "Last Name",
+    display_name: "Display Name",
+    job_title: "Job Title",
+    bio: "Bio",
+    bio_placeholder: "Write a short bio about yourself",
+    bio_default: "System administrator for EduHub platform, managing centers and user access.",
+    location: "Location",
+    timezone: "Timezone",
+    select_timezone: "Select timezone",
+    timezone_et: "Eastern Time (ET)",
+    timezone_ct: "Central Time (CT)",
+    timezone_mt: "Mountain Time (MT)",
+    timezone_pt: "Pacific Time (PT)",
+    timezone_gmt: "Greenwich Mean Time (GMT)",
+
+    // Contact Information
+    contact_information: "Contact Information",
+    update_contact_details: "Update your contact details",
+    email_address: "Email Address",
+    phone_number: "Phone Number",
+    alternative_email: "Alternative Email",
+    enter_alternative_email: "Enter an alternative email",
+
+    // Account Access & Sign Out
+    account_access: "Account Access",
+    manage_account_access: "Manage your account access and sessions",
+    sign_out: "Sign Out",
+    sign_out_device_desc: "Sign out of your account on this device",
+    active_sessions: "Active Sessions",
+    manage_all_sessions: "Manage and sign out from all of your active sessions on other browsers and devices",
+    sign_out_all_devices: "Sign out from all devices",
+
+    // Services Management
+    services_lab_test_types: "Lab Test Types",
+    services_add_new_type: "Add New Type",
+    services_create_lab_test_type: "Create Lab Test Type",
+    services_code: "Code",
+    services_code_placeholder: "e.g., CBC, MRI",
+    services_name: "Name",
+    services_name_placeholder: "e.g., Complete Blood Count",
+    services_category: "Category",
+    services_lab: "Lab",
+    services_imaging: "Imaging",
+    services_default_fee: "Default Fee (Optional)",
+    services_cancel: "Cancel",
+    services_create: "Create",
+    services_creating: "Creating...",
+    services_enabled: "Enabled",
+    services_fee: "Fee",
+    services_save: "Save",
+    services_saving: "Saving...",
+    services_category_lab: "Lab",
+    services_category_imaging: "Imaging",
 
     // Units / common UI
     minutes_short: "min",
@@ -442,7 +557,7 @@ export const translations = {
     dd_dashboard: "Dashboard",
     dd_management_section: "Management",
     dd_communication_section: "Communication",
-    dd_help_support: "Help & Support",
+
     dd_today: "Today",
     dd_this_month: "This month",
     dd_overview_tab: "Overview",
@@ -1637,7 +1752,7 @@ export const translations = {
     admin_notifications: "Notifications",
     admin_account: "Account",
     admin_profile: "Profile",
-    admin_help_support: "Help & Support",
+
     admin_welcome_back: "Welcome back",
     admin_whats_happening: "Here's what's happening in your system today",
     admin_total_users: "Users",
@@ -1836,6 +1951,108 @@ export const translations = {
     analytics: "التحليلات",
     settings: "الإعدادات",
 
+    // Schedule Page
+    schedule_page_title: "إدارة جداول الطبيب | نظام إدارة المواعيد الطبية",
+    schedule_breadcrumb: "الجدول",
+    today_schedule: "جدول اليوم",
+    add_appointment: "إضافة موعد",
+    schedule_appointments: "المواعيد",
+    manage_patient_appointments: "إدارة مواعيد المرضى",
+    search_patients: "البحث عن المرضى...",
+    schedule_time: "الوقت",
+    schedule_patient: "المريض",
+    schedule_type: "النوع",
+    schedule_duration: "المدة",
+    schedule_status: "الحالة",
+    schedule_contact: "الاتصال",
+
+    // Appointment Types
+    appointment_type_consultation: "استشارة",
+    appointment_type_follow_up: "متابعة",
+    appointment_type_treatment: "علاج",
+    appointment_type_emergency: "طوارئ",
+
+    // Duration translations
+    duration_30_min: "٣٠ دقيقة",
+    duration_45_min: "٤٥ دقيقة",
+    duration_60_min: "٦٠ دقيقة",
+
+    // Status translations
+    schedule_status_confirmed: "مؤكد",
+    schedule_status_pending: "في الانتظار",
+    schedule_status_urgent: "عاجل",
+
+    // Settings Page
+    settings_page_title: "إعدادات الحساب والتفضيلات | نظام إدارة الرعاية الصحية",
+    settings_breadcrumb: "الإعدادات",
+    settings_title: "الإعدادات",
+    save_changes: "حفظ التغييرات",
+    user_settings: "إعدادات المستخدم",
+    profile_tab: "الملف الشخصي",
+    account_tab: "الحساب",
+    notifications_tab: "الإشعارات",
+    security_tab: "الأمان",
+    settings_description: "إدارة إعدادات الحساب والتفضيلات",
+
+    // Profile Information
+    profile_information: "معلومات الملف الشخصي",
+    update_personal_info: "تحديث معلوماتك الشخصية",
+    change_avatar: "تغيير الصورة الشخصية",
+    first_name: "الاسم الأول",
+    last_name: "اسم العائلة",
+    display_name: "اسم العرض",
+    job_title: "المسمى الوظيفي",
+    bio: "السيرة الذاتية",
+    bio_placeholder: "اكتب نبذة مختصرة عن نفسك",
+    bio_default: "مدير النظام لمنصة EduHub، يدير المراكز ووصول المستخدمين.",
+    location: "الموقع",
+    timezone: "المنطقة الزمنية",
+    select_timezone: "اختر المنطقة الزمنية",
+    timezone_et: "التوقيت الشرقي (ET)",
+    timezone_ct: "التوقيت المركزي (CT)",
+    timezone_mt: "توقيت الجبل (MT)",
+    timezone_pt: "توقيت المحيط الهادئ (PT)",
+    timezone_gmt: "توقيت غرينتش (GMT)",
+
+    // Contact Information
+    contact_information: "معلومات الاتصال",
+    update_contact_details: "تحديث بيانات الاتصال",
+    email_address: "عنوان البريد الإلكتروني",
+    phone_number: "رقم الهاتف",
+    alternative_email: "البريد الإلكتروني البديل",
+    enter_alternative_email: "أدخل بريد إلكتروني بديل",
+
+    // Account Access & Sign Out
+    account_access: "الوصول للحساب",
+    manage_account_access: "إدارة الوصول لحسابك والجلسات النشطة",
+    sign_out: "تسجيل الخروج",
+    sign_out_device_desc: "تسجيل الخروج من حسابك على هذا الجهاز",
+    active_sessions: "الجلسات النشطة",
+    manage_all_sessions: "إدارة وتسجيل الخروج من جميع الجلسات النشطة على المتصفحات والأجهزة الأخرى",
+    sign_out_all_devices: "تسجيل الخروج من جميع الأجهزة",
+
+    // Services Management
+    services_lab_test_types: "أنواع الفحوصات المخبرية",
+    services_add_new_type: "إضافة نوع جديد",
+    services_create_lab_test_type: "إنشاء نوع فحص مخبري",
+    services_code: "الرمز",
+    services_code_placeholder: "مثال: CBC, MRI",
+    services_name: "الاسم",
+    services_name_placeholder: "مثال: تعداد الدم الشامل",
+    services_category: "الفئة",
+    services_lab: "مخبري",
+    services_imaging: "تصوير",
+    services_default_fee: "الرسوم الافتراضية (اختياري)",
+    services_cancel: "إلغاء",
+    services_create: "إنشاء",
+    services_creating: "جاري الإنشاء...",
+    services_enabled: "خدمات مُفعّلة حالياً",
+    services_fee: "الرسوم",
+    services_save: "حفظ",
+    services_saving: "جاري الحفظ...",
+    services_category_lab: "مخبري",
+    services_category_imaging: "تصوير",
+
     // Units / common UI
     minutes_short: "د",
     days: "أيام",
@@ -1981,7 +2198,7 @@ export const translations = {
     dd_dashboard: "لوحة التحكم",
     dd_management_section: "الإدارة",
     dd_communication_section: "التواصل",
-    dd_help_support: "المساعدة والدعم",
+
     dd_today: "اليوم",
     dd_this_month: "هذا الشهر",
     dd_overview_tab: "نظرة عامة",
@@ -3020,7 +3237,6 @@ export const translations = {
     reset_pricing: "إعادة تعيين الأسعار",
     restore_default_prices: "استعادة الأسعار الافتراضية",
     bulk_enable: "تفعيل مجمع",
-    services_enabled: "خدمات مُفعّلة حالياً",
     bulk_disable: "تعطيل مجمع",
     all_services_disabled: "تم تعطيل جميع الخدمات",
     pricing_reset: "إعادة تعيين الأسعار",
@@ -3234,7 +3450,7 @@ export const translations = {
     admin_notifications: "الإشعارات",
     admin_account: "الحساب",
     admin_profile: "الملف الشخصي",
-    admin_help_support: "المساعدة والدعم",
+
     admin_welcome_back: "مرحباً بعودتك",
     admin_whats_happening: "إليك ما يحدث في نظامك اليوم",
     admin_total_users: "المستخدمون",

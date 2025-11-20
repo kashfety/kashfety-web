@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Filter, Clock, User, Phone } from "lucide-react"
+import { useLanguage } from '@/lib/i18n'
+import { formatLocalizedNumber, formatLocalizedDate, formatLocalizedTime } from '@/lib/i18n'
 
 // Sample data for appointments
 const appointments = [
@@ -64,10 +66,13 @@ const appointments = [
 ]
 
 export default function SchedulePage() {
+  const { t, locale, isRTL } = useLanguage()
+
   // Set comprehensive page title
   useEffect(() => {
-    document.title = "Doctor Schedule Management | Healthcare Appointment System"
-  }, [])
+    const title = t('schedule_page_title') || "Doctor Schedule Management | Healthcare Appointment System"
+    document.title = title
+  }, [t])
 
   // Set up intersection observer for scroll animations
   useEffect(() => {
@@ -96,61 +101,65 @@ export default function SchedulePage() {
   }, [])
 
   return (
-    <MainLayout breadcrumbs={[{ label: "Schedule" }]}>
-      <div className="space-y-6">
+    <MainLayout breadcrumbs={[{ label: t('schedule_breadcrumb') || "Schedule" }]}>
+      <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 scroll-animation">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Today's Schedule</h1>
-          <Button className="bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Appointment
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('today_schedule') || "Today's Schedule"}</h1>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            {t('add_appointment') || "Add Appointment"}
           </Button>
         </div>
 
-        <Card className="scroll-animation animation-delay-200 bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800">
+        <Card className="scroll-animation animation-delay-200 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-gray-900 dark:text-white">Appointments</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">{t('schedule_appointments') || "Appointments"}</CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
-              Manage your patient appointments
+              {t('manage_patient_appointments') || "Manage your patient appointments"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Input type="search" placeholder="Search patients..." className="pl-9 w-full" />
+                <Search className={`absolute ${isRTL ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400`} />
+                <Input
+                  type="search"
+                  placeholder={t('search_patients') || "Search patients..."}
+                  className={`${isRTL ? 'pr-9' : 'pl-9'} w-full`}
+                />
               </div>
-              <Button variant="outline" size="icon" className="h-10 w-10 border-green-200 dark:border-green-700">
+              <Button variant="outline" size="icon" className="h-10 w-10 border-emerald-200 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="rounded-md border border-green-200 dark:border-green-800">
+            <div className="rounded-md border border-emerald-200 dark:border-emerald-800">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-green-200 dark:border-green-800">
-                    <TableHead className="text-gray-700 dark:text-gray-300">Time</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Patient</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Type</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Duration</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Status</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-300">Contact</TableHead>
+                  <TableRow className="border-emerald-200 dark:border-emerald-800">
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_time') || "Time"}</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_patient') || "Patient"}</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_type') || "Type"}</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_duration') || "Duration"}</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_status') || "Status"}</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-300">{t('schedule_contact') || "Contact"}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {appointments.map((appointment, index) => (
                     <TableRow
                       key={appointment.id}
-                      className={`cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors scroll-animation animation-delay-${(index + 3) * 100} border-green-200 dark:border-green-800`}
+                      className={`cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors scroll-animation animation-delay-${(index + 3) * 100} border-emerald-200 dark:border-emerald-800`}
                     >
                       <TableCell className="font-medium">
                         <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
-                          {appointment.time}
+                          <Clock className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} text-emerald-600 dark:text-emerald-400`} />
+                          {formatLocalizedTime(appointment.time, locale)}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <User className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} text-gray-500 dark:text-gray-400`} />
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white">{appointment.patientName}</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">{appointment.notes}</div>
@@ -158,10 +167,14 @@ export default function SchedulePage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-gray-700 dark:text-gray-300">{appointment.type}</span>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {t(`appointment_type_${appointment.type.toLowerCase()}`) || appointment.type}
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-gray-700 dark:text-gray-300">{appointment.duration}</span>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {t(`duration_${appointment.duration.replace(' ', '_').toLowerCase()}`) || appointment.duration}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -172,13 +185,18 @@ export default function SchedulePage() {
                                 ? "destructive"
                                 : "outline"
                           }
+                          className={
+                            appointment.status === "confirmed"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                              : ""
+                          }
                         >
-                          {appointment.status}
+                          {t(`schedule_status_${appointment.status}`) || appointment.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <Phone className="h-3.5 w-3.5 mr-1.5 text-gray-500 dark:text-gray-400" />
+                          <Phone className={`h-3.5 w-3.5 ${isRTL ? 'ml-1.5' : 'mr-1.5'} text-gray-500 dark:text-gray-400`} />
                           <span className="text-sm text-gray-600 dark:text-gray-300">{appointment.phone}</span>
                         </div>
                       </TableCell>

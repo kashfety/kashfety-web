@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { labService, centerService } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { useLocale } from "@/components/providers/locale-provider";
+import { useLanguage } from '@/lib/i18n';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,12 +36,12 @@ interface TypeRow {
 
 export default function CenterServicesManagement() {
   const { toast } = useToast();
-  const { t } = useLocale();
+  const { t, locale, isRTL } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [types, setTypes] = useState<TypeRow[]>([]);
   const [services, setServices] = useState<Record<string, { active: boolean; fee?: string }>>({});
   const [saving, setSaving] = useState(false);
-  
+
   // New lab test type dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -86,13 +86,13 @@ export default function CenterServicesManagement() {
   const updateFee = (id: string, fee: string) => {
     setServices(prev => ({ ...prev, [id]: { active: prev[id]?.active ?? false, fee } }));
   };
-  
+
   const handleCreateTestType = async () => {
     if (!newTestType.code || !newTestType.name) {
       toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
       return;
     }
-    
+
     setCreating(true);
     try {
       const response = await labService.createLabTestType({
@@ -101,12 +101,12 @@ export default function CenterServicesManagement() {
         category: newTestType.category,
         default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
       });
-      
+
       const newType = response.data;
-      
+
       // Add to types list
       setTypes(prev => [...prev, newType]);
-      
+
       // Auto-enable in services with default fee
       setServices(prev => ({
         ...prev,
@@ -115,18 +115,18 @@ export default function CenterServicesManagement() {
           fee: newTestType.default_fee || ''
         }
       }));
-      
+
       toast({ title: 'Success', description: 'Lab test type created successfully' });
-      
+
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
       setShowCreateDialog(false);
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
-      toast({ 
-        title: 'Error', 
+      toast({
+        title: 'Error',
         description: error.response?.data?.error || 'Failed to create lab test type',
-        variant: 'destructive' 
+        variant: 'destructive'
       });
     } finally {
       setCreating(false);
@@ -147,106 +147,113 @@ export default function CenterServicesManagement() {
   };
 
   return (
-    <Card className="bg-card p-4 border">
-      {loading ? (
-        <div className="text-sm text-muted-foreground">{t('loading') || 'Loading...'}</div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">{t('lab_test_types') || 'Lab Test Types'}</h3>
-            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('add_new_type') || 'Add New Type'}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t('create_lab_test_type') || 'Create Lab Test Type'}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="code">{t('code') || 'Code'} *</Label>
-                    <Input
-                      id="code"
-                      value={newTestType.code}
-                      onChange={(e) => setNewTestType(prev => ({ ...prev, code: e.target.value }))}
-                      placeholder="e.g., CBC, MRI"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t('name') || 'Name'} *</Label>
-                    <Input
-                      id="name"
-                      value={newTestType.name}
-                      onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="e.g., Complete Blood Count"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">{t('category') || 'Category'} *</Label>
-                    <Select
-                      value={newTestType.category}
-                      onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger id="category">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
-                        <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="default_fee">{t('default_fee') || 'Default Fee (Optional)'}</Label>
-                    <Input
-                      id="default_fee"
-                      type="number"
-                      value={newTestType.default_fee}
-                      onChange={(e) => setNewTestType(prev => ({ ...prev, default_fee: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
-                    {t('cancel') || 'Cancel'}
+    <div className={`${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800 p-4">
+        {loading ? (
+          <div className="text-sm text-gray-500 dark:text-gray-400">{t('loading') || 'Loading...'}</div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('services_lab_test_types') || 'Lab Test Types'}</h3>
+              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-emerald-200 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
+                    <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t('services_add_new_type') || 'Add New Type'}
                   </Button>
-                  <Button onClick={handleCreateTestType} disabled={creating}>
-                    {creating ? (t('creating') || 'Creating...') : (t('create') || 'Create')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {types.map((t1) => (
-              <div key={t1.id} className="border rounded-lg p-3">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">{t1.name}</div>
-                  <label className="inline-flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={!!services[t1.id]?.active} onChange={() => toggleActive(t1.id)} />
-                    {t('enabled') || 'Enabled'}
-                  </label>
+                </DialogTrigger>
+                <DialogContent className={`${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-900 dark:text-white">{t('services_create_lab_test_type') || 'Create Lab Test Type'}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="code" className="text-gray-700 dark:text-gray-300">{t('services_code') || 'Code'} *</Label>
+                      <Input
+                        id="code"
+                        value={newTestType.code}
+                        onChange={(e) => setNewTestType(prev => ({ ...prev, code: e.target.value }))}
+                        placeholder={t('services_code_placeholder') || "e.g., CBC, MRI"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">{t('services_name') || 'Name'} *</Label>
+                      <Input
+                        id="name"
+                        value={newTestType.name}
+                        onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder={t('services_name_placeholder') || "e.g., Complete Blood Count"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-gray-700 dark:text-gray-300">{t('services_category') || 'Category'} *</Label>
+                      <Select
+                        value={newTestType.category}
+                        onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
+                      >
+                        <SelectTrigger id="category">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="lab">{t('services_lab') || 'Lab'}</SelectItem>
+                          <SelectItem value="imaging">{t('services_imaging') || 'Imaging'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="default_fee" className="text-gray-700 dark:text-gray-300">{t('services_default_fee') || 'Default Fee (Optional)'}</Label>
+                      <Input
+                        id="default_fee"
+                        type="number"
+                        value={newTestType.default_fee}
+                        onChange={(e) => setNewTestType(prev => ({ ...prev, default_fee: e.target.value }))}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
+                      {t('services_cancel') || 'Cancel'}
+                    </Button>
+                    <Button onClick={handleCreateTestType} disabled={creating} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      {creating ? (t('services_creating') || 'Creating...') : (t('services_create') || 'Create')}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {types.map((t1) => (
+                <div key={t1.id} className="border border-emerald-200 dark:border-emerald-700 rounded-lg p-3 bg-white/50 dark:bg-gray-800/50">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium text-gray-900 dark:text-white">{t1.name}</div>
+                    <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input type="checkbox" checked={!!services[t1.id]?.active} onChange={() => toggleActive(t1.id)} />
+                      {t('services_enabled') || 'Enabled'}
+                    </label>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{t(`services_category_${t1.category}`) || t1.category}</div>
+                  <div className="mt-2">
+                    <div className="text-xs mb-1 text-gray-700 dark:text-gray-300">{t('services_fee') || 'Fee'}</div>
+                    <Input
+                      value={services[t1.id]?.fee ?? ''}
+                      onChange={(e) => updateFee(t1.id, e.target.value)}
+                      placeholder={(t1.default_fee ?? '').toString()}
+                      className="text-sm"
+                    />
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground">{t1.category}</div>
-                <div className="mt-2">
-                  <div className="text-xs mb-1">{t('fee') || 'Fee'}</div>
-                  <Input value={services[t1.id]?.fee ?? ''} onChange={(e) => updateFee(t1.id, e.target.value)} placeholder={(t1.default_fee ?? '').toString()} />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
+              <Button onClick={handleSave} disabled={saving || !anyChanged} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                {saving ? (t('services_saving') || 'Saving...') : (t('services_save') || 'Save')}
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={saving || !anyChanged} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-              {saving ? (t('saving') || 'Saving...') : (t('save') || 'Save')}
-            </Button>
-          </div>
-        </div>
-      )}
-    </Card>
+        )}
+      </Card>
+    </div>
   );
 }
 

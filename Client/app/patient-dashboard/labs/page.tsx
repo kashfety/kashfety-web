@@ -259,25 +259,18 @@ export default function PatientLabsPage() {
                                             setCategoryFilter(e.target.value as '' | 'lab' | 'imaging')
                                             setCurrentPage(1)
                                         }}
-                                        size={3}
-                                        className="w-full px-3 py-2 rounded-lg border-2 border-[#4DBCC4]/40 bg-gradient-to-r from-[#4DBCC4]/5 to-[#3da8b0]/5 dark:from-[#4DBCC4]/10 dark:to-[#3da8b0]/10 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-sm hover:shadow-md font-medium [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:py-2 [&>option]:px-3 [&>option:hover]:bg-[#4DBCC4]/20 [&>option:checked]:bg-[#4DBCC4] [&>option:checked]:text-white"
+                                        className="w-full h-10 px-3 py-2 rounded-lg border-2 border-[#4DBCC4] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] hover:shadow-lg focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-md font-medium appearance-none"
                                         style={{
-                                            height: '40px',
-                                            overflow: 'hidden'
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.height = 'auto';
-                                            e.target.style.maxHeight = '120px';
-                                            e.target.style.overflow = 'auto';
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.height = '40px';
-                                            e.target.style.overflow = 'hidden';
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
+                                            paddingLeft: isRTL ? '2rem' : '0.75rem',
+                                            paddingRight: isRTL ? '0.75rem' : '2rem'
                                         }}
                                     >
-                                        <option value="">{t('all_services') || 'All Services'}</option>
-                                        <option value="lab">{t('lab_tests') || 'Lab Tests'}</option>
-                                        <option value="imaging">{t('imaging') || 'Imaging'}</option>
+                                        <option value="" className="bg-white dark:bg-gray-800">{t('all_services') || 'All Services'}</option>
+                                        <option value="lab" className="bg-white dark:bg-gray-800">{t('lab_tests') || 'Lab Tests'}</option>
+                                        <option value="imaging" className="bg-white dark:bg-gray-800">{t('imaging') || 'Imaging'}</option>
                                     </select>
                                 </div>
                             </div>

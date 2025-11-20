@@ -290,36 +290,29 @@ export default function PatientDoctorsPage() {
                                 </div>
 
                                 {/* Specialty Filter */}
-                                <div>
+                                <div className="relative">
                                     <select
                                         value={specialtyFilter}
                                         onChange={(e) => {
                                             setSpecialtyFilter(e.target.value)
                                             setCurrentPage(1)
                                         }}
-                                        size={4}
-                                        className="w-full px-3 py-2 rounded-lg border-2 border-[#4DBCC4]/40 bg-gradient-to-r from-[#4DBCC4]/5 to-[#3da8b0]/5 dark:from-[#4DBCC4]/10 dark:to-[#3da8b0]/10 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-sm hover:shadow-md font-medium [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:py-2 [&>option]:px-3 [&>option:hover]:bg-[#4DBCC4]/20 [&>option:checked]:bg-[#4DBCC4] [&>option:checked]:text-white"
+                                        className="w-full h-10 px-3 py-2 rounded-lg border-2 border-[#4DBCC4] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:border-[#4DBCC4] hover:shadow-lg focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/30 cursor-pointer transition-all shadow-md font-medium appearance-none"
                                         style={{
-                                            height: '40px',
-                                            overflow: 'hidden'
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.height = 'auto';
-                                            e.target.style.maxHeight = '160px';
-                                            e.target.style.overflow = 'auto';
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.height = '40px';
-                                            e.target.style.overflow = 'hidden';
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234DBCC4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: isRTL ? 'left 0.75rem center' : 'right 0.75rem center',
+                                            paddingLeft: isRTL ? '2rem' : '0.75rem',
+                                            paddingRight: isRTL ? '0.75rem' : '2rem'
                                         }}
                                     >
-                                        <option value="">{t('all_specialties') || 'All Specialties'}</option>
+                                        <option value="" className="bg-white dark:bg-gray-800">{t('all_specialties') || 'All Specialties'}</option>
                                         {getUniqueSpecialties().map((specialty) => {
                                             // Find a doctor with this specialty to get localized name
                                             const doctorWithSpecialty = doctors.find(d => d.specialty === specialty);
                                             const localizedName = doctorWithSpecialty ? getLocalizedSpecialty(doctorWithSpecialty) : specialty;
                                             return (
-                                                <option key={specialty} value={specialty}>
+                                                <option key={specialty} value={specialty} className="bg-white dark:bg-gray-800">
                                                     {localizedName}
                                                 </option>
                                             );

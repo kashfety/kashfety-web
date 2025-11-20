@@ -487,7 +487,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       <AnimatePresence>
         {isOpen && (
           <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={`max-w-2xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}>
+            <DialogContent className={`max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}

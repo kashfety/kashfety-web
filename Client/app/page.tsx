@@ -72,8 +72,8 @@ export default function HomePage() {
         />
       )}
 
-      {/* Main Content */}
-      <div className="transition-all duration-300">
+      {/* Main Content - No transform, sidebar overlays on top */}
+      <div>
         {/* Animated Background Elements */}
         <motion.div
           className="absolute inset-0 opacity-20 sm:opacity-30"

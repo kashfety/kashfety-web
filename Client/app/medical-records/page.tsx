@@ -53,6 +53,14 @@ export default function MedicalRecordsPage() {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
+      {/* Overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
       {/* Main Content - No transform, sidebar overlays on top */}
       <div 
         className="flex flex-col min-h-screen"

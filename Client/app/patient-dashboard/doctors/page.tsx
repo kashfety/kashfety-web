@@ -380,10 +380,12 @@ export default function PatientDoctorsPage() {
 
                                                 {/* Rating & Experience */}
                                                 <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span>{toArabicNumerals(doctor.rating?.toFixed(1) || '0.0', locale)}</span>
-                                                    </div>
+                                                    {doctor.rating && doctor.rating > 0 && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                            <span>{toArabicNumerals(doctor.rating.toFixed(1), locale)}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1">
                                                         <Briefcase className="w-4 h-4 text-blue-500" />
                                                         <span>{toArabicNumerals(doctor.experience_years || 0, locale)}{t('year_short') || 'y'}</span>
@@ -489,10 +491,12 @@ export default function PatientDoctorsPage() {
                                                     {getLocalizedSpecialty(selectedDoctor)}
                                                 </DialogDescription>
                                                 <div className="flex items-center gap-4 mt-2">
-                                                    <div className="flex items-center gap-1 text-sm">
-                                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                        <span className="font-medium">{toArabicNumerals(selectedDoctor.rating?.toFixed(1) || '0.0', locale)}</span>
-                                                    </div>
+                                                    {selectedDoctor.rating && selectedDoctor.rating > 0 && (
+                                                        <div className="flex items-center gap-1 text-sm">
+                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                            <span className="font-medium">{toArabicNumerals(selectedDoctor.rating.toFixed(1), locale)}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                                         <Briefcase className="w-4 h-4" />
                                                         <span>{toArabicNumerals(selectedDoctor.experience_years || 0, locale)} {t('years_experience') || 'years experience'}</span>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocale } from '@/components/providers/locale-provider';
 import { Beaker, Plus, Trash2, Search, AlertCircle, CheckCircle } from 'lucide-react';
 import { useCustomAlert } from '@/hooks/use-custom-alert';
@@ -24,7 +25,7 @@ export default function LabTestTypesManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newTestType, setNewTestType] = useState({ name: '', name_ar: '' });
+  const [newTestType, setNewTestType] = useState({ name: '', name_ar: '', category: 'lab' });
   const [submitting, setSubmitting] = useState(false);
 
   const { alertConfig, isOpen, showSuccess, showError, hideAlert } = useCustomAlert();
@@ -74,7 +75,7 @@ export default function LabTestTypesManagement() {
         body: JSON.stringify({
           name: newTestType.name.trim(),
           name_ar: newTestType.name_ar.trim(),
-          category: 'general'
+          category: newTestType.category
         })
       });
 
@@ -90,7 +91,7 @@ export default function LabTestTypesManagement() {
         'Lab test type added successfully',
         () => {
           setLabTestTypes([data.labTestType, ...labTestTypes]);
-          setNewTestType({ name: '', name_ar: '' });
+          setNewTestType({ name: '', name_ar: '', category: 'lab' });
           setIsAddingNew(false);
         }
       );
@@ -195,6 +196,24 @@ export default function LabTestTypesManagement() {
                 />
               </div>
             </div>
+            
+            <div className="mt-4">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={newTestType.category}
+                onValueChange={(value) => setNewTestType({ ...newTestType, category: value })}
+                disabled={submitting}
+              >
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lab">Lab Tests</SelectItem>
+                  <SelectItem value="imaging">Imaging</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div className="flex gap-2 mt-4">
               <Button
                 onClick={handleAddTestType}
@@ -206,7 +225,7 @@ export default function LabTestTypesManagement() {
               <Button
                 onClick={() => {
                   setIsAddingNew(false);
-                  setNewTestType({ name: '', name_ar: '' });
+                  setNewTestType({ name: '', name_ar: '', category: 'lab' });
                 }}
                 variant="outline"
                 disabled={submitting}

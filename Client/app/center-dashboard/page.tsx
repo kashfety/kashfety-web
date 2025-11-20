@@ -1012,7 +1012,7 @@ function CenterAnalytics({
                         border: `2px solid ${isDark ? "#10B981" : "#10B981"}`,
                         borderRadius: "12px",
                         boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
-                        color: isDark ? "#10B981" : "#0f172a",
+                        color: isDark ? "#f8fafc" : "#0f172a",
                         backdropFilter: "blur(12px)",
                         WebkitBackdropFilter: "blur(12px)",
                         textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
@@ -1083,23 +1083,24 @@ function CenterAnalytics({
                         }}
                         labelFormatter={(label) => `${t('cd_gender')}: ${label}`}
                         contentStyle={{
-                          backgroundColor: isDark ? "rgba(15, 23, 42, 0.98)" : "rgba(255, 255, 255, 0.98)",
-                          border: `2px solid ${isDark ? "#10B981" : "#10B981"}`,
+                          backgroundColor: "rgba(255, 255, 255, 0.98)",
+                          border: "2px solid #10B981",
                           borderRadius: "12px",
-                          boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.2)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
-                          color: isDark ? "#f8fafc" : "#0f172a",
+                          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(16, 185, 129, 0.1)",
+                          color: "#1f2937 !important",
                           fontSize: "14px",
                           fontWeight: "600",
                           padding: "12px 16px",
                           backdropFilter: "blur(12px)",
                           WebkitBackdropFilter: "blur(12px)",
-                          zIndex: 9999,
-                          textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
+                          zIndex: 9999
                         }}
                         wrapperStyle={{
                           zIndex: 9999,
-                          outline: "none"
+                          outline: "none",
+                          color: "#1f2937 !important"
                         }}
+                        wrapperClassName="pie-chart-tooltip"
                         cursor={{ fill: "transparent" }}
                       />
                     </PieChart>

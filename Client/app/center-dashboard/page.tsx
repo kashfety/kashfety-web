@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocale } from '@/components/providers/locale-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from "next-themes";
-import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders } from '@/lib/i18n';
+import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -1575,7 +1575,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Clock className="h-5 w-5" />
-              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('center_schedule_management') || 'Lab Schedule Management'}</h2>
+              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management') || 'Lab Schedule Management'}</h2>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -1765,7 +1765,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {slots.slice(0, 8).map((slot, index) => (
                                     <Badge key={index} variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
-                                      {locale === 'ar' ? toArabicNumerals(slot.time) : slot.time}
+                                      {formatLocalizedTime(slot.time, locale)}
                                     </Badge>
                                   ))}
                                   {slots.length > 8 && (

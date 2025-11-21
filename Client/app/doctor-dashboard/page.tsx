@@ -1146,7 +1146,7 @@ export default function DoctorDashboard() {
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0F0F12]">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
               {/* Overview Tab */}
-              <TabsContent value="overview" className="p-6 space-y-6 h-full">
+              <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full">
                 {/* Welcome Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1428,7 +1428,7 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               {/* Analytics Tab (in-place, same route) */}
-              <TabsContent value="analytics" className="p-6 h-full space-y-6">
+              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl gradient-emerald">
                     <BarChart2 className="h-5 w-5 text-white" />
@@ -1564,7 +1564,7 @@ export default function DoctorDashboard() {
                 </Card>
               </TabsContent>
               {/* Appointments Tab */}
-              <TabsContent value="appointments" className="p-6 h-full">
+              <TabsContent value="appointments" className="py-6 px-4 h-full">
                 {/* Hero like old dashboard */}
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
@@ -1845,7 +1845,7 @@ export default function DoctorDashboard() {
                 />
               </TabsContent>
 
-              <TabsContent value="patients" className="p-6 h-full">
+              <TabsContent value="patients" className="py-6 px-4 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Users className="h-5 w-5 text-white" /></div>
@@ -2049,7 +2049,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="schedule" className="p-6 h-full">
+              <TabsContent value="schedule" className="py-6 px-4 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
@@ -2070,7 +2070,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="centers" className="p-6 h-full">
+              <TabsContent value="centers" className="py-6 px-4 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Building2 className="h-5 w-5 text-white" /></div>
@@ -2085,7 +2085,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="reviews" className="p-6 h-full">
+              <TabsContent value="reviews" className="py-6 px-4 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
@@ -2196,7 +2196,7 @@ export default function DoctorDashboard() {
                 )}
               </TabsContent>
 
-              <TabsContent value="profile" className="p-6 h-full">
+              <TabsContent value="profile" className="py-6 px-4 h-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>

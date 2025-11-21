@@ -92,6 +92,30 @@ function getLocalizedNameUtil(item: any, currentLocale: string, fallbackField = 
     item.first_name || item.last_name || '';
 }
 
+// Generic utility to localize arbitrary text fields (e.g., descriptions, addresses)
+function getLocalizedFieldValue(item: any, currentLocale: string, field: string) {
+  if (!item) return '';
+
+  if (currentLocale === 'ar') {
+    const translationValue = item?.translations?.[currentLocale]?.[field];
+    const candidates = [
+      translationValue,
+      item?.[`${field}_ar`],
+      item?.[`${field}Ar`],
+      item?.[`${field}_arabic`],
+      item?.[`${field}Arabic`]
+    ];
+
+    for (const value of candidates) {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+  }
+
+  return item?.[field] || item?.translations?.en?.[field] || '';
+}
+
 // TopNav Component
 function TopNav({
   centerProfile,
@@ -2043,6 +2067,11 @@ export default function CenterDashboardPage() {
     description: ''
   });
 
+  const getProfileField = (field: string) => {
+    if (!centerProfile) return '';
+    return getLocalizedFieldValue(centerProfile, locale, field) || (centerProfile as any)?.[field] || '';
+  };
+
   // Loading and saving states
   const [servicesLoading, setServicesLoading] = useState(false);
   const [scheduleLoading, setScheduleLoading] = useState(false);
@@ -3471,7 +3500,9 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <h4 className="font-semibold text-gray-900 dark:text-white">{displayName}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{testType.description}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description') || 'No description provided'}
+                                    </p>
                                     <div className="flex items-center gap-4 mt-2">
                                       <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {t('duration') || 'Duration'}: {formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes') || 'minutes'}
@@ -3637,8 +3668,8 @@ export default function CenterDashboardPage() {
                                       </div>
                                       <h3 className={`font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{displayName}</h3>
                                     </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                                      {testType.description}
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description') || 'No description provided'}
                                     </p>
                                     <div className="space-y-2">
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -3805,57 +3836,74 @@ export default function CenterDashboardPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                            {centerProfile.name ? (
-                              <span className="text-white font-medium text-sm">
-                                {centerProfile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
-                              </span>
-                            ) : (
-                              <Building2 className="w-5 h-5 text-white" />
-                            )}
-                          </div>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <p className="font-medium text-gray-900 dark:text-white">{centerProfile.name || t('cd_no_name_set') || 'No name set'}</p>
-                            <p className="text-sm text-gray-500">{centerProfile.email || t('cd_no_email_set') || 'No email set'}</p>
-                          </div>
-                        </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Phone className="w-3 h-3" />
-                            {t('phone') || 'Phone'}
-                          </p>
-                          <p className="font-medium">{centerProfile.phone || t('cd_not_provided')}</p>
-                        </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Building2 className="w-3 h-3" />
-                            {t('address') || 'Address'}
-                          </p>
-                          <p className="font-medium">{centerProfile.address || t('cd_not_provided')}</p>
-                        </div>
-                        {(centerProfile.website || centerProfile.description) && (
-                          <>
-                            {centerProfile.website && (
+                      {(() => {
+                        const localizedName = getProfileField('name');
+                        const displayName = localizedName || centerProfile.name || t('cd_no_name_set') || 'No name set';
+                        const localizedAddress = getProfileField('address');
+                        const displayAddress = localizedAddress || centerProfile.address || t('cd_not_provided');
+                        const localizedDescription = getProfileField('description') || centerProfile.description || '';
+                        const initialsSource = (localizedName || centerProfile.name || '').trim();
+                        const initials = initialsSource
+                          ? initialsSource.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+                          : '';
+                        const websiteValue = getProfileField('website') || centerProfile.website || '';
+
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                                {initials ? (
+                                  <span className="text-white font-medium text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {initials}
+                                  </span>
+                                ) : (
+                                  <Building2 className="w-5 h-5 text-white" />
+                                )}
+                              </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website') || 'Website'}</p>
-                                <p className="font-medium text-blue-600 hover:text-blue-800">
-                                  <a href={centerProfile.website} target="_blank" rel="noopener noreferrer">
-                                    {centerProfile.website}
-                                  </a>
-                                </p>
+                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</p>
+                                <p className="text-sm text-gray-500" dir="ltr">{centerProfile.email || t('cd_no_email_set') || 'No email set'}</p>
                               </div>
+                            </div>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <Phone className="w-3 h-3" />
+                                {t('phone') || 'Phone'}
+                              </p>
+                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{centerProfile.phone || t('cd_not_provided')}</p>
+                            </div>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <Building2 className="w-3 h-3" />
+                                {t('address') || 'Address'}
+                              </p>
+                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{displayAddress}</p>
+                            </div>
+                            {(websiteValue || localizedDescription) && (
+                              <>
+                                {websiteValue && (
+                                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website') || 'Website'}</p>
+                                    <p className="font-medium text-blue-600 hover:text-blue-800" dir="ltr">
+                                      <a href={websiteValue} target="_blank" rel="noopener noreferrer">
+                                        {websiteValue}
+                                      </a>
+                                    </p>
+                                  </div>
+                                )}
+                                {localizedDescription && (
+                                  <div className={`col-span-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description') || 'Description'}</p>
+                                    <p className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {localizedDescription}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
                             )}
-                            {centerProfile.description && (
-                              <div className={`col-span-full ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description') || 'Description'}</p>
-                                <p className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{centerProfile.description}</p>
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
+                          </div>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 )}
@@ -3908,6 +3956,7 @@ export default function CenterDashboardPage() {
                             onChange={(e) => updateProfileForm('email', e.target.value)}
                             className="mt-1"
                             required
+                            dir="ltr"
                           />
                           <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
                         </div>
@@ -3919,6 +3968,7 @@ export default function CenterDashboardPage() {
                             value={profileForm.phone}
                             onChange={(e) => updateProfileForm('phone', e.target.value)}
                             className="mt-1"
+                            dir="ltr"
                           />
                           <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
                         </div>
@@ -3932,6 +3982,7 @@ export default function CenterDashboardPage() {
                             value={profileForm.address}
                             onChange={(e) => updateProfileForm('address', e.target.value)}
                             className="mt-1"
+                            dir={isRTL ? 'rtl' : 'ltr'}
                           />
                           <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_physical_location') || 'Physical location for patient visits'}</p>
                         </div>
@@ -3943,6 +3994,7 @@ export default function CenterDashboardPage() {
                             value={profileForm.website}
                             onChange={(e) => updateProfileForm('website', e.target.value)}
                             className="mt-1"
+                            dir="ltr"
                           />
                           <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_optional_website') || 'Optional website for more information'}</p>
                         </div>

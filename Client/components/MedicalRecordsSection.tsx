@@ -139,15 +139,6 @@ export default function MedicalRecordsSection() {
     record_date: new Date().toISOString().split('T')[0]
   });
 
-  // Debug logging for RTL and Emergency Contact issues
-  useEffect(() => {
-    console.log('MedicalRecordsSection Debug:', { 
-      locale, 
-      isRTL, 
-      emergencyContact: medicalInfo?.emergency_contact 
-    });
-  }, [locale, isRTL, medicalInfo]);
-
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       fetchMedicalInfo();
@@ -716,14 +707,20 @@ export default function MedicalRecordsSection() {
                   <div className="w-full">
                     {medicalInfo?.emergency_contact?.name ? (
                       <div className="space-y-2 w-full">
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
+                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}
+                          </p>
                         </div>
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
+                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}
+                          </p>
                         </div>
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <p><strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{medicalInfo.emergency_contact.phone}</span></p>
+                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{medicalInfo.emergency_contact.phone}</span>
+                          </p>
                         </div>
                       </div>
                     ) : (

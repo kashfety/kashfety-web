@@ -3160,14 +3160,14 @@ export default function CenterDashboardPage() {
                 {/* Today's Appointments */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CardHeader>
-                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                      {t('cd_upcoming_appointments') || 'Upcoming Appointments'}
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      {t('cd_upcoming_appointments') || 'المواعيد القادمة'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {todayStats?.appointments?.length > 0 ? todayStats.appointments.map((appointment: any, index: number) => (
-                        <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 space-y-3">
+                        <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 space-y-3 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800">
                           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <div className={`w-3 h-3 rounded-full ${appointment.status === 'completed' ? 'bg-green-500' :
@@ -3256,7 +3256,7 @@ export default function CenterDashboardPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewPatient(appointment.patient_id, appointment.patient_name)}
-                              className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                              className={`${isRTL ? 'flex-row-reverse' : ''} hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`}
                             >
                               <User className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                               {t('cd_view_patient') || 'عرض المريض'}
@@ -3264,10 +3264,10 @@ export default function CenterDashboardPage() {
                           </div>
                         </div>
                       )) : (
-                        <div className={`text-center py-8 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className="text-center py-8">
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today') || 'لا توجد مواعيد لليوم'}</p>
-                          <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear') || 'ستظهر المواعيد هنا عندما يقوم المرضى بالحجز'}</p>
+                          <p className="text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today') || 'لا توجد مواعيد لليوم'}</p>
+                          <p className="text-sm text-gray-400 mt-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear') || 'ستظهر المواعيد هنا عندما يقوم المرضى بالحجز'}</p>
                         </div>
                       )}
                     </div>

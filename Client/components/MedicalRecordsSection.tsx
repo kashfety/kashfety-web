@@ -509,7 +509,7 @@ export default function MedicalRecordsSection() {
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="flex flex-col h-auto w-full sm:grid sm:grid-cols-5">
             <TabsTrigger value="overview" disabled={editing && false}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
             <TabsTrigger value="allergies" disabled={editing && false}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
             <TabsTrigger value="medications" disabled={editing && false}>{t('mr_tab_medications') || 'Medications'}</TabsTrigger>

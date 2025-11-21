@@ -14,6 +14,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 
 import { useLocale } from "@/components/providers/locale-provider"
+import { formatLocalizedNumber } from "@/lib/i18n"
 
 interface DoctorCertificate {
   id: string;
@@ -51,9 +52,9 @@ interface DoctorProfileSettingsProps {
   onProfileUpdate?: (updatedProfile: DoctorProfileData) => void;
 }
 
-export default function DoctorProfileSettings({ 
-  doctorId, 
-  onProfileUpdate 
+export default function DoctorProfileSettings({
+  doctorId,
+  onProfileUpdate
 }: DoctorProfileSettingsProps) {
   const { t, isRTL, locale } = useLocale()
 
@@ -100,7 +101,7 @@ export default function DoctorProfileSettings({
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (!token) {
-        showError("Authentication Error", "Please log in to view your profile.");
+        showError(t('dp_auth_error') || 'خطأ في المصادقة', t('dp_login_required_profile') || 'يرجى تسجيل الدخول لعرض ملفك الشخصي');
         return;
       }
 
@@ -123,7 +124,7 @@ export default function DoctorProfileSettings({
         const data = await response.json();
         const doctorProfile = data.doctor;
         console.log('Profile data received:', doctorProfile);
-        
+
         setProfile(doctorProfile);
         setFormData({
           name: doctorProfile.name || "",
@@ -203,7 +204,7 @@ export default function DoctorProfileSettings({
       const freshCertificates = await loadDoctorCertificates();
       const freshCert = freshCertificates.find((c: any) => c.id === certificateId);
       const urlToDownload = freshCert?.certificate_file_url || currentUrl;
-      
+
       const link = document.createElement('a');
       link.href = urlToDownload;
       link.download = fileName;
@@ -254,22 +255,22 @@ export default function DoctorProfileSettings({
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
-      showError(t('error'), 'Invalid file type. Only JPEG, PNG, WebP, and GIF files are allowed.');
+      showError(t('error') || 'خطأ', t('dp_invalid_file_type') || 'نوع ملف غير صالح. يسمح فقط بملفات JPEG و PNG و WebP و GIF');
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      showError(t('error'), 'File size too large. Maximum size is 5MB.');
+      showError(t('error') || 'خطأ', t('dp_file_too_large') || 'حجم الملف كبير جداً. الحد الأقصى 5MB');
       return;
     }
 
     setUploadingPicture(true);
-    
+
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (!token) {
-        showError("Authentication Error", "Please log in to upload profile picture.");
+        showError(t('dp_auth_error') || 'خطأ في المصادقة', t('dp_login_required_upload') || 'يرجى تسجيل الدخول لرفع صورة الملف');
         return;
       }
 
@@ -292,8 +293,8 @@ export default function DoctorProfileSettings({
         const data = await response.json();
         setProfilePictureUrl(data.profile_picture_url);
         showSuccess(
-          "Profile Picture Updated!",
-          "Your profile picture has been uploaded successfully."
+          t('dp_picture_updated_title') || 'تم تحديث صورة الملف!',
+          t('dp_picture_updated_desc') || 'تم رفع صورة ملفك بنجاح'
         );
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -301,7 +302,7 @@ export default function DoctorProfileSettings({
       }
     } catch (error: any) {
       console.error('Error uploading profile picture:', error);
-      showError("Upload Failed", error.message || "Failed to upload profile picture. Please try again.");
+      showError(t('dp_upload_failed') || 'فشل الرفع', error.message || t('dp_picture_upload_failed') || 'فشل رفع الصورة. يرجى المحاولة مرة أخرى');
     } finally {
       setUploadingPicture(false);
       // Reset file input
@@ -323,13 +324,13 @@ export default function DoctorProfileSettings({
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
       if (!token) {
-        showError("Authentication Error", "Please log in to update your profile.");
+        showError(t('dp_auth_error') || 'خطأ في المصادقة', t('dp_login_required_update') || 'يرجى تسجيل الدخول لتحديث ملفك الشخصي');
         return;
       }
 
       // Validate consultation fee
       if (formData.consultation_fee < 0) {
-        showError("Invalid Fee", "Consultation fee cannot be negative.");
+        showError(t('dp_invalid_fee') || 'رسوم غير صالحة', t('dp_invalid_fee_desc') || 'لا يمكن أن تكون رسوم الاستشارة سالبة');
         return;
       }
 
@@ -355,12 +356,12 @@ export default function DoctorProfileSettings({
         const data = await response.json();
         const updatedProfile = data.doctor;
         console.log('Profile saved successfully:', updatedProfile);
-        
+
         setProfile(updatedProfile);
-        
+
         showSuccess(
-          "Profile Updated!",
-          "Your profile and consultation fee have been updated successfully.",
+          t('dp_profile_updated_title') || 'تم تحديث الملف الشخصي!',
+          t('dp_profile_updated_desc') || 'تم تحديث ملفك ورسوم الاستشارة بنجاح',
           () => {
             if (onProfileUpdate) {
               onProfileUpdate(updatedProfile);
@@ -374,7 +375,7 @@ export default function DoctorProfileSettings({
       }
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      showError("Update Failed", error.message || "Failed to update your profile. Please try again.");
+      showError(t('dp_update_failed') || 'فشل التحديث', error.message || t('dp_profile_update_failed') || 'فشل تحديث ملفك الشخصي. يرجى المحاولة مرة أخرى');
     } finally {
       setSaving(false);
     }
@@ -407,11 +408,11 @@ export default function DoctorProfileSettings({
       {/* Header */}
       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={isRTL ? 'text-right' : 'text-left'}>
-          <h2 className="text-2xl font-bold text-gray-900">{t('profile_settings_title') || 'Profile Settings'}</h2>
-          <p className="text-gray-600">{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('profile_settings_title') || 'إعدادات الملف الشخصي'}</h2>
+          <p className="text-gray-600 dark:text-gray-400">{t('profile_settings_desc') || 'إدارة ملفك المهني ورسوم الاستشارة'}</p>
         </div>
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          {t('doctor_profile') || 'Doctor Profile'}
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800">
+          {t('doctor_profile') || 'ملف الطبيب'}
         </Badge>
       </div>
 
@@ -420,18 +421,18 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            {t('dd_basic_info') || 'Basic Information'}
+            {t('dd_basic_info') || 'المعلومات الأساسية'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullName') || 'Full Name (English)'}</Label>
+              <Label htmlFor="name" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullName') || 'الاسم الكامل (إنجليزي)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder={t('fullNamePlaceholder') || "Enter your full name in English"}
+                placeholder={t('fullNamePlaceholder') || "أدخل اسمك الكامل بالإنجليزية"}
                 className="text-left"
                 dir="ltr"
               />
@@ -448,21 +449,21 @@ export default function DoctorProfileSettings({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="specialty" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialty') || 'Specialty'}</Label>
+              <Label htmlFor="specialty" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialty') || 'التخصص'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
                 onChange={(e) => handleInputChange('specialty', e.target.value)}
-                placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
+                placeholder={t('specialtyPlaceholder') || "مثال: أمراض القلب، الأمراض الجلدية"}
                 className="text-left"
                 dir="ltr"
               />
             </div>
             <div>
-              <Label htmlFor="specialty_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
+              <Label htmlFor="specialty_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialtyArabic') || 'التخصص (عربي)'}</Label>
               <Input
                 id="specialty_ar"
                 value={formData.specialty_ar}
@@ -474,14 +475,14 @@ export default function DoctorProfileSettings({
               />
             </div>
           </div>
-          
+
           <div>
-            <Label htmlFor="bio" className={isRTL ? 'text-right block' : 'text-left block'}>{t('professionalBio') || 'Professional Bio'}</Label>
+            <Label htmlFor="bio" className={isRTL ? 'text-right block' : 'text-left block'}>{t('professionalBio') || 'السيرة المهنية'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
-              placeholder={t('professionalBioPlaceholder') || "Describe your background, expertise, and approach to patient care..."}
+              placeholder={t('professionalBioPlaceholder') || "اكتب خلفيتك وخبراتك ونهجك في رعاية المرضى..."}
               rows={4}
               className="text-left"
               dir="ltr"
@@ -489,7 +490,7 @@ export default function DoctorProfileSettings({
           </div>
 
           <div>
-            <Label htmlFor="experience" className={isRTL ? 'text-right block' : 'text-left block'}>{t('yearsOfExperience') || 'Years of Experience'}</Label>
+            <Label htmlFor="experience" className={isRTL ? 'text-right block' : 'text-left block'}>{t('yearsOfExperience') || 'سنوات الخبرة'}</Label>
             <Input
               id="experience"
               type="number"
@@ -497,7 +498,7 @@ export default function DoctorProfileSettings({
               max="50"
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
-              placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
+              placeholder={t('yearsOfExperiencePlaceholder') || "أدخل سنوات الخبرة"}
               className="text-left"
               dir="ltr"
             />
@@ -508,24 +509,24 @@ export default function DoctorProfileSettings({
       {/* Consultation Fee Settings */}
       <Card className="border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-900/10">
         <CardHeader>
-          <CardTitle className={`flex items-center gap-2 text-emerald-800 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+          <CardTitle className={`flex items-center gap-2 text-emerald-800 dark:text-emerald-400 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <DollarSign className="w-5 h-5" />
-            {t('dd_consultation_fee_settings') || 'Consultation Fee Settings'}
+            {t('dd_consultation_fee_settings') || 'إعدادات رسوم الاستشارة'}
           </CardTitle>
-          <p className={`text-sm text-emerald-600 ${isRTL ? 'text-right' : 'text-left'}`}>
-            {t('dd_consultation_fee_desc') || 'Set your consultation fee that will be displayed to patients and used in billing'}
+          <p className={`text-sm text-emerald-600 dark:text-emerald-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('dd_consultation_fee_desc') || 'حدد رسوم الاستشارة التي ستُعرض للمرضى وتُستخدم في الفوترة'}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="consultation_fee" className={`text-base font-medium ${isRTL ? 'text-right block' : 'text-left block'}`}>
-                {t('consultationFeeUSD') || 'Consultation Fee (SYP)'}
+                {t('consultationFeeUSD') || 'رسوم الاستشارة (ل.س)'}
               </Label>
               <div className="mt-1 flex items-center gap-2 flex-row">
                 <button
                   type="button"
-                  aria-label="Decrease fee"
+                  aria-label={t('dp_decrease_fee') || 'إنقاص الرسوم'}
                   className="h-10 w-10 inline-flex items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-[#1F1F23] dark:text-gray-300 dark:hover:bg-[#1F1F23]"
                   onClick={() => handleInputChange('consultation_fee', Math.max(0, (Number(formData.consultation_fee) || 0) - 1))}
                   disabled={saving}
@@ -534,7 +535,7 @@ export default function DoctorProfileSettings({
                 </button>
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <span className="text-gray-500 text-sm font-medium">{t('currency_symbol') || 'SYP'}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">{locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                   </div>
                   <Input
                     id="consultation_fee"
@@ -551,7 +552,7 @@ export default function DoctorProfileSettings({
                 </div>
                 <button
                   type="button"
-                  aria-label="Increase fee"
+                  aria-label={t('dp_increase_fee') || 'زيادة الرسوم'}
                   className="h-10 w-10 inline-flex items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-[#1F1F23] dark:text-gray-300 dark:hover:bg-[#1F1F23]"
                   onClick={() => handleInputChange('consultation_fee', Math.min(1000000, (Number(formData.consultation_fee) || 0) + 1))}
                   disabled={saving}
@@ -571,53 +572,53 @@ export default function DoctorProfileSettings({
                   disabled={saving}
                 />
                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 flex-row">
-                  <span>0 {t('currency_symbol') || 'SYP'}</span>
-                  <span>1000 {t('currency_symbol') || 'SYP'}</span>
+                  <span dir="ltr"><span dir="ltr">{formatLocalizedNumber(0, locale)}</span> {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
+                  <span dir="ltr"><span dir="ltr">{formatLocalizedNumber(1000, locale)}</span> {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                 </div>
               </div>
-              <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {t('consultationFeeNote') || 'This fee will be displayed to patients when booking appointments'}
+              <p className={`text-xs text-gray-500 dark:text-gray-400 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t('consultationFeeNote') || 'سيتم عرض هذه الرسوم للمرضى عند حجز المواعيد'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
-              <h4 className={`font-medium text-emerald-800 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>{t('feePreview') || 'Fee Preview'}</h4>
+              <h4 className={`font-medium text-emerald-800 dark:text-emerald-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>{t('feePreview') || 'معاينة الرسوم'}</h4>
               <div className="space-y-2 text-sm">
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <span>{t('clinicConsultation') || 'Clinic Consultation'}:</span>
-                  <span className="font-medium">{formData.consultation_fee.toFixed(2)} {t('currency_symbol') || 'SYP'}</span>
+                  <span>{t('clinicConsultation') || 'استشارة في العيادة'}:</span>
+                  <span className="font-medium" dir="ltr">{formatLocalizedNumber(formData.consultation_fee, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                 </div>
                 <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <span>{t('homeVisit') || 'Home Visit'}:</span>
-                  <span className="font-medium">{(formData.consultation_fee + 50).toFixed(2)} {t('currency_symbol') || 'SYP'}</span>
+                  <span>{t('homeVisit') || 'زيارة منزلية'}:</span>
+                  <span className="font-medium" dir="ltr">{formatLocalizedNumber(formData.consultation_fee + 50, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {locale === 'ar' ? 'ل.س' : 'SYP'}</span>
                 </div>
                 <Separator className="my-2" />
-                <p className={`text-xs text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('homeVisitNote') || 'Home visits include additional travel fee'}
+                <p className={`text-xs text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('homeVisitNote') || 'تشمل الزيارة المنزلية رسوم انتقال إضافية'}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+            <h4 className="font-medium text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              {t('feeChangeNotice') || 'Fee Change Notice'}
+              {t('feeChangeNotice') || 'ملاحظة تغيير الرسوم'}
             </h4>
-            <p className="text-sm text-blue-700">
-              {t('feeChangeNoticeText') || 'Changes to your consultation fee will apply to all new appointments. Existing scheduled appointments will keep their original pricing.'}
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              {t('feeChangeNoticeText') || 'سيتم تطبيق التغييرات على الرسوم على الحجوزات الجديدة فقط. الحجوزات الحالية ستبقى بسعرها الأصلي.'}
             </p>
           </div>
 
           {/* Save Consultation Fee Button */}
           <div className="flex justify-end mt-4">
-            <Button 
+            <Button
               onClick={handleSaveProfile}
               disabled={saving}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Save className="w-4 h-4 mr-2" />
-              {saving ? (t('saving') || "Saving...") : (t('saveConsultationFee') || "Save Consultation Fee")}
+              {saving ? (t('saving') || "جارٍ الحفظ...") : (t('saveConsultationFee') || "حفظ رسوم الاستشارة")}
             </Button>
           </div>
         </CardContent>
@@ -628,7 +629,7 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="w-5 h-5" />
-            {t('dd_qualifications_certifications') || 'Qualifications & Certifications'}
+            {t('dd_qualifications_certifications') || 'المؤهلات والشهادات'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -640,11 +641,11 @@ export default function DoctorProfileSettings({
                 </Badge>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">{t('dd_no_qualifications') || 'No qualifications listed'}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_qualifications') || 'لا توجد مؤهلات مسجلة'}</p>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            {t('dd_contact_support_qualifications') || 'Contact support to update your qualifications and certifications'}
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            {t('dd_contact_support_qualifications') || 'اتصل بالدعم لتحديث مؤهلاتك وشهاداتك'}
           </p>
         </CardContent>
       </Card>
@@ -654,7 +655,7 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="w-5 h-5" />
-            {t('certificates_title') || 'My Certificates'}
+            {t('certificates_title') || 'شهاداتي'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -673,28 +674,28 @@ export default function DoctorProfileSettings({
                       </h3>
                       {certificate.certificate_number && (
                         <p className="text-sm text-gray-600">
-                          <strong>{t('certificate_number') || 'Certificate Number'}:</strong> {certificate.certificate_number}
+                          <strong>{t('certificate_number') || 'رقم الشهادة'}:</strong> <span dir="ltr">{certificate.certificate_number}</span>
                         </p>
                       )}
                       {certificate.issuing_authority && (
                         <p className="text-sm text-gray-600">
-                          <strong>{t('issuing_authority') || 'Issuing Authority'}:</strong> {certificate.issuing_authority}
+                          <strong>{t('issuing_authority') || 'الجهة المصدرة'}:</strong> {certificate.issuing_authority}
                         </p>
                       )}
                       <div className={`flex gap-4 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                         {certificate.issue_date && (
                           <span>
-                            <strong>{t('issue_date') || 'Issued'}:</strong> {new Date(certificate.issue_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                            <strong>{t('issue_date') || 'تاريخ الإصدار'}:</strong> <span dir="ltr">{new Date(certificate.issue_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
                           </span>
                         )}
                         {certificate.expiry_date && (
                           <span>
-                            <strong>{t('expiry_date') || 'Expires'}:</strong> {new Date(certificate.expiry_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                            <strong>{t('expiry_date') || 'تاريخ الانتهاء'}:</strong> <span dir="ltr">{new Date(certificate.expiry_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500">
-                        {t('certificate_uploaded_on') || 'Uploaded on'}: {new Date(certificate.submitted_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {t('certificate_uploaded_on') || 'تم الرفع في'}: <span dir="ltr">{new Date(certificate.submitted_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -704,17 +705,17 @@ export default function DoctorProfileSettings({
                         {certificate.status === 'rejected' && <XCircle className="w-4 h-4 text-red-600" />}
                         {certificate.status === 'pending' && <Clock className="w-4 h-4 text-yellow-600" />}
                         {certificate.status === 'resubmission_required' && <AlertCircle className="w-4 h-4 text-orange-600" />}
-                        <Badge 
+                        <Badge
                           variant={
-                            certificate.status === 'approved' ? 'default' : 
-                            certificate.status === 'rejected' ? 'destructive' : 
-                            certificate.status === 'pending' ? 'secondary' : 'outline'
+                            certificate.status === 'approved' ? 'default' :
+                              certificate.status === 'rejected' ? 'destructive' :
+                                certificate.status === 'pending' ? 'secondary' : 'outline'
                           }
                           className={
                             certificate.status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' :
-                            certificate.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                            certificate.status === 'resubmission_required' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                            ''
+                              certificate.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                certificate.status === 'resubmission_required' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                  ''
                           }
                         >
                           {t(`certificate_${certificate.status}`) || certificate.status.replace('_', ' ')}
@@ -729,7 +730,7 @@ export default function DoctorProfileSettings({
                           className="flex items-center gap-1"
                         >
                           <Eye className="w-3 h-3" />
-                          {t('certificate_view_btn') || 'View'}
+                          {t('certificate_view_btn') || 'عرض'}
                         </Button>
                         <Button
                           size="sm"
@@ -738,27 +739,27 @@ export default function DoctorProfileSettings({
                           className="flex items-center gap-1"
                         >
                           <Download className="w-3 h-3" />
-                          {t('certificate_download_btn') || 'Download'}
+                          {t('certificate_download_btn') || 'تنزيل'}
                         </Button>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Rejection Reason */}
                   {certificate.status === 'rejected' && certificate.rejection_reason && (
                     <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm font-medium text-red-800">
-                        {t('certificate_admin_feedback') || 'Admin Feedback'}:
+                      <p className="text-sm font-medium text-red-800 dark:text-red-400">
+                        {t('certificate_admin_feedback') || 'ملاحظات الإدارة'}:
                       </p>
                       <p className="text-sm text-red-700 mt-1">{certificate.rejection_reason}</p>
                     </div>
                   )}
-                  
+
                   {/* Admin Notes */}
                   {certificate.admin_notes && (
                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm font-medium text-blue-800">
-                        {t('admin_notes') || 'Admin Notes'}:
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-400">
+                        {t('admin_notes') || 'ملاحظات الإدارة'}:
                       </p>
                       <p className="text-sm text-blue-700 mt-1">{certificate.admin_notes}</p>
                     </div>
@@ -769,11 +770,11 @@ export default function DoctorProfileSettings({
           ) : (
             <div className="text-center py-8">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-500">
-                {t('certificate_none_found') || 'No certificates found'}
+              <p className="text-gray-500 dark:text-gray-400">
+                {t('certificate_none_found') || 'لم يتم العثور على شهادات'}
               </p>
-              <p className="text-sm text-gray-400 mt-1">
-                {t('certificate_none_description') || 'You haven\'t uploaded any certificates yet'}
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                {t('certificate_none_description') || 'لم تقم برفع أي شهادات بعد'}
               </p>
             </div>
           )}
@@ -785,10 +786,10 @@ export default function DoctorProfileSettings({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            {t('profile_picture_title') || 'Profile Picture'}
+            {t('profile_picture_title') || 'صورة الملف الشخصي'}
           </CardTitle>
-          <p className="text-sm text-gray-600">
-            {t('profile_picture_description') || 'Upload a professional profile picture that will be displayed to patients'}
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t('profile_picture_description') || 'ارفع صورة ملف مهنية سيتم عرضها للمرضى'}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -813,10 +814,10 @@ export default function DoctorProfileSettings({
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-600 text-center">
-                {profilePictureUrl 
-                  ? (t('profile_picture_current') || 'Current Picture')
-                  : (t('profile_picture_no_image') || 'No profile picture uploaded')
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                {profilePictureUrl
+                  ? (t('profile_picture_current') || 'الصورة الحالية')
+                  : (t('profile_picture_no_image') || 'لا توجد صورة مرفوعة')
                 }
               </p>
             </div>
@@ -825,20 +826,20 @@ export default function DoctorProfileSettings({
             <div className="flex-1 space-y-4">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-2">
-                  {t('profile_picture_upload_hint') || 'Click to upload a new profile picture'}
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  {t('profile_picture_upload_hint') || 'انقر لرفع صورة ملف جديدة'}
                 </p>
-                <p className="text-xs text-gray-500 mb-4">
-                  {t('profile_picture_supported_formats') || 'Supported formats: JPEG, PNG, WebP, GIF (Max 5MB)'}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                  {t('profile_picture_supported_formats') || 'الصيغ المدعومة: JPEG, PNG, WebP, GIF (بحد أقصى 5MB)'}
                 </p>
-                <label 
-                  htmlFor="profile-picture-upload" 
+                <label
+                  htmlFor="profile-picture-upload"
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  {uploadingPicture 
-                    ? 'Uploading...' 
-                    : (t('profile_picture_upload_btn') || 'Upload Picture')
+                  {uploadingPicture
+                    ? (t('dp_uploading') || 'جارٍ الرفع...')
+                    : (t('profile_picture_upload_btn') || 'رفع صورة')
                   }
                 </label>
                 <input
@@ -857,14 +858,14 @@ export default function DoctorProfileSettings({
 
       {/* Save Button */}
       <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
-        <Button 
+        <Button
           onClick={handleSaveProfile}
           disabled={saving}
           className="bg-emerald-600 hover:bg-emerald-700"
           size="lg"
         >
           <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-          {saving ? (t('dd_save_profile_saving') || "Saving...") : (t('dd_save_profile') || "Save Profile")}
+          {saving ? (t('dd_save_profile_saving') || "جارٍ الحفظ...") : (t('dd_save_profile') || "حفظ الملف الشخصي")}
         </Button>
       </div>
 

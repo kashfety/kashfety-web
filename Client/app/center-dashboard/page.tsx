@@ -3797,13 +3797,13 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Profile Tab */}
-              <TabsContent value="profile" className="p-6 space-y-6">
+              <TabsContent value="profile" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="relative p-6 rounded-2xl glass-effect">
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_profile_settings') || 'Profile Settings'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_update_center_info') || 'Update your center information and preferences'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_profile_settings') || 'Profile Settings'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_update_center_info') || 'Update your center information and preferences'}</p>
                     </div>
                   </div>
                 </div>
@@ -3815,7 +3815,7 @@ export default function CenterDashboardPage() {
                       <CardTitle className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <Building2 className="w-5 h-5" />
-                          {t('cd_current_profile') || 'Current Profile'}
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_profile') || 'Current Profile'}</span>
                         </div>
                         {centerProfile && (
                           <div className="flex items-center gap-2">
@@ -3909,11 +3909,11 @@ export default function CenterDashboardPage() {
 
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       <Edit className="w-5 h-5" />
                       {t('center_profile') || 'Edit Center Profile'}
                     </CardTitle>
-                    <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
+                    <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('cd_update_profile_desc') || 'Update your center information to help patients find and contact you'}
                     </CardDescription>
                   </CardHeader>
@@ -3921,7 +3921,7 @@ export default function CenterDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'}>{t('center_name') || 'Center Name (English)'} *</Label>
+                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_name') || 'Center Name (English)'} *</Label>
                           <Input
                             id="centerName"
                             placeholder={centerProfile?.name ? `${t('current_prefix') || 'Current:'} ${centerProfile.name}` : (t('enter_center_name') || 'Enter center name in English')}
@@ -3931,10 +3931,10 @@ export default function CenterDashboardPage() {
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'}>{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
+                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
                           <Input
                             id="centerNameAr"
                             placeholder={centerProfile?.name_ar ? `${t('current_prefix') || 'Current:'} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
@@ -3943,10 +3943,10 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir="rtl"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'}>{t('email') || 'Email'} *</Label>
+                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'} *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -3957,10 +3957,10 @@ export default function CenterDashboardPage() {
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'}>{t('phone') || 'Phone'}</Label>
+                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
                           <Input
                             id="phone"
                             placeholder={centerProfile?.phone ? `${t('current_prefix') || 'Current:'} ${centerProfile.phone}` : (t('enter_phone') || 'Enter phone number')}
@@ -3969,12 +3969,12 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
                         </div>
                       </div>
                       <div className="space-y-4">
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'}>{t('address') || 'Address'}</Label>
+                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
                           <Input
                             id="address"
                             placeholder={centerProfile?.address ? `${t('current_prefix') || 'Current:'} ${centerProfile.address}` : (t('enter_address') || 'Enter center address')}
@@ -3983,10 +3983,10 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_physical_location') || 'Physical location for patient visits'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_physical_location') || 'Physical location for patient visits'}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'}>{t('website') || 'Website'}</Label>
+                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('website') || 'Website'}</Label>
                           <Input
                             id="website"
                             placeholder={centerProfile?.website ? `${t('current_prefix') || 'Current:'} ${centerProfile.website}` : (t('enter_website') || 'Enter website URL')}
@@ -3995,10 +3995,10 @@ export default function CenterDashboardPage() {
                             className="mt-1"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_optional_website') || 'Optional website for more information'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_optional_website') || 'Optional website for more information'}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'}>{t('description') || 'Description'}</Label>
+                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('description') || 'Description'}</Label>
                           <textarea
                             id="description"
                             placeholder={centerProfile?.description ? `${t('current_prefix') || 'Current:'} ${centerProfile.description}` : (t('enter_description') || 'Enter center description')}
@@ -4008,7 +4008,7 @@ export default function CenterDashboardPage() {
                             rows={3}
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_brief_description') || 'Brief description of services and specialties'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_brief_description') || 'Brief description of services and specialties'}</p>
                         </div>
                       </div>
                     </div>

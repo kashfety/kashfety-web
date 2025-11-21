@@ -213,7 +213,7 @@ function TopNav({
                 onClick={() => setActiveTab('profile')}
               >
                 <User className="w-4 h-4" />
-                {t('cd_profile') || 'Profile'}
+                {t('cd_profile') || 'الملف الشخصي'}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={`flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
@@ -1468,8 +1468,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to load schedule:', error);
       toast({
-        title: "Error",
-        description: "Failed to load schedule configuration",
+        title: t('error') || 'خطأ',
+        description: t('failed_load_schedule_config') || 'فشل تحميل تكوين الجدول',
         variant: "destructive"
       });
     } finally {
@@ -1480,8 +1480,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   const saveSchedule = async () => {
     if (!selectedTestType || !user?.id) {
       toast({
-        title: "Error",
-        description: "Please select a test type first",
+        title: t('error') || 'خطأ',
+        description: t('please_select_test_type_first') || 'يرجى اختيار نوع تحليل أولاً',
         variant: "destructive"
       });
       return;
@@ -1513,15 +1513,15 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       console.log('✅ [CenterSchedule] Save response:', response);
 
       toast({
-        title: "Success",
-        description: "Schedule saved successfully!",
+        title: t('success') || 'نجاح',
+        description: t('schedule_saved_success') || 'تم حفظ الجدول بنجاح!',
         variant: "default"
       });
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to save schedule:', error);
       toast({
-        title: "Error",
-        description: "Failed to save schedule configuration",
+        title: t('error') || 'خطأ',
+        description: t('failed_save_schedule_config') || 'فشل حفظ تكوين الجدول',
         variant: "destructive"
       });
     } finally {
@@ -1649,7 +1649,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <CheckCircle className="h-5 w-5 text-blue-500" />
                       <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('selected') || 'Selected'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
+                        {t('selected') || 'محدد'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
                     </div>
                   </div>
@@ -1926,7 +1926,7 @@ function Sidebar({
               </div>
               {!isCollapsed && (
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t('center_portal') || 'Center Portal'}
+                  {t('center_portal') || 'بوابة المركز'}
                 </span>
               )}
             </div>
@@ -1936,7 +1936,7 @@ function Sidebar({
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors"
-                title={t('collapse_sidebar') || 'Collapse sidebar'}
+                title={t('collapse_sidebar') || 'طي الشريط الجانبي'}
               >
                 <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
               </button>
@@ -1947,7 +1947,7 @@ function Sidebar({
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className={`hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors absolute top-4 ${isRTL ? 'left-2' : 'right-2'}`}
-                title={t('expand_sidebar') || 'Expand sidebar'}
+                title={t('expand_sidebar') || 'توسيع الشريط الجانبي'}
               >
                 <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
               </button>
@@ -1960,7 +1960,7 @@ function Sidebar({
               <div>
                 {!isCollapsed && (
                   <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {t('dashboard') || 'Dashboard'}
+                    {t('dashboard') || 'لوحة التحكم'}
                   </div>
                 )}
                 <div className={isCollapsed ? 'space-y-2' : ''}>
@@ -1982,18 +1982,18 @@ function Sidebar({
               <div>
                 {!isCollapsed && (
                   <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {t('management') || 'Management'}
+                    {t('management') || 'الإدارة'}
                   </div>
                 )}
                 <div className={isCollapsed ? 'space-y-2' : ''}>
                   <NavItem tab="schedule" icon={Clock} isActive={activeTab === "schedule"}>
-                    {t('schedule') || 'Schedule'}
+                    {t('schedule') || 'الجدول'}
                   </NavItem>
                   <NavItem tab="services" icon={TestTube} isActive={activeTab === "services"}>
-                    {t('services') || 'Services'}
+                    {t('services') || 'الخدمات'}
                   </NavItem>
                   <NavItem tab="profile" icon={Settings} isActive={activeTab === "profile"}>
-                    {t('profile') || 'Profile'}
+                    {t('profile') || 'الملف الشخصي'}
                   </NavItem>
                 </div>
               </div>
@@ -2007,10 +2007,10 @@ function Sidebar({
               <button
                 onClick={onSignOut}
                 className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? (t('sign_out') || 'Sign Out') : ''}
+                title={isCollapsed ? (t('sign_out') || 'تسجيل الخروج') : ''}
               >
                 <LogOut className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-                {!isCollapsed && <span className="ml-3">{t('sign_out') || 'Sign Out'}</span>}
+                {!isCollapsed && <span className="ml-3">{t('sign_out') || 'تسجيل الخروج'}</span>}
               </button>
             </div>
           </div>
@@ -2631,14 +2631,14 @@ export default function CenterDashboardPage() {
 
       if (!result.success) {
         console.error('Services save unsuccessful:', result);
-        throw new Error(result.error || 'Services save was not successful');
+        throw new Error(result.error || (t('services_save_failed') || 'فشل حفظ الخدمات'));
       }
 
       console.log('✅ Services saved successfully');
 
       toast({
-        title: t('success') || 'Success',
-        description: t('services_saved') || 'Services saved successfully'
+        title: t('success') || 'نجاح',
+        description: t('services_saved') || 'تم حفظ الخدمات بنجاح'
       });
 
       // Reload lab test types with updated service settings instead of all center data
@@ -2748,7 +2748,7 @@ export default function CenterDashboardPage() {
 
   const handleBatchSetFee = () => {
     if (!batchFee) {
-      toast({ title: t('error') || 'Error', description: t('please_enter_fee') || 'Please enter a fee', variant: 'destructive' });
+      toast({ title: t('error') || 'خطأ', description: t('please_enter_fee') || 'يرجى إدخال رسوم', variant: 'destructive' });
       return;
     }
     console.log('📦 [Batch] Setting fee', batchFee, 'for', selectedTestTypes.size, 'test types');
@@ -2771,7 +2771,7 @@ export default function CenterDashboardPage() {
   // Create new lab test type
   const handleCreateTestType = async () => {
     if (!newTestType.code || !newTestType.name) {
-      toast({ title: 'Error', description: 'Please fill in all required fields', variant: 'destructive' });
+      toast({ title: t('error') || 'خطأ', description: t('please_fill_required_fields') || 'يرجى ملء جميع الحقول المطلوبة', variant: 'destructive' });
       return;
     }
 
@@ -2787,7 +2787,7 @@ export default function CenterDashboardPage() {
       const newType = response.data;
       console.log('✅ [Frontend] Created new lab test type:', newType);
 
-      toast({ title: 'Success', description: 'Lab test type created successfully' });
+      toast({ title: t('success') || 'نجاح', description: t('lab_test_type_created') || 'تم إنشاء نوع التحليل بنجاح' });
 
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
@@ -2799,8 +2799,8 @@ export default function CenterDashboardPage() {
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
       toast({
-        title: 'Error',
-        description: error.response?.data?.error || 'Failed to create lab test type',
+        title: t('error') || 'خطأ',
+        description: error.response?.data?.error || t('failed_create_lab_test_type') || 'فشل إنشاء نوع التحليل',
         variant: 'destructive'
       });
     } finally {

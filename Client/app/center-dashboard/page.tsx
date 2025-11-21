@@ -490,7 +490,7 @@ function CenterPatients({
             <Users className="h-5 w-5 text-white" />
           </div>
           <div className={isRTL ? 'text-right' : 'text-left'}>
-            <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>
+            <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               {t('cd_patient_management') || 'Patient Management'}
             </h2>
             <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -502,7 +502,7 @@ function CenterPatients({
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
-          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
+          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -513,7 +513,7 @@ function CenterPatients({
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="font-medium text-gray-900 dark:text-white">{getPatientDisplayName(patient)}</p>
+                    <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
                     <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                       {patient.age ? <><span>{t('age') || 'Age'}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}

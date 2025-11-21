@@ -3151,8 +3151,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management') || 'Appointment Management'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc') || 'Manage your center\'s appointments and bookings'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management') || 'إدارة المواعيد'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc') || 'إدارة وتنظيم مواعيد وحجوزات المركز'}</p>
                     </div>
                   </div>
                 </div>
@@ -3178,17 +3178,21 @@ export default function CenterDashboardPage() {
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {appointment.appointment_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time') : appointment.booking_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time') : t('cd_na')} • {formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
+                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</span>
                                 </p>
                               </div>
                             </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                              appointment.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                appointment.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
-                                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                              }`}>
-                              {t(`status_${appointment.status}`) || appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                            </span>
+                            <Badge className={`px-3 py-1 ${appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
+                              appointment.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
+                                appointment.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
+                                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700'
+                              }`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              {appointment.status === 'completed' ? (t('appointments_status_completed') || 'مكتمل') :
+                                appointment.status === 'confirmed' ? (t('appointments_status_confirmed') || 'مؤكد') :
+                                  appointment.status === 'cancelled' ? (t('appointments_status_cancelled') || 'ملغي') :
+                                    appointment.status === 'scheduled' ? (t('appointments_status_scheduled') || 'مجدول') :
+                                      (t(`appointments_status_${appointment.status}`) || appointment.status)}
+                            </Badge>
                           </div>
 
                           {/* Action Buttons */}
@@ -3199,17 +3203,19 @@ export default function CenterDashboardPage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('cd_confirm') || 'Confirm'}
+                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                  {t('cd_confirm') || 'تأكيد'}
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
+                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('cd_cancel') || 'Cancel'}
+                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                  {t('cd_cancel') || 'إلغاء'}
                                 </Button>
                               </>
                             )}
@@ -3219,17 +3225,19 @@ export default function CenterDashboardPage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
+                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('cd_complete') || 'Complete'}
+                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                  {t('cd_complete') || 'إتمام'}
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
+                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                  {t('cancel') || 'Cancel'}
+                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                  {t('cancel') || 'إلغاء'}
                                 </Button>
                               </>
                             )}
@@ -3238,26 +3246,28 @@ export default function CenterDashboardPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleUploadResult(appointment)}
+                                className={`${isRTL ? 'flex-row-reverse' : ''}`}
                               >
-                                <Upload className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                {t('cd_upload_result') || 'Upload Result'}
+                                <Upload className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                {t('cd_upload_result') || 'رفع النتيجة'}
                               </Button>
                             )}
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewPatient(appointment.patient_id, appointment.patient_name)}
+                              className={`${isRTL ? 'flex-row-reverse' : ''}`}
                             >
-                              <User className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                              {t('cd_view_patient') || 'View Patient'}
+                              <User className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              {t('cd_view_patient') || 'عرض المريض'}
                             </Button>
                           </div>
                         </div>
                       )) : (
-                        <div className="text-center py-8">
+                        <div className={`text-center py-8 ${isRTL ? 'text-right' : 'text-left'}`}>
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500">{t('cd_no_appointments_today') || 'No appointments for today'}</p>
-                          <p className="text-sm text-gray-400 mt-1">{t('cd_appointments_will_appear') || 'Appointments will appear here when patients book'}</p>
+                          <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today') || 'لا توجد مواعيد لليوم'}</p>
+                          <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear') || 'ستظهر المواعيد هنا عندما يقوم المرضى بالحجز'}</p>
                         </div>
                       )}
                     </div>

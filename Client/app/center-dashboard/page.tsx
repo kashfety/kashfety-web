@@ -3288,7 +3288,7 @@ export default function CenterDashboardPage() {
                 {/* Available Services Card */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <div>
                         <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                           <Building2 className="w-5 h-5" />
@@ -3300,8 +3300,12 @@ export default function CenterDashboardPage() {
                       </div>
                       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Plus className="h-4 w-4 mr-2" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+                          >
+                            <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                             {t('add_new_type') || 'Add New Type'}
                           </Button>
                         </DialogTrigger>
@@ -3371,7 +3375,7 @@ export default function CenterDashboardPage() {
                   <CardContent>
                     {servicesLoading ? (
                       <div className="flex items-center justify-center py-8">
-                        <div className="flex items-center gap-2 text-gray-500">
+                        <div className={`flex items-center gap-2 text-gray-500 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                           <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                           {t('loading_services') || 'Loading services...'}
                         </div>
@@ -3383,8 +3387,8 @@ export default function CenterDashboardPage() {
                           <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div className="flex flex-col gap-4">
                               {/* Selection Controls */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {selectedTestTypes.size} {t('selected') || 'selected'}
                                   </span>
@@ -3409,14 +3413,14 @@ export default function CenterDashboardPage() {
 
                               {/* Batch Actions */}
                               {selectedTestTypes.size > 0 && (
-                                <div className="flex items-center gap-2 flex-wrap">
+                                <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={handleBatchEnable}
                                     className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700"
                                   >
-                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    <CheckCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                     {t('enable_selected') || 'Enable Selected'}
                                   </Button>
                                   <Button
@@ -3424,16 +3428,17 @@ export default function CenterDashboardPage() {
                                     variant="outline"
                                     onClick={handleBatchDisable}
                                   >
-                                    <XCircle className="h-4 w-4 mr-2" />
+                                    <XCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                     {t('disable_selected') || 'Disable Selected'}
                                   </Button>
-                                  <div className="flex items-center gap-2">
+                                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                     <Input
                                       type="number"
                                       placeholder={t('fee') || 'Fee'}
                                       value={batchFee}
                                       onChange={(e) => setBatchFee(e.target.value)}
-                                      className="w-32"
+                                      className={`w-32 ${isRTL ? 'text-right' : 'text-left'}`}
+                                      dir={isRTL ? 'rtl' : 'ltr'}
                                     />
                                     <Button
                                       size="sm"
@@ -3478,10 +3483,10 @@ export default function CenterDashboardPage() {
                                   </div>
                                 </div>
                                 <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                  <div className={isRTL ? 'text-left' : 'text-right'}>
+                                  <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                       <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium">
-                                        {t('fee') || 'Fee'} ($)
+                                        {(t('fee') || 'Fee')} ({t('currency') || 'SYP'})
                                       </Label>
                                       <Input
                                         id={`fee-${testType.id}`}
@@ -3501,7 +3506,7 @@ export default function CenterDashboardPage() {
                                       />
                                     </div>
                                   </div>
-                                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                                     <Label htmlFor={`service-${testType.id}`} className="text-sm font-medium">
                                       {state.active ? t('enabled') || 'Enabled' : t('disabled') || 'Disabled'}
                                     </Label>
@@ -3523,15 +3528,15 @@ export default function CenterDashboardPage() {
                               {state.active && (
                                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
                                       <span className="text-gray-600 dark:text-gray-400">{t('online_booking_enabled') || 'Online booking enabled'}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
                                       <span className="text-gray-600 dark:text-gray-400">{t('instant_confirmation') || 'Instant confirmation'}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
                                       <span className="text-gray-600 dark:text-gray-400">{t('automated_scheduling') || 'Automated scheduling'}</span>
                                     </div>
@@ -3544,7 +3549,7 @@ export default function CenterDashboardPage() {
                       </div>
                     )}
 
-                    <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <div className={`flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Button
                         type="button"
                         onClick={(e) => {
@@ -3553,12 +3558,12 @@ export default function CenterDashboardPage() {
                           saveServices();
                         }}
                         disabled={servicesSaving}
-                        className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                        className={`flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                       >
                         {servicesSaving ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <Save className="w-4 h-4" />
+                          <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         )}
                         {t('save_services') || 'Save Services'}
                       </Button>
@@ -3575,9 +3580,9 @@ export default function CenterDashboardPage() {
                           });
                         }}
                         disabled={servicesLoading}
-                        className="flex items-center gap-2"
+                        className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                       >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         {t('reset') || 'Reset'}
                       </Button>
                     </div>
@@ -3636,17 +3641,17 @@ export default function CenterDashboardPage() {
                                       {testType.description}
                                     </p>
                                     <div className="space-y-2">
-                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <span className="text-gray-500">{t('duration') || 'Duration'}:</span>
                                         <span className="font-medium">{formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes_short') || 'min'}</span>
                                       </div>
-                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <span className="text-gray-500">{t('fee') || 'Fee'}:</span>
                                         <span className="font-medium text-emerald-600 dark:text-emerald-400">
                                           {formatLocalizedNumber(parseFloat(state.fee || '0') || 0, locale, { style: 'currency', currency: 'SYP' })}
                                         </span>
                                       </div>
-                                      <div className="flex items-center justify-between text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <span className="text-gray-500">{t('category') || 'Category'}:</span>
                                         <Badge variant="secondary" className="text-xs">
                                           {t(`category_${testType.category}`) || testType.category || t('category_general') || 'General'}
@@ -3662,7 +3667,7 @@ export default function CenterDashboardPage() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-emerald-200 dark:border-emerald-700">
-                                  <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                                  <div className={`flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                     <CheckCircle className="w-3 h-3" />
                                     <span>Online booking available</span>
                                   </div>
@@ -3688,7 +3693,7 @@ export default function CenterDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Button
                         variant="outline"
-                        className="flex items-center gap-2 p-4 h-auto"
+                        className={`flex items-center gap-2 p-4 h-auto ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                         onClick={() => {
                           const activeServices = Object.entries(serviceStates).filter(([_, state]) => state.active);
                           toast({
@@ -3697,8 +3702,8 @@ export default function CenterDashboardPage() {
                           });
                         }}
                       >
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <div className="text-left">
+                        <CheckCircle className={`w-5 h-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('enable_all') || 'Enable All'}</div>
                           <div className="text-xs text-gray-500">{t('activate_all_services') || 'Activate all services'}</div>
                         </div>
@@ -3706,7 +3711,7 @@ export default function CenterDashboardPage() {
 
                       <Button
                         variant="outline"
-                        className="flex items-center gap-2 p-4 h-auto"
+                        className={`flex items-center gap-2 p-4 h-auto ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                         onClick={() => {
                           setServiceStates(prev => {
                             const updated = { ...prev };
@@ -3721,8 +3726,8 @@ export default function CenterDashboardPage() {
                           });
                         }}
                       >
-                        <XCircle className="w-5 h-5 text-red-500" />
-                        <div className="text-left">
+                        <XCircle className={`w-5 h-5 text-red-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('disable_all') || 'Disable All'}</div>
                           <div className="text-xs text-gray-500">{t('deactivate_all_services') || 'Deactivate all services'}</div>
                         </div>
@@ -3730,7 +3735,7 @@ export default function CenterDashboardPage() {
 
                       <Button
                         variant="outline"
-                        className="flex items-center gap-2 p-4 h-auto"
+                        className={`flex items-center gap-2 p-4 h-auto ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                         onClick={() => {
                           setServiceStates(prev => {
                             const updated = { ...prev };
@@ -3750,8 +3755,8 @@ export default function CenterDashboardPage() {
                           });
                         }}
                       >
-                        <RotateCcw className="w-5 h-5 text-blue-500" />
-                        <div className="text-left">
+                        <RotateCcw className={`w-5 h-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('reset_pricing') || 'Reset Pricing'}</div>
                           <div className="text-xs text-gray-500">{t('restore_default_prices') || 'Restore default prices'}</div>
                         </div>

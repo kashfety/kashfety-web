@@ -290,7 +290,7 @@ function CenterOverview({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <TrendingUp className="w-5 h-5" />
               {t('cd_appointment_trends') || 'Appointment Trends'}
             </CardTitle>
@@ -3676,7 +3676,7 @@ export default function CenterDashboardPage() {
                 {/* Quick Actions */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <Activity className="w-5 h-5" />
                       {t('quick_actions') || 'Quick Actions'}
                     </CardTitle>

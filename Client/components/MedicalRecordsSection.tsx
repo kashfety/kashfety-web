@@ -476,17 +476,17 @@ export default function MedicalRecordsSection() {
         </div>
         {!editing ? (
           <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-            <Edit className="w-4 h-4 mr-2" />
+            <Edit className="w-4 h-4 me-2" />
             {t('mr_edit') || 'Edit'}
           </Button>
         ) : (
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={loading}>
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-4 h-4 me-2" />
               {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
             </Button>
             <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-              <X className="w-4 h-4 mr-2" />
+              <X className="w-4 h-4 me-2" />
               {t('mr_cancel') || 'Cancel'}
             </Button>
           </div>
@@ -587,7 +587,7 @@ export default function MedicalRecordsSection() {
                     {allergiesList.length > 0 ? (
                       allergiesList.map((allergy, index) => (
                         <Badge key={index} variant="destructive">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          <AlertTriangle className="w-3 h-3 me-1" />
                           {allergy}
                         </Badge>
                       ))
@@ -639,7 +639,7 @@ export default function MedicalRecordsSection() {
                     {medicationsList.length > 0 ? (
                       medicationsList.map((medication, index) => (
                         <Badge key={index} variant="secondary">
-                          <Pill className="w-3 h-3 mr-1" />
+                          <Pill className="w-3 h-3 me-1" />
                           {medication}
                         </Badge>
                       ))
@@ -733,7 +733,7 @@ export default function MedicalRecordsSection() {
                 {recordsLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4DBCC4]"></div>
-                    <p className="ml-3 text-muted-foreground">{t('mr_loading_records') || 'Loading records...'}</p>
+                    <p className="ms-3 text-muted-foreground">{t('mr_loading_records') || 'Loading records...'}</p>
                   </div>
                 ) : medicalRecords.length === 0 ? (
                   <div className="text-center py-8">
@@ -754,7 +754,7 @@ export default function MedicalRecordsSection() {
                                     <User className="w-4 h-4" />
                                     <span>{t('mr_dr') || 'Dr.'} {getLocalizedDoctorName(record.doctor)}</span>
                                     {getLocalizedSpecialty(record.doctor) && (
-                                      <Badge variant="outline" className="ml-1">{getLocalizedSpecialty(record.doctor)}</Badge>
+                                      <Badge variant="outline" className="ms-1">{getLocalizedSpecialty(record.doctor)}</Badge>
                                     )}
                                   </div>
                                 )}

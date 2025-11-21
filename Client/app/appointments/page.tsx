@@ -460,6 +460,18 @@ export default function MyAppointmentsPage() {
     }
   }
 
+  const isAbsent = (appointment: Appointment) => {
+    if (appointment.status !== 'scheduled' && appointment.status !== 'confirmed') return false;
+    
+    try {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      return appointmentDateTime < now;
+    } catch (e) {
+      return false;
+    }
+  }
+
   if (loading || appointmentsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -630,6 +642,9 @@ export default function MyAppointmentsPage() {
                         )}
                         {(appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
                           <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">{t('appointments_booked_badge') || 'Booked'}</Badge>
+                        )}
+                        {isAbsent(appointment) && (
+                          <Badge variant="destructive" className="text-xs bg-red-100 text-red-800 border-red-200 hover:bg-red-100">{t('appointments_absent_badge') || 'Absent'}</Badge>
                         )}
                       </div>
                     </div>

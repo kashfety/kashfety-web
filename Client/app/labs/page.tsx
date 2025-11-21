@@ -99,6 +99,18 @@ export default function MyLabsPage() {
     return t(statusKey) || status.toUpperCase();
   };
 
+  const isAbsent = (booking: LabBooking) => {
+    if (booking.status !== 'scheduled' && booking.status !== 'confirmed') return false;
+    
+    try {
+      const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
+      const now = new Date();
+      return bookingDateTime < now;
+    } catch (e) {
+      return false;
+    }
+  }
+
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
     const catOk = (b: LabBooking) => categoryFilter === 'all' || (b.type?.category || '').toLowerCase() === categoryFilter;
@@ -294,6 +306,9 @@ export default function MyLabsPage() {
                           </div>
                         )}
                         <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
+                        {isAbsent(booking) && (
+                          <Badge variant="destructive" className="text-xs bg-red-100 text-red-800 border-red-200 hover:bg-red-100">{t('appointments_absent_badge') || 'Absent'}</Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>

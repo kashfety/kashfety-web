@@ -1638,6 +1638,27 @@ export default function DoctorDashboard() {
                                 >
                                   {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
                                 </Badge>
+                                {(() => {
+                                  const isAbsent = (apt: Appointment) => {
+                                    if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
+                                    try {
+                                      const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
+                                      const now = new Date();
+                                      return aptDateTime < now;
+                                    } catch (e) {
+                                      return false;
+                                    }
+                                  };
+                                  
+                                  if (isAbsent(appointment)) {
+                                    return (
+                                      <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
+                                        {t('appointments_absent_badge') || 'Absent'}
+                                      </Badge>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
                                     ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}

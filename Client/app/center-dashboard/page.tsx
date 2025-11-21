@@ -3131,20 +3131,22 @@ export default function CenterDashboardPage() {
                 {/* Today's Appointments */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CardHeader>
-                    <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</CardTitle>
+                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                      {t('cd_upcoming_appointments') || 'Upcoming Appointments'}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {todayStats?.appointments?.length > 0 ? todayStats.appointments.map((appointment: any, index: number) => (
                         <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
+                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <div className={`w-3 h-3 rounded-full ${appointment.status === 'completed' ? 'bg-green-500' :
                                 appointment.status === 'confirmed' ? 'bg-blue-500' :
                                   appointment.status === 'cancelled' ? 'bg-red-500' :
                                     'bg-yellow-500'
                                 }`}></div>
-                              <div>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {appointment.appointment_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time') : appointment.booking_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time') : t('cd_na')} • {formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}

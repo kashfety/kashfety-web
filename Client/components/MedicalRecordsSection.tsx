@@ -565,8 +565,9 @@ export default function MedicalRecordsSection() {
                         onChange={(e) => setAllergyInput(e.target.value)}
                         placeholder={t('mr_add_allergy_placeholder') || "Add an allergy"}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAllergy())}
+                        className="flex-1"
                       />
-                      <Button onClick={addAllergy} type="button">
+                      <Button onClick={addAllergy} type="button" className="shrink-0">
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
@@ -617,8 +618,9 @@ export default function MedicalRecordsSection() {
                         onChange={(e) => setMedicationInput(e.target.value)}
                         placeholder={t('mr_add_medication_placeholder') || "Add a medication"}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMedication())}
+                        className="flex-1"
                       />
-                      <Button onClick={addMedication} type="button">
+                      <Button onClick={addMedication} type="button" className="shrink-0">
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
@@ -705,7 +707,7 @@ export default function MedicalRecordsSection() {
                 ) : (
                   <div>
                     {medicalInfo?.emergency_contact?.name ? (
-                      <div className="space-y-2">
+                      <div className="space-y-2 text-start">
                         <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
                         <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
                         <p><strong>{t('mr_phone') || 'Phone'}:</strong> {medicalInfo.emergency_contact.phone}</p>

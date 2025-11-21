@@ -1538,7 +1538,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
               <div 
                 className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 w-full max-w-full box-border"
-                style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+                style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box', scrollbarGutter: 'stable' }}
               >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">

@@ -425,7 +425,7 @@ export default function DoctorProfileSettings({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className={isRTL ? "md:order-last" : ""}>
               <Label htmlFor="name" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
@@ -436,7 +436,7 @@ export default function DoctorProfileSettings({
                 dir="ltr"
               />
             </div>
-            <div>
+            <div className={isRTL ? "md:order-first" : ""}>
               <Label htmlFor="name_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
               <Input
                 id="name_ar"
@@ -450,18 +450,19 @@ export default function DoctorProfileSettings({
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className={isRTL ? "md:order-last" : ""}>
               <Label htmlFor="specialty" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
-                onChange={(e) => handleInputChange('specialty', e.target.value)}
+                readOnly
+                disabled
+                className="bg-gray-100 text-gray-500 text-left"
                 placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
-                className="text-left"
                 dir="ltr"
               />
             </div>
-            <div>
+            <div className={isRTL ? "md:order-first" : ""}>
               <Label htmlFor="specialty_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
               <Input
                 id="specialty_ar"

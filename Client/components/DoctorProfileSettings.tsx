@@ -432,7 +432,7 @@ export default function DoctorProfileSettings({
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder={t('fullNamePlaceholder') || "Enter your full name in English"}
-                className={isRTL ? 'text-right' : 'text-left'}
+                className="text-left"
                 dir="ltr"
               />
             </div>
@@ -457,8 +457,8 @@ export default function DoctorProfileSettings({
                 value={formData.specialty}
                 onChange={(e) => handleInputChange('specialty', e.target.value)}
                 placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
-                className={isRTL ? 'text-right' : 'text-left'}
-                dir={isRTL ? 'rtl' : 'ltr'}
+                className="text-left"
+                dir="ltr"
               />
             </div>
             <div>
@@ -483,8 +483,8 @@ export default function DoctorProfileSettings({
               onChange={(e) => handleInputChange('bio', e.target.value)}
               placeholder={t('professionalBioPlaceholder') || "Describe your background, expertise, and approach to patient care..."}
               rows={4}
-              className={isRTL ? 'text-right' : 'text-left'}
-              dir={isRTL ? 'rtl' : 'ltr'}
+              className="text-left"
+              dir="ltr"
             />
           </div>
 
@@ -498,7 +498,7 @@ export default function DoctorProfileSettings({
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
               placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
-              className={isRTL ? 'text-right' : 'text-left'}
+              className="text-left"
               dir="ltr"
             />
           </div>
@@ -522,7 +522,7 @@ export default function DoctorProfileSettings({
               <Label htmlFor="consultation_fee" className={`text-base font-medium ${isRTL ? 'text-right block' : 'text-left block'}`}>
                 {t('consultationFeeUSD') || 'Consultation Fee (SYP)'}
               </Label>
-              <div className={`mt-1 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div className="mt-1 flex items-center gap-2 flex-row">
                 <button
                   type="button"
                   aria-label="Decrease fee"
@@ -533,7 +533,7 @@ export default function DoctorProfileSettings({
                   <Minus className="w-4 h-4" />
                 </button>
                 <div className="relative flex-1">
-                  <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none z-10`}>
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                     <span className="text-gray-500 text-sm font-medium">{t('currency_symbol') || 'SYP'}</span>
                   </div>
                   <Input
@@ -543,7 +543,7 @@ export default function DoctorProfileSettings({
                     step="0.01"
                     value={formData.consultation_fee}
                     onChange={(e) => handleInputChange('consultation_fee', parseFloat(e.target.value) || 0)}
-                    className={`${isRTL ? 'pr-12 text-right' : 'pl-12 text-left'} text-lg font-medium bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white border-gray-200 dark:border-[#1F1F23] placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                    className="pl-12 text-left text-lg font-medium bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white border-gray-200 dark:border-[#1F1F23] placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     placeholder="0.00"
                     disabled={saving}
                     dir="ltr"
@@ -567,10 +567,10 @@ export default function DoctorProfileSettings({
                   step={1}
                   value={Number(formData.consultation_fee) || 0}
                   onChange={(e) => handleInputChange('consultation_fee', Number(e.target.value))}
-                  className={`w-full accent-emerald-600 dark:accent-emerald-400 ${isRTL ? 'rotate-180' : ''}`}
+                  className="w-full accent-emerald-600 dark:accent-emerald-400"
                   disabled={saving}
                 />
-                <div className={`flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 flex-row">
                   <span>0 {t('currency_symbol') || 'SYP'}</span>
                   <span>1000 {t('currency_symbol') || 'SYP'}</span>
                 </div>

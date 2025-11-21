@@ -1355,19 +1355,16 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
   // Handle test type selection with auto-save (like doctor-dashboard center switching)
   const handleTypeSelection = async (newTypeId: string) => {
-    console.log('🔄 [CenterSchedule] Switching test type from', selectedTestType, 'to', newTypeId);
-
     // If switching away from a previously selected type, auto-save current schedule
     if (selectedTestType && selectedTestType !== newTypeId) {
       try {
         // Only auto-save if there are actual changes to save
         const hasChanges = DAYS_OF_WEEK.some(d => getDayConfig(d.value).isAvailable);
-        console.log('💾 [CenterSchedule] Auto-saving previous type:', selectedTestType, 'hasChanges:', hasChanges);
         if (hasChanges) {
           await saveSchedule();
         }
       } catch (error) {
-        console.error('❌ [CenterSchedule] Auto-save failed:', error);
+        console.error('Auto-save failed:', error);
         // Continue with type selection even if auto-save fails
       }
     }
@@ -1482,6 +1479,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           break_end: dayConfig.breakEnd || undefined,
           notes: dayConfig.notes || `${day.label} schedule for center ${user.id}`
         };
+      });
+
+      console.log('💾 [CenterSchedule] Converted schedule for API:',
       });
 
       console.log('💾 [CenterSchedule] Converted schedule for API:', schedule);
@@ -2094,6 +2094,14 @@ export default function CenterDashboardPage() {
   // Track which test types have been initialized (like doctor-dashboard initializedCenters)
   const [initializedTypes, setInitializedTypes] = useState<Set<string>>(new Set());
   const [lastFetchedTypeId, setLastFetchedTypeId] = useState<string | null>(null);
+
+  // Close patient modal when switching tabs
+  useEffect(() => {
+    if (activeTab !== 'patients') {
+      setShowPatientModal(false);
+      setSelectedPatient(null);
+    }
+  }, [activeTab]);
 
   // Load saved form states from localStorage on component mount
   useEffect(() => {

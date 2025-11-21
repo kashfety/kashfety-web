@@ -1244,7 +1244,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           }
           setSelectedTime("");
           showSuccess(
-            t('booking_success') || "Success!",
+            "", // Let CustomAlert use its own localized title
             t('booking_success_lab_test') || "Lab test booked successfully!",
             () => {
               if (onSuccess) onSuccess(); // Refresh data before closing
@@ -1356,7 +1356,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           setSelectedTime("");
 
           showSuccess(
-            t('booking_success') || "Success!",
+            "", // Let CustomAlert use its own localized title
             t('booking_success_appointment') || "Appointment booked successfully!",
             () => {
               if (onSuccess) onSuccess(); // Refresh data before closing

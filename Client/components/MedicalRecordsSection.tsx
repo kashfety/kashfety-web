@@ -710,10 +710,16 @@ export default function MedicalRecordsSection() {
                 ) : (
                   <div className="w-full">
                     {medicalInfo?.emergency_contact?.name ? (
-                      <div className={`space-y-2 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
-                        <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
-                        <p><strong>{t('mr_phone') || 'Phone'}:</strong> {medicalInfo.emergency_contact.phone}</p>
+                      <div className="space-y-2 w-full">
+                        <div className={`flex w-full ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
+                        </div>
+                        <div className={`flex w-full ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
+                        </div>
+                        <div className={`flex w-full ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                          <p><strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{medicalInfo.emergency_contact.phone}</span></p>
+                        </div>
                       </div>
                     ) : (
                       <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>

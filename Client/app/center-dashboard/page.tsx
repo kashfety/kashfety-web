@@ -982,7 +982,7 @@ function CenterAnalytics({
         {/* Age Distribution */}
         <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <User className="h-5 w-5 text-emerald-600" />
               {t('cd_age_distribution') || 'Age Distribution'}
             </CardTitle>
@@ -1140,7 +1140,7 @@ function CenterAnalytics({
         {/* Most Popular Tests */}
         <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <TestTube className="h-5 w-5 text-emerald-600" />
               {t('cd_popular_tests') || 'Popular Tests'}
             </CardTitle>

@@ -642,7 +642,7 @@ export default function MyAppointmentsPage() {
                         <div className="flex items-center gap-3 text-muted-foreground">
                           <Clock className="w-5 h-5 text-emerald-600" />
                           <div>
-                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
+                            <div className="font-medium">{(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); } catch { return appointment.time; } })()} ({appointment.duration})</div>
                             <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                           </div>
                         </div>

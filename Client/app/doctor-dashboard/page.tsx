@@ -1360,7 +1360,33 @@ export default function DoctorDashboard() {
                       const order: string[] = []
                       for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
                       const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return <AppointmentsChart data={data} />
+                      return (
+                        <div className="flex flex-col h-full">
+                          <AppointmentsChart data={data} />
+                          <div className="px-6 pb-6 pt-2">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Appointments:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Consultations:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Completed appointments only. Tracks finalized visits and revenue-generating activities.
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     })()}
                   </div>
                 </div>
@@ -1506,7 +1532,33 @@ export default function DoctorDashboard() {
                       const order: string[] = []
                       for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
                       const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return <AppointmentsChart data={data} />
+                      return (
+                        <div className="flex flex-col h-full">
+                          <AppointmentsChart data={data} />
+                          <div className="px-6 pb-6 pt-2">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Appointments:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Consultations:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Completed appointments only. Tracks finalized visits and revenue-generating activities.
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     })()}
                   </div>
                 </div>

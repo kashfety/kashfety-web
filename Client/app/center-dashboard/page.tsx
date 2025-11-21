@@ -1481,9 +1481,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         };
       });
 
-      console.log('💾 [CenterSchedule] Converted schedule for API:',
-      });
-
       console.log('💾 [CenterSchedule] Converted schedule for API:', schedule);
 
       const response = await centerService.saveLabSchedule(selectedTestType, schedule);

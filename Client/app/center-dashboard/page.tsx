@@ -1547,24 +1547,24 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
             <div className="text-center py-8">
               <TestTube className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  {t('no_services_for_schedule') || 'No Services Available for Scheduling'}
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {t('no_services_for_schedule') || 'لا توجد خدمات متاحة للجدولة'}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {t('no_services_schedule_desc') || 'You need to enable lab test services first before you can configure their schedules.'}
+                <p className="text-gray-600 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {t('no_services_schedule_desc') || 'يجب تفعيل خدمات التحاليل أولاً قبل أن تتمكن من تكوين جداولها'}
                 </p>
                 <div className="mt-4">
                   <Button
                     onClick={() => {
                       toast({
-                        title: t('switch_to_services') || 'Switch to Services',
-                        description: t('enable_services_first') || 'Please enable services in the Services tab first'
+                        title: t('switch_to_services') || 'التبديل إلى الخدمات',
+                        description: t('enable_services_first') || 'يرجى تفعيل الخدمات في تبويب الخدمات أولاً'
                       });
                     }}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
                     <TestTube className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    {t('go_to_services') || 'Go to Services Tab'}
+                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('go_to_services') || 'انتقل إلى تبويب الخدمات'}</span>
                   </Button>
                 </div>
               </div>
@@ -1577,9 +1577,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Clock className="h-5 w-5" />
-              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management') || 'Lab Schedule Management'}</h2>
+              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management') || 'إدارة جدول المختبر'}</h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Button
                 onClick={() => selectedTestType && loadScheduleForType(selectedTestType)}
                 variant="outline"
@@ -1587,7 +1587,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 disabled={loading || !selectedTestType}
               >
                 <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                {t('refresh') || 'Refresh'}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('refresh') || 'تحديث'}</span>
               </Button>
               <Button
                 onClick={saveSchedule}
@@ -1595,7 +1595,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 size="sm"
               >
                 <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                {saving ? (t('saving') || 'Saving...') : (t('save_schedule') || 'Save Schedule')}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('saving') || 'حفظ الجدول...') : (t('save_schedule') || 'حفظ الجدول')}</span>
               </Button>
             </div>
           </div>
@@ -1603,28 +1603,28 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           {/* Test Type Selection */}
           <Card>
             <CardHeader>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <TestTube className="h-5 w-5" />
-                {t('test_type_selection') || 'Lab Test Type Selection'}
+                {t('test_type_selection') || 'اختيار نوع التحليل'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{t('select_test_type_manage') || 'Select Test Type to Manage Schedule'}</Label>
-                  <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('test_type_selection_desc') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'}</p>
+                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('select_test_type_manage') || 'اختر نوع التحليل لإدارة الجدول'}</Label>
+                  <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc') || 'اختر نوع التحليل الذي تريد تحديد الجدول له. يمكن أن يكون لكل نوع تحليل ساعات عمل فريدة خاصة به.'}</p>
                 </div>
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('cd_test_type_desc_schedule') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'} />
+                    <SelectValue placeholder={t('cd_test_type_desc_schedule') || 'اختر نوع التحليل الذي تريد تحديد الجدول له'} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedServices.length === 0 ? (
                       <div className="p-4 text-center">
                         <TestTube className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500">{t('no_services_selected') || 'No services selected'}</p>
-                        <p className="text-xs text-gray-400">{t('select_services_first') || 'Please enable services in the Services tab first'}</p>
+                        <p className="text-sm text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('no_services_selected') || 'لم يتم اختيار خدمات'}</p>
+                        <p className="text-xs text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('select_services_first') || 'يرجى تفعيل الخدمات في تبويب الخدمات أولاً'}</p>
                       </div>
                     ) : (
                       selectedServices.map((type) => {
@@ -1663,16 +1663,16 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               {loading && (
                 <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500"></div>
-                  Loading schedule configuration...
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('loading_schedule_config') || 'تحميل تكوين الجدول...'}</span>
                 </div>
               )}
 
               {/* Weekly Schedule */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <Calendar className="h-5 w-5" />
-                    {(t('weekly_schedule_for') || 'Weekly Schedule for')} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
+                    {(t('weekly_schedule_for') || 'الجدول الأسبوعي لـ')} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1698,7 +1698,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Time Range */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('start_time') || 'Start Time'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('start_time') || 'وقت البداية'}</Label>
                                 <Input
                                   type="time"
                                   value={config.startTime || '09:00'}
@@ -1708,7 +1708,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('end_time') || 'End Time'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('end_time') || 'وقت النهاية'}</Label>
                                 <Input
                                   type="time"
                                   value={config.endTime || '17:00'}
@@ -1718,7 +1718,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('slot_duration_minutes') || 'مدة الفترة (دقيقة)'}</Label>
                                 <Input
                                   type="number"
                                   min="15"
@@ -1737,7 +1737,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Break Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('break_start_optional') || 'Break Start (optional)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_start_optional') || 'بداية الاستراحة (اختياري)'}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakStart || ''}
@@ -1747,7 +1747,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'}>{t('break_end_optional') || 'Break End (optional)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_end_optional') || 'نهاية الاستراحة (اختياري)'}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakEnd || ''}
@@ -1761,8 +1761,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Generated Slots Preview */}
                             {slots.length > 0 && (
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                  {(t('generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', formatLocalizedNumber(slots.length, locale))}
+                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {(t('generated_time_slots_total') || 'فترات الوقت المنشأة ({count} إجمالي)').replace('{count}', formatLocalizedNumber(slots.length, locale))}
                                 </Label>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {slots.slice(0, 8).map((slot, index) => (
@@ -1781,7 +1781,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                             {/* Copy from other days */}
                             <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                              <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('copy_from') || 'Copy from:'}</span>
+                              <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from') || 'نسخ من:'}  </span>
                               {DAYS_OF_WEEK.filter(d => d.value !== day.value && getDayConfig(d.value).isAvailable).map(sourceDay => (
                                 <Button
                                   key={sourceDay.value}
@@ -1806,24 +1806,24 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               {/* Schedule Summary */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <CheckCircle className="h-5 w-5" />
-                    {t('schedule_summary') || 'Schedule Summary'}
+                    {t('schedule_summary') || 'ملخص الجدول'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('working_days') || 'Working Days'}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)} {t('days') || 'days'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days') || 'أيام العمل'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days') || 'أيام'}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)} {t('slots') || 'slots'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots') || 'إجمالي الفترات الأسبوعية'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots') || 'فترة'}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('test_type') || 'Test Type'}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type') || 'نوع التحليل'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
                     </div>
                   </div>
                 </CardContent>

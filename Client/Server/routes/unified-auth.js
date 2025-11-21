@@ -2625,6 +2625,19 @@ router.get('/doctor/profile', authenticateToken, async (req, res) => {
     // Remove password from response
     const { password, ...doctorWithoutPassword } = doctor;
 
+    // Fetch Arabic specialty name if specialty exists
+    if (doctorWithoutPassword.specialty) {
+      const { data: specialtyData } = await supabase
+        .from('specialties')
+        .select('name_ar')
+        .or(`name.eq.${doctorWithoutPassword.specialty},name_en.eq.${doctorWithoutPassword.specialty}`)
+        .single();
+      
+      if (specialtyData) {
+        doctorWithoutPassword.specialty_ar = specialtyData.name_ar;
+      }
+    }
+
     res.json({
       success: true,
       doctor: doctorWithoutPassword

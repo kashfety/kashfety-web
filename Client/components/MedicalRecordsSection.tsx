@@ -708,12 +708,12 @@ export default function MedicalRecordsSection() {
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="w-full">
                     {medicalInfo?.emergency_contact?.name ? (
-                      <div className={`space-y-2 w-full ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <p className={isRTL ? 'text-right' : 'text-left'}><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
-                        <p className={isRTL ? 'text-right' : 'text-left'}><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
-                        <p className={isRTL ? 'text-right' : 'text-left'}><strong>{t('mr_phone') || 'Phone'}:</strong> {medicalInfo.emergency_contact.phone}</p>
+                      <div className={`space-y-2 w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
+                        <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
+                        <p><strong>{t('mr_phone') || 'Phone'}:</strong> {medicalInfo.emergency_contact.phone}</p>
                       </div>
                     ) : (
                       <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>

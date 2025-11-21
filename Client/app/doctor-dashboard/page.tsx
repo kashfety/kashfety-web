@@ -578,12 +578,15 @@ export default function DoctorDashboard() {
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState<any>(null);
 
-  // Close medical record form when switching tabs
+  // Close medical record form and patient details when switching tabs
   useEffect(() => {
     if (showMedicalRecordForm) {
       setShowMedicalRecordForm(false);
       setSelectedAppointment(null);
       setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
+    }
+    if (selectedPatient) {
+      setSelectedPatient(null);
     }
   }, [activeTab]);
 

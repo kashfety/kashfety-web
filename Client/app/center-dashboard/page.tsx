@@ -2092,14 +2092,6 @@ export default function CenterDashboardPage() {
   const [initializedTypes, setInitializedTypes] = useState<Set<string>>(new Set());
   const [lastFetchedTypeId, setLastFetchedTypeId] = useState<string | null>(null);
 
-  // Close patient modal when switching tabs
-  useEffect(() => {
-    if (activeTab !== 'patients') {
-      setShowPatientModal(false);
-      setSelectedPatient(null);
-    }
-  }, [activeTab]);
-
   // Load saved form states from localStorage on component mount
   useEffect(() => {
     if (user?.id) {

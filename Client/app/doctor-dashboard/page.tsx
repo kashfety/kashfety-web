@@ -1592,7 +1592,7 @@ export default function DoctorDashboard() {
                               key={appointment.id}
                               className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
                             >
-                              <div className="flex items-center gap-4 w-full lg:w-auto">
+                              <div className="flex items-center gap-4 w-full lg:w-auto min-w-0">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                   <User className="w-6 h-6 text-white" />
                                 </div>
@@ -1615,7 +1615,7 @@ export default function DoctorDashboard() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
                                 <Badge
                                   variant={
                                     appointment.status === 'completed'
@@ -1643,14 +1643,15 @@ export default function DoctorDashboard() {
                                     ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
                                   </Badge>
                                 )}
-                                <div className="flex flex-wrap items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
                                   {appointment.status === 'scheduled' && (
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_confirm') || 'Confirm'}
                                     </Button>
                                   )}
@@ -1659,8 +1660,9 @@ export default function DoctorDashboard() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleStartConsultation(appointment)}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <Stethoscope className="w-4 h-4 mr-1" />
+                                      <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_consult') || 'Consult'}
                                     </Button>
                                   )}
@@ -1674,8 +1676,9 @@ export default function DoctorDashboard() {
                                         description: t('viewing_patient_profile') || 'Viewing patient profile...',
                                       });
                                     }}
+                                    className="text-xs sm:text-sm whitespace-nowrap"
                                   >
-                                    <User className="w-4 h-4 mr-1" />
+                                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                     {t('patients') || 'Patients'}
                                   </Button>
                                   {['scheduled', 'confirmed'].includes(appointment.status) && (
@@ -1686,8 +1689,9 @@ export default function DoctorDashboard() {
                                         setSelectedAppointment(appointment);
                                         setShowCancelModal(true);
                                       }}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <XCircle className="w-4 h-4 mr-1" />
+                                      <XCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_cancel') || 'Cancel'}
                                     </Button>
                                   )}

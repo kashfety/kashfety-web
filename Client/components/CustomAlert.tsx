@@ -72,13 +72,28 @@ export default function CustomAlert({
     }
   };
 
+  // Localize default titles
+  const getLocalizedTitle = () => {
+    if (title) return title;
+    switch (type) {
+      case 'success':
+        return t('success') || 'Success';
+      case 'error':
+        return t('error') || 'Error';
+      case 'warning':
+        return t('warning') || 'Warning';
+      default:
+        return t('info') || 'Info';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className={`flex items-center gap-3 text-lg font-semibold ${getTitleColor()}`}>
             {getIcon()}
-            {title}
+            {getLocalizedTitle()}
           </DialogTitle>
         </DialogHeader>
         

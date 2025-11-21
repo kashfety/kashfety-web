@@ -74,9 +74,10 @@ interface BookingModalProps {
   initialMode?: 'doctor' | 'lab';
   preSelectedDoctorId?: string;
   preSelectedCenterId?: string;
+  onSuccess?: () => void;
 }
 
-export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId, onSuccess }: BookingModalProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { t, isRTL, locale } = useLocale();
@@ -1246,6 +1247,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             t('booking_success') || "Success!",
             t('booking_success_lab_test') || "Lab test booked successfully!",
             () => {
+              if (onSuccess) onSuccess(); // Refresh data before closing
               onClose();
               resetModal();
             }
@@ -1357,6 +1359,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             t('booking_success') || "Success!",
             t('booking_success_appointment') || "Appointment booked successfully!",
             () => {
+              if (onSuccess) onSuccess(); // Refresh data before closing
               onClose();
               resetModal();
             }
@@ -1504,7 +1507,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1529,7 +1532,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 </DialogHeader>
               </motion.div>
 
-              <div className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-900">
+              <div className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900 w-full max-w-full box-border">
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
                   <Button

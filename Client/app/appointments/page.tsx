@@ -730,7 +730,12 @@ export default function MyAppointmentsPage() {
       <CancelModal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} appointment={selectedAppointment} onSuccess={handleModalSuccess} />
       <ReviewModal isOpen={reviewOpen} onClose={() => setReviewOpen(false)} appointmentId={selectedAppointment?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} patientId={user?.id || ''} onSuccess={() => { setReviewOpen(false); setReviewedIds(prev => new Set(prev).add(selectedAppointment?.id || '')); }} />
       <VisitSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} appointmentId={selectedAppointment?.id || ''} patientId={user?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} />
-      <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} initialMode="doctor" />
+      <BookingModal 
+        isOpen={isBookingModalOpen} 
+        onClose={() => setIsBookingModalOpen(false)} 
+        initialMode="doctor"
+        onSuccess={refreshAppointments}
+      />
     </div>
   )
 }

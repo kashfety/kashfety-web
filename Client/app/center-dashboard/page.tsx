@@ -501,6 +501,7 @@ function CenterPatients({
                   onClick={() => onViewPatient(patient.id, patient.name)}
                   variant="outline"
                   size="sm"
+                  className={isRTL ? 'flex-row-reverse text-right' : 'text-left'}
                 >
                   {t('cd_view_details') || 'View Details'}
                 </Button>

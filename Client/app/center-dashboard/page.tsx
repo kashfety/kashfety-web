@@ -299,7 +299,7 @@ function CenterOverview({
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white" dir="ltr">{stat.value}</p>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month') || 'from last month'}</p>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month') || 'من الشهر الماضي'}</p>
                   </div>
                   <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600`}>
                     <Icon className="w-6 h-6 text-white" />
@@ -316,7 +316,7 @@ function CenterOverview({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <TrendingUp className="w-5 h-5" />
-              {t('cd_appointment_trends') || 'Appointment Trends'}
+              {t('cd_appointment_trends') || 'اتجاهات المواعيد'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -329,25 +329,25 @@ function CenterOverview({
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.appointments.length, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('dd_today') || 'Today'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('dd_today') || 'اليوم'}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.stats?.todayCompleted || 0, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('completed') || 'Completed'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('completed') || 'مكتمل'}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                       <div className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('cd_revenue') || 'Revenue'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('cd_revenue') || 'الإيرادات'}</div>
                     </div>
                   </div>
 
                   {/* Appointment Status Breakdown */}
                   <div className="space-y-3">
-                    <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_upcoming_appointments') || 'Upcoming Appointments'} {t('cd_status') || 'Status'}</h4>
+                    <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_upcoming_appointments') || 'المواعيد القادمة'} {t('cd_status') || 'الحالة'}</h4>
                     {[
                       { status: 'completed', label: t('completed'), color: 'bg-green-500' },
                       { status: 'confirmed', label: t('cd_confirmed'), color: 'bg-blue-500' },
@@ -381,7 +381,7 @@ function CenterOverview({
                   {/* Next Appointment */}
                   {todayStats.stats?.nextAppointment && (
                     <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-                      <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-1">{t('dd_next_appointment') || 'Next Appointment'}</h4>
+                      <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-1">{t('dd_next_appointment') || 'الموعد التالي'}</h4>
                       <p className="text-sm text-emerald-700 dark:text-emerald-300">
                         {getLocalizedNameUtil(todayStats.stats.nextAppointment, locale, 'patient_name')} • {todayStats.stats.nextAppointment.type}
                       </p>
@@ -402,8 +402,8 @@ function CenterOverview({
                 <div className="h-full flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p className="text-sm">{t('cd_no_data') || 'No data available'}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t('cd_no_appointments') || 'No appointments scheduled'}</p>
+                    <p className="text-sm">{t('cd_no_data') || 'لا توجد بيانات'}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('cd_no_appointments') || 'لا توجد مواعيد مجدولة'}</p>
                   </div>
                 </div>
               )}
@@ -415,7 +415,7 @@ function CenterOverview({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <Clock className="w-5 h-5" />
-              {t('cd_recent_bookings') || 'Recent Bookings'}
+              {t('cd_recent_bookings') || 'الحجوزات الأخيرة'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -437,10 +437,10 @@ function CenterOverview({
                     <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                       {getLocalizedNameUtil(appointment, locale, 'patient_name')} • {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {
                         appointment.booking_date && appointment.booking_time ?
-                          `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
+                          `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at') || 'في'} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
                           appointment.appointment_date && appointment.appointment_time ?
-                            `${formatLocalizedDate(appointment.appointment_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')}` :
-                            t('time_tbd') || 'Time TBD'
+                            `${formatLocalizedDate(appointment.appointment_date, locale)} ${t('at') || 'في'} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')}` :
+                            t('time_tbd') || 'سيتم تحديده'
                       }
                     </p>
                   </div>

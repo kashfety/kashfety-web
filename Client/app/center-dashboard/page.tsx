@@ -3319,8 +3319,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><TestTube className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_services_management') || 'Services Management'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_lab_services') || 'Configure and manage your lab testing services'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_services_management') || 'إدارة الخدمات'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_lab_services') || 'إعداد وإدارة خدمات الفحوصات المخبرية'}</p>
                     </div>
                   </div>
                 </div>
@@ -3332,10 +3332,10 @@ export default function CenterDashboardPage() {
                       <div>
                         <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                           <Building2 className="w-5 h-5" />
-                          {t('available_services') || 'Available Lab Services'}
+                          {t('available_services') || 'الخدمات المخبرية المتاحة'}
                         </CardTitle>
                         <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
-                          {t('services_description') || 'Enable or disable lab test services and set pricing'}
+                          {t('services_description') || 'تفعيل أو تعطيل خدمات التحاليل وتعيين الأسعار'}
                         </CardDescription>
                       </div>
                       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -3346,16 +3346,16 @@ export default function CenterDashboardPage() {
                             className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                           >
                             <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                            {t('add_new_type') || 'Add New Type'}
+                            {t('add_new_type') || 'إضافة نوع جديد'}
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>{t('create_lab_test_type') || 'Create Lab Test Type'}</DialogTitle>
+                            <DialogTitle>{t('create_lab_test_type') || 'إنشاء نوع تحليل مخبري'}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                              <Label htmlFor="code">{t('code') || 'Code'} *</Label>
+                              <Label htmlFor="code">{t('code') || 'الرمز'} *</Label>
                               <Input
                                 id="code"
                                 value={newTestType.code}
@@ -3364,7 +3364,7 @@ export default function CenterDashboardPage() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="name">{t('name') || 'Name'} *</Label>
+                              <Label htmlFor="name">{t('name') || 'الاسم'} *</Label>
                               <Input
                                 id="name"
                                 value={newTestType.name}
@@ -3373,7 +3373,7 @@ export default function CenterDashboardPage() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="category">{t('category') || 'Category'} *</Label>
+                              <Label htmlFor="category">{t('category') || 'الفئة'} *</Label>
                               <Select
                                 value={newTestType.category}
                                 onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
@@ -3383,13 +3383,13 @@ export default function CenterDashboardPage() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="lab">{t('lab') || 'Lab'}</SelectItem>
-                                  <SelectItem value="imaging">{t('imaging') || 'Imaging'}</SelectItem>
+                                  <SelectItem value="lab">{t('lab') || 'مختبر'}</SelectItem>
+                                  <SelectItem value="imaging">{t('imaging') || 'تصوير'}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="default_fee">{t('default_fee') || 'Default Fee (Optional)'}</Label>
+                              <Label htmlFor="default_fee">{t('default_fee') || 'الرسوم الافتراضية (اختياري)'}</Label>
                               <Input
                                 id="default_fee"
                                 type="number"
@@ -3402,10 +3402,10 @@ export default function CenterDashboardPage() {
                           </div>
                           <DialogFooter>
                             <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
-                              {t('cancel') || 'Cancel'}
+                              {t('cancel') || 'إلغاء'}
                             </Button>
                             <Button onClick={handleCreateTestType} disabled={creating}>
-                              {creating ? (t('creating') || 'Creating...') : (t('create') || 'Create')}
+                              {creating ? (t('creating') || 'جارٍ الإنشاء...') : (t('create') || 'إنشاء')}
                             </Button>
                           </DialogFooter>
                         </DialogContent>
@@ -3417,7 +3417,7 @@ export default function CenterDashboardPage() {
                       <div className="flex items-center justify-center py-8">
                         <div className={`flex items-center gap-2 text-gray-500 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                           <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                          {t('loading_services') || 'Loading services...'}
+                          {t('loading_services') || 'جارٍ تحميل الخدمات...'}
                         </div>
                       </div>
                     ) : (
@@ -3429,15 +3429,15 @@ export default function CenterDashboardPage() {
                               {/* Selection Controls */}
                               <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {selectedTestTypes.size} {t('selected') || 'selected'}
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <span dir="ltr">{formatLocalizedNumber(selectedTestTypes.size || 0, locale)}</span> {t('selected') || 'محدد'}
                                   </span>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={selectAllTestTypes}
                                   >
-                                    {t('select_all') || 'Select All'}
+                                    {t('select_all') || 'تحديد الكل'}
                                   </Button>
                                   {selectedTestTypes.size > 0 && (
                                     <Button
@@ -3445,7 +3445,7 @@ export default function CenterDashboardPage() {
                                       size="sm"
                                       onClick={deselectAllTestTypes}
                                     >
-                                      {t('deselect_all') || 'Deselect All'}
+                                      {t('deselect_all') || 'إلغاء التحديد'}
                                     </Button>
                                   )}
                                 </div>
@@ -3461,7 +3461,7 @@ export default function CenterDashboardPage() {
                                     className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700"
                                   >
                                     <CheckCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                    {t('enable_selected') || 'Enable Selected'}
+                                    {t('enable_selected') || 'تفعيل المحدد'}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -3469,12 +3469,12 @@ export default function CenterDashboardPage() {
                                     onClick={handleBatchDisable}
                                   >
                                     <XCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                    {t('disable_selected') || 'Disable Selected'}
+                                    {t('disable_selected') || 'تعطيل المحدد'}
                                   </Button>
                                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                     <Input
                                       type="number"
-                                      placeholder={t('fee') || 'Fee'}
+                                      placeholder={t('fee') || 'رسوم'}
                                       value={batchFee}
                                       onChange={(e) => setBatchFee(e.target.value)}
                                       className={`w-32 ${isRTL ? 'text-right' : 'text-left'}`}
@@ -3485,7 +3485,7 @@ export default function CenterDashboardPage() {
                                       variant="outline"
                                       onClick={handleBatchSetFee}
                                     >
-                                      {t('set_fee') || 'Set Fee'}
+                                      {t('set_fee') || 'تعيين الرسوم'}
                                     </Button>
                                   </div>
                                 </div>
@@ -3516,10 +3516,10 @@ export default function CenterDashboardPage() {
                                     </p>
                                     <div className="flex items-center gap-4 mt-2">
                                       <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        {t('duration') || 'Duration'}: {formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes') || 'minutes'}
+                                        {t('duration') || 'المدة'}: <span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes') || 'دقائق'}
                                       </span>
                                       <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        {t('category') || 'Category'}: {testType.category ? (testType.category === 'lab' ? (t('lab') || 'Lab') : testType.category === 'imaging' ? (t('imaging') || 'Imaging') : testType.category) : (t('general') || 'General')}
+                                        {t('category') || 'الفئة'}: {testType.category ? (testType.category === 'lab' ? (t('lab') || 'مختبر') : testType.category === 'imaging' ? (t('imaging') || 'تصوير') : testType.category) : (t('general') || 'عام')}
                                       </span>
                                     </div>
                                   </div>
@@ -3528,7 +3528,7 @@ export default function CenterDashboardPage() {
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                       <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium">
-                                        {(t('fee') || 'Fee')} ({t('currency') || 'SYP'})
+                                        {(t('fee') || 'الرسوم')} ({t('currency') || 'SYP'})
                                       </Label>
                                       <Input
                                         id={`fee-${testType.id}`}
@@ -3550,7 +3550,7 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                                     <Label htmlFor={`service-${testType.id}`} className="text-sm font-medium">
-                                      {state.active ? t('enabled') || 'Enabled' : t('disabled') || 'Disabled'}
+                                      {state.active ? t('enabled') || 'مفعل' : t('disabled') || 'معطل'}
                                     </Label>
                                     <Switch
                                       id={`service-${testType.id}`}
@@ -3572,15 +3572,15 @@ export default function CenterDashboardPage() {
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('online_booking_enabled') || 'Online booking enabled'}</span>
+                                      <span className="text-gray-600 dark:text-gray-400">{t('online_booking_enabled') || 'الحجز الإلكتروني مفعل'}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('instant_confirmation') || 'Instant confirmation'}</span>
+                                      <span className="text-gray-600 dark:text-gray-400">{t('instant_confirmation') || 'تأكيد فوري'}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('automated_scheduling') || 'Automated scheduling'}</span>
+                                      <span className="text-gray-600 dark:text-gray-400">{t('automated_scheduling') || 'جدولة آلية'}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -3607,7 +3607,7 @@ export default function CenterDashboardPage() {
                         ) : (
                           <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         )}
-                        {t('save_services') || 'Save Services'}
+                        {t('save_services') || 'حفظ الخدمات'}
                       </Button>
                       <Button
                         type="button"
@@ -3625,7 +3625,7 @@ export default function CenterDashboardPage() {
                         className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                       >
                         <RotateCcw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        {t('reset') || 'Reset'}
+                        {t('reset') || 'إعادة التعيين'}
                       </Button>
                     </div>
                   </CardContent>
@@ -3636,10 +3636,10 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <CheckCircle className="w-5 h-5 text-green-500" />
-                      {t('active_services') || 'Active Lab Services'}
+                      {t('active_services') || 'الخدمات المخبرية النشطة'}
                     </CardTitle>
                     <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
-                      {t('active_services_description') || 'Currently enabled lab test services with their configurations'}
+                      {t('active_services_description') || 'الخدمات المفعلة حالياً مع إعداداتها'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -3653,8 +3653,8 @@ export default function CenterDashboardPage() {
                           <div className="text-center py-8">
                             <TestTube className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                             <div className="space-y-2">
-                              <p className="text-gray-600 dark:text-gray-400">{t('no_active_services_title') || 'No services enabled yet.'}</p>
-                              <p className="text-sm text-gray-500 dark:text-gray-500">{t('no_active_services_desc') || 'Enable lab test services above to see them here as cards.'}</p>
+                              <p className="text-gray-600 dark:text-gray-400">{t('no_active_services_title') || 'لم يتم تفعيل أي خدمة بعد.'}</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-500">{t('no_active_services_desc') || 'فعّل خدمات التحاليل بالأعلى لتظهر هنا كبطاقات.'}</p>
                             </div>
                           </div>
                         );
@@ -3684,17 +3684,17 @@ export default function CenterDashboardPage() {
                                     </p>
                                     <div className="space-y-2">
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('duration') || 'Duration'}:</span>
-                                        <span className="font-medium">{formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes_short') || 'min'}</span>
+                                        <span className="text-gray-500">{t('duration') || 'المدة'}:</span>
+                                        <span className="font-medium"><span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes_short') || 'دقيقة'}</span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('fee') || 'Fee'}:</span>
+                                        <span className="text-gray-500">{t('fee') || 'الرسوم'}:</span>
                                         <span className="font-medium text-emerald-600 dark:text-emerald-400">
                                           {formatLocalizedNumber(parseFloat(state.fee || '0') || 0, locale, { style: 'currency', currency: 'SYP' })}
                                         </span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('category') || 'Category'}:</span>
+                                        <span className="text-gray-500">{t('category') || 'الفئة'}:</span>
                                         <Badge variant="secondary" className="text-xs">
                                           {t(`category_${testType.category}`) || testType.category || t('category_general') || 'General'}
                                         </Badge>
@@ -3703,7 +3703,7 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={isRTL ? 'mr-2' : 'ml-2'}>
                                     <Badge variant="default" className="text-xs bg-green-500">
-                                      {t('active') || 'Active'}
+                                      {t('active') || 'نشط'}
                                     </Badge>
                                   </div>
                                 </div>
@@ -3711,7 +3711,7 @@ export default function CenterDashboardPage() {
                                 <div className="mt-4 pt-3 border-t border-emerald-200 dark:border-emerald-700">
                                   <div className={`flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                     <CheckCircle className="w-3 h-3" />
-                                    <span>Online booking available</span>
+                                    <span>{t('online_booking_available') || 'الحجز الإلكتروني متاح'}</span>
                                   </div>
                                 </div>
                               </div>
@@ -3728,7 +3728,7 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <Activity className="w-5 h-5" />
-                      {t('quick_actions') || 'Quick Actions'}
+                      {t('quick_actions') || 'إجراءات سريعة'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -3746,8 +3746,8 @@ export default function CenterDashboardPage() {
                       >
                         <CheckCircle className={`w-5 h-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('enable_all') || 'Enable All'}</div>
-                          <div className="text-xs text-gray-500">{t('activate_all_services') || 'Activate all services'}</div>
+                          <div className="font-medium">{t('enable_all') || 'تفعيل الكل'}</div>
+                          <div className="text-xs text-gray-500">{t('activate_all_services') || 'تفعيل كل الخدمات'}</div>
                         </div>
                       </Button>
 
@@ -3770,8 +3770,8 @@ export default function CenterDashboardPage() {
                       >
                         <XCircle className={`w-5 h-5 text-red-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('disable_all') || 'Disable All'}</div>
-                          <div className="text-xs text-gray-500">{t('deactivate_all_services') || 'Deactivate all services'}</div>
+                          <div className="font-medium">{t('disable_all') || 'تعطيل الكل'}</div>
+                          <div className="text-xs text-gray-500">{t('deactivate_all_services') || 'تعطيل كل الخدمات'}</div>
                         </div>
                       </Button>
 
@@ -3799,8 +3799,8 @@ export default function CenterDashboardPage() {
                       >
                         <RotateCcw className={`w-5 h-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('reset_pricing') || 'Reset Pricing'}</div>
-                          <div className="text-xs text-gray-500">{t('restore_default_prices') || 'Restore default prices'}</div>
+                          <div className="font-medium">{t('reset_pricing') || 'إعادة ضبط التسعير'}</div>
+                          <div className="text-xs text-gray-500">{t('restore_default_prices') || 'استعادة الأسعار الافتراضية'}</div>
                         </div>
                       </Button>
                     </div>

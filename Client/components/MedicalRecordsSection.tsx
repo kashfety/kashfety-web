@@ -139,6 +139,15 @@ export default function MedicalRecordsSection() {
     record_date: new Date().toISOString().split('T')[0]
   });
 
+  // Debug logging for RTL and Emergency Contact issues
+  useEffect(() => {
+    console.log('MedicalRecordsSection Debug:', { 
+      locale, 
+      isRTL, 
+      emergencyContact: medicalInfo?.emergency_contact 
+    });
+  }, [locale, isRTL, medicalInfo]);
+
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       fetchMedicalInfo();
@@ -451,12 +460,8 @@ export default function MedicalRecordsSection() {
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center">
-              <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">{t('mr_access_required') || 'Access Required'}</h3>
-              <p className="text-muted-foreground mb-4">{t('mr_login_required') || 'You need to be logged in to view your medical records'}</p>
-              <Button onClick={() => window.location.href = '/login?redirect=/medical-records'}>
-                {t('mr_log_in') || 'Log In'}
-              </Button>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4DBCC4] mx-auto mb-4"></div>
+              <p className="text-muted-foreground">{t('mr_loading') || 'Loading medical records...'}</p>
             </div>
           </CardContent>
         </Card>

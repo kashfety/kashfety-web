@@ -1143,7 +1143,7 @@ export default function DoctorDashboard() {
             />
           </header>
 
-          <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#0F0F12]">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0F0F12]">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
               {/* Overview Tab */}
               <TabsContent value="overview" className="p-6 space-y-6 h-full">
@@ -1590,9 +1590,9 @@ export default function DoctorDashboard() {
                           {(showAllAppointments ? allAppointments : allAppointments.slice(0, 10)).map((appointment) => (
                             <div
                               key={appointment.id}
-                              className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
+                              className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
                             >
-                              <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-4 w-full lg:w-auto">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                   <User className="w-6 h-6 text-white" />
                                 </div>
@@ -1643,7 +1643,7 @@ export default function DoctorDashboard() {
                                     ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
                                   </Badge>
                                 )}
-                                <div className="flex items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-1">
                                   {appointment.status === 'scheduled' && (
                                     <Button
                                       variant="outline"
@@ -2373,8 +2373,8 @@ export default function DoctorDashboard() {
             {/* Medical Record Form Modal */}
             {showMedicalRecordForm && selectedAppointment && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full">
-                  <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
+                <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                  <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23] flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {t('dd_complete_consultation') || 'Complete Consultation'} - {getLocalizedPatientName(selectedAppointment)}
                     </h2>
@@ -2383,7 +2383,7 @@ export default function DoctorDashboard() {
                     </p>
                   </div>
 
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                     {/* Patient Symptoms */}
                     {selectedAppointment.symptoms && (
                       <div>
@@ -2453,8 +2453,10 @@ export default function DoctorDashboard() {
                         placeholder={t('dd_notes_placeholder') || 'Additional notes...'}
                       />
                     </div>
+                  </div>
 
-                    <div className="flex gap-3 pt-4">
+                  <div className="p-6 border-t border-gray-200 dark:border-[#1F1F23] flex-shrink-0">
+                    <div className="flex gap-3">
                       <Button
                         onClick={handleSaveMedicalRecord}
                         disabled={!medicalRecordForm.diagnosis || !medicalRecordForm.treatment}

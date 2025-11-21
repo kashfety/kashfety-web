@@ -290,27 +290,27 @@ export function formatLocalizedNumber(value: number | string, locale: Locale, op
  */
 export function formatLocalizedTime(timeString: string, locale: Locale): string {
   if (!timeString) return '';
-  
+
   // Parse the time string (handle both "HH:MM" and "HH:MM AM/PM" formats)
   const timeMatch = timeString.match(/(\d{1,2}):(\d{2})/);
   if (!timeMatch) return timeString;
-  
+
   let hours = parseInt(timeMatch[1]);
   const minutes = timeMatch[2];
-  
+
   // Convert to 12-hour format
   const isPM = hours >= 12;
   const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  
+
   const formattedTime = `${hours12.toString().padStart(2, '0')}:${minutes}`;
-  
+
   if (locale === 'ar') {
     // Convert to Arabic numerals and add Arabic AM/PM
     const arabicTime = toArabicNumerals(formattedTime, locale);
     const period = isPM ? 'م' : 'ص'; // م for PM (مساءً), ص for AM (صباحاً)
     return `${arabicTime} ${period}`;
   }
-  
+
   // For English, add AM/PM
   const period = isPM ? 'PM' : 'AM';
   return `${formattedTime} ${period}`;

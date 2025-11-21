@@ -3307,8 +3307,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><TestTube className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_services_management') || 'Services Management'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_lab_services') || 'Configure and manage your lab testing services'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_services_management') || 'Services Management'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_lab_services') || 'Configure and manage your lab testing services'}</p>
                     </div>
                   </div>
                 </div>
@@ -3498,7 +3498,7 @@ export default function CenterDashboardPage() {
                                     <TestTube className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                                   </div>
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <h4 className="font-semibold text-gray-900 dark:text-white">{displayName}</h4>
+                                    <h4 className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</h4>
                                     <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description') || 'No description provided'}
                                     </p>
@@ -3507,7 +3507,7 @@ export default function CenterDashboardPage() {
                                         {t('duration') || 'Duration'}: {formatLocalizedNumber(testType.default_duration || 30, locale)} {t('minutes') || 'minutes'}
                                       </span>
                                       <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        {t('category') || 'Category'}: {testType.category || 'General'}
+                                        {t('category') || 'Category'}: {testType.category ? (testType.category === 'lab' ? (t('lab') || 'Lab') : testType.category === 'imaging' ? (t('imaging') || 'Imaging') : testType.category) : (t('general') || 'General')}
                                       </span>
                                     </div>
                                   </div>

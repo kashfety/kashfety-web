@@ -491,10 +491,10 @@ function CenterPatients({
           </div>
           <div className={isRTL ? 'text-right' : 'text-left'}>
             <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              {t('cd_patient_management') || 'Patient Management'}
+              {t('cd_patient_management') || 'إدارة المرضى'}
             </h2>
             <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              {t('cd_view_patient_records') || 'View patient records and upload documents'} ({formatLocalizedNumber(patients?.length || 0, locale)} {t('cd_total_patients') || 'total patients'})
+              {t('cd_view_patient_records') || 'عرض سجلات المرضى ورفع المستندات'} (<span dir="ltr">{formatLocalizedNumber(patients?.length || 0, locale)}</span> {t('cd_total_patients') || 'إجمالي المرضى'})
             </p>
           </div>
         </div>
@@ -502,22 +502,22 @@ function CenterPatients({
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
-          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_records') || 'Patient Records'}</CardTitle>
+          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_records') || 'سجلات المرضى'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {patients?.length > 0 ? patients.map((patient: any) => (
-              <div key={patient.id} className={`flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div key={patient.id} className={`flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
                     <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                      {patient.age ? <><span>{t('age') || 'Age'}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
+                      {patient.age ? <><span>{t('age') || 'العمر'}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
-                      {patient.last_visit ? `${t('cd_last_visit') || 'Last visit'}: ${formatLocalizedDate(patient.last_visit, locale)}` : t('cd_no_recent_visits') || 'No recent visits'}
+                      {patient.last_visit ? <><span>{t('cd_last_visit') || 'آخر زيارة'}: </span><span dir="ltr">{formatLocalizedDate(patient.last_visit, locale)}</span></> : <span>{t('cd_no_recent_visits') || 'لا توجد زيارات حديثة'}</span>}
                     </p>
                   </div>
                 </div>
@@ -525,16 +525,16 @@ function CenterPatients({
                   onClick={() => onViewPatient(patient.id, patient.name)}
                   variant="outline"
                   size="sm"
-                  className={isRTL ? 'flex-row-reverse text-right' : 'text-left'}
+                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
-                  {t('cd_view_details') || 'View Details'}
+                  {t('cd_view_details') || 'عرض التفاصيل'}
                 </Button>
               </div>
             )) : (
               <div className="text-center py-8">
                 <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                <p className="text-gray-500">{t('cd_no_patients_registered') || 'No patients registered yet'}</p>
-                <p className="text-sm text-gray-400 mt-1">{t('cd_patients_will_appear') || 'Patients will appear here when they book appointments'}</p>
+                <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_patients_registered') || 'لم يتم تسجيل مرضى بعد'}</p>
+                <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patients_will_appear') || 'سيظهر المرضى هنا عندما يحجزون مواعيد'}</p>
               </div>
             )}
           </div>
@@ -4073,11 +4073,11 @@ export default function CenterDashboardPage() {
 
       {/* Enhanced Patient Modal */}
       {showPatientModal && selectedPatient && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {t('cd_patient_medical_records')}: {getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')}
+            <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                {t('cd_patient_medical_records') || 'السجلات الطبية للمريض'}: {getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient') || 'مريض غير معروف'}
               </h3>
               <Button variant="outline" size="sm" onClick={() => setShowPatientModal(false)}>
                 <XCircle className="w-4 h-4" />
@@ -4088,25 +4088,25 @@ export default function CenterDashboardPage() {
               {/* Patient Basic Info */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_information')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_information') || 'معلومات المريض'}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>{t('cd_patient_full_name')}</Label>
-                      <Input value={getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')} readOnly />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_full_name') || 'الاسم الكامل'}</Label>
+                      <Input value={getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient') || 'مريض غير معروف'} readOnly dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'} />
                     </div>
-                    <div>
-                      <Label>{t('cd_patient_email')}</Label>
-                      <Input value={selectedPatient.email || t('cd_value_not_provided')} readOnly />
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_email') || 'البريد الإلكتروني'}</Label>
+                      <Input value={selectedPatient.email || t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
                     </div>
-                    <div>
-                      <Label>{t('cd_patient_phone')}</Label>
-                      <Input value={selectedPatient.phone || t('cd_value_not_provided')} readOnly />
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_phone') || 'رقم الهاتف'}</Label>
+                      <Input value={selectedPatient.phone || t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
                     </div>
-                    <div>
-                      <Label>{t('cd_registered_date')}</Label>
-                      <Input value={selectedPatient.created_at ? formatLocalizedDate(selectedPatient.created_at, locale) : t('cd_value_not_provided')} readOnly />
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registered_date') || 'تاريخ التسجيل'}</Label>
+                      <Input value={selectedPatient.created_at ? formatLocalizedDate(selectedPatient.created_at, locale) : t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
                     </div>
                   </div>
                 </CardContent>
@@ -4115,48 +4115,48 @@ export default function CenterDashboardPage() {
               {/* Past Lab Tests History with This Center */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_lab_test_history')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_lab_test_history') || 'سجل التحاليل المخبرية'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.labHistory?.length > 0 ? (
                     <div className="space-y-3">
                       {selectedPatient.labHistory.map((test: any, index: number) => (
                         <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test')}</p>
-                              <p className="text-sm text-gray-500">
-                                {test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available')} • ${formatLocalizedNumber(test.fee, locale)}
+                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                              <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test') || 'تحليل غير معروف'}</p>
+                              <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <span dir="ltr">{test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available') || 'التاريخ غير متوفر'}</span> • <span dir="ltr">{formatLocalizedNumber(test.fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</span>
                               </p>
                             </div>
-                            <div className="text-right">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${test.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                                test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
-                                  test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                                    test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
-                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                                }`}>
-                                {test.status === 'completed' ? t('status_completed') :
-                                  test.status === 'confirmed' ? t('status_confirmed') :
-                                    test.status === 'scheduled' ? t('status_scheduled') :
-                                      test.status === 'cancelled' ? t('status_cancelled') :
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <Badge className={`${test.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
+                                test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
+                                  test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700' :
+                                    test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
+                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 border-gray-300 dark:border-gray-700'
+                                }`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                {test.status === 'completed' ? (t('appointments_status_completed') || 'مكتمل') :
+                                  test.status === 'confirmed' ? (t('appointments_status_confirmed') || 'مؤكد') :
+                                    test.status === 'scheduled' ? (t('appointments_status_scheduled') || 'مجدول') :
+                                      test.status === 'cancelled' ? (t('appointments_status_cancelled') || 'ملغي') :
                                         test.status}
-                              </span>
+                              </Badge>
                               {test.result_file_url && (
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className={isRTL ? "mr-2" : "ml-2"}
+                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                                   onClick={() => window.open(test.result_file_url, '_blank')}
                                 >
-                                  {t('cd_view_result')}
+                                  {t('cd_view_result') || 'عرض النتيجة'}
                                 </Button>
                               )}
                             </div>
                           </div>
                           {test.result_notes && (
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                              {t('cd_notes')}: {test.result_notes}
+                              <span className="font-medium">{t('cd_notes') || 'ملاحظات'}:</span> {test.result_notes}
                             </p>
                           )}
                         </div>
@@ -4165,8 +4165,8 @@ export default function CenterDashboardPage() {
                   ) : (
                     <div className="text-center py-8">
                       <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500">{t('cd_no_lab_history')}</p>
-                      <p className="text-sm text-gray-400 mt-1">{t('cd_no_tests_yet')}</p>
+                      <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_lab_history') || 'لا يوجد سجل تحاليل'}</p>
+                      <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_tests_yet') || 'لم يتم إجراء أي تحاليل بعد'}</p>
                     </div>
                   )}
                 </CardContent>
@@ -4175,7 +4175,7 @@ export default function CenterDashboardPage() {
               {/* Patient Registration & Medical Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_patient_registration_info')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_registration_info') || 'معلومات التسجيل'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {selectedPatient.medicalRecords?.length > 0 ? (
@@ -4183,24 +4183,24 @@ export default function CenterDashboardPage() {
                       {selectedPatient.medicalRecords.map((record: any, index: number) => (
                         <div key={index} className="space-y-4">
                           {/* Personal Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className="font-medium text-gray-900 dark:text-white mb-3">{t('cd_personal_details')}</h4>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_full_name')}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided')}
+                              <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_personal_details') || 'البيانات الشخصية'}</h4>
+                              <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_patient_full_name') || 'الاسم الكامل'}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided') || 'غير متوفر'}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_gender')}:</strong> {record.gender ? (locale === 'ar' ? (record.gender.toLowerCase() === 'male' ? 'ذكر' : record.gender.toLowerCase() === 'female' ? 'أنثى' : record.gender) : record.gender) : t('cd_value_not_provided')}
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_patient_gender') || 'الجنس'}:</strong> {record.gender ? (record.gender.toLowerCase() === 'male' ? (t('gender_male') || 'ذكر') : record.gender.toLowerCase() === 'female' ? (t('gender_female') || 'أنثى') : record.gender) : (t('cd_value_not_provided') || 'غير متوفر')}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_dob')}:</strong> {record.date_of_birth ? new Date(record.date_of_birth).toLocaleDateString() : t('cd_value_not_provided')}
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_patient_dob') || 'تاريخ الميلاد'}:</strong> <span dir="ltr">{record.date_of_birth ? formatLocalizedDate(record.date_of_birth, locale) : (t('cd_value_not_provided') || 'غير متوفر')}</span>
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_phone')}:</strong> {record.phone || t('cd_value_not_provided')}
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_patient_phone') || 'رقم الهاتف'}:</strong> <span dir="ltr">{record.phone || (t('cd_value_not_provided') || 'غير متوفر')}</span>
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  <strong>{t('cd_patient_email')}:</strong> {record.email || t('cd_value_not_provided')}
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_patient_email') || 'البريد الإلكتروني'}:</strong> <span dir="ltr">{record.email || (t('cd_value_not_provided') || 'غير متوفر')}</span>
                                 </p>
                               </div>
                             </div>

@@ -1122,7 +1122,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`}>
+    <div className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`}>
       {/* Background mesh to match old dashboard UI */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 rounded-full blur-3xl animate-float-slow"></div>
@@ -1130,10 +1130,10 @@ export default function DoctorDashboard() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-emerald-400/5 to-transparent rounded-full animate-breathe"></div>
       </div>
 
-      <div className="flex h-screen relative z-10">
+      <div className="flex h-screen relative z-10 overflow-x-hidden">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} toast={toast} />
 
-        <div className="w-full flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col min-w-0">
           <header className="h-16 border-b border-gray-200 dark:border-[#1F1F23]">
             <ProfileHeader
               doctorProfile={doctorProfile}
@@ -1143,10 +1143,10 @@ export default function DoctorDashboard() {
             />
           </header>
 
-          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0F0F12]">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0F0F12] w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full w-full">
               {/* Overview Tab */}
-              <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full">
+              <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full w-full max-w-full">
                 {/* Welcome Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1428,7 +1428,7 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               {/* Analytics Tab (in-place, same route) */}
-              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6">
+              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6 w-full max-w-full">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl gradient-emerald">
                     <BarChart2 className="h-5 w-5 text-white" />
@@ -1564,7 +1564,7 @@ export default function DoctorDashboard() {
                 </Card>
               </TabsContent>
               {/* Appointments Tab */}
-              <TabsContent value="appointments" className="py-6 px-4 h-full">
+              <TabsContent value="appointments" className="py-6 px-4 h-full w-full max-w-full">
                 {/* Hero like old dashboard */}
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
@@ -1816,7 +1816,7 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               {/* Schedule Calendar Tab */}
-              <TabsContent value="schedule-calendar" className="h-full">
+              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full">
                 <DoctorScheduleCalendar
                   appointments={allAppointments || []}
                   onAppointmentClick={(appointment: Appointment) => {
@@ -1845,7 +1845,7 @@ export default function DoctorDashboard() {
                 />
               </TabsContent>
 
-              <TabsContent value="patients" className="py-6 px-4 h-full">
+              <TabsContent value="patients" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Users className="h-5 w-5 text-white" /></div>
@@ -2049,7 +2049,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="schedule" className="py-6 px-4 h-full">
+              <TabsContent value="schedule" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
@@ -2070,7 +2070,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="centers" className="py-6 px-4 h-full">
+              <TabsContent value="centers" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Building2 className="h-5 w-5 text-white" /></div>
@@ -2085,7 +2085,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="reviews" className="py-6 px-4 h-full">
+              <TabsContent value="reviews" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
@@ -2196,7 +2196,7 @@ export default function DoctorDashboard() {
                 )}
               </TabsContent>
 
-              <TabsContent value="profile" className="py-6 px-4 h-full">
+              <TabsContent value="profile" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>

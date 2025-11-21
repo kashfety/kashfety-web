@@ -126,7 +126,7 @@ function TopNav({
         {nextAppointment && (
           <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Clock className="w-4 h-4" />
-            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} <span dir="ltr">{formatLocalizedTime(nextAppointment.time, locale)}</span></span>
+            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${nextAppointment.time}`), locale, 'time')}</span></span>
           </div>
         )}
       </div>
@@ -1577,7 +1577,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           {/* Test Type Selection */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                 <TestTube className="h-5 w-5" />
                 {t('test_type_selection') || 'Lab Test Type Selection'}
               </CardTitle>
@@ -1585,8 +1585,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-base font-medium">{t('select_test_type_manage') || 'Select Test Type to Manage Schedule'}</Label>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('test_type_selection_desc') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'}</p>
+                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{t('select_test_type_manage') || 'Select Test Type to Manage Schedule'}</Label>
+                  <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('test_type_selection_desc') || 'Choose which lab test type you want to set the schedule for. Each test type can have its own unique operating hours.'}</p>
                 </div>
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1622,7 +1622,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                   <div className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium text-blue-700 dark:text-blue-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('selected') || 'Selected'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
                     </div>

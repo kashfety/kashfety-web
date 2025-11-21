@@ -1538,7 +1538,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                     }}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
-                    <TestTube className="w-4 h-4 mr-2" />
+                    <TestTube className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t('go_to_services') || 'Go to Services Tab'}
                   </Button>
                 </div>
@@ -1561,7 +1561,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 size="sm"
                 disabled={loading || !selectedTestType}
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 {t('refresh') || 'Refresh'}
               </Button>
               <Button
@@ -1569,7 +1569,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 disabled={saving || !selectedTestType}
                 size="sm"
               >
-                <Save className="h-4 w-4 mr-2" />
+                <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 {saving ? (t('saving') || 'Saving...') : (t('save_schedule') || 'Save Schedule')}
               </Button>
             </div>
@@ -1621,7 +1621,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                 {selectedTestType && (
                   <div className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="flex items-center gap-2">
+                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <CheckCircle className="h-5 w-5 text-blue-500" />
                       <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('selected') || 'Selected'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
@@ -1636,7 +1636,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           {selectedTestType && (
             <>
               {loading && (
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500"></div>
                   Loading schedule configuration...
                 </div>
@@ -1755,8 +1755,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             )}
 
                             {/* Copy from other days */}
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">{t('copy_from') || 'Copy from:'}</span>
+                            <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                              <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('copy_from') || 'Copy from:'}</span>
                               {DAYS_OF_WEEK.filter(d => d.value !== day.value && getDayConfig(d.value).isAvailable).map(sourceDay => (
                                 <Button
                                   key={sourceDay.value}
@@ -1789,16 +1789,16 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('working_days') || 'Working Days'}</Label>
-                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)} {t('days') || 'days'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('working_days') || 'Working Days'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)} {t('days') || 'days'}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)} {t('slots') || 'slots'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('total_weekly_slots') || 'Total Weekly Slots'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)} {t('slots') || 'slots'}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('test_type') || 'Test Type'}</Label>
-                      <p className="text-lg font-semibold">{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>{t('test_type') || 'Test Type'}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
                     </div>
                   </div>
                 </CardContent>

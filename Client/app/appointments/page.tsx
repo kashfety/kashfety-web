@@ -137,9 +137,17 @@ export default function MyAppointmentsPage() {
     const q = searchText.trim().toLowerCase()
     const matchesSearch = (a: Appointment) => {
       if (!q) return true
+      // Support searching in both English and Arabic names
+      const doctorEn = (a.doctorName || '').toLowerCase()
+      const doctorAr = (a.doctor?.name_ar || a.doctor?.first_name_ar || '').toLowerCase()
+      const specialtyEn = (a.specialty || '').toLowerCase()
+      const specialtyAr = (a.doctor?.specialty_ar || '').toLowerCase()
+      
       return (
-        (a.doctorName || '').toLowerCase().includes(q) ||
-        (a.specialty || '').toLowerCase().includes(q)
+        doctorEn.includes(q) ||
+        doctorAr.includes(q) ||
+        specialtyEn.includes(q) ||
+        specialtyAr.includes(q)
       )
     }
     return appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
@@ -642,7 +650,7 @@ export default function MyAppointmentsPage() {
                         <div className="flex items-center gap-3 text-muted-foreground">
                           <Clock className="w-5 h-5 text-emerald-600" />
                           <div>
-                            <div className="font-medium">{(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); } catch { return appointment.time; } })()} ({appointment.duration})</div>
+                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
                             <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                           </div>
                         </div>

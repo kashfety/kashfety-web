@@ -62,9 +62,9 @@ export default function AdminOverview({ stats, loading, onRefresh }: AdminOvervi
     const { t, isRTL } = useLocale();
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat(isRTL ? 'ar-SY' : 'en-SY', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'SYP',
         }).format(amount);
     };
 

@@ -510,7 +510,7 @@ export default function DoctorProfileSettings({
                 </button>
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <span className="text-gray-500 text-lg">$</span>
+                    <span className="text-gray-500 text-sm font-medium">{t('currency_symbol') || 'SYP'}</span>
                   </div>
                   <Input
                     id="consultation_fee"

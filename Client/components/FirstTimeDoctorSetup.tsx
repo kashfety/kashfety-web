@@ -260,11 +260,11 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
 
               <div>
                 <Label htmlFor="consultation_fee" className="text-base font-medium">
-                  Consultation Fee (USD) *
+                  {t('consultationFeeUSD') || 'Consultation Fee (SYP)'} *
                 </Label>
                 <div className="relative mt-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 text-lg">$</span>
+                    <span className="text-gray-500 text-sm font-medium">{t('currency_symbol') || 'SYP'}</span>
                   </div>
                   <Input
                     id="consultation_fee"

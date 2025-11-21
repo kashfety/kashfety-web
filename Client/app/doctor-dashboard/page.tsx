@@ -578,6 +578,15 @@ export default function DoctorDashboard() {
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState<any>(null);
 
+  // Close medical record form when switching tabs
+  useEffect(() => {
+    if (showMedicalRecordForm) {
+      setShowMedicalRecordForm(false);
+      setSelectedAppointment(null);
+      setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -2397,8 +2406,18 @@ export default function DoctorDashboard() {
 
             {/* Medical Record Form Modal */}
             {showMedicalRecordForm && selectedAppointment && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+                onClick={() => {
+                  setShowMedicalRecordForm(false);
+                  setSelectedAppointment(null);
+                  setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
+                }}
+              >
+                <div 
+                  className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23] flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {t('dd_complete_consultation') || 'Complete Consultation'} - {getLocalizedPatientName(selectedAppointment)}

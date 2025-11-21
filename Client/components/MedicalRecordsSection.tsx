@@ -711,13 +711,13 @@ export default function MedicalRecordsSection() {
                   <div className="w-full">
                     {medicalInfo?.emergency_contact?.name ? (
                       <div className="space-y-2 w-full">
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p><strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}</p>
                         </div>
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p><strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}</p>
                         </div>
-                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p><strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{medicalInfo.emergency_contact.phone}</span></p>
                         </div>
                       </div>

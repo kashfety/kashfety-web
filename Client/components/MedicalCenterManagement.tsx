@@ -381,7 +381,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
           {/* Consultation Fee */}
           {isEditing ? (
             <div>
-              <Label>Consultation Fee (USD)</Label>
+              <Label>{t('consultationFeeUSD') || 'Consultation Fee (SYP)'}</Label>
               <Input
                 type="number"
                 value={editData.consultation_fee || 0}
@@ -395,7 +395,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
             center.consultation_fee && (
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
-                  Consultation Fee: ${center.consultation_fee}
+                  {t('consultation_fee') || 'Consultation Fee'}: {center.consultation_fee} {t('currency_symbol') || 'SYP'}
                 </Badge>
               </div>
             )

@@ -59,7 +59,7 @@ interface MedicalRecord {
 
 export default function MedicalRecordsSection() {
   const { user, isAuthenticated } = useAuth();
-  const { t, locale } = useLocale();
+  const { t, locale, isRTL } = useLocale();
   const { toast } = useToast();
 
   const [medicalInfo, setMedicalInfo] = useState<MedicalInfo | null>(null);
@@ -465,7 +465,7 @@ export default function MedicalRecordsSection() {
   }
 
   return (
-    <div className="w-full" id="medical-records">
+    <div className="w-full" id="medical-records" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">

@@ -515,7 +515,7 @@ export default function MedicalRecordsSection() {
           <TabsContent value="overview">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-start">
                   <Heart className="w-5 h-5 text-[#4DBCC4]" />
                   {t('mr_medical_history') || 'Medical History'}
                 </CardTitle>
@@ -524,23 +524,23 @@ export default function MedicalRecordsSection() {
                 {editing ? (
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="medical_history">{t('mr_medical_history') || 'Medical History'}</Label>
+                      <Label htmlFor="medical_history" className="text-start">{t('mr_medical_history') || 'Medical History'}</Label>
                       <Textarea
                         id="medical_history"
                         value={editForm.medical_history}
                         onChange={(e) => setEditForm(prev => ({ ...prev, medical_history: e.target.value }))}
                         placeholder={t('mr_medical_history_placeholder') || "Enter your medical history, past conditions, surgeries, etc."}
                         rows={6}
-                        className="mt-1"
+                        className="mt-1 text-start"
                       />
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="text-start">
                     {medicalInfo?.medical_history ? (
-                      <p className="text-foreground whitespace-pre-wrap">{medicalInfo.medical_history}</p>
+                      <p className="text-foreground whitespace-pre-wrap text-start">{medicalInfo.medical_history}</p>
                     ) : (
-                      <p className="text-muted-foreground italic">{t('mr_no_medical_history') || 'No medical history recorded'}</p>
+                      <p className="text-muted-foreground italic text-start">{t('mr_no_medical_history') || 'No medical history recorded'}</p>
                     )}
                   </div>
                 )}
@@ -551,7 +551,7 @@ export default function MedicalRecordsSection() {
           <TabsContent value="allergies">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-start">
                   <AlertTriangle className="w-5 h-5 text-red-500" />
                   {t('mr_allergies') || 'Allergies'}
                 </CardTitle>
@@ -593,7 +593,7 @@ export default function MedicalRecordsSection() {
                         </Badge>
                       ))
                     ) : (
-                      <p className="text-muted-foreground italic">{t('mr_no_allergies') || 'No allergies recorded'}</p>
+                      <p className="text-muted-foreground italic text-start">{t('mr_no_allergies') || 'No allergies recorded'}</p>
                     )}
                   </div>
                 )}
@@ -604,9 +604,9 @@ export default function MedicalRecordsSection() {
           <TabsContent value="medications">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Pill className="w-5 h-5 text-blue-500" />
-                  {t('mr_medications') || 'Current Medications'}
+                <CardTitle className="flex items-center gap-2 text-start">
+                  <Pill className="w-5 h-5 text-[#4DBCC4]" />
+                  {t('mr_medications') || 'Medications'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -646,7 +646,7 @@ export default function MedicalRecordsSection() {
                         </Badge>
                       ))
                     ) : (
-                      <p className="text-muted-foreground italic">{t('mr_no_medications') || 'No medications recorded'}</p>
+                      <p className="text-muted-foreground italic text-start">{t('mr_no_medications') || 'No medications recorded'}</p>
                     )}
                   </div>
                 )}
@@ -657,9 +657,9 @@ export default function MedicalRecordsSection() {
           <TabsContent value="emergency">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-green-500" />
-                  {t('mr_emergency_contact') || 'Emergency Contact'}
+                <CardTitle className="flex items-center gap-2 text-start">
+                  <Phone className="w-5 h-5 text-[#4DBCC4]" />
+                  {t('mr_emergency_contact') || 'Emergency Contact Information'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -667,7 +667,7 @@ export default function MedicalRecordsSection() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="emergency_name">{t('mr_contact_name') || 'Contact Name'}</Label>
+                        <Label htmlFor="emergency_name" className="text-start">{t('mr_contact_name') || 'Contact Name'}</Label>
                         <Input
                           id="emergency_name"
                           value={editForm.emergency_contact.name || ''}
@@ -679,7 +679,7 @@ export default function MedicalRecordsSection() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="emergency_relationship">{t('mr_relationship') || 'Relationship'}</Label>
+                        <Label htmlFor="emergency_relationship" className="text-start">{t('mr_relationship') || 'Relationship'}</Label>
                         <Input
                           id="emergency_relationship"
                           value={editForm.emergency_contact.relationship || ''}
@@ -692,7 +692,7 @@ export default function MedicalRecordsSection() {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="emergency_phone">{t('mr_phone') || 'Phone Number'}</Label>
+                      <Label htmlFor="emergency_phone" className="text-start">{t('mr_phone') || 'Phone Number'}</Label>
                       <Input
                         id="emergency_phone"
                         value={editForm.emergency_contact.phone || ''}
@@ -713,7 +713,7 @@ export default function MedicalRecordsSection() {
                         <p><strong>{t('mr_phone') || 'Phone'}:</strong> {medicalInfo.emergency_contact.phone}</p>
                       </div>
                     ) : (
-                      <p className="text-muted-foreground italic">{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>
+                      <p className="text-muted-foreground italic text-start">{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>
                     )}
                   </div>
                 )}
@@ -725,7 +725,7 @@ export default function MedicalRecordsSection() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-start">
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
                     {t('mr_tab_consultations') || 'Consultations'}
                   </CardTitle>
@@ -735,12 +735,12 @@ export default function MedicalRecordsSection() {
                 {recordsLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4DBCC4]"></div>
-                    <p className="ms-3 text-muted-foreground">{t('mr_loading_records') || 'Loading records...'}</p>
+                    <p className="ms-3 text-muted-foreground text-start">{t('mr_loading_records') || 'Loading records...'}</p>
                   </div>
                 ) : medicalRecords.length === 0 ? (
                   <div className="text-center py-8">
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">{t('mr_no_consultations') || 'No consultations found'}</p>
+                    <p className="text-muted-foreground text-start">{t('mr_no_consultations') || 'No consultations found'}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -749,7 +749,7 @@ export default function MedicalRecordsSection() {
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-lg mb-2">{record.diagnosis}</CardTitle>
+                              <CardTitle className="text-lg mb-2 text-start">{record.diagnosis}</CardTitle>
                               <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                                 {record.doctor && (
                                   <div className="flex items-center gap-1">
@@ -770,19 +770,19 @@ export default function MedicalRecordsSection() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div>
-                            <Label className="text-sm font-semibold">{t('mr_treatment') || 'Treatment'}</Label>
-                            <p className="text-foreground mt-1">{record.treatment}</p>
+                            <Label className="text-sm font-semibold text-start">{t('mr_treatment') || 'Treatment'}</Label>
+                            <p className="text-foreground mt-1 text-start">{record.treatment}</p>
                           </div>
                           {record.prescription && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_prescription') || 'Prescription'}</Label>
-                              <p className="text-foreground mt-1">{record.prescription}</p>
+                              <Label className="text-sm font-semibold text-start">{t('mr_prescription') || 'Prescription'}</Label>
+                              <p className="text-foreground mt-1 text-start">{record.prescription}</p>
                             </div>
                           )}
                           {record.notes && (
                             <div>
-                              <Label className="text-sm font-semibold">{t('mr_notes') || 'Notes'}</Label>
-                              <p className="text-foreground mt-1 whitespace-pre-wrap">{record.notes}</p>
+                              <Label className="text-sm font-semibold text-start">{t('mr_notes') || 'Notes'}</Label>
+                              <p className="text-foreground mt-1 whitespace-pre-wrap text-start">{record.notes}</p>
                             </div>
                           )}
                         </CardContent>

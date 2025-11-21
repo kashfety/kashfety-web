@@ -833,10 +833,10 @@ function CenterAnalytics({
               <BarChart2 className="h-5 w-5 text-white" />
             </div>
             <div className={isRTL ? 'text-right' : 'text-left'}>
-              <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>
+              <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {t('cd_analytics_demographics') || 'Analytics & Demographics'}
               </h2>
-              <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {t('cd_center_performance_insights') || 'Center performance insights and patient demographics'}
               </p>
             </div>
@@ -851,12 +851,11 @@ function CenterAnalytics({
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_total_revenue') || 'Total Revenue'}</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" dir="ltr">
                   {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: {formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
               </div>
-              <DollarSign className="h-8 w-8 text-emerald-500" />
             </div>
           </CardContent>
         </Card>
@@ -866,10 +865,10 @@ function CenterAnalytics({
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_total_bookings') || 'Total Bookings'}</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                   {formatLocalizedNumber(totalBookings, locale)}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: {formatLocalizedNumber(todayBookings, locale)}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'Today'}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -881,10 +880,10 @@ function CenterAnalytics({
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('cd_completion_rate') || 'Completion Rate'}</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
                   {formatLocalizedNumber(completionRate, locale)}%
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{formatLocalizedNumber(completedBookings, locale)} {t('of') || 'of'} {formatLocalizedNumber(totalBookings, locale)}</p>
+                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of') || 'of'} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
               </div>
               <CheckCircle className="h-8 w-8 text-purple-500" />
             </div>
@@ -896,7 +895,7 @@ function CenterAnalytics({
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" dir="ltr">
                   {formatLocalizedNumber(totalPatients, locale)}
                 </p>
                 <p className="text-xs text-gray-500">{t('cd_unique_patients_served') || 'Unique patients served'}</p>

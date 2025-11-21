@@ -39,6 +39,7 @@ interface DoctorProfileData {
   email: string;
   phone: string;
   specialty: string;
+  specialty_ar?: string;
   bio: string;
   experience_years: number;
   consultation_fee: number;
@@ -67,6 +68,7 @@ export default function DoctorProfileSettings({
     name: "",
     name_ar: "",
     specialty: "",
+    specialty_ar: "",
     bio: "",
     experience_years: 0,
     consultation_fee: 0,
@@ -127,6 +129,7 @@ export default function DoctorProfileSettings({
           name: doctorProfile.name || "",
           name_ar: doctorProfile.name_ar || "",
           specialty: doctorProfile.specialty || "",
+          specialty_ar: doctorProfile.specialty_ar || "",
           bio: doctorProfile.bio || "",
           experience_years: doctorProfile.experience_years || 0,
           consultation_fee: doctorProfile.consultation_fee || 0,
@@ -423,21 +426,24 @@ export default function DoctorProfileSettings({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">{t('fullName') || 'Full Name (English)'}</Label>
+              <Label htmlFor="name" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder={t('fullNamePlaceholder') || "Enter your full name in English"}
+                className="text-left"
+                dir="ltr"
               />
             </div>
             <div>
-              <Label htmlFor="name_ar">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
+              <Label htmlFor="name_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
               <Input
                 id="name_ar"
                 value={formData.name_ar}
                 onChange={(e) => handleInputChange('name_ar', e.target.value)}
                 placeholder={t('fullNameArabicPlaceholder') || "أدخل اسمك الكامل بالعربية"}
+                className="text-right"
                 dir="rtl"
               />
             </div>
@@ -445,29 +451,45 @@ export default function DoctorProfileSettings({
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="specialty">{t('specialty') || 'Specialty'}</Label>
+              <Label htmlFor="specialty" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
                 onChange={(e) => handleInputChange('specialty', e.target.value)}
                 placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
+                className="text-left"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <Label htmlFor="specialty_ar" className={isRTL ? 'text-right block' : 'text-left block'}>{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
+              <Input
+                id="specialty_ar"
+                value={formData.specialty_ar}
+                readOnly
+                disabled
+                className={`bg-gray-100 text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                placeholder={t('specialtyArabicPlaceholder') || "التخصص بالعربية"}
+                dir="rtl"
               />
             </div>
           </div>
           
           <div>
-            <Label htmlFor="bio">{t('professionalBio') || 'Professional Bio'}</Label>
+            <Label htmlFor="bio" className={isRTL ? 'text-right block' : 'text-left block'}>{t('professionalBio') || 'Professional Bio'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               placeholder={t('professionalBioPlaceholder') || "Describe your background, expertise, and approach to patient care..."}
               rows={4}
+              className="text-left"
+              dir="ltr"
             />
           </div>
 
           <div>
-            <Label htmlFor="experience">{t('yearsOfExperience') || 'Years of Experience'}</Label>
+            <Label htmlFor="experience" className={isRTL ? 'text-right block' : 'text-left block'}>{t('yearsOfExperience') || 'Years of Experience'}</Label>
             <Input
               id="experience"
               type="number"
@@ -476,6 +498,8 @@ export default function DoctorProfileSettings({
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
               placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
+              className="text-left"
+              dir="ltr"
             />
           </div>
         </CardContent>
@@ -484,21 +508,21 @@ export default function DoctorProfileSettings({
       {/* Consultation Fee Settings */}
       <Card className="border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-900/10">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-emerald-800">
+          <CardTitle className={`flex items-center gap-2 text-emerald-800 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
             <DollarSign className="w-5 h-5" />
             {t('dd_consultation_fee_settings') || 'Consultation Fee Settings'}
           </CardTitle>
-          <p className="text-sm text-emerald-600">
+          <p className={`text-sm text-emerald-600 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('dd_consultation_fee_desc') || 'Set your consultation fee that will be displayed to patients and used in billing'}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="consultation_fee" className="text-base font-medium">
-                {t('consultationFeeUSD') || 'Consultation Fee (USD)'}
+              <Label htmlFor="consultation_fee" className={`text-base font-medium ${isRTL ? 'text-right block' : 'text-left block'}`}>
+                {t('consultationFeeUSD') || 'Consultation Fee (SYP)'}
               </Label>
-              <div className="mt-1 flex items-center gap-2">
+              <div className="mt-1 flex items-center gap-2 flex-row">
                 <button
                   type="button"
                   aria-label="Decrease fee"
@@ -510,7 +534,7 @@ export default function DoctorProfileSettings({
                 </button>
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <span className="text-gray-500 text-lg">$</span>
+                    <span className="text-gray-500 text-sm font-medium">{t('currency_symbol') || 'SYP'}</span>
                   </div>
                   <Input
                     id="consultation_fee"
@@ -519,9 +543,10 @@ export default function DoctorProfileSettings({
                     step="0.01"
                     value={formData.consultation_fee}
                     onChange={(e) => handleInputChange('consultation_fee', parseFloat(e.target.value) || 0)}
-                    className="pl-8 text-lg font-medium bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white border-gray-200 dark:border-[#1F1F23] placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                    className="pl-12 text-left text-lg font-medium bg-white dark:bg-[#0F0F12] text-gray-900 dark:text-white border-gray-200 dark:border-[#1F1F23] placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     placeholder="0.00"
                     disabled={saving}
+                    dir="ltr"
                   />
                 </div>
                 <button
@@ -545,29 +570,29 @@ export default function DoctorProfileSettings({
                   className="w-full accent-emerald-600 dark:accent-emerald-400"
                   disabled={saving}
                 />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <span>$0</span>
-                  <span>$1000</span>
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 flex-row">
+                  <span>0 {t('currency_symbol') || 'SYP'}</span>
+                  <span>1000 {t('currency_symbol') || 'SYP'}</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {t('consultationFeeNote') || 'This fee will be displayed to patients when booking appointments'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
-              <h4 className="font-medium text-emerald-800 mb-2">{t('feePreview') || 'Fee Preview'}</h4>
+              <h4 className={`font-medium text-emerald-800 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>{t('feePreview') || 'Fee Preview'}</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                   <span>{t('clinicConsultation') || 'Clinic Consultation'}:</span>
-                  <span className="font-medium">${formData.consultation_fee.toFixed(2)}</span>
+                  <span className="font-medium">{formData.consultation_fee.toFixed(2)} {t('currency_symbol') || 'SYP'}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className={`flex justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                   <span>{t('homeVisit') || 'Home Visit'}:</span>
-                  <span className="font-medium">${(formData.consultation_fee + 50).toFixed(2)}</span>
+                  <span className="font-medium">{(formData.consultation_fee + 50).toFixed(2)} {t('currency_symbol') || 'SYP'}</span>
                 </div>
                 <Separator className="my-2" />
-                <p className="text-xs text-gray-600">
+                <p className={`text-xs text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
                   {t('homeVisitNote') || 'Home visits include additional travel fee'}
                 </p>
               </div>

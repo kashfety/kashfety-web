@@ -137,9 +137,17 @@ export default function MyAppointmentsPage() {
     const q = searchText.trim().toLowerCase()
     const matchesSearch = (a: Appointment) => {
       if (!q) return true
+      // Support searching in both English and Arabic names
+      const doctorEn = (a.doctorName || '').toLowerCase()
+      const doctorAr = (a.doctor?.name_ar || a.doctor?.first_name_ar || '').toLowerCase()
+      const specialtyEn = (a.specialty || '').toLowerCase()
+      const specialtyAr = (a.doctor?.specialty_ar || '').toLowerCase()
+      
       return (
-        (a.doctorName || '').toLowerCase().includes(q) ||
-        (a.specialty || '').toLowerCase().includes(q)
+        doctorEn.includes(q) ||
+        doctorAr.includes(q) ||
+        specialtyEn.includes(q) ||
+        specialtyAr.includes(q)
       )
     }
     return appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
@@ -311,7 +319,11 @@ export default function MyAppointmentsPage() {
         }
 
         // Get doctor and center information
-        const doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+        let doctorPhone = apt.doctor?.phone || apt.doctor_phone || 'N/A';
+        // Filter out placeholder phone values that contain IDs
+        if (doctorPhone && (doctorPhone.includes('PHONE_NEEDED') || doctorPhone.includes('_') && doctorPhone.length > 20)) {
+          doctorPhone = 'N/A';
+        }
         const isHomeVisit = (apt.appointment_type === 'home' || apt.appointment_type === 'home_visit' || apt.type === 'home_visit');
         let center = apt.center || apt.centers || null;
         let centerName = isHomeVisit ? (t('appointments_type_home_visit') || 'Home Visit') : (getLocalizedCenterName(center) || apt.center_name || '');
@@ -445,6 +457,18 @@ export default function MyAppointmentsPage() {
         return t('appointments_status_pending') || 'Pending'
       default:
         return s.charAt(0).toUpperCase() + s.slice(1)
+    }
+  }
+
+  const isAbsent = (appointment: Appointment) => {
+    if (appointment.status !== 'scheduled' && appointment.status !== 'confirmed') return false;
+    
+    try {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      return appointmentDateTime < now;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -619,6 +643,9 @@ export default function MyAppointmentsPage() {
                         {(appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
                           <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">{t('appointments_booked_badge') || 'Booked'}</Badge>
                         )}
+                        {isAbsent(appointment) && (
+                          <Badge variant="destructive" className="text-xs bg-red-100 text-red-800 border-red-200 hover:bg-red-100">{t('appointments_absent_badge') || 'Absent'}</Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -638,7 +665,7 @@ export default function MyAppointmentsPage() {
                         <div className="flex items-center gap-3 text-muted-foreground">
                           <Clock className="w-5 h-5 text-emerald-600" />
                           <div>
-                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
+                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); } catch { return appointment.time; } })(), locale)} ({appointment.duration})</div>
                             <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                           </div>
                         </div>
@@ -683,7 +710,7 @@ export default function MyAppointmentsPage() {
                           </div>
                         )}
 
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-wrap gap-2 pt-2">
                           <Button variant="outline" size="sm" className="text-[#4DBCC4] border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:text-[#4DBCC4] dark:border-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20" onClick={() => handleReschedule(appointment)} disabled={appointment.status === 'cancelled' || appointment.status === 'completed'}>
                             {t('appointments_reschedule_button') || 'Reschedule'}
                           </Button>
@@ -718,7 +745,12 @@ export default function MyAppointmentsPage() {
       <CancelModal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} appointment={selectedAppointment} onSuccess={handleModalSuccess} />
       <ReviewModal isOpen={reviewOpen} onClose={() => setReviewOpen(false)} appointmentId={selectedAppointment?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} patientId={user?.id || ''} onSuccess={() => { setReviewOpen(false); setReviewedIds(prev => new Set(prev).add(selectedAppointment?.id || '')); }} />
       <VisitSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} appointmentId={selectedAppointment?.id || ''} patientId={user?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} />
-      <BookingModal isOpen={isBookingModalOpen} onClose={() => setIsBookingModalOpen(false)} initialMode="doctor" />
+      <BookingModal 
+        isOpen={isBookingModalOpen} 
+        onClose={() => setIsBookingModalOpen(false)} 
+        initialMode="doctor"
+        onSuccess={refreshAppointments}
+      />
     </div>
   )
 }

@@ -76,7 +76,7 @@ export default function MedicalRecordsPage() {
               <div className="flex items-center gap-4 mb-4">
                 <Link href="/">
                   <Button variant="outline" size="sm" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    <ArrowLeft className="w-4 h-4 me-2" />
                     {t('appointments_back_home') || 'Back to Home'}
                   </Button>
                 </Link>

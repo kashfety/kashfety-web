@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle } from "lucide-react";
+import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Search, XCircle, User, Building } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
@@ -74,9 +74,10 @@ interface BookingModalProps {
   initialMode?: 'doctor' | 'lab';
   preSelectedDoctorId?: string;
   preSelectedCenterId?: string;
+  onSuccess?: () => void;
 }
 
-export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId, onSuccess }: BookingModalProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { t, isRTL, locale } = useLocale();
@@ -1243,9 +1244,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           }
           setSelectedTime("");
           showSuccess(
-            t('booking_success') || "Success!",
+            "", // Let CustomAlert use its own localized title
             t('booking_success_lab_test') || "Lab test booked successfully!",
             () => {
+              if (onSuccess) onSuccess(); // Refresh data before closing
               onClose();
               resetModal();
             }
@@ -1354,9 +1356,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           setSelectedTime("");
 
           showSuccess(
-            t('booking_success') || "Success!",
+            "", // Let CustomAlert use its own localized title
             t('booking_success_appointment') || "Appointment booked successfully!",
             () => {
+              if (onSuccess) onSuccess(); // Refresh data before closing
               onClose();
               resetModal();
             }
@@ -1504,7 +1507,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl">
+          <DialogContent 
+            className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] !overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
+            style={{ overflowX: 'hidden', maxWidth: '100%' }}
+          >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1514,7 +1520,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 duration: 0.4,
                 bounce: 0.25
               }}
-              className="rounded-2xl overflow-hidden"
+              className="rounded-2xl overflow-hidden w-full max-w-full"
+              style={{ overflowX: 'hidden', maxWidth: '100%' }}
             >
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
@@ -1529,7 +1536,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 </DialogHeader>
               </motion.div>
 
-              <div className="p-6 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-900">
+              <div 
+                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 w-full max-w-full box-border"
+                style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box', scrollbarGutter: 'stable', contain: 'paint', paddingRight: '4px' }}
+              >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
                   <Button
@@ -1605,7 +1615,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   <div className="space-y-8">
                     <div>
                       <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">{t('auth_medical_specialty_label')}</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-2">
                         {loadingSpecialties ? (
                           <div className="col-span-full text-center py-8">
                             <div className="text-gray-700 dark:text-gray-300 font-medium text-lg">{t('auth_loading_specialties')}</div>
@@ -1614,7 +1624,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           specialties.map((specialty) => (
                             <Card
                               key={specialty.id}
-                              className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 ${selectedSpecialty === specialty.name
+                              className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${selectedSpecialty === specialty.name
                                 ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
                                 : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
                                 }`}
@@ -1641,9 +1651,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
                     <div>
                       <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">{t('booking_select_visit_type')}</h3>
-                      <div className="grid grid-cols-2 gap-5">
+                      <div className="grid grid-cols-2 gap-5 p-2">
                         <Card
-                          className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 ${selectedLocation === "clinic"
+                          className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${selectedLocation === "clinic"
                             ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
                             : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
                             }`}
@@ -1659,7 +1669,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         </Card>
 
                         <Card
-                          className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 ${selectedLocation === "home"
+                          className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${selectedLocation === "home"
                             ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
                             : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
                             }`}
@@ -1693,24 +1703,24 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         transition={{ duration: 0.3 }}
                       >
                         <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">{t('booking_how_find_doctor') || 'How would you like to find your doctor?'}</h3>
-                        <div className="grid grid-cols-2 gap-5">
+                        <div className="grid grid-cols-2 gap-5 p-2">
                           <Card
-                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
+                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
                             onClick={() => setSearchMethod("centers")}
                           >
                             <CardContent className="p-7 text-center">
-                              <MapPin className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
+                              <Building className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
                               <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_centers') || 'Find Centers'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_centers_desc') || 'Browse medical centers first, then view their doctors'}</div>
                             </CardContent>
                           </Card>
 
                           <Card
-                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-105 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
+                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
                             onClick={() => setSearchMethod("doctors")}
                           >
                             <CardContent className="p-7 text-center">
-                              <Home className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
+                              <User className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
                               <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_doctors') || 'Find Doctors'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_doctors_desc') || 'Browse doctors directly based on your specialty'}</div>
                             </CardContent>
@@ -1754,7 +1764,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <div className="text-lg text-gray-700 dark:text-gray-300 font-medium">{t('booking_loading_centers') || 'Loading centers...'}</div>
                       </div>
                     ) : (
-                      <div className="grid gap-5 max-h-96 overflow-y-auto pr-2">
+                      <div className="grid gap-5 max-h-96 overflow-y-auto p-2">
                         {centers
                           .filter((center) => {
                             const filterQuery = (centerFilter || '').toLowerCase();
@@ -1764,10 +1774,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               (center.address || '').toLowerCase().includes(filterQuery);
                           })
                           .map((center) => (
-                            <Card key={center.id} className="transition-all duration-200 hover:shadow-2xl hover:scale-[1.02] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]">
-                              <CardContent className="p-6">
-                                <div className="flex items-start gap-4">
-                                  <div className="flex-1">
+                            <Card key={center.id} className="transition-all duration-200 hover:shadow-2xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]">
+                              <CardContent className="p-3 sm:p-6">
+                                <div className="flex flex-col sm:flex-row items-start gap-4">
+                                  <div className="flex-1 w-full">
                                     <div className="flex items-center justify-between gap-4 mb-3">
                                       <div className="flex-1">
                                         <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{getLocalizedName(center)}</h4>
@@ -1854,7 +1864,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     {loading ? (
                       <div className="text-center py-8 text-gray-600 dark:text-gray-400 font-medium">{t('booking_loading_doctors') || 'Loading doctors...'}</div>
                     ) : (
-                      <div className="grid gap-4 max-h-96 overflow-y-auto">
+                      <div className="grid gap-4 max-h-96 overflow-y-auto p-2">
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
@@ -1986,7 +1996,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <p className="mt-4 text-gray-900 dark:text-gray-300 font-medium">{t('booking_loading_doctors') || 'Loading doctors...'}</p>
                       </div>
                     ) : (
-                      <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+                      <div className="grid gap-4 max-h-[500px] overflow-y-auto p-2">
                         {doctors
                           .filter((d) => {
                             const filterQuery = (filterText || '').toLowerCase();
@@ -2100,7 +2110,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <p className="mt-4 text-gray-900 dark:text-gray-300 font-medium">{t('booking_loading_centers') || 'Loading available centers...'}</p>
                       </div>
                     ) : (
-                      <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+                      <div className="grid gap-4 max-h-[500px] overflow-y-auto p-2">
                         {doctorCenters.length > 0 ? (
                           doctorCenters.map((center) => (
                             <Card
@@ -2206,7 +2216,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <p className="mt-4 text-gray-900 dark:text-gray-300 font-medium">{t('booking_loading_centers') || 'Loading available centers...'}</p>
                       </div>
                     ) : (
-                      <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+                      <div className="grid gap-4 max-h-[500px] overflow-y-auto p-2">
                         {(() => {
                           // Filter centers based on search
                           const filterQuery = (labCenterFilter || '').toLowerCase();
@@ -2223,7 +2233,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             filteredCenters.map((center) => (
                               <Card
                                 key={center.id}
-                                className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
+                                className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.01]"
                                 onClick={() => handleLabCenterSelect(center)}
                               >
                                 <CardContent className="p-6 bg-white dark:bg-gray-800">
@@ -2301,12 +2311,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <p className="mt-4 text-gray-900 dark:text-gray-300 font-medium">{t('booking_loading_test_types') || 'Loading available test types...'}</p>
                       </div>
                     ) : (
-                      <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+                      <div className="grid gap-4 max-h-[500px] overflow-y-auto p-2">
                         {labTypes.length > 0 ? (
                           labTypes.map((type) => (
                             <Card
                               key={type.id}
-                              className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.02]"
+                              className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.01]"
                               onClick={() => handleLabTypeSelect(type)}
                             >
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
@@ -2533,7 +2543,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               </div>
                             ) : (
                               <div>
-                                <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                                <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
                                   {availableSlots.map((slot, index) => (
                                     <motion.div
                                       key={slot.time}

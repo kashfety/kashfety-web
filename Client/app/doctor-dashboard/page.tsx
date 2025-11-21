@@ -578,6 +578,18 @@ export default function DoctorDashboard() {
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState<any>(null);
 
+  // Close medical record form and patient details when switching tabs
+  useEffect(() => {
+    if (showMedicalRecordForm) {
+      setShowMedicalRecordForm(false);
+      setSelectedAppointment(null);
+      setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
+    }
+    if (selectedPatient) {
+      setSelectedPatient(null);
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -1122,7 +1134,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`}>
+    <div className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`}>
       {/* Background mesh to match old dashboard UI */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 rounded-full blur-3xl animate-float-slow"></div>
@@ -1130,10 +1142,10 @@ export default function DoctorDashboard() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-emerald-400/5 to-transparent rounded-full animate-breathe"></div>
       </div>
 
-      <div className="flex h-screen relative z-10">
+      <div className="flex h-screen relative z-10 overflow-x-hidden">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} toast={toast} />
 
-        <div className="w-full flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col min-w-0">
           <header className="h-16 border-b border-gray-200 dark:border-[#1F1F23]">
             <ProfileHeader
               doctorProfile={doctorProfile}
@@ -1143,10 +1155,10 @@ export default function DoctorDashboard() {
             />
           </header>
 
-          <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#0F0F12]">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-[#0F0F12] w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full w-full">
               {/* Overview Tab */}
-              <TabsContent value="overview" className="p-6 space-y-6 h-full">
+              <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full w-full max-w-full">
                 {/* Welcome Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1351,7 +1363,33 @@ export default function DoctorDashboard() {
                       const order: string[] = []
                       for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
                       const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return <AppointmentsChart data={data} />
+                      return (
+                        <div className="flex flex-col h-full">
+                          <AppointmentsChart data={data} />
+                          <div className="px-6 pb-6 pt-2">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Appointments:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Consultations:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Completed appointments only. Tracks finalized visits and revenue-generating activities.
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     })()}
                   </div>
                 </div>
@@ -1428,7 +1466,7 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               {/* Analytics Tab (in-place, same route) */}
-              <TabsContent value="analytics" className="p-6 h-full space-y-6">
+              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6 w-full max-w-full">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl gradient-emerald">
                     <BarChart2 className="h-5 w-5 text-white" />
@@ -1497,7 +1535,33 @@ export default function DoctorDashboard() {
                       const order: string[] = []
                       for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
                       const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return <AppointmentsChart data={data} />
+                      return (
+                        <div className="flex flex-col h-full">
+                          <AppointmentsChart data={data} />
+                          <div className="px-6 pb-6 pt-2">
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Appointments:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 items-start">
+                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-gray-900 dark:text-white">Consultations:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                    Completed appointments only. Tracks finalized visits and revenue-generating activities.
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     })()}
                   </div>
                 </div>
@@ -1564,7 +1628,7 @@ export default function DoctorDashboard() {
                 </Card>
               </TabsContent>
               {/* Appointments Tab */}
-              <TabsContent value="appointments" className="p-6 h-full">
+              <TabsContent value="appointments" className="py-6 px-4 h-full w-full max-w-full">
                 {/* Hero like old dashboard */}
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
@@ -1590,9 +1654,9 @@ export default function DoctorDashboard() {
                           {(showAllAppointments ? allAppointments : allAppointments.slice(0, 10)).map((appointment) => (
                             <div
                               key={appointment.id}
-                              className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
+                              className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
                             >
-                              <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-4 w-full lg:w-auto min-w-0">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                   <User className="w-6 h-6 text-white" />
                                 </div>
@@ -1615,7 +1679,7 @@ export default function DoctorDashboard() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
                                 <Badge
                                   variant={
                                     appointment.status === 'completed'
@@ -1638,19 +1702,41 @@ export default function DoctorDashboard() {
                                 >
                                   {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
                                 </Badge>
+                                {(() => {
+                                  const isAbsent = (apt: Appointment) => {
+                                    if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
+                                    try {
+                                      const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
+                                      const now = new Date();
+                                      return aptDateTime < now;
+                                    } catch (e) {
+                                      return false;
+                                    }
+                                  };
+                                  
+                                  if (isAbsent(appointment)) {
+                                    return (
+                                      <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
+                                        {t('appointments_absent_badge') || 'Absent'}
+                                      </Badge>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
                                     ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
                                   </Badge>
                                 )}
-                                <div className="flex items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
                                   {appointment.status === 'scheduled' && (
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_confirm') || 'Confirm'}
                                     </Button>
                                   )}
@@ -1659,8 +1745,9 @@ export default function DoctorDashboard() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleStartConsultation(appointment)}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <Stethoscope className="w-4 h-4 mr-1" />
+                                      <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_consult') || 'Consult'}
                                     </Button>
                                   )}
@@ -1674,8 +1761,9 @@ export default function DoctorDashboard() {
                                         description: t('viewing_patient_profile') || 'Viewing patient profile...',
                                       });
                                     }}
+                                    className="text-xs sm:text-sm whitespace-nowrap"
                                   >
-                                    <User className="w-4 h-4 mr-1" />
+                                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                     {t('patients') || 'Patients'}
                                   </Button>
                                   {['scheduled', 'confirmed'].includes(appointment.status) && (
@@ -1686,8 +1774,9 @@ export default function DoctorDashboard() {
                                         setSelectedAppointment(appointment);
                                         setShowCancelModal(true);
                                       }}
+                                      className="text-xs sm:text-sm whitespace-nowrap"
                                     >
-                                      <XCircle className="w-4 h-4 mr-1" />
+                                      <XCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                       {t('dd_cancel') || 'Cancel'}
                                     </Button>
                                   )}
@@ -1812,7 +1901,7 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               {/* Schedule Calendar Tab */}
-              <TabsContent value="schedule-calendar" className="h-full">
+              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full">
                 <DoctorScheduleCalendar
                   appointments={allAppointments || []}
                   onAppointmentClick={(appointment: Appointment) => {
@@ -1841,7 +1930,7 @@ export default function DoctorDashboard() {
                 />
               </TabsContent>
 
-              <TabsContent value="patients" className="p-6 h-full">
+              <TabsContent value="patients" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Users className="h-5 w-5 text-white" /></div>
@@ -2045,7 +2134,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="schedule" className="p-6 h-full">
+              <TabsContent value="schedule" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
@@ -2066,7 +2155,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="centers" className="p-6 h-full">
+              <TabsContent value="centers" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Building2 className="h-5 w-5 text-white" /></div>
@@ -2081,7 +2170,7 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="reviews" className="p-6 h-full">
+              <TabsContent value="reviews" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
@@ -2192,7 +2281,7 @@ export default function DoctorDashboard() {
                 )}
               </TabsContent>
 
-              <TabsContent value="profile" className="p-6 h-full">
+              <TabsContent value="profile" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
@@ -2216,8 +2305,14 @@ export default function DoctorDashboard() {
 
             {/* Patient Details Modal */}
             {showPatientModal && selectedPatient && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+                onClick={() => setShowPatientModal(false)}
+              >
+                <div 
+                  className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -2372,9 +2467,19 @@ export default function DoctorDashboard() {
 
             {/* Medical Record Form Modal */}
             {showMedicalRecordForm && selectedAppointment && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full">
-                  <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23]">
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+                onClick={() => {
+                  setShowMedicalRecordForm(false);
+                  setSelectedAppointment(null);
+                  setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
+                }}
+              >
+                <div 
+                  className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-6 border-b border-gray-200 dark:border-[#1F1F23] flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {t('dd_complete_consultation') || 'Complete Consultation'} - {getLocalizedPatientName(selectedAppointment)}
                     </h2>
@@ -2383,7 +2488,7 @@ export default function DoctorDashboard() {
                     </p>
                   </div>
 
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                     {/* Patient Symptoms */}
                     {selectedAppointment.symptoms && (
                       <div>
@@ -2453,8 +2558,10 @@ export default function DoctorDashboard() {
                         placeholder={t('dd_notes_placeholder') || 'Additional notes...'}
                       />
                     </div>
+                  </div>
 
-                    <div className="flex gap-3 pt-4">
+                  <div className="p-6 border-t border-gray-200 dark:border-[#1F1F23] flex-shrink-0">
+                    <div className="flex gap-3">
                       <Button
                         onClick={handleSaveMedicalRecord}
                         disabled={!medicalRecordForm.diagnosis || !medicalRecordForm.treatment}

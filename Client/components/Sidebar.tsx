@@ -43,16 +43,28 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         }
       }
     },
-    ...(user ? [{
+    {
       icon: Calendar,
       label: t('header_my_appointments') || 'My Appointments',
-      action: () => router.push('/appointments')
-    }] : []),
-    ...(user ? [{
+      action: () => {
+        if (!user) {
+          router.push('/login');
+        } else {
+          router.push('/appointments');
+        }
+      }
+    },
+    {
       icon: TestTube,
       label: t('my_labs_title') || 'My Labs',
-      action: () => router.push('/labs')
-    }] : []),
+      action: () => {
+        if (!user) {
+          router.push('/login');
+        } else {
+          router.push('/labs');
+        }
+      }
+    },
     ...(user && user.role === 'patient' ? [{
       icon: Microscope,
       label: t('labs') || 'Labs',

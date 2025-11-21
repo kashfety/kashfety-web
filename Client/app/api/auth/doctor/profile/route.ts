@@ -47,6 +47,19 @@ export async function GET(request: NextRequest) {
       .single();
     if (error) throw error;
 
+    // Fetch Arabic specialty name if specialty exists
+    if (user && user.specialty) {
+      const { data: specialtyData } = await supabase
+        .from('specialties')
+        .select('name_ar')
+        .or(`name.eq.${user.specialty},name_en.eq.${user.specialty}`)
+        .single();
+      
+      if (specialtyData) {
+        (user as any).specialty_ar = specialtyData.name_ar;
+      }
+    }
+
     return NextResponse.json({ success: true, doctor: user });
   } catch (error) {
     console.error('Proxy error (/api/auth/doctor/profile GET):', error);

@@ -99,6 +99,18 @@ export default function MyLabsPage() {
     return t(statusKey) || status.toUpperCase();
   };
 
+  const isAbsent = (booking: LabBooking) => {
+    if (booking.status !== 'scheduled' && booking.status !== 'confirmed') return false;
+    
+    try {
+      const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
+      const now = new Date();
+      return bookingDateTime < now;
+    } catch (e) {
+      return false;
+    }
+  }
+
   const filtered = useMemo(() => {
     const statusOk = (b: LabBooking) => statusFilter === 'all' || (b.status || '').toLowerCase() === statusFilter;
     const catOk = (b: LabBooking) => categoryFilter === 'all' || (b.type?.category || '').toLowerCase() === categoryFilter;
@@ -110,7 +122,17 @@ export default function MyLabsPage() {
       return true;
     };
     const q = searchText.trim().toLowerCase();
-    const searchOk = (b: LabBooking) => !q || (b.type?.name || '').toLowerCase().includes(q) || (b.center?.name || '').toLowerCase().includes(q);
+    const searchOk = (b: LabBooking) => {
+      if (!q) return true;
+      // Support searching in both English and Arabic names
+      const testNameEn = (b.type?.name || '').toLowerCase();
+      const testNameAr = (b.type?.name_ar || '').toLowerCase();
+      const centerNameEn = (b.center?.name || '').toLowerCase();
+      const centerNameAr = (b.center?.name_ar || '').toLowerCase();
+      
+      return testNameEn.includes(q) || testNameAr.includes(q) || 
+             centerNameEn.includes(q) || centerNameAr.includes(q);
+    };
     return bookings.filter(b => statusOk(b) && catOk(b) && dateOk(b) && searchOk(b));
   }, [bookings, statusFilter, categoryFilter, startDate, endDate, searchText]);
 
@@ -284,6 +306,9 @@ export default function MyLabsPage() {
                           </div>
                         )}
                         <Badge className={`${getStatusColor(booking.status)} border`}>{getLocalizedStatus(booking.status)}</Badge>
+                        {isAbsent(booking) && (
+                          <Badge variant="destructive" className="text-xs bg-red-100 text-red-800 border-red-200 hover:bg-red-100">{t('appointments_absent_badge') || 'Absent'}</Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -300,7 +325,7 @@ export default function MyLabsPage() {
                         <div className="flex items-center gap-3 text-muted-foreground">
                           <Clock className="w-5 h-5 text-emerald-600" />
                           <div>
-                            <div className="font-medium">{(() => { try { const [h, m] = (booking.booking_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return booking.booking_time; } })()} ({toArabicNumerals(booking.duration || 30, locale)} {t('minutes_short') || 'min'})</div>
+                            <div className="font-medium">{toArabicNumerals((() => { try { const [h, m] = (booking.booking_time || '').split(':'); const t2 = new Date(); t2.setHours(parseInt(h), parseInt(m), 0); return t2.toLocaleTimeString(locale || 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); } catch { return booking.booking_time; } })(), locale)} ({toArabicNumerals(booking.duration || 30, locale)} {t('minutes_short') || 'min'})</div>
                             <div className="text-sm text-gray-500">{t('appointments_duration_label') || 'Duration'}</div>
                           </div>
                         </div>

@@ -3152,8 +3152,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_appointment_management') || 'Appointment Management'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_manage_appointments_desc') || 'Manage your center\'s appointments and bookings'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management') || 'Appointment Management'}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc') || 'Manage your center\'s appointments and bookings'}</p>
                     </div>
                   </div>
                 </div>
@@ -3177,7 +3177,7 @@ export default function CenterDashboardPage() {
                                     'bg-yellow-500'
                                 }`}></div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
+                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {appointment.appointment_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time') : appointment.booking_time ? formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time') : t('cd_na')} • {formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
                                 </p>

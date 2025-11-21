@@ -340,6 +340,7 @@ export const translations = {
     schedule_status_confirmed: "Confirmed",
     schedule_status_pending: "Pending",
     schedule_status_urgent: "Urgent",
+    appointments_absent_badge: "Absent",
 
     // Settings Page
     settings_page_title: "Account Settings & Preferences | Healthcare Management System",
@@ -2022,6 +2023,7 @@ export const translations = {
     schedule_status_confirmed: "مؤكد",
     schedule_status_pending: "في الانتظار",
     schedule_status_urgent: "عاجل",
+    appointments_absent_badge: "غائب",
 
     // Settings Page
     settings_page_title: "إعدادات الحساب والتفضيلات | نظام إدارة الرعاية الصحية",

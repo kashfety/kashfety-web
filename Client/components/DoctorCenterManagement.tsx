@@ -38,7 +38,9 @@ export default function DoctorCenterManagement() {
   const [saving, setSaving] = useState(false);
   const [centers, setCenters] = useState<Center[]>([]);
   const [selectedCenters, setSelectedCenters] = useState<string[]>([]);
+  const [initialSelectedCenters, setInitialSelectedCenters] = useState<string[]>([]);
   const [primaryCenter, setPrimaryCenter] = useState<string>('');
+  const [initialPrimaryCenter, setInitialPrimaryCenter] = useState<string>('');
   const [creating, setCreating] = useState(false);
   const [newCenter, setNewCenter] = useState<{ name: string; address?: string; phone?: string; email?: string; center_type: 'generic'|'personal'; set_as_primary: boolean }>({ name: '', address: '', phone: '', email: '', center_type: 'generic', set_as_primary: false });
 
@@ -105,12 +107,18 @@ export default function DoctorCenterManagement() {
         
         // Set current assignments
         const assignedCenters = filtered.filter((c: Center) => c.is_assigned) || [];
-        setSelectedCenters(assignedCenters.map((c: Center) => c.id));
+        const assignedIds = assignedCenters.map((c: Center) => c.id);
+        setSelectedCenters(assignedIds);
+        setInitialSelectedCenters(assignedIds);
         
         // Set primary center
         const primary = assignedCenters.find((c: Center) => c.is_primary);
         if (primary) {
           setPrimaryCenter(primary.id);
+          setInitialPrimaryCenter(primary.id);
+        } else {
+          setPrimaryCenter('');
+          setInitialPrimaryCenter('');
         }
       }
     } catch (error) {
@@ -180,6 +188,14 @@ export default function DoctorCenterManagement() {
     }
   };
 
+  const hasChanges = (() => {
+    if (primaryCenter !== initialPrimaryCenter) return true;
+    if (selectedCenters.length !== initialSelectedCenters.length) return true;
+    const sortedSelected = [...selectedCenters].sort();
+    const sortedInitial = [...initialSelectedCenters].sort();
+    return sortedSelected.some((id, index) => id !== sortedInitial[index]);
+  })();
+
   const saveAssignments = async () => {
     try {
       setSaving(true);
@@ -237,6 +253,9 @@ export default function DoctorCenterManagement() {
         });
         // Refresh the data
         await fetchCenters();
+        // Update initial state to match current state after successful save
+        setInitialSelectedCenters(selectedCenters);
+        setInitialPrimaryCenter(finalPrimary);
       }
     } catch (error: any) {
       console.error('Save assignments error:', error);
@@ -269,14 +288,16 @@ export default function DoctorCenterManagement() {
           <Building className="h-5 w-5" />
           <h2 className="text-xl font-semibold">{t('dd_medical_center_assignments') || 'Medical Center Assignments'}</h2>
         </div>
-        <Button
-          onClick={saveAssignments}
-          disabled={saving || selectedCenters.length === 0}
-          size="sm"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? (t('dd_assignments_saving') || 'Saving...') : (t('dd_save_assignments') || 'Save Assignments')}
-        </Button>
+        {hasChanges && (
+          <Button
+            onClick={saveAssignments}
+            disabled={saving || selectedCenters.length === 0}
+            size="sm"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? (t('dd_assignments_saving') || 'Saving...') : (t('dd_save_assignments') || 'Save Assignments')}
+          </Button>
+        )}
       </div>
 
       {/* Instructions */}

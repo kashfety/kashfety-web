@@ -625,9 +625,6 @@ export default function MyAppointmentsPage() {
                 <div>
                   {showingCountText}
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setStartDate(''); setEndDate(''); setSearchText(''); }} className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">{t('appointments_clear_filters') || 'Clear'}</Button>
-                </div>
               </div>
             </CardContent>
           </Card>

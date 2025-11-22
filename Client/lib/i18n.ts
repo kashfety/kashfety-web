@@ -2019,6 +2019,7 @@ export const translations = {
     status_cancelled: "Cancelled",
     cd_confirm: "Confirm",
     cd_complete: "Complete",
+    age: "Age",
   },
   ar: {
     // Navigation
@@ -3770,6 +3771,13 @@ export const translations = {
     status_cancelled: "ملغي",
     cd_confirm: "تأكيد",
     cd_complete: "إكمال",
+
+    // Additional Center Dashboard translations (Arabic)
+    cd_no_patients_registered: "لم يتم تسجيل مرضى بعد",
+    cd_patients_will_appear: "سيظهر المرضى هنا عندما يحجزون مواعيد",
+    patient: "مريض",
+    failed_load_schedule_config: "فشل تحميل تكوين الجدول",
+    please_select_test_type_first: "يرجى اختيار نوع تحليل أولاً",
   },
 } as const
 

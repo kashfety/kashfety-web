@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import './dashboard.css';
 import { useEffect, useState, useMemo } from 'react';
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from "next-themes";
 import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
+import DoctorScheduleCalendar from '@/components/DoctorScheduleCalendar';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -60,6 +61,7 @@ import {
   Home,
   ChevronRight,
   Stethoscope,
+  Grid3X3,
   MessagesSquare,
   Video,
   HelpCircle,
@@ -129,6 +131,7 @@ function TopNav({
   setActiveTab: (tab: string) => void;
 }) {
   const { t, locale, isRTL } = useLocale();
+
   const displayRevenue = todayStats?.stats?.todayRevenue || 0;
   const displayAppointments = todayStats?.stats?.todayAppointments || 0;
   const nextAppointment = todayStats?.stats?.nextAppointment;
@@ -138,19 +141,19 @@ function TopNav({
     if (locale === 'ar' && centerProfile?.name_ar) {
       return centerProfile.name_ar;
     }
-    return centerProfile?.name || t('cd_medical_center') || 'Medical Center';
+    return centerProfile?.name || t('cd_medical_center');
   };
 
   return (
     <div className={`h-16 border-b border-gray-200 dark:border-[#1F1F23] bg-white dark:bg-[#1A1A1A] flex items-center justify-between px-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
       <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <h1 className={`text-xl font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
-          {t('cd_welcome_back') || 'Welcome back'}, {getCenterDisplayName()}
+          {t('cd_welcome_back')}, {getCenterDisplayName()}
         </h1>
         {nextAppointment && (
-          <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
             <Clock className="w-4 h-4" />
-            <span>{t('cd_next') || 'Next'}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at') || 'at'} <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${nextAppointment.time}`), locale, 'time')}</span></span>
+            <span>{t('cd_next')}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at')} <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${nextAppointment.time}`), locale, 'time')}</span></span>
           </div>
         )}
       </div>
@@ -158,15 +161,15 @@ function TopNav({
       <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400">{t('cd_upcoming_appointments') || 'Upcoming Appointments'}</p>
+            <p className="text-gray-900 dark:text-white">{t('cd_upcoming_appointments')}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400">{t('cd_revenue') || 'Total Revenue'}</p>
-            <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</p>
+            <p className="text-gray-900 dark:text-white">{t('cd_revenue')}</p>
+            <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayRevenue, locale, { style: 'currency', currency: t('currency') })}</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400">{t('completed') || 'Completed'}</p>
+            <p className="text-gray-900 dark:text-white">{t('completed')}</p>
             <p className="font-semibold text-emerald-600" dir="ltr">{formatLocalizedNumber(todayStats?.stats?.todayCompleted || 0, locale)}</p>
           </div>
         </div>
@@ -192,7 +195,7 @@ function TopNav({
                 </div>
                 <div className={`text-sm ${locale === 'ar' ? 'text-right' : 'text-left'}`}>
                   <p className="font-medium text-gray-900 dark:text-white">{centerProfile?.name || t('cd_medical_center')}</p>
-                  <p className="text-gray-500 dark:text-gray-400">{centerProfile?.email || t('cd_default_email') || 'admin@center.com'}</p>
+                  <p className="text-gray-500 dark:text-gray-200">{centerProfile?.email || t('cd_default_email')}</p>
                 </div>
                 <ChevronRight className={`w-4 h-4 text-gray-400 ${locale === 'ar' ? 'rotate-[270deg]' : 'rotate-90'}`} />
               </Button>
@@ -200,9 +203,9 @@ function TopNav({
             <DropdownMenuContent align={locale === 'ar' ? 'start' : 'end'} className="w-64">
               <div className="px-2 py-2 border-b">
                 <p className="font-medium text-gray-900 dark:text-white">{centerProfile?.name || t('cd_medical_center')}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{centerProfile?.email || t('cd_default_email') || 'admin@center.com'}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-200">{centerProfile?.email || t('cd_default_email')}</p>
                 {centerProfile?.phone && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-200 flex items-center gap-1">
                     <Phone className="w-3 h-3" />
                     {centerProfile.phone}
                   </p>
@@ -213,14 +216,14 @@ function TopNav({
                 onClick={() => setActiveTab('profile')}
               >
                 <User className="w-4 h-4" />
-                {t('cd_profile') || 'الملف الشخصي'}
+                {t('cd_profile')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={`flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
                 onClick={onSignOut}
               >
                 <LogOut className="w-4 h-4" />
-                {t('header_logout') || 'Logout'}
+                {t('header_logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -273,7 +276,7 @@ function CenterOverview({
     },
     {
       title: t('cd_todays_revenue'),
-      value: formatLocalizedNumber(todayStats?.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' }),
+      value: formatLocalizedNumber(todayStats?.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') }),
       change: analytics?.revenueGrowth || (locale === 'ar' ? '+٠%' : '+0%'),
       color: 'purple',
       icon: DollarSign
@@ -297,9 +300,9 @@ function CenterOverview({
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-200">{stat.title}</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white" dir="ltr">{stat.value}</p>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month') || 'من الشهر الماضي'}</p>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month')}</p>
                   </div>
                   <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600`}>
                     <Icon className="w-6 h-6 text-white" />
@@ -316,7 +319,7 @@ function CenterOverview({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <TrendingUp className="w-5 h-5" />
-              {t('cd_appointment_trends') || 'اتجاهات المواعيد'}
+              {t('cd_appointment_trends')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -329,25 +332,25 @@ function CenterOverview({
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.appointments.length, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('dd_today') || 'اليوم'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('dd_today')}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.stats?.todayCompleted || 0, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('completed') || 'مكتمل'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('completed')}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                       <div className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
-                        {formatLocalizedNumber(todayStats.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
+                        {formatLocalizedNumber(todayStats.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') })}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('cd_revenue') || 'الإيرادات'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('cd_revenue')}</div>
                     </div>
                   </div>
 
                   {/* Appointment Status Breakdown */}
                   <div className="space-y-3">
-                    <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_upcoming_appointments') || 'المواعيد القادمة'} {t('cd_status') || 'الحالة'}</h4>
+                    <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_upcoming_appointments')} {t('cd_status')}</h4>
                     {[
                       { status: 'completed', label: t('completed'), color: 'bg-green-500' },
                       { status: 'confirmed', label: t('cd_confirmed'), color: 'bg-blue-500' },
@@ -370,7 +373,7 @@ function CenterOverview({
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
-                              <span className="text-xs text-gray-500 w-8" dir="ltr">{formatLocalizedNumber(percentage, locale, { maximumFractionDigits: 0 })}%</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 w-8" dir="ltr">{formatLocalizedNumber(percentage, locale, { maximumFractionDigits: 0 })}%</span>
                             </div>
                           </div>
                         </div>
@@ -381,7 +384,7 @@ function CenterOverview({
                   {/* Next Appointment */}
                   {todayStats.stats?.nextAppointment && (
                     <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
-                      <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-1">{t('dd_next_appointment') || 'الموعد التالي'}</h4>
+                      <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-1">{t('dd_next_appointment')}</h4>
                       <p className="text-sm text-emerald-700 dark:text-emerald-300">
                         {getLocalizedNameUtil(todayStats.stats.nextAppointment, locale, 'patient_name')} • {todayStats.stats.nextAppointment.type}
                       </p>
@@ -399,11 +402,11 @@ function CenterOverview({
                   )}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
+                <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                   <div className="text-center">
                     <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p className="text-sm">{t('cd_no_data') || 'لا توجد بيانات'}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t('cd_no_appointments') || 'لا توجد مواعيد مجدولة'}</p>
+                    <p className="text-sm">{t('cd_no_data')}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('cd_no_appointments')}</p>
                   </div>
                 </div>
               )}
@@ -415,7 +418,7 @@ function CenterOverview({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <Clock className="w-5 h-5" />
-              {t('cd_recent_bookings') || 'الحجوزات الأخيرة'}
+              {t('cd_recent_bookings')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -434,25 +437,25 @@ function CenterOverview({
                           appointment.status === 'cancelled' ? t('cd_cancelled') :
                             t('appointments_status_scheduled')}
                     </p>
-                    <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                       {getLocalizedNameUtil(appointment, locale, 'patient_name')} • {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {
                         appointment.booking_date && appointment.booking_time ?
-                          `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at') || 'في'} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
+                          `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
                           appointment.appointment_date && appointment.appointment_time ?
-                            `${formatLocalizedDate(appointment.appointment_date, locale)} ${t('at') || 'في'} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')}` :
-                            t('time_tbd') || 'سيتم تحديده'
+                            `${formatLocalizedDate(appointment.appointment_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.appointment_time}`), locale, 'time')}` :
+                            t('time_tbd')
                       }
                     </p>
                   </div>
                 </div>
               )) || [
-                { action: t('no_recent_appointments') || 'No recent appointments', time: '', patient: t('check_back_later') || 'Check back later' }
+                { action: t('no_recent_appointments'), time: '', patient: t('check_back_later') }
               ].map((activity, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                   <div className="w-2 h-2 rounded-full bg-gray-400"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.action}</p>
-                    <p className="text-xs text-gray-500">{activity.patient} • {activity.time}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{activity.patient} • {activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -479,7 +482,7 @@ function CenterPatients({
     if (locale === 'ar' && patient.name_ar) {
       return patient.name_ar;
     }
-    return patient.name || `${t('patient') || 'Patient'} ${patient.id}`;
+    return patient.name || `${t('patient')} ${patient.id}`;
   };
 
   return (
@@ -491,10 +494,10 @@ function CenterPatients({
           </div>
           <div className={isRTL ? 'text-right' : 'text-left'}>
             <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              {t('cd_patient_management') || 'إدارة المرضى'}
+              {t('cd_patient_management')}
             </h2>
             <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              {t('cd_view_patient_records') || 'عرض سجلات المرضى ورفع المستندات'} (<span dir="ltr">{formatLocalizedNumber(patients?.length || 0, locale)}</span> {t('cd_total_patients') || 'إجمالي المرضى'})
+              {t('cd_view_patient_records')} (<span dir="ltr">{formatLocalizedNumber(patients?.length || 0, locale)}</span> {t('cd_total_patients')})
             </p>
           </div>
         </div>
@@ -503,7 +506,7 @@ function CenterPatients({
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
         <CardHeader>
           <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            {t('cd_patient_records') || 'سجلات المرضى'}
+            {t('cd_patient_records')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -516,10 +519,10 @@ function CenterPatients({
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
-                    <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                      {patient.age ? <><span>{t('age') || 'العمر'}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
+                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                      {patient.age ? <><span>{t('age')}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
-                      {patient.last_visit ? <><span>{t('cd_last_visit') || 'آخر زيارة'}: </span><span dir="ltr">{formatLocalizedDate(patient.last_visit, locale)}</span></> : <span>{t('cd_no_recent_visits') || 'لا توجد زيارات حديثة'}</span>}
+                      {patient.last_visit ? <><span>{t('cd_last_visit')}: </span><span dir="ltr">{formatLocalizedDate(patient.last_visit, locale)}</span></> : <span>{t('cd_no_recent_visits')}</span>}
                     </p>
                   </div>
                 </div>
@@ -529,14 +532,14 @@ function CenterPatients({
                   size="sm"
                   className={`flex items-center gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 dark:hover:border-emerald-700 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
-                  {t('cd_view_details') || 'عرض التفاصيل'}
+                  {t('cd_view_details')}
                 </Button>
               </div>
             )) : (
               <div className="text-center py-8">
                 <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                <p className="text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_patients_registered') || 'لم يتم تسجيل مرضى بعد'}</p>
-                <p className="text-sm text-gray-400 text-center mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patients_will_appear') || 'سيظهر المرضى هنا عندما يحجزون مواعيد'}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_patients_registered')}</p>
+                <p className="text-sm text-gray-400 text-center mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patients_will_appear')}</p>
               </div>
             )}
           </div>
@@ -836,10 +839,10 @@ function CenterAnalytics({
             </div>
             <div className={isRTL ? 'text-right' : 'text-left'}>
               <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                {t('cd_analytics_demographics') || 'التحليلات والتركيبة السكانية'}
+                {t('cd_analytics_demographics')}
               </h2>
               <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                {t('cd_center_performance_insights') || 'رؤى أداء المركز والتركيبة السكانية للمرضى'}
+                {t('cd_center_performance_insights')}
               </p>
             </div>
           </div>
@@ -852,11 +855,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_revenue') || 'إجمالي الإيرادات'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_revenue')}</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" dir="ltr">
-                  {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') || 'SYP' })}
+                  {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') })}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'اليوم'}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
               </div>
             </div>
           </CardContent>
@@ -866,11 +869,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_bookings') || 'إجمالي الحجوزات'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_bookings')}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                   {formatLocalizedNumber(totalBookings, locale)}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today') || 'اليوم'}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -881,11 +884,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completion_rate') || 'معدل الإنجاز'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completion_rate')}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
                   {formatLocalizedNumber(completionRate, locale)}%
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of') || 'من'} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of')} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
               </div>
               <CheckCircle className="h-8 w-8 text-purple-500" />
             </div>
@@ -896,11 +899,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_patients') || 'إجمالي المرضى'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_patients')}</p>
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" dir="ltr">
                   {formatLocalizedNumber(totalPatients, locale)}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_unique_patients_served') || 'المرضى الفريدون الذين تمت خدمتهم'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_unique_patients_served')}</p>
               </div>
               <Users className="h-8 w-8 text-orange-500" />
             </div>
@@ -913,9 +916,9 @@ function CenterAnalytics({
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <TrendingUp className="h-5 w-5 text-emerald-600" />
-            {t('cd_lab_test_trends_revenue') || 'اتجاهات التحاليل والإيرادات'}
+            {t('cd_lab_test_trends_revenue')}
           </CardTitle>
-          <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_monthly_bookings_desc') || 'الحجوزات والإنجازات والإيرادات الشهرية عبر الوقت'}</CardDescription>
+          <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_monthly_bookings_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -953,7 +956,7 @@ function CenterAnalytics({
                     textShadow: isDark ? "0 1px 2px rgba(0, 0, 0, 0.5)" : "0 1px 2px rgba(255, 255, 255, 0.8)"
                   }}
                   formatter={(value, name) => [
-                    name === 'revenue' ? formatLocalizedNumber(Number(value), locale, { style: 'currency', currency: t('currency') || 'SYP' }) :
+                    name === 'revenue' ? formatLocalizedNumber(Number(value), locale, { style: 'currency', currency: t('currency') }) :
                       `${formatLocalizedNumber(Number(value), locale)}`,
                     name === 'bookings' ? t('cd_total_bookings') :
                       name === 'completed' ? t('cd_completed_tests') :
@@ -968,7 +971,7 @@ function CenterAnalytics({
                   strokeWidth={3}
                   dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
-                  name={t('cd_total_bookings') || 'Total Bookings'}
+                  name={t('cd_total_bookings')}
                   animationDuration={1500}
                   animationEasing="ease-in-out"
                 />
@@ -979,7 +982,7 @@ function CenterAnalytics({
                   strokeWidth={3}
                   dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#3B82F6", strokeWidth: 2 }}
-                  name={t('cd_completed_tests') || 'Completed Tests'}
+                  name={t('cd_completed_tests')}
                   animationDuration={1500}
                   animationEasing="ease-in-out"
                   animationBegin={300}
@@ -991,7 +994,7 @@ function CenterAnalytics({
                   strokeWidth={3}
                   dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2 }}
-                  name={`${t('cd_revenue') || 'Revenue'} (${t('currency') || 'SYP'})`}
+                  name={`${t('cd_revenue')} (${t('currency')})`}
                   animationDuration={1500}
                   animationEasing="ease-in-out"
                   animationBegin={600}
@@ -1009,7 +1012,7 @@ function CenterAnalytics({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <User className="h-5 w-5 text-emerald-600" />
-              {t('cd_age_distribution') || 'توزيع الأعمار'}
+              {t('cd_age_distribution')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1048,10 +1051,10 @@ function CenterAnalytics({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <User className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_age_data') || 'لا توجد بيانات أعمار متاحة'}</p>
+                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_age_data')}</p>
                 </div>
               </div>
             )}
@@ -1063,7 +1066,7 @@ function CenterAnalytics({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <Users className="h-5 w-5 text-emerald-600" />
-              {t('cd_gender_distribution') || 'توزيع الجنس'}
+              {t('cd_gender_distribution')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1098,7 +1101,7 @@ function CenterAnalytics({
                           const formattedValue = formatLocalizedNumber(Number(value), locale);
                           const percentage = ((Number(value) / genderData.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1);
                           return [
-                            `${formattedValue} ${t('cd_patients') || 'patients'} (${formatLocalizedNumber(Number(percentage), locale)}%)`,
+                            `${formattedValue} ${t('cd_patients')} (${formatLocalizedNumber(Number(percentage), locale)}%)`,
                             name
                           ];
                         }}
@@ -1139,7 +1142,7 @@ function CenterAnalytics({
                         ></div>
                         <div className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <div className="text-sm font-semibold text-gray-900 dark:text-white">{entry.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          <div className="text-xs text-gray-500 dark:text-gray-200 font-medium">
                             <span dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
                             <span className="mx-1 opacity-60">•</span>
                             <span dir="ltr">{formatLocalizedNumber(Number(percentage), locale)}%</span>
@@ -1151,11 +1154,11 @@ function CenterAnalytics({
                 </div>
               </div>
             ) : (
-              <div className="h-[280px] flex items-center justify-center text-gray-500">
+              <div className="h-[280px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <Users className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p className="text-base font-medium text-gray-600 dark:text-gray-400 mb-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_gender_data') || 'لا توجد بيانات جنس متاحة'}</p>
-                  <p className="text-sm text-gray-400 dark:text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_data_will_appear_patients') || 'ستظهر البيانات عند تسجيل المرضى'}</p>
+                  <p className="text-base font-medium text-gray-600 dark:text-gray-200 mb-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_gender_data')}</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_data_will_appear_patients')}</p>
                 </div>
               </div>
             )}
@@ -1167,7 +1170,7 @@ function CenterAnalytics({
           <CardHeader>
             <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <TestTube className="h-5 w-5 text-emerald-600" />
-              {t('cd_popular_tests') || 'التحاليل الأكثر شيوعاً'}
+              {t('cd_popular_tests')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1182,15 +1185,15 @@ function CenterAnalytics({
                       ></div>
                       <span className={`font-medium text-gray-900 dark:text-white text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{test.name}</span>
                     </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 font-medium" dir="ltr">{formatLocalizedNumber(test.value, locale)}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-200 font-medium" dir="ltr">{formatLocalizedNumber(test.value, locale)}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_test_data') || 'لا توجد بيانات تحاليل متاحة'}</p>
+                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_test_data')}</p>
                 </div>
               </div>
             )}
@@ -1468,8 +1471,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to load schedule:', error);
       toast({
-        title: t('error') || 'خطأ',
-        description: t('failed_load_schedule_config') || 'فشل تحميل تكوين الجدول',
+        title: t('error'),
+        description: t('failed_load_schedule_config'),
         variant: "destructive"
       });
     } finally {
@@ -1480,8 +1483,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   const saveSchedule = async () => {
     if (!selectedTestType || !user?.id) {
       toast({
-        title: t('error') || 'خطأ',
-        description: t('please_select_test_type_first') || 'يرجى اختيار نوع تحليل أولاً',
+        title: t('error'),
+        description: t('please_select_test_type_first'),
         variant: "destructive"
       });
       return;
@@ -1513,15 +1516,15 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       console.log('✅ [CenterSchedule] Save response:', response);
 
       toast({
-        title: t('success') || 'نجاح',
-        description: t('schedule_saved_success') || 'تم حفظ الجدول بنجاح!',
+        title: t('success'),
+        description: t('schedule_saved_success'),
         variant: "default"
       });
     } catch (error) {
       console.error('❌ [CenterSchedule] Failed to save schedule:', error);
       toast({
-        title: t('error') || 'خطأ',
-        description: t('failed_save_schedule_config') || 'فشل حفظ تكوين الجدول',
+        title: t('error'),
+        description: t('failed_save_schedule_config'),
         variant: "destructive"
       });
     } finally {
@@ -1548,23 +1551,23 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               <TestTube className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <div className="space-y-2">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center" dir={isRTL ? 'rtl' : 'ltr'}>
-                  {t('no_services_for_schedule') || 'لا توجد خدمات متاحة للجدولة'}
+                  {t('no_services_for_schedule')}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
-                  {t('no_services_schedule_desc') || 'يجب تفعيل خدمات التحاليل أولاً قبل أن تتمكن من تكوين جداولها'}
+                <p className="text-gray-600 dark:text-gray-200 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {t('no_services_schedule_desc')}
                 </p>
                 <div className="mt-4">
                   <Button
                     onClick={() => {
                       toast({
-                        title: t('switch_to_services') || 'التبديل إلى الخدمات',
-                        description: t('enable_services_first') || 'يرجى تفعيل الخدمات في تبويب الخدمات أولاً'
+                        title: t('switch_to_services'),
+                        description: t('enable_services_first')
                       });
                     }}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
                     <TestTube className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('go_to_services') || 'انتقل إلى تبويب الخدمات'}</span>
+                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('go_to_services')}</span>
                   </Button>
                 </div>
               </div>
@@ -1577,7 +1580,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Clock className="h-5 w-5" />
-              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management') || 'إدارة جدول المختبر'}</h2>
+              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management')}</h2>
             </div>
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Button
@@ -1587,7 +1590,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 disabled={loading || !selectedTestType}
               >
                 <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('refresh') || 'تحديث'}</span>
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('refresh')}</span>
               </Button>
               <Button
                 onClick={saveSchedule}
@@ -1595,7 +1598,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 size="sm"
               >
                 <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('saving') || 'حفظ الجدول...') : (t('save_schedule') || 'حفظ الجدول')}</span>
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('saving')) : (t('save_schedule'))}</span>
               </Button>
             </div>
           </div>
@@ -1605,26 +1608,26 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
             <CardHeader>
               <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <TestTube className="h-5 w-5" />
-                {t('test_type_selection') || 'اختيار نوع التحليل'}
+                {t('test_type_selection')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('select_test_type_manage') || 'اختر نوع التحليل لإدارة الجدول'}</Label>
-                  <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc') || 'اختر نوع التحليل الذي تريد تحديد الجدول له. يمكن أن يكون لكل نوع تحليل ساعات عمل فريدة خاصة به.'}</p>
+                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('select_test_type_manage')}</Label>
+                  <p className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc')}</p>
                 </div>
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('cd_test_type_desc_schedule') || 'اختر نوع التحليل الذي تريد تحديد الجدول له'} />
+                    <SelectValue placeholder={t('cd_test_type_desc_schedule')} />
                   </SelectTrigger>
                   <SelectContent>
                     {selectedServices.length === 0 ? (
                       <div className="p-4 text-center">
                         <TestTube className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('no_services_selected') || 'لم يتم اختيار خدمات'}</p>
-                        <p className="text-xs text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('select_services_first') || 'يرجى تفعيل الخدمات في تبويب الخدمات أولاً'}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('no_services_selected')}</p>
+                        <p className="text-xs text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('select_services_first')}</p>
                       </div>
                     ) : (
                       selectedServices.map((type) => {
@@ -1649,7 +1652,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <CheckCircle className="h-5 w-5 text-blue-500" />
                       <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('selected') || 'محدد'}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
+                        {t('selected')}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
                     </div>
                   </div>
@@ -1661,9 +1664,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           {selectedTestType && (
             <>
               {loading && (
-                <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-200 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500"></div>
-                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('loading_schedule_config') || 'تحميل تكوين الجدول...'}</span>
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('loading_schedule_config')}</span>
                 </div>
               )}
 
@@ -1672,7 +1675,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <Calendar className="h-5 w-5" />
-                    {(t('weekly_schedule_for') || 'الجدول الأسبوعي لـ')} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
+                    {(t('weekly_schedule_for'))} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1698,7 +1701,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Time Range */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('start_time') || 'وقت البداية'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('start_time')}</Label>
                                 <Input
                                   type="time"
                                   value={config.startTime || '09:00'}
@@ -1708,7 +1711,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('end_time') || 'وقت النهاية'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('end_time')}</Label>
                                 <Input
                                   type="time"
                                   value={config.endTime || '17:00'}
@@ -1718,7 +1721,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('slot_duration_minutes') || 'مدة الفترة (دقيقة)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('slot_duration_minutes')}</Label>
                                 <Input
                                   type="number"
                                   min="15"
@@ -1737,7 +1740,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Break Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_start_optional') || 'بداية الاستراحة (اختياري)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_start_optional')}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakStart || ''}
@@ -1747,7 +1750,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 />
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_end_optional') || 'نهاية الاستراحة (اختياري)'}</Label>
+                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_end_optional')}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakEnd || ''}
@@ -1761,8 +1764,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Generated Slots Preview */}
                             {slots.length > 0 && (
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {(t('generated_time_slots_total') || 'فترات الوقت المنشأة ({count} إجمالي)').replace('{count}', formatLocalizedNumber(slots.length, locale))}
+                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {(t('generated_time_slots_total')).replace('{count}', formatLocalizedNumber(slots.length, locale))}
                                 </Label>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {slots.slice(0, 8).map((slot, index) => (
@@ -1772,7 +1775,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   ))}
                                   {slots.length > 8 && (
                                     <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
-                                      {(t('more_count') || '+{count} more').replace('{count}', formatLocalizedNumber(slots.length - 8, locale))}
+                                      {(t('more_count')).replace('{count}', formatLocalizedNumber(slots.length - 8, locale))}
                                     </Badge>
                                   )}
                                 </div>
@@ -1781,7 +1784,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                             {/* Copy from other days */}
                             <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                              <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from') || 'نسخ من:'}  </span>
+                              <span className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from')}  </span>
                               {DAYS_OF_WEEK.filter(d => d.value !== day.value && getDayConfig(d.value).isAvailable).map(sourceDay => (
                                 <Button
                                   key={sourceDay.value}
@@ -1808,21 +1811,21 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <CheckCircle className="h-5 w-5" />
-                    {t('schedule_summary') || 'ملخص الجدول'}
+                    {t('schedule_summary')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days') || 'أيام العمل'}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days') || 'أيام'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days')}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days')}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots') || 'إجمالي الفترات الأسبوعية'}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots') || 'فترة'}</p>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots')}</Label>
+                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots')}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type') || 'نوع التحليل'}</Label>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type')}</Label>
                       <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
                     </div>
                   </div>
@@ -1859,7 +1862,7 @@ function Sidebar({
   onSignOut: () => void;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const isCollapsed = false;
   const { theme } = useTheme();
   const { t, isRTL } = useLocale();
 
@@ -1885,11 +1888,10 @@ function Sidebar({
         className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-${isRTL ? 'right' : 'left'} ${isActive
           ? `bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-${isRTL ? 'l' : 'r'}-2 border-emerald-500`
           : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
-          } ${isCollapsed ? 'justify-center' : ''}`}
-        title={isCollapsed ? children?.toString() : ''}
+          }`}
       >
-        <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span>{children}</span>}
+        <Icon className={`h-4 w-4 flex-shrink-0 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+        <span>{children}</span>
       </button>
     );
   }
@@ -1908,7 +1910,7 @@ function Sidebar({
         className={`
           fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-[70] bg-white dark:bg-[#0F0F12] transform transition-all duration-300 ease-in-out
           lg:static lg:translate-x-0 border-${isRTL ? 'l' : 'r'} border-gray-200 dark:border-[#1F1F23]
-          ${isCollapsed ? 'lg:w-16 sidebar-collapsed' : 'lg:w-64'}
+          lg:w-64
           ${isMobileMenuOpen
             ? "translate-x-0 w-64"
             : isRTL
@@ -1919,81 +1921,56 @@ function Sidebar({
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
-          <div className={`h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-6'}`}>
-            <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'gap-3'}`}>
+          <div className="h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] px-6">
+            <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
                 <Building2 className="w-4 h-4 text-white" />
               </div>
-              {!isCollapsed && (
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t('center_portal') || 'بوابة المركز'}
-                </span>
-              )}
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('center_portal')}
+              </span>
             </div>
-
-            {/* Collapse Button - Desktop Only */}
-            {!isCollapsed && (
-              <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors"
-                title={t('collapse_sidebar') || 'طي الشريط الجانبي'}
-              >
-                <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
-
-            {/* Expand Button when Collapsed */}
-            {isCollapsed && (
-              <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className={`hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors absolute top-4 ${isRTL ? 'left-2' : 'right-2'}`}
-                title={t('expand_sidebar') || 'توسيع الشريط الجانبي'}
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
           </div>
 
           {/* Navigation */}
-          <div className={`flex-1 overflow-y-auto py-4 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+          <div className="flex-1 overflow-y-auto py-4 px-4">
             <div className="space-y-6">
               <div>
-                {!isCollapsed && (
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {t('dashboard') || 'لوحة التحكم'}
-                  </div>
-                )}
-                <div className={isCollapsed ? 'space-y-2' : ''}>
+                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-200">
+                  {t('dashboard')}
+                </div>
+                <div>
                   <NavItem tab="overview" icon={Home} isActive={activeTab === "overview"}>
-                    {t('overview') || 'Overview'}
+                    {t('overview')}
                   </NavItem>
                   <NavItem tab="appointments" icon={Calendar} isActive={activeTab === "appointments"}>
-                    {t('appointments') || 'Appointments'}
+                    {t('appointments')}
+                  </NavItem>
+                  <NavItem tab="schedule-calendar" icon={Grid3X3} isActive={activeTab === "schedule-calendar"}>
+                    {t('dd_schedule_calendar_tab') || 'Schedule Calendar'}
                   </NavItem>
                   <NavItem tab="patients" icon={Users} isActive={activeTab === "patients"}>
-                    {t('patients') || 'Patients'}
+                    {t('patients')}
                   </NavItem>
                   <NavItem tab="analytics" icon={BarChart2} isActive={activeTab === "analytics"}>
-                    {t('analytics') || 'Analytics'}
+                    {t('analytics')}
                   </NavItem>
                 </div>
               </div>
 
               <div>
-                {!isCollapsed && (
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {t('management') || 'الإدارة'}
-                  </div>
-                )}
-                <div className={isCollapsed ? 'space-y-2' : ''}>
+                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-200">
+                  {t('management')}
+                </div>
+                <div>
                   <NavItem tab="schedule" icon={Clock} isActive={activeTab === "schedule"}>
-                    {t('schedule') || 'الجدول'}
+                    {t('schedule')}
                   </NavItem>
                   <NavItem tab="services" icon={TestTube} isActive={activeTab === "services"}>
-                    {t('services') || 'الخدمات'}
+                    {t('services')}
                   </NavItem>
                   <NavItem tab="profile" icon={Settings} isActive={activeTab === "profile"}>
-                    {t('profile') || 'الملف الشخصي'}
+                    {t('profile')}
                   </NavItem>
                 </div>
               </div>
@@ -2001,16 +1978,14 @@ function Sidebar({
           </div>
 
           {/* Bottom Navigation */}
-          <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-4'}`}>
+          <div className="py-4 border-t border-gray-200 dark:border-[#1F1F23] px-4">
             <div className="space-y-1">
-
               <button
                 onClick={onSignOut}
-                className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? (t('sign_out') || 'تسجيل الخروج') : ''}
+                className="w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20"
               >
-                <LogOut className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-                {!isCollapsed && <span className="ml-3">{t('sign_out') || 'تسجيل الخروج'}</span>}
+                <LogOut className="h-4 w-4 flex-shrink-0 mr-3" />
+                <span className="ml-3">{t('sign_out')}</span>
               </button>
             </div>
           </div>
@@ -2388,14 +2363,37 @@ export default function CenterDashboardPage() {
 
       // Create stats from appointment data
       const upcomingBookings = appointmentData;
-      const completedToday = upcomingBookings.filter((b: any) => b.status === 'completed').length;
+
+      // Sort appointments: Scheduled -> Confirmed -> Cancelled -> Completed, then by date (latest to oldest)
+      const statusOrder: Record<string, number> = {
+        'scheduled': 1,
+        'confirmed': 2,
+        'cancelled': 3,
+        'completed': 4
+      };
+
+      const sortedBookings = [...upcomingBookings].sort((a, b) => {
+        const statusA = statusOrder[a.status?.toLowerCase()] || 999;
+        const statusB = statusOrder[b.status?.toLowerCase()] || 999;
+
+        if (statusA !== statusB) {
+          return statusA - statusB;
+        }
+
+        // Within same status, sort by date (latest to oldest)
+        const dateA = new Date(a.appointment_date || a.booking_date || 0).getTime();
+        const dateB = new Date(b.appointment_date || b.booking_date || 0).getTime();
+        return dateB - dateA;
+      });
+
+      const completedToday = sortedBookings.filter((b: any) => b.status === 'completed').length;
       // Only count scheduled and confirmed appointments for upcoming count
-      const upcomingCount = upcomingBookings.filter((b: any) => b.status === 'scheduled' || b.status === 'confirmed').length;
+      const upcomingCount = sortedBookings.filter((b: any) => b.status === 'scheduled' || b.status === 'confirmed').length;
       // Only count revenue from completed appointments
-      const revenueToday = upcomingBookings
+      const revenueToday = sortedBookings
         .filter((b: any) => b.status === 'completed')
         .reduce((sum: number, b: any) => sum + (Number(b.fee) || 0), 0);
-      const nextAppointment = upcomingBookings.find((b: any) => b.status === 'scheduled' || b.status === 'confirmed');
+      const nextAppointment = sortedBookings.find((b: any) => b.status === 'scheduled' || b.status === 'confirmed');
 
       setTodayStats({
         stats: {
@@ -2409,7 +2407,7 @@ export default function CenterDashboardPage() {
             type: nextAppointment.test_type_name || 'Lab Test'
           } : null
         },
-        appointments: upcomingBookings
+        appointments: sortedBookings
       });
 
       // Service states are already set from lab test types API above
@@ -2426,8 +2424,8 @@ export default function CenterDashboardPage() {
     } catch (error) {
       console.error('Failed to load center data:', error);
       toast({
-        title: t('error') || 'Error',
-        description: t('failed_to_load_data') || 'Failed to load dashboard data',
+        title: t('error'),
+        description: t('failed_to_load_data'),
         variant: 'destructive'
       });
     } finally {
@@ -2631,14 +2629,14 @@ export default function CenterDashboardPage() {
 
       if (!result.success) {
         console.error('Services save unsuccessful:', result);
-        throw new Error(result.error || (t('services_save_failed') || 'فشل حفظ الخدمات'));
+        throw new Error(result.error || (t('services_save_failed')));
       }
 
       console.log('✅ Services saved successfully');
 
       toast({
-        title: t('success') || 'نجاح',
-        description: t('services_saved') || 'تم حفظ الخدمات بنجاح'
+        title: t('success'),
+        description: t('services_saved')
       });
 
       // Reload lab test types with updated service settings instead of all center data
@@ -2679,7 +2677,7 @@ export default function CenterDashboardPage() {
     } catch (error: any) {
       console.error('Save services error:', error);
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: error?.message || 'Failed to save services',
         variant: 'destructive'
       });
@@ -2723,8 +2721,8 @@ export default function CenterDashboardPage() {
       return updated;
     });
     toast({
-      title: t('success') || 'Success',
-      description: `${selectedTestTypes.size} ${t('test_types_enabled') || 'test types enabled'}`
+      title: t('success'),
+      description: `${selectedTestTypes.size} ${t('test_types_enabled')}`
     });
   };
 
@@ -2741,14 +2739,14 @@ export default function CenterDashboardPage() {
       return updated;
     });
     toast({
-      title: t('success') || 'Success',
-      description: `${selectedTestTypes.size} ${t('test_types_disabled') || 'test types disabled'}`
+      title: t('success'),
+      description: `${selectedTestTypes.size} ${t('test_types_disabled')}`
     });
   };
 
   const handleBatchSetFee = () => {
     if (!batchFee) {
-      toast({ title: t('error') || 'خطأ', description: t('please_enter_fee') || 'يرجى إدخال رسوم', variant: 'destructive' });
+      toast({ title: t('error'), description: t('please_enter_fee'), variant: 'destructive' });
       return;
     }
     console.log('📦 [Batch] Setting fee', batchFee, 'for', selectedTestTypes.size, 'test types');
@@ -2763,15 +2761,15 @@ export default function CenterDashboardPage() {
       return updated;
     });
     toast({
-      title: t('success') || 'Success',
-      description: `${t('fee_set_for') || 'Fee set for'} ${selectedTestTypes.size} ${t('test_types') || 'test types'}`
+      title: t('success'),
+      description: `${t('fee_set_for')} ${selectedTestTypes.size} ${t('test_types')}`
     });
   };
 
   // Create new lab test type
   const handleCreateTestType = async () => {
     if (!newTestType.code || !newTestType.name) {
-      toast({ title: t('error') || 'خطأ', description: t('please_fill_required_fields') || 'يرجى ملء جميع الحقول المطلوبة', variant: 'destructive' });
+      toast({ title: t('error'), description: t('please_fill_required_fields'), variant: 'destructive' });
       return;
     }
 
@@ -2787,7 +2785,7 @@ export default function CenterDashboardPage() {
       const newType = response.data;
       console.log('✅ [Frontend] Created new lab test type:', newType);
 
-      toast({ title: t('success') || 'نجاح', description: t('lab_test_type_created') || 'تم إنشاء نوع التحليل بنجاح' });
+      toast({ title: t('success'), description: t('lab_test_type_created') });
 
       // Reset form and close dialog
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
@@ -2799,8 +2797,8 @@ export default function CenterDashboardPage() {
     } catch (error: any) {
       console.error('Failed to create lab test type:', error);
       toast({
-        title: t('error') || 'خطأ',
-        description: error.response?.data?.error || t('failed_create_lab_test_type') || 'فشل إنشاء نوع التحليل',
+        title: t('error'),
+        description: error.response?.data?.error || t('failed_create_lab_test_type'),
         variant: 'destructive'
       });
     } finally {
@@ -2847,8 +2845,8 @@ export default function CenterDashboardPage() {
   const saveSchedule = async () => {
     if (!selectedType) {
       toast({
-        title: t('error') || 'Error',
-        description: t('selectTest') || 'Please select a test type first',
+        title: t('error'),
+        description: t('selectTest'),
         variant: 'destructive'
       });
       return;
@@ -2884,8 +2882,8 @@ export default function CenterDashboardPage() {
         setSchedule(res.schedule || scheduleData);
 
         toast({
-          title: t('success') || 'Success',
-          description: t('schedule_saved') || 'Schedule saved successfully'
+          title: t('success'),
+          description: t('schedule_saved')
         });
 
         // Don't reload schedule to avoid resetting form state
@@ -2894,7 +2892,7 @@ export default function CenterDashboardPage() {
 
     } catch (error: any) {
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: error?.message || 'Failed to save schedule',
         variant: 'destructive'
       });
@@ -2926,14 +2924,14 @@ export default function CenterDashboardPage() {
       }
 
       toast({
-        title: t('success') || 'Success',
+        title: t('success'),
         description: `Appointment ${status} successfully`,
       });
       loadCenterData(); // Refresh data
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: error instanceof Error ? error.message : 'Failed to update appointment',
         variant: 'destructive'
       });
@@ -2950,7 +2948,7 @@ export default function CenterDashboardPage() {
   const handleFileUpload = async () => {
     if (!uploadFile || !selectedAppointment) {
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: 'Please select a file to upload',
         variant: 'destructive'
       });
@@ -2968,7 +2966,7 @@ export default function CenterDashboardPage() {
 
       if (response) {
         toast({
-          title: t('success') || 'Success',
+          title: t('success'),
           description: 'Lab result uploaded successfully',
         });
         setShowUploadModal(false);
@@ -2977,7 +2975,7 @@ export default function CenterDashboardPage() {
     } catch (error) {
       console.error('Error uploading result:', error);
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: 'Failed to upload lab result',
         variant: 'destructive'
       });
@@ -2989,11 +2987,13 @@ export default function CenterDashboardPage() {
   const handleViewPatient = async (patientId: string, patientName?: string) => {
     try {
       // Load comprehensive patient data using proper API methods
-      const [patientResponse, labHistoryResponse, medicalRecordsResponse] = await Promise.all([
+      const [patientResponse, labHistoryResponse] = await Promise.all([
         centerService.getPatientDetails(patientId),
-        centerService.getPatientLabHistory(patientId),
-        centerService.getPatientMedicalRecords(patientId)
+        centerService.getPatientLabHistory(patientId)
       ]);
+
+      console.log('🔍 [View Patient] Patient Response:', patientResponse);
+      console.log('🔍 [View Patient] Lab History Response:', labHistoryResponse);
 
       let patientData: any = {
         id: patientId,
@@ -3005,19 +3005,50 @@ export default function CenterDashboardPage() {
         patientData = { ...patientData, ...patientResponse.patient };
       }
 
-      patientData.labHistory = labHistoryResponse?.labHistory || [];
-      patientData.medicalRecords = medicalRecordsResponse?.medicalRecords || [];
+      // Get all lab history - API returns 'bookings' not 'labHistory'
+      const allLabHistory = labHistoryResponse?.bookings || labHistoryResponse?.labHistory || [];
+      console.log('📋 [View Patient] All Lab History:', allLabHistory);
+      console.log('📋 [View Patient] Total appointments:', allLabHistory.length);
+
+      // Log each appointment status for debugging
+      allLabHistory.forEach((apt: any, idx: number) => {
+        console.log(`  Appointment ${idx + 1}:`, {
+          id: apt.id,
+          status: apt.status,
+          booking_date: apt.booking_date,
+          appointment_date: apt.appointment_date,
+          test_type: apt.test_type_name || apt.lab_test_types?.name
+        });
+      });
+
+      const completedAppointments = allLabHistory
+        .filter((appointment: any) => {
+          const isCompleted = appointment.status === 'completed';
+          console.log(`  ✅ Checking appointment ${appointment.id}: status="${appointment.status}", isCompleted=${isCompleted}`);
+          return isCompleted;
+        })
+        .sort((a: any, b: any) => {
+          // Sort by booking_date descending (most recent first)
+          const dateA = new Date(a.booking_date || a.appointment_date || 0);
+          const dateB = new Date(b.booking_date || b.appointment_date || 0);
+          return dateB.getTime() - dateA.getTime();
+        })
+        .slice(0, 3); // Take only the 3 most recent
+
+      console.log('✅ [View Patient] Completed Appointments:', completedAppointments);
+      console.log('✅ [View Patient] Number of completed appointments:', completedAppointments.length);
+
+      patientData.recentVisits = completedAppointments;
 
       setSelectedPatient(patientData);
       setShowPatientModal(true);
     } catch (error) {
-      console.error('Error loading patient:', error);
+      console.error('❌ [View Patient] Error loading patient:', error);
       // Fallback to basic patient info
       setSelectedPatient({
         id: patientId,
         name: patientName || `Patient ${patientId}`,
-        labHistory: [],
-        medicalRecords: []
+        recentVisits: []
       });
       setShowPatientModal(true);
     }
@@ -3038,8 +3069,8 @@ export default function CenterDashboardPage() {
   const saveProfile = async () => {
     if (!profileForm.name.trim() || !profileForm.email.trim()) {
       toast({
-        title: t('error') || 'Error',
-        description: t('name_email_required') || 'Name and email are required fields',
+        title: t('error'),
+        description: t('name_email_required'),
         variant: 'destructive'
       });
       return;
@@ -3056,8 +3087,8 @@ export default function CenterDashboardPage() {
       setCenterProfile(updatedProfile);
 
       toast({
-        title: t('success') || 'Success',
-        description: t('profile_updated') || 'Profile updated successfully',
+        title: t('success'),
+        description: t('profile_updated'),
       });
 
       // Reload data to refresh the display
@@ -3066,9 +3097,9 @@ export default function CenterDashboardPage() {
       console.error('Profile update error:', error);
       console.error('Error response:', error.response?.data);
 
-      const errorMessage = error.response?.data?.error || error.message || t('profile_update_failed') || 'Failed to update profile';
+      const errorMessage = error.response?.data?.error || error.message || t('profile_update_failed');
       toast({
-        title: t('error') || 'Error',
+        title: t('error'),
         description: errorMessage,
         variant: 'destructive'
       });
@@ -3085,8 +3116,8 @@ export default function CenterDashboardPage() {
       localStorage.removeItem(`centerScheduleStates_${user?.id}`);
 
       toast({
-        title: t('success') || 'Success',
-        description: t('signed_out_successfully') || 'Signed out successfully',
+        title: t('success'),
+        description: t('signed_out_successfully'),
       });
 
       // Redirect to login page
@@ -3094,8 +3125,8 @@ export default function CenterDashboardPage() {
     } catch (error) {
       console.error('Sign out error:', error);
       toast({
-        title: t('error') || 'Error',
-        description: t('sign_out_failed') || 'Failed to sign out',
+        title: t('error'),
+        description: t('sign_out_failed'),
         variant: 'destructive'
       });
     }
@@ -3131,7 +3162,7 @@ export default function CenterDashboardPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
               <div className={`p-6 ${isRTL ? 'text-right' : 'text-left'}`}>
                 <h1 className={`text-2xl font-bold text-gray-900 dark:text-white mb-6 ${isRTL ? 'text-right mr-0' : 'text-left ml-0'}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                  {t('center_dashboard') || 'Center Dashboard'}
+                  {t('center_dashboard')}
                 </h1>
               </div>
 
@@ -3153,8 +3184,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management') || 'إدارة المواعيد'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc') || 'إدارة وتنظيم مواعيد وحجوزات المركز'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc')}</p>
                     </div>
                   </div>
                 </div>
@@ -3163,7 +3194,7 @@ export default function CenterDashboardPage() {
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                      {t('cd_upcoming_appointments') || 'المواعيد القادمة'}
+                      {t('cd_upcoming_appointments')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -3179,8 +3210,8 @@ export default function CenterDashboardPage() {
                                 }`}></div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</span>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_date ? formatLocalizedDate(appointment.appointment_date, locale, 'short') : appointment.booking_date ? formatLocalizedDate(appointment.booking_date, locale, 'short') : ''} {appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
                                 </p>
                               </div>
                             </div>
@@ -3189,10 +3220,10 @@ export default function CenterDashboardPage() {
                                 appointment.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
                                   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700'
                               }`} dir={isRTL ? 'rtl' : 'ltr'}>
-                              {appointment.status === 'completed' ? (t('appointments_status_completed') || 'مكتمل') :
-                                appointment.status === 'confirmed' ? (t('appointments_status_confirmed') || 'مؤكد') :
-                                  appointment.status === 'cancelled' ? (t('appointments_status_cancelled') || 'ملغي') :
-                                    appointment.status === 'scheduled' ? (t('appointments_status_scheduled') || 'مجدول') :
+                              {appointment.status === 'completed' ? (t('appointments_status_completed')) :
+                                appointment.status === 'confirmed' ? (t('appointments_status_confirmed')) :
+                                  appointment.status === 'cancelled' ? (t('appointments_status_cancelled')) :
+                                    appointment.status === 'scheduled' ? (t('appointments_status_scheduled')) :
                                       (t(`appointments_status_${appointment.status}`) || appointment.status)}
                             </Badge>
                           </div>
@@ -3208,7 +3239,7 @@ export default function CenterDashboardPage() {
                                   className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
                                   <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_confirm') || 'تأكيد'}
+                                  {t('cd_confirm')}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -3217,7 +3248,7 @@ export default function CenterDashboardPage() {
                                   className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
                                   <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_cancel') || 'إلغاء'}
+                                  {t('cd_cancel')}
                                 </Button>
                               </>
                             )}
@@ -3230,7 +3261,7 @@ export default function CenterDashboardPage() {
                                   className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
                                   <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_complete') || 'إتمام'}
+                                  {t('cd_complete')}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -3239,7 +3270,7 @@ export default function CenterDashboardPage() {
                                   className={`${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
                                   <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cancel') || 'إلغاء'}
+                                  {t('cancel')}
                                 </Button>
                               </>
                             )}
@@ -3251,7 +3282,7 @@ export default function CenterDashboardPage() {
                                 className={`${isRTL ? 'flex-row-reverse' : ''}`}
                               >
                                 <Upload className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                {t('cd_upload_result') || 'رفع النتيجة'}
+                                {t('cd_upload_result')}
                               </Button>
                             )}
                             <Button
@@ -3261,20 +3292,48 @@ export default function CenterDashboardPage() {
                               className={`${isRTL ? 'flex-row-reverse' : ''} hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`}
                             >
                               <User className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                              {t('cd_view_patient') || 'عرض المريض'}
+                              {t('cd_view_patient')}
                             </Button>
                           </div>
                         </div>
                       )) : (
                         <div className="text-center py-8">
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today') || 'لا توجد مواعيد لليوم'}</p>
-                          <p className="text-sm text-gray-400 mt-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear') || 'ستظهر المواعيد هنا عندما يقوم المرضى بالحجز'}</p>
+                          <p className="text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today')}</p>
+                          <p className="text-sm text-gray-400 mt-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear')}</p>
                         </div>
                       )}
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Schedule Calendar Tab */}
+              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full">
+                <DoctorScheduleCalendar
+                  appointments={allAppointments || []}
+                  onAppointmentClick={(appointment: any) => {
+                    console.log('Appointment clicked:', appointment);
+                    // You can add modal or detailed view here if needed
+                  }}
+                  onStatusUpdate={async (appointmentId: string, newStatus: string) => {
+                    try {
+                      await handleUpdateAppointmentStatus(appointmentId, newStatus);
+                      toast({
+                        title: t('success'),
+                        description: t('dd_appointment_status_updated') || 'Appointment status has been updated successfully.'
+                      });
+                      // Refresh data
+                      await loadCenterData();
+                    } catch (error) {
+                      toast({
+                        title: t('error'),
+                        description: t('dd_failed_to_update_status') || 'Failed to update appointment status.',
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                />
               </TabsContent>
 
               {/* Patients Tab */}
@@ -3299,8 +3358,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_schedule_management') || 'Schedule Management'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_operating_hours') || 'Configure operating hours and availability for each lab test type'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_schedule_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_operating_hours')}</p>
                     </div>
                   </div>
                 </div>
@@ -3319,8 +3378,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><TestTube className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_services_management') || 'إدارة الخدمات'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_lab_services') || 'إعداد وإدارة خدمات الفحوصات المخبرية'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_services_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_lab_services')}</p>
                     </div>
                   </div>
                 </div>
@@ -3332,10 +3391,10 @@ export default function CenterDashboardPage() {
                       <div>
                         <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                           <Building2 className="w-5 h-5" />
-                          {t('available_services') || 'الخدمات المخبرية المتاحة'}
+                          {t('available_services')}
                         </CardTitle>
                         <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
-                          {t('services_description') || 'تفعيل أو تعطيل خدمات التحاليل وتعيين الأسعار'}
+                          {t('services_description')}
                         </CardDescription>
                       </div>
                       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -3346,16 +3405,16 @@ export default function CenterDashboardPage() {
                             className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                           >
                             <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                            {t('add_new_type') || 'إضافة نوع جديد'}
+                            {t('add_new_type')}
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>{t('create_lab_test_type') || 'إنشاء نوع تحليل مخبري'}</DialogTitle>
+                            <DialogTitle>{t('create_lab_test_type')}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                              <Label htmlFor="code">{t('code') || 'الرمز'} *</Label>
+                              <Label htmlFor="code">{t('code')} *</Label>
                               <Input
                                 id="code"
                                 value={newTestType.code}
@@ -3364,7 +3423,7 @@ export default function CenterDashboardPage() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="name">{t('name') || 'الاسم'} *</Label>
+                              <Label htmlFor="name">{t('name')} *</Label>
                               <Input
                                 id="name"
                                 value={newTestType.name}
@@ -3373,7 +3432,7 @@ export default function CenterDashboardPage() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="category">{t('category') || 'الفئة'} *</Label>
+                              <Label htmlFor="category">{t('category')} *</Label>
                               <Select
                                 value={newTestType.category}
                                 onValueChange={(value: 'lab' | 'imaging') => setNewTestType(prev => ({ ...prev, category: value }))}
@@ -3383,13 +3442,13 @@ export default function CenterDashboardPage() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="lab">{t('lab') || 'مختبر'}</SelectItem>
-                                  <SelectItem value="imaging">{t('imaging') || 'تصوير'}</SelectItem>
+                                  <SelectItem value="lab">{t('lab')}</SelectItem>
+                                  <SelectItem value="imaging">{t('imaging')}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="default_fee">{t('default_fee') || 'الرسوم الافتراضية (اختياري)'}</Label>
+                              <Label htmlFor="default_fee">{t('default_fee')}</Label>
                               <Input
                                 id="default_fee"
                                 type="number"
@@ -3402,10 +3461,10 @@ export default function CenterDashboardPage() {
                           </div>
                           <DialogFooter>
                             <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
-                              {t('cancel') || 'إلغاء'}
+                              {t('cancel')}
                             </Button>
                             <Button onClick={handleCreateTestType} disabled={creating}>
-                              {creating ? (t('creating') || 'جارٍ الإنشاء...') : (t('create') || 'إنشاء')}
+                              {creating ? (t('creating')) : (t('create'))}
                             </Button>
                           </DialogFooter>
                         </DialogContent>
@@ -3417,7 +3476,7 @@ export default function CenterDashboardPage() {
                       <div className="flex items-center justify-center py-8">
                         <div className={`flex items-center gap-2 text-gray-500 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                           <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                          {t('loading_services') || 'جارٍ تحميل الخدمات...'}
+                          {t('loading_services')}
                         </div>
                       </div>
                     ) : (
@@ -3430,14 +3489,14 @@ export default function CenterDashboardPage() {
                               <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
-                                    <span dir="ltr">{formatLocalizedNumber(selectedTestTypes.size || 0, locale)}</span> {t('selected') || 'محدد'}
+                                    <span dir="ltr">{formatLocalizedNumber(selectedTestTypes.size || 0, locale)}</span> {t('selected')}
                                   </span>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={selectAllTestTypes}
                                   >
-                                    {t('select_all') || 'تحديد الكل'}
+                                    {t('select_all')}
                                   </Button>
                                   {selectedTestTypes.size > 0 && (
                                     <Button
@@ -3445,7 +3504,7 @@ export default function CenterDashboardPage() {
                                       size="sm"
                                       onClick={deselectAllTestTypes}
                                     >
-                                      {t('deselect_all') || 'إلغاء التحديد'}
+                                      {t('deselect_all')}
                                     </Button>
                                   )}
                                 </div>
@@ -3461,7 +3520,7 @@ export default function CenterDashboardPage() {
                                     className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700"
                                   >
                                     <CheckCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                    {t('enable_selected') || 'تفعيل المحدد'}
+                                    {t('enable_selected')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -3469,12 +3528,12 @@ export default function CenterDashboardPage() {
                                     onClick={handleBatchDisable}
                                   >
                                     <XCircle className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                    {t('disable_selected') || 'تعطيل المحدد'}
+                                    {t('disable_selected')}
                                   </Button>
                                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                     <Input
                                       type="number"
-                                      placeholder={t('fee') || 'رسوم'}
+                                      placeholder={t('fee')}
                                       value={batchFee}
                                       onChange={(e) => setBatchFee(e.target.value)}
                                       className={`w-32 ${isRTL ? 'text-right' : 'text-left'}`}
@@ -3485,7 +3544,7 @@ export default function CenterDashboardPage() {
                                       variant="outline"
                                       onClick={handleBatchSetFee}
                                     >
-                                      {t('set_fee') || 'تعيين الرسوم'}
+                                      {t('set_fee')}
                                     </Button>
                                   </div>
                                 </div>
@@ -3511,15 +3570,15 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <h4 className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description') || 'No description provided'}
+                                    <p className="text-sm text-gray-500 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description')}
                                     </p>
                                     <div className="flex items-center gap-4 mt-2">
-                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        {t('duration') || 'المدة'}: <span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes') || 'دقائق'}
+                                      <span className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        {t('duration')}: <span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes')}
                                       </span>
-                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        {t('category') || 'الفئة'}: {testType.category ? (testType.category === 'lab' ? (t('lab') || 'مختبر') : testType.category === 'imaging' ? (t('imaging') || 'تصوير') : testType.category) : (t('general') || 'عام')}
+                                      <span className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        {t('category')}: {testType.category ? (testType.category === 'lab' ? (t('lab')) : testType.category === 'imaging' ? (t('imaging')) : testType.category) : (t('general'))}
                                       </span>
                                     </div>
                                   </div>
@@ -3528,7 +3587,7 @@ export default function CenterDashboardPage() {
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                       <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium">
-                                        {(t('fee') || 'الرسوم')} ({t('currency') || 'SYP'})
+                                        {(t('fee'))} ({t('currency')})
                                       </Label>
                                       <Input
                                         id={`fee-${testType.id}`}
@@ -3550,7 +3609,7 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                                     <Label htmlFor={`service-${testType.id}`} className="text-sm font-medium">
-                                      {state.active ? t('enabled') || 'مفعل' : t('disabled') || 'معطل'}
+                                      {state.active ? t('enabled') : t('disabled')}
                                     </Label>
                                     <Switch
                                       id={`service-${testType.id}`}
@@ -3572,15 +3631,15 @@ export default function CenterDashboardPage() {
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('online_booking_enabled') || 'الحجز الإلكتروني مفعل'}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('online_booking_enabled')}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('instant_confirmation') || 'تأكيد فوري'}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('instant_confirmation')}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('automated_scheduling') || 'جدولة آلية'}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('automated_scheduling')}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -3607,7 +3666,7 @@ export default function CenterDashboardPage() {
                         ) : (
                           <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         )}
-                        {t('save_services') || 'حفظ الخدمات'}
+                        {t('save_services')}
                       </Button>
                       <Button
                         type="button"
@@ -3617,15 +3676,15 @@ export default function CenterDashboardPage() {
                           e.stopPropagation();
                           loadCenterData();
                           toast({
-                            title: t('services_reset') || 'Services Reset',
-                            description: t('services_reset_desc') || 'Services have been reset to saved configuration'
+                            title: t('services_reset'),
+                            description: t('services_reset_desc')
                           });
                         }}
                         disabled={servicesLoading}
                         className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                       >
                         <RotateCcw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        {t('reset') || 'إعادة التعيين'}
+                        {t('reset')}
                       </Button>
                     </div>
                   </CardContent>
@@ -3636,10 +3695,10 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <CheckCircle className="w-5 h-5 text-green-500" />
-                      {t('active_services') || 'الخدمات المخبرية النشطة'}
+                      {t('active_services')}
                     </CardTitle>
                     <CardDescription className={isRTL ? 'text-right' : 'text-left'}>
-                      {t('active_services_description') || 'الخدمات المفعلة حالياً مع إعداداتها'}
+                      {t('active_services_description')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -3653,8 +3712,8 @@ export default function CenterDashboardPage() {
                           <div className="text-center py-8">
                             <TestTube className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                             <div className="space-y-2">
-                              <p className="text-gray-600 dark:text-gray-400">{t('no_active_services_title') || 'لم يتم تفعيل أي خدمة بعد.'}</p>
-                              <p className="text-sm text-gray-500 dark:text-gray-500">{t('no_active_services_desc') || 'فعّل خدمات التحاليل بالأعلى لتظهر هنا كبطاقات.'}</p>
+                              <p className="text-gray-600 dark:text-gray-200">{t('no_active_services_title')}</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-500">{t('no_active_services_desc')}</p>
                             </div>
                           </div>
                         );
@@ -3679,31 +3738,31 @@ export default function CenterDashboardPage() {
                                       </div>
                                       <h3 className={`font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{displayName}</h3>
                                     </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
-                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description') || 'No description provided'}
+                                    <p className="text-xs text-gray-600 dark:text-gray-200 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description')}
                                     </p>
                                     <div className="space-y-2">
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('duration') || 'المدة'}:</span>
-                                        <span className="font-medium"><span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes_short') || 'دقيقة'}</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('duration')}:</span>
+                                        <span className="font-medium"><span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes_short')}</span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('fee') || 'الرسوم'}:</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('fee')}:</span>
                                         <span className="font-medium text-emerald-600 dark:text-emerald-400">
                                           {formatLocalizedNumber(parseFloat(state.fee || '0') || 0, locale, { style: 'currency', currency: 'SYP' })}
                                         </span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('category') || 'الفئة'}:</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('category')}:</span>
                                         <Badge variant="secondary" className="text-xs">
-                                          {t(`category_${testType.category}`) || testType.category || t('category_general') || 'General'}
+                                          {t(`category_${testType.category}`) || testType.category || t('category_general')}
                                         </Badge>
                                       </div>
                                     </div>
                                   </div>
                                   <div className={isRTL ? 'mr-2' : 'ml-2'}>
                                     <Badge variant="default" className="text-xs bg-green-500">
-                                      {t('active') || 'نشط'}
+                                      {t('active')}
                                     </Badge>
                                   </div>
                                 </div>
@@ -3711,7 +3770,7 @@ export default function CenterDashboardPage() {
                                 <div className="mt-4 pt-3 border-t border-emerald-200 dark:border-emerald-700">
                                   <div className={`flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                     <CheckCircle className="w-3 h-3" />
-                                    <span>{t('online_booking_available') || 'الحجز الإلكتروني متاح'}</span>
+                                    <span>{t('online_booking_available')}</span>
                                   </div>
                                 </div>
                               </div>
@@ -3728,7 +3787,7 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                       <Activity className="w-5 h-5" />
-                      {t('quick_actions') || 'إجراءات سريعة'}
+                      {t('quick_actions')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -3739,15 +3798,15 @@ export default function CenterDashboardPage() {
                         onClick={() => {
                           const activeServices = Object.entries(serviceStates).filter(([_, state]) => state.active);
                           toast({
-                            title: t('bulk_enable') || 'Bulk Enable',
-                            description: `${activeServices.length} ${t('services_enabled') || 'services currently enabled'}`
+                            title: t('bulk_enable'),
+                            description: `${activeServices.length} ${t('services_enabled')}`
                           });
                         }}
                       >
                         <CheckCircle className={`w-5 h-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('enable_all') || 'تفعيل الكل'}</div>
-                          <div className="text-xs text-gray-500">{t('activate_all_services') || 'تفعيل كل الخدمات'}</div>
+                          <div className="font-medium">{t('enable_all')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('activate_all_services')}</div>
                         </div>
                       </Button>
 
@@ -3763,15 +3822,15 @@ export default function CenterDashboardPage() {
                             return updated;
                           });
                           toast({
-                            title: t('bulk_disable') || 'Bulk Disable',
-                            description: t('all_services_disabled') || 'All services have been disabled'
+                            title: t('bulk_disable'),
+                            description: t('all_services_disabled')
                           });
                         }}
                       >
                         <XCircle className={`w-5 h-5 text-red-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('disable_all') || 'تعطيل الكل'}</div>
-                          <div className="text-xs text-gray-500">{t('deactivate_all_services') || 'تعطيل كل الخدمات'}</div>
+                          <div className="font-medium">{t('disable_all')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('deactivate_all_services')}</div>
                         </div>
                       </Button>
 
@@ -3792,15 +3851,15 @@ export default function CenterDashboardPage() {
                             return updated;
                           });
                           toast({
-                            title: t('pricing_reset') || 'Pricing Reset',
-                            description: t('default_prices_applied') || 'Default prices have been applied'
+                            title: t('pricing_reset'),
+                            description: t('default_prices_applied')
                           });
                         }}
                       >
                         <RotateCcw className={`w-5 h-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <div className="font-medium">{t('reset_pricing') || 'إعادة ضبط التسعير'}</div>
-                          <div className="text-xs text-gray-500">{t('restore_default_prices') || 'استعادة الأسعار الافتراضية'}</div>
+                          <div className="font-medium">{t('reset_pricing')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('restore_default_prices')}</div>
                         </div>
                       </Button>
                     </div>
@@ -3814,8 +3873,8 @@ export default function CenterDashboardPage() {
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_profile_settings') || 'Profile Settings'}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_update_center_info') || 'Update your center information and preferences'}</p>
+                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_profile_settings')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_update_center_info')}</p>
                     </div>
                   </div>
                 </div>
@@ -3827,19 +3886,19 @@ export default function CenterDashboardPage() {
                       <CardTitle className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <Building2 className="w-5 h-5" />
-                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_profile') || 'Current Profile'}</span>
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_profile')}</span>
                         </div>
                         {centerProfile && (
                           <div className="flex items-center gap-2">
                             {centerProfile.name && centerProfile.email && centerProfile.phone ? (
                               <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                 <CheckCircle className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                {t('complete') || 'Complete'}
+                                {t('complete')}
                               </Badge>
                             ) : (
                               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                 <AlertCircle className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                {t('incomplete') || 'Incomplete'}
+                                {t('incomplete')}
                               </Badge>
                             )}
                           </div>
@@ -3849,7 +3908,7 @@ export default function CenterDashboardPage() {
                     <CardContent>
                       {(() => {
                         const localizedName = getProfileField('name');
-                        const displayName = localizedName || centerProfile.name || t('cd_no_name_set') || 'No name set';
+                        const displayName = localizedName || centerProfile.name || t('cd_no_name_set');
                         const localizedAddress = getProfileField('address');
                         const displayAddress = localizedAddress || centerProfile.address || t('cd_not_provided');
                         const localizedDescription = getProfileField('description') || centerProfile.description || '';
@@ -3873,20 +3932,20 @@ export default function CenterDashboardPage() {
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</p>
-                                <p className="text-sm text-gray-500" dir="ltr">{centerProfile.email || t('cd_no_email_set') || 'No email set'}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir="ltr">{centerProfile.email || t('cd_no_email_set')}</p>
                               </div>
                             </div>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                               <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <Phone className="w-3 h-3" />
-                                {t('phone') || 'Phone'}
+                                {t('phone')}
                               </p>
                               <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{centerProfile.phone || t('cd_not_provided')}</p>
                             </div>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                               <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <Building2 className="w-3 h-3" />
-                                {t('address') || 'Address'}
+                                {t('address')}
                               </p>
                               <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{displayAddress}</p>
                             </div>
@@ -3894,7 +3953,7 @@ export default function CenterDashboardPage() {
                               <>
                                 {websiteValue && (
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website') || 'Website'}</p>
+                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website')}</p>
                                     <p className="font-medium text-blue-600 hover:text-blue-800" dir="ltr">
                                       <a href={websiteValue} target="_blank" rel="noopener noreferrer">
                                         {websiteValue}
@@ -3904,7 +3963,7 @@ export default function CenterDashboardPage() {
                                 )}
                                 {localizedDescription && (
                                   <div className={`col-span-full ${isRTL ? 'text-right' : 'text-left'}`}>
-                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description') || 'Description'}</p>
+                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description')}</p>
                                     <p className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                       {localizedDescription}
                                     </p>
@@ -3923,104 +3982,104 @@ export default function CenterDashboardPage() {
                   <CardHeader>
                     <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       <Edit className="w-5 h-5" />
-                      {t('center_profile') || 'Edit Center Profile'}
+                      {t('center_profile')}
                     </CardTitle>
                     <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                      {t('cd_update_profile_desc') || 'Update your center information to help patients find and contact you'}
+                      {t('cd_update_profile_desc')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_name') || 'Center Name (English)'} *</Label>
+                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_name')} *</Label>
                           <Input
                             id="centerName"
-                            placeholder={centerProfile?.name ? `${t('current_prefix') || 'Current:'} ${centerProfile.name}` : (t('enter_center_name') || 'Enter center name in English')}
+                            placeholder={centerProfile?.name ? `${t('current_prefix')} ${centerProfile.name}` : (t('enter_center_name'))}
                             value={profileForm.name}
                             onChange={(e) => updateProfileForm('name', e.target.value)}
                             className="mt-1"
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_appears_on') || 'This name will appear on appointments and communications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_appears_on')}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_center_name_arabic') || 'Center Name (Arabic)'}</Label>
+                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_center_name_arabic')}</Label>
                           <Input
                             id="centerNameAr"
-                            placeholder={centerProfile?.name_ar ? `${t('current_prefix') || 'Current:'} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
+                            placeholder={centerProfile?.name_ar ? `${t('current_prefix')} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
                             value={profileForm.name_ar}
                             onChange={(e) => updateProfileForm('name_ar', e.target.value)}
                             className="mt-1"
                             dir="rtl"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_arabic_help') || 'Arabic name for multilingual support'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_arabic_help')}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'} *</Label>
+                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('email')} *</Label>
                           <Input
                             id="email"
                             type="email"
-                            placeholder={centerProfile?.email ? `${t('current_prefix') || 'Current:'} ${centerProfile.email}` : (user?.email ? `${t('current_prefix') || 'Current:'} ${user.email}` : (t('enter_email') || 'Enter email'))}
+                            placeholder={centerProfile?.email ? `${t('current_prefix')} ${centerProfile.email}` : (user?.email ? `${t('current_prefix')} ${user.email}` : (t('enter_email')))}
                             value={profileForm.email}
                             onChange={(e) => updateProfileForm('email', e.target.value)}
                             className="mt-1"
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_primary_contact_email') || 'Primary contact email for patients and notifications'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_primary_contact_email')}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
+                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone')}</Label>
                           <Input
                             id="phone"
-                            placeholder={centerProfile?.phone ? `${t('current_prefix') || 'Current:'} ${centerProfile.phone}` : (t('enter_phone') || 'Enter phone number')}
+                            placeholder={centerProfile?.phone ? `${t('current_prefix')} ${centerProfile.phone}` : (t('enter_phone'))}
                             value={profileForm.phone}
                             onChange={(e) => updateProfileForm('phone', e.target.value)}
                             className="mt-1"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_contact_number_appointments') || 'Contact number for appointments and emergencies'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_contact_number_appointments')}</p>
                         </div>
                       </div>
                       <div className="space-y-4">
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
+                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('address')}</Label>
                           <Input
                             id="address"
-                            placeholder={centerProfile?.address ? `${t('current_prefix') || 'Current:'} ${centerProfile.address}` : (t('enter_address') || 'Enter center address')}
+                            placeholder={centerProfile?.address ? `${t('current_prefix')} ${centerProfile.address}` : (t('enter_address'))}
                             value={profileForm.address}
                             onChange={(e) => updateProfileForm('address', e.target.value)}
                             className="mt-1"
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_physical_location') || 'Physical location for patient visits'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_physical_location')}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('website') || 'Website'}</Label>
+                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('website')}</Label>
                           <Input
                             id="website"
-                            placeholder={centerProfile?.website ? `${t('current_prefix') || 'Current:'} ${centerProfile.website}` : (t('enter_website') || 'Enter website URL')}
+                            placeholder={centerProfile?.website ? `${t('current_prefix')} ${centerProfile.website}` : (t('enter_website'))}
                             value={profileForm.website}
                             onChange={(e) => updateProfileForm('website', e.target.value)}
                             className="mt-1"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_optional_website') || 'Optional website for more information'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_optional_website')}</p>
                         </div>
                         <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('description') || 'Description'}</Label>
+                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('description')}</Label>
                           <textarea
                             id="description"
-                            placeholder={centerProfile?.description ? `${t('current_prefix') || 'Current:'} ${centerProfile.description}` : (t('enter_description') || 'Enter center description')}
+                            placeholder={centerProfile?.description ? `${t('current_prefix')} ${centerProfile.description}` : (t('enter_description'))}
                             value={profileForm.description}
                             onChange={(e) => updateProfileForm('description', e.target.value)}
                             className={`mt-1 w-full p-3 border rounded-lg resize-none ${isRTL ? 'text-right' : 'text-left'}`}
                             rows={3}
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_brief_description') || 'Brief description of services and specialties'}</p>
+                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_brief_description')}</p>
                         </div>
                       </div>
                     </div>
@@ -4033,7 +4092,7 @@ export default function CenterDashboardPage() {
                           disabled={profileSaving}
                         >
                           <Save className="w-4 h-4" />
-                          {profileSaving ? (t('updating_profile') || 'Saving...') : (t('save_profile') || 'Save Changes')}
+                          {profileSaving ? (t('updating_profile')) : (t('save_profile'))}
                         </Button>
                         <Button
                           variant="outline"
@@ -4053,7 +4112,7 @@ export default function CenterDashboardPage() {
                           }}
                         >
                           <RotateCcw className="w-4 h-4" />
-                          {t('reset_form') || 'Reset Form'}
+                          {t('reset_form')}
                         </Button>
                         <Button
                           variant="outline"
@@ -4061,7 +4120,7 @@ export default function CenterDashboardPage() {
                           onClick={() => setActiveTab('services')}
                         >
                           <TestTube className="w-4 h-4" />
-                          {t('manage_services') || 'Manage Services'}
+                          {t('manage_services')}
                         </Button>
                       </div>
                     </div>
@@ -4079,7 +4138,7 @@ export default function CenterDashboardPage() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                {t('cd_patient_medical_records') || 'السجلات الطبية للمريض'}: {getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient') || 'مريض غير معروف'}
+                {t('cd_patient_medical_records')}: {getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')}
               </h3>
               <Button variant="outline" size="sm" onClick={() => setShowPatientModal(false)}>
                 <XCircle className="w-4 h-4" />
@@ -4087,205 +4146,123 @@ export default function CenterDashboardPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Patient Basic Info */}
+              {/* Patient Basic Info - Contact Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_information') || 'معلومات المريض'}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_information')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_full_name') || 'الاسم الكامل'}</Label>
-                      <Input value={getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient') || 'مريض غير معروف'} readOnly dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'} />
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_full_name')}</Label>
+                      <Input value={getLocalizedNameUtil(selectedPatient, locale, 'name') || t('cd_unknown_patient')} readOnly dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'} />
                     </div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_email') || 'البريد الإلكتروني'}</Label>
-                      <Input value={selectedPatient.email || t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_email')}</Label>
+                      <Input value={selectedPatient.email || t('cd_value_not_provided')} readOnly dir="ltr" className="text-left" />
                     </div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_phone') || 'رقم الهاتف'}</Label>
-                      <Input value={selectedPatient.phone || t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
-                    </div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registered_date') || 'تاريخ التسجيل'}</Label>
-                      <Input value={selectedPatient.created_at ? formatLocalizedDate(selectedPatient.created_at, locale) : t('cd_value_not_provided') || 'غير متوفر'} readOnly dir="ltr" className="text-left" />
+                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_phone')}</Label>
+                      <Input value={selectedPatient.phone || t('cd_value_not_provided')} readOnly dir="ltr" className="text-left" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Past Lab Tests History with This Center */}
+              {/* Recent Visits (3 Most Recent Completed Appointments) */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_lab_test_history') || 'سجل التحاليل المخبرية'}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_recent_visits')}</CardTitle>
+                  <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {t('cd_last_3_completed_visits')}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {selectedPatient.labHistory?.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedPatient.labHistory.map((test: any, index: number) => (
-                        <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                              <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test') || 'تحليل غير معروف'}</p>
-                              <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <span dir="ltr">{test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available') || 'التاريخ غير متوفر'}</span> • <span dir="ltr">{formatLocalizedNumber(test.fee || 0, locale, { style: 'currency', currency: t('currency') || 'SYP' })}</span>
-                              </p>
-                            </div>
-                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <Badge className={`${test.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
-                                test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
-                                  test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700' :
-                                    test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
-                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 border-gray-300 dark:border-gray-700'
-                                }`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                {test.status === 'completed' ? (t('appointments_status_completed') || 'مكتمل') :
-                                  test.status === 'confirmed' ? (t('appointments_status_confirmed') || 'مؤكد') :
-                                    test.status === 'scheduled' ? (t('appointments_status_scheduled') || 'مجدول') :
-                                      test.status === 'cancelled' ? (t('appointments_status_cancelled') || 'ملغي') :
-                                        test.status}
-                              </Badge>
-                              {test.result_file_url && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                                  onClick={() => window.open(test.result_file_url, '_blank')}
-                                >
-                                  {t('cd_view_result') || 'عرض النتيجة'}
-                                </Button>
+                  {selectedPatient.recentVisits?.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedPatient.recentVisits.map((visit: any, index: number) => (
+                        <div key={index} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                          <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <TestTube className="w-5 h-5 text-emerald-600" />
+                                <p className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {(() => {
+                                    // Try multiple possible locations for test type name
+                                    const testName = getLocalizedNameUtil(visit.lab_test_types, locale, 'name')
+                                      || visit.test_type_name
+                                      || visit.lab_test_types?.name
+                                      || visit.lab_test_types?.name_en
+                                      || visit.test_type?.name
+                                      || visit.test_name
+                                      || t('cd_unknown_test');
+                                    console.log('🔍 Test name for visit:', { visit, testName });
+                                    return testName;
+                                  })()}
+                                </p>
+                              </div>
+
+                              <div className={`space-y-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_appointment_date')}:</strong> <span dir="ltr">{visit.booking_date || visit.appointment_date ? formatLocalizedDate(visit.booking_date || visit.appointment_date, locale) : t('cd_date_not_available')}</span>
+                                </p>
+                                {visit.booking_time && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <strong>{t('cd_appointment_time')}:</strong> <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${visit.booking_time}`), locale, 'time')}</span>
+                                  </p>
+                                )}
+                                <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('fee')}:</strong> <span dir="ltr">{formatLocalizedNumber(visit.fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
+                                </p>
+                              </div>
+
+                              {/* Test Result Section */}
+                              {visit.result_file_url || visit.result_notes ? (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                  <p className={`text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {t('cd_test_result')}
+                                  </p>
+                                  {visit.result_notes && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-200 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <strong>{t('cd_notes')}:</strong> {visit.result_notes}
+                                    </p>
+                                  )}
+                                  {visit.result_file_url && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                      onClick={() => window.open(visit.result_file_url, '_blank')}
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      {t('cd_view_result')}
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                  <p className={`text-sm text-gray-500 dark:text-gray-400 italic ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {t('cd_no_result_uploaded')}
+                                  </p>
+                                </div>
                               )}
                             </div>
-                          </div>
-                          {test.result_notes && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <span className="font-medium">{t('cd_notes') || 'ملاحظات'}:</span> {test.result_notes}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_lab_history') || 'لا يوجد سجل تحاليل'}</p>
-                      <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_tests_yet') || 'لم يتم إجراء أي تحاليل بعد'}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
 
-              {/* Patient Registration & Medical Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_registration_info') || 'معلومات التسجيل'}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedPatient.medicalRecords?.length > 0 ? (
-                    <div className="space-y-6">
-                      {selectedPatient.medicalRecords.map((record: any, index: number) => (
-                        <div key={index} className="space-y-4">
-                          {/* Personal Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_personal_details') || 'البيانات الشخصية'}</h4>
-                              <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_full_name') || 'الاسم الكامل'}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided') || 'غير متوفر'}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_gender') || 'الجنس'}:</strong> {record.gender ? (record.gender.toLowerCase() === 'male' ? (t('gender_male') || 'ذكر') : record.gender.toLowerCase() === 'female' ? (t('gender_female') || 'أنثى') : record.gender) : (t('cd_value_not_provided') || 'غير متوفر')}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_dob') || 'تاريخ الميلاد'}:</strong> <span dir="ltr">{record.date_of_birth ? formatLocalizedDate(record.date_of_birth, locale) : (t('cd_value_not_provided') || 'غير متوفر')}</span>
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_phone') || 'رقم الهاتف'}:</strong> <span dir="ltr">{record.phone || (t('cd_value_not_provided') || 'غير متوفر')}</span>
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_email') || 'البريد الإلكتروني'}:</strong> <span dir="ltr">{record.email || (t('cd_value_not_provided') || 'غير متوفر')}</span>
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Emergency Contact */}
-                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_emergency_contact') || 'جهة الاتصال للطوارئ'}</h4>
-                              <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                {record.emergency_contact && Object.keys(record.emergency_contact).length > 0 ? (
-                                  <>
-                                    {record.emergency_contact.name && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_contact_name') || 'اسم جهة الاتصال'}:</strong> {record.emergency_contact.name}
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.phone && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_patient_phone') || 'رقم الهاتف'}:</strong> <span dir="ltr">{record.emergency_contact.phone}</span>
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.relationship && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_contact_relationship') || 'صلة القرابة'}:</strong> {record.emergency_contact.relationship}
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.email && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_patient_email') || 'البريد الإلكتروني'}:</strong> <span dir="ltr">{record.emergency_contact.email}</span>
-                                      </p>
-                                    )}
-                                  </>
-                                ) : (
-                                  <p className="text-sm text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_emergency_contact') || 'لا توجد جهة اتصال للطوارئ'}</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Medical History */}
-                          <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_medical_history') || 'التاريخ الطبي'}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_medical_history') || 'التاريخ الطبي'}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.medical_history || (t('cd_no_medical_history') || 'لا يوجد تاريخ طبي')}
-                                </p>
-                              </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_allergies') || 'الحساسية'}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.allergies || (t('cd_no_allergies') || 'لا توجد حساسية')}
-                                </p>
-                              </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_medications') || 'الأدوية الحالية'}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.medications || (t('cd_no_medications') || 'لا توجد أدوية')}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Registration Details */}
-                          <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registration_details') || 'تفاصيل التسجيل'}</h4>
-                            <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <strong>{t('cd_registered_date') || 'تاريخ التسجيل'}:</strong> <span dir="ltr">{record.created_at ? formatLocalizedDate(record.created_at, locale) : (t('cd_unknown') || 'غير معروف')}</span>
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <strong>{t('cd_last_updated_date') || 'تاريخ آخر تحديث'}:</strong> <span dir="ltr">{record.updated_at ? formatLocalizedDate(record.updated_at, locale) : (t('cd_not_updated') || 'لم يتم التحديث')}</span>
-                              </p>
-                            </div>
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700 ml-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {t('completed')}
+                            </Badge>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Heart className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500">{t('cd_no_patient_registration')}</p>
-                      <p className="text-sm text-gray-400 mt-1">{t('cd_registration_details_appear')}</p>
+                      <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                      <p className="text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_completed_visits')}</p>
+                      <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completed_visits_will_appear')}</p>
                     </div>
                   )}
                 </CardContent>
@@ -4346,7 +4323,7 @@ export default function CenterDashboardPage() {
                   className="mt-2"
                   onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {t('cd_upload_pdf_hint')}
                 </p>
               </div>

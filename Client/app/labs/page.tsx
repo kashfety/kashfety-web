@@ -101,7 +101,7 @@ export default function MyLabsPage() {
 
   const isAbsent = (booking: LabBooking) => {
     if (booking.status !== 'scheduled' && booking.status !== 'confirmed') return false;
-    
+
     try {
       const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
       const now = new Date();
@@ -129,11 +129,41 @@ export default function MyLabsPage() {
       const testNameAr = (b.type?.name_ar || '').toLowerCase();
       const centerNameEn = (b.center?.name || '').toLowerCase();
       const centerNameAr = (b.center?.name_ar || '').toLowerCase();
-      
-      return testNameEn.includes(q) || testNameAr.includes(q) || 
-             centerNameEn.includes(q) || centerNameAr.includes(q);
+
+      return testNameEn.includes(q) || testNameAr.includes(q) ||
+        centerNameEn.includes(q) || centerNameAr.includes(q);
     };
-    return bookings.filter(b => statusOk(b) && catOk(b) && dateOk(b) && searchOk(b));
+
+    // Filter bookings
+    const filteredBookings = bookings.filter(b => statusOk(b) && catOk(b) && dateOk(b) && searchOk(b));
+
+    // Sort bookings with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
+    // Within each status group, sort by date (latest to oldest)
+    const statusOrder: Record<string, number> = {
+      'scheduled': 1,
+      'confirmed': 2,
+      'cancelled': 3,
+      'completed': 4
+    }
+
+    return filteredBookings.sort((a, b) => {
+      const statusA = (a.status || '').toLowerCase()
+      const statusB = (b.status || '').toLowerCase()
+
+      // First, sort by status
+      const orderA = statusOrder[statusA] || 999
+      const orderB = statusOrder[statusB] || 999
+
+      if (orderA !== orderB) {
+        return orderA - orderB
+      }
+
+      // Within same status, sort by date (latest to oldest)
+      const dateA = new Date(a.booking_date + 'T' + a.booking_time).getTime()
+      const dateB = new Date(b.booking_date + 'T' + b.booking_time).getTime()
+
+      return dateB - dateA // Descending order (latest first)
+    })
   }, [bookings, statusFilter, categoryFilter, startDate, endDate, searchText]);
 
   const refresh = async () => {

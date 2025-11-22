@@ -31,6 +31,7 @@ interface Doctor {
   specialty: string;
   experience_years: number;
   profile_picture: string;
+  profile_picture_url?: string;
   consultation_fee: number;
   rating: number;
   home_available?: boolean;
@@ -1507,38 +1508,21 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          <DialogContent 
-            className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] !overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-            style={{ overflowX: 'hidden', maxWidth: '100%' }}
+          <DialogContent
+            className="max-w-4xl w-full max-h-[85vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-white dark:bg-gray-900 shadow-2xl rounded-2xl"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{
-                type: "spring",
-                duration: 0.4,
-                bounce: 0.25
-              }}
-              className="rounded-2xl overflow-hidden w-full max-w-full"
-              style={{ overflowX: 'hidden', maxWidth: '100%' }}
-            >
-              <motion.div
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-                className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] p-6 text-white border-b-4 border-[#3da8b0]"
-              >
+            <div className="flex flex-col max-h-[85vh]">
+              <div className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] p-5 text-white flex-shrink-0">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-center text-white drop-shadow-md">
+                  <DialogTitle className="text-2xl font-bold text-center text-white">
                     {isLabMode ? t('lab_booking_title') : t('booking_modal_title')}
                   </DialogTitle>
                 </DialogHeader>
-              </motion.div>
+              </div>
 
-              <div 
-                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 w-full max-w-full box-border"
-                style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box', scrollbarGutter: 'stable', contain: 'paint', paddingRight: '4px' }}
+              <div
+                className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900 min-h-0"
+                style={{ scrollbarGutter: 'stable' }}
               >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
@@ -1571,44 +1555,27 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 )}
 
                 {/* Step Indicator */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                  className="flex justify-center mb-8"
-                >
+                <div className="flex justify-center mb-8">
                   <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''} gap-0`}>
                     {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index, array) => (
-                      <motion.div
-                        key={step}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
-                        className="flex items-center"
-                      >
-                        <motion.div
-                          className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-md
+                      <div key={step} className="flex items-center">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 shadow-md
                             ${currentStep >= step
-                              ? 'bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] text-white ring-4 ring-[#4DBCC4]/30'
+                              ? 'bg-gradient-to-br from-[#4DBCC4] to-[#3da8b0] text-white ring-2 ring-[#4DBCC4]/30'
                               : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}
-                          whileHover={{ scale: 1.1 }}
-                          animate={currentStep >= step ? { scale: [1, 1.08, 1] } : {}}
-                          transition={{ duration: 0.4 }}
                         >
                           {toArabicNumerals(step.toString(), locale)}
-                        </motion.div>
+                        </div>
                         {index < array.length - 1 && (
-                          <motion.div
-                            className={`w-12 h-1.5 mx-2 rounded-full transition-all duration-500 ${currentStep > step ? 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0]' : 'bg-gray-300 dark:bg-gray-700'}`}
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: currentStep > step ? 1 : 0 }}
-                            style={{ originX: isRTL ? 1 : 0 }}
+                          <div
+                            className={`w-12 h-1.5 mx-2 rounded-full transition-all duration-300 ${currentStep > step ? 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0]' : 'bg-gray-300 dark:bg-gray-700'}`}
                           />
                         )}
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Step 1: Specialty and Location Selection (Doctor mode) */}
                 {!isLabMode && currentStep === 1 && (
@@ -1882,7 +1849,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-5 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-4">
                                   <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture_url || doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-3">
@@ -2014,7 +1981,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-5">
                                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-[#4DBCC4] transition-all">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture_url || doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -2719,7 +2686,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
           </DialogContent>
 
           {/* Custom Alert Dialog */}

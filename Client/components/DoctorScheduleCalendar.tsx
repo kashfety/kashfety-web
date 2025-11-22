@@ -63,17 +63,17 @@ export default function DoctorScheduleCalendar({
     // Helper to get localized patient name
     const getLocalizedPatientName = (appointment: Appointment) => {
         if (!appointment) return 'Unknown Patient';
-        
+
         if (locale === 'ar') {
             // Try name_ar first
             if (appointment.name_ar) return appointment.name_ar;
-            
+
             // Build from first_name_ar + last_name_ar
             if (appointment.first_name_ar || appointment.last_name_ar) {
                 return [appointment.first_name_ar, appointment.last_name_ar].filter(Boolean).join(' ').trim();
             }
         }
-        
+
         // Fallback to English name
         if (appointment.name) return appointment.name;
         if (appointment.first_name || appointment.last_name) {
@@ -125,12 +125,12 @@ export default function DoctorScheduleCalendar({
                 appointmentTimes.add(time);
             }
         });
-        
+
         // Add default hourly slots from 8 AM to 8 PM
         for (let i = 8; i <= 20; i++) {
             appointmentTimes.add(`${i.toString().padStart(2, '0')}:00`);
         }
-        
+
         // Sort times chronologically
         return Array.from(appointmentTimes).sort();
     };
@@ -219,12 +219,12 @@ export default function DoctorScheduleCalendar({
         if (!time) return '';
         const [hours, minutes] = time.split(':');
         const hour = parseInt(hours);
-        
+
         if (locale === 'ar') {
             // Arabic 24-hour format
             return `${toArabicNumerals(hour)}:${toArabicNumerals(minutes)}`;
         }
-        
+
         // English AM/PM format
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
@@ -253,14 +253,14 @@ export default function DoctorScheduleCalendar({
         <div className="p-6 max-w-7xl mx-auto min-h-screen">
             {/* Floating background elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-emerald-400/10 to-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '5s' }}></div>
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-emerald-400/10 to-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '5s' }}></div>
             </div>
 
             {/* Header */}
             <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div className="space-y-2">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-600 bg-clip-text text-transparent">
                         {t('dd_schedule_calendar') || 'Schedule Calendar'}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 text-lg">
@@ -276,7 +276,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('day')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'day'
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -287,7 +287,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('week')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'week'
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -301,7 +301,7 @@ export default function DoctorScheduleCalendar({
                             variant="ghost"
                             size="sm"
                             onClick={navigatePrevious}
-                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                            className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
@@ -309,7 +309,7 @@ export default function DoctorScheduleCalendar({
                             variant="ghost"
                             size="sm"
                             onClick={goToToday}
-                            className="px-4 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                            className="px-4 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                         >
                             {t('dd_today') || 'Today'}
                         </Button>
@@ -317,7 +317,7 @@ export default function DoctorScheduleCalendar({
                             variant="ghost"
                             size="sm"
                             onClick={navigateNext}
-                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                            className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </Button>
@@ -331,7 +331,7 @@ export default function DoctorScheduleCalendar({
                     <div className="overflow-x-auto">
                         <div className="min-w-full relative">
                             {/* Sticky Header Row */}
-                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-blue-200 dark:border-blue-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>
+                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>
                                 <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700">
                                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                         <Clock className="w-4 h-4" />
@@ -346,24 +346,24 @@ export default function DoctorScheduleCalendar({
                                         return (
                                             <div
                                                 className={`p-4 text-center transition-all duration-300 ${isToday
-                                                    ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 shadow-inner'
+                                                    ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 shadow-inner'
                                                     : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900'
                                                     }`}
                                             >
                                                 <div className={`text-lg font-bold ${isToday
-                                                    ? 'text-blue-700 dark:text-blue-300'
+                                                    ? 'text-emerald-700 dark:text-emerald-300'
                                                     : 'text-gray-900 dark:text-white'
                                                     }`}>
                                                     {formatDate(currentDate)}
                                                 </div>
                                                 <div className={`text-sm font-medium mt-1 ${isToday
-                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                    ? 'text-emerald-600 dark:text-emerald-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
                                                     {currentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                                 </div>
                                                 {isToday && (
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>
+                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full mx-auto mt-1 animate-pulse"></div>
                                                 )}
                                             </div>
                                         );
@@ -377,24 +377,24 @@ export default function DoctorScheduleCalendar({
                                             <div
                                                 key={dateStr}
                                                 className={`p-4 border-r border-gray-200 dark:border-gray-700 text-center transition-all duration-300 ${isToday
-                                                    ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 shadow-inner'
+                                                    ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 shadow-inner'
                                                     : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900'
                                                     }`}
                                             >
                                                 <div className={`text-sm font-bold ${isToday
-                                                    ? 'text-blue-700 dark:text-blue-300'
+                                                    ? 'text-emerald-700 dark:text-emerald-300'
                                                     : 'text-gray-900 dark:text-white'
                                                     }`}>
                                                     {formatDate(date)}
                                                 </div>
                                                 <div className={`text-xs font-medium mt-1 ${isToday
-                                                    ? 'text-blue-600 dark:text-blue-400'
+                                                    ? 'text-emerald-600 dark:text-emerald-400'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                     }`}>
                                                     {date.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' })}
                                                 </div>
                                                 {isToday && (
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full mx-auto mt-1 animate-pulse"></div>
+                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full mx-auto mt-1 animate-pulse"></div>
                                                 )}
                                             </div>
                                         );
@@ -572,22 +572,22 @@ export default function DoctorScheduleCalendar({
 
             {/* Summary Stats */}
             <div className={`relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
-                <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
+                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-1">
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
-                                <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
                                     {toArabicNumerals(appointments.length)}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
                                 <Calendar className="w-6 h-6 text-white" />
                             </div>
                         </div>
-                        <div className="mt-3 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
+                        <div className="mt-3 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"></div>
                     </CardContent>
                 </Card>
 
@@ -629,22 +629,22 @@ export default function DoctorScheduleCalendar({
                     </CardContent>
                 </Card>
 
-                <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-1">
+                                <p className="text-sm font-medium text-teal-600 dark:text-teal-400 mb-1">
                                     {t('dd_completed') || 'Completed'}
                                 </p>
-                                <p className="text-3xl font-bold text-purple-700 dark:text-purple-300">
+                                <p className="text-3xl font-bold text-teal-700 dark:text-teal-300">
                                     {toArabicNumerals(appointments.filter(apt => apt.status === 'completed').length)}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
                                 <Clock className="w-6 h-6 text-white" />
                             </div>
                         </div>
-                        <div className="mt-3 h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"></div>
+                        <div className="mt-3 h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full"></div>
                     </CardContent>
                 </Card>
             </div>

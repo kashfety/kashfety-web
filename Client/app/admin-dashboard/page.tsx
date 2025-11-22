@@ -109,7 +109,7 @@ function AdminSidebar({
     user: any;
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const isCollapsed = false;
     const { t, isRTL } = useLocale();
 
     function handleNavigation(tab: string) {

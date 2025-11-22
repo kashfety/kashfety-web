@@ -356,9 +356,13 @@ export default function PatientLabsPage() {
                                                 </div>
 
                                                 {/* Tests Count */}
-                                                {center.tests && center.tests.length > 0 && (
+                                                {center.tests && center.tests.length > 0 ? (
                                                     <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-4">
                                                         {toArabicNumerals(center.tests.length, locale)} {t('tests_available') || 'tests available'}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
+                                                        {t('no_tests_available_text') || 'No Tests Available'}
                                                     </p>
                                                 )}
 

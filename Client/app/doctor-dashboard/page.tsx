@@ -1254,7 +1254,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_monthly_revenue') || 'Monthly Revenue'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            ${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}
+                            {formatCurrency(analytics?.analytics?.totalRevenue || 0, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                           </p>
                         </div>
                         <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -1595,7 +1595,7 @@ export default function DoctorDashboard() {
                                 })()}
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
-                                    ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
+                                    {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                                   </Badge>
                                 )}
                                 <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">

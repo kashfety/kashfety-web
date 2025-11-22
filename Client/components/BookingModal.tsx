@@ -1511,8 +1511,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           <DialogContent
             className="max-w-4xl w-full max-h-[85vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-white dark:bg-gray-900 shadow-2xl rounded-2xl"
           >
-            <div className="h-full flex flex-col">
-              <div className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] p-5 text-white">
+            <div className="flex flex-col max-h-[85vh]">
+              <div className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] p-5 text-white flex-shrink-0">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold text-center text-white">
                     {isLabMode ? t('lab_booking_title') : t('booking_modal_title')}
@@ -1521,7 +1521,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
               </div>
 
               <div
-                className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900"
+                className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900 min-h-0"
                 style={{ scrollbarGutter: 'stable' }}
               >
                 {/* Mode Toggle */}

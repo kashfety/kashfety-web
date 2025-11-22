@@ -427,7 +427,7 @@ export default function DoctorProfileSettings({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={isRTL ? "md:order-last" : ""}>
-              <Label htmlFor="name" className="block">{t('fullName') || 'Full Name (English)'}</Label>
+              <Label htmlFor="name" className="block mb-2">{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -438,7 +438,7 @@ export default function DoctorProfileSettings({
               />
             </div>
             <div className={isRTL ? "md:order-first" : ""}>
-              <Label htmlFor="name_ar" className="block">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
+              <Label htmlFor="name_ar" className="block mb-2">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
               <Input
                 id="name_ar"
                 value={formData.name_ar}
@@ -452,7 +452,7 @@ export default function DoctorProfileSettings({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={isRTL ? "md:order-last" : ""}>
-              <Label htmlFor="specialty" className="block">{t('specialty') || 'Specialty'}</Label>
+              <Label htmlFor="specialty" className="block mb-2">{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
@@ -464,7 +464,7 @@ export default function DoctorProfileSettings({
               />
             </div>
             <div className={isRTL ? "md:order-first" : ""}>
-              <Label htmlFor="specialty_ar" className="block">{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
+              <Label htmlFor="specialty_ar" className="block mb-2">{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
               <Input
                 id="specialty_ar"
                 value={formData.specialty_ar}
@@ -478,7 +478,7 @@ export default function DoctorProfileSettings({
           </div>
 
           <div>
-            <Label htmlFor="bio" className="block">{t('professionalBio') || 'Professional Bio'}</Label>
+            <Label htmlFor="bio" className="block mb-2">{t('professionalBio') || 'Professional Bio'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
@@ -491,7 +491,7 @@ export default function DoctorProfileSettings({
           </div>
 
           <div>
-            <Label htmlFor="experience" className="block">{t('yearsOfExperience') || 'Years of Experience'}</Label>
+            <Label htmlFor="experience" className="block mb-2">{t('yearsOfExperience') || 'Years of Experience'}</Label>
             <Input
               id="experience"
               type="number"
@@ -521,7 +521,7 @@ export default function DoctorProfileSettings({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="consultation_fee" className="text-base font-medium block">
+              <Label htmlFor="consultation_fee" className="text-base font-medium block mb-2">
                 {t('consultationFeeUSD') || 'Consultation Fee (SYP)'}
               </Label>
               <div className="mt-1 flex items-center gap-2">

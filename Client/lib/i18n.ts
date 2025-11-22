@@ -2082,6 +2082,15 @@ export const translations = {
     disable_all: "Disable All",
     reset_pricing: "Reset Pricing",
     no_services_selected: "No services selected",
+    end_time: "End Time",
+    break_start_optional: "Break Start (optional)",
+    break_end_optional: "Break End (optional)",
+    generated_time_slots_total: "Generated Time Slots ({count} total)",
+    more_count: "+{count} more",
+    copy_from: "Copy from:",
+    schedule_summary: "Schedule Summary",
+    select_test_type_manage: "Select test type to manage schedule",
+    test_type_selection_desc: "Select the lab test type you want to configure the schedule for. Each test type can have unique operating hours.",
   },
   ar: {
     // Navigation

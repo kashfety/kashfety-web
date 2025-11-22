@@ -247,9 +247,9 @@ function Sidebar({
   toast: any;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const isCollapsed = false;
   const { theme } = useTheme();
-  const { t } = useLocale();
+  const { t, isRTL } = useLocale();
 
   function handleNavigation(tab: string) {
     setActiveTab(tab);
@@ -270,14 +270,14 @@ function Sidebar({
     return (
       <button
         onClick={() => handleNavigation(tab)}
-        className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-left ${isActive
-          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-500"
+        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-${isRTL ? 'right' : 'left'} ${isActive
+          ? `bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-${isRTL ? 'l' : 'r'}-2 border-blue-500`
           : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
           } ${isCollapsed ? 'justify-center' : ''}`}
         title={isCollapsed ? children?.toString() : ''}
       >
-        <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-        {!isCollapsed && <span className="ml-3">{children}</span>}
+        <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : isRTL ? 'ml-3' : 'mr-3'}`} />
+        {!isCollapsed && <span className={isRTL ? 'mr-3' : 'ml-3'}>{children}</span>}
       </button>
     );
   }
@@ -286,7 +286,7 @@ function Sidebar({
     <>
       <button
         type="button"
-        className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md border border-gray-200 dark:border-[#1F1F23] transition-all duration-300 hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg"
+        className={`lg:hidden fixed top-4 ${isRTL ? 'right-4' : 'left-4'} z-[70] p-2 rounded-lg bg-white dark:bg-[#0F0F12] shadow-md border border-gray-200 dark:border-[#1F1F23] transition-all duration-300 hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg`}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
         <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
@@ -294,39 +294,29 @@ function Sidebar({
 
       <nav
         className={`
-          fixed inset-y-0 left-0 z-[70] bg-white dark:bg-[#0F0F12] transform transition-all duration-300 ease-in-out
-          lg:translate-x-0 lg:static border-r border-gray-200 dark:border-[#1F1F23]
+          fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-[70] bg-white dark:bg-[#0F0F12] transform transition-all duration-300 ease-in-out
+          lg:translate-x-0 lg:static border-${isRTL ? 'l' : 'r'} border-gray-200 dark:border-[#1F1F23]
           ${isCollapsed ? 'lg:w-16 sidebar-collapsed' : 'lg:w-64'}
-          ${isMobileMenuOpen ? "translate-x-0 w-64" : "-translate-x-full w-64"}
+          ${isMobileMenuOpen ? "translate-x-0 w-64" : isRTL ? "translate-x-full w-64" : "-translate-x-full w-64"}
         `}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
-          <div className={`h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-6'}`}>
-            <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'gap-3'}`}>
+          <div className="h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] px-6">
+            <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-4 h-4 text-white" />
               </div>
-              {!isCollapsed && (
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {t('dd_portal') || 'Doctor Portal'}
-                </span>
-              )}
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('dd_portal') || 'Doctor Portal'}
+              </span>
             </div>
+          </div>
 
-            {/* Collapse Button - Desktop Only */}
-            {!isCollapsed && (
-              <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors"
-                title={t('dd_collapse_sidebar') || "Collapse sidebar"}
-              >
-                <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
-
-            {/* Expand Button when Collapsed */}
-            {isCollapsed && (
+          {/* Navigation */}
+          <div className="flex-1 overflow-y-auto py-4 px-4">
+            {/* Remove the expand button section */}
+            {false && (
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors absolute top-4 right-2"
@@ -417,7 +407,7 @@ function ProfileHeader({
   toast: any;
   specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) {
-  const { t, locale } = useLocale();
+  const { t, locale, isRTL } = useLocale();
   const { logout } = useAuth();
   const router = useRouter();
 
@@ -427,7 +417,7 @@ function ProfileHeader({
   };
 
   return (
-    <div className="relative px-6 flex items-center justify-end gap-4 bg-white dark:bg-[#0F0F12] h-full">
+    <div className={`relative px-6 flex items-center ${isRTL ? 'justify-start' : 'justify-end'} gap-4 bg-white dark:bg-[#0F0F12] h-full`} dir={isRTL ? 'rtl' : 'ltr'}>
       <LocaleSwitcher />
       <ThemeToggle />
 
@@ -437,7 +427,7 @@ function ProfileHeader({
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
-            <div className="hidden sm:block text-left">
+            <div className={`hidden sm:block text-${isRTL ? 'right' : 'left'}`}>
               <div className="text-sm font-medium text-gray-900 dark:text-white">
                 {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
@@ -450,9 +440,10 @@ function ProfileHeader({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          align="end"
+          align={isRTL ? 'start' : 'end'}
           sideOffset={8}
           className="w-64 bg-background border-border rounded-lg shadow-lg"
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
           <div className="p-4">
             <div className="flex items-center gap-3 mb-3">
@@ -472,7 +463,7 @@ function ProfileHeader({
             <div className="space-y-2">
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className={`w-full ${isRTL ? 'flex-row-reverse' : 'justify-start'}`}
                 size="sm"
                 onClick={() => {
                   setActiveTab("profile");
@@ -482,16 +473,16 @@ function ProfileHeader({
                   });
                 }}
               >
-                <Settings className="w-4 h-4 mr-2" />
+                <Settings className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 {t('dd_profile_tab') || 'Profile'}
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                className={`w-full ${isRTL ? 'flex-row-reverse' : 'justify-start'} text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20`}
                 size="sm"
                 onClick={handleLogout}
               >
-                <User className="w-4 h-4 mr-2" />
+                <User className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 {t('header_logout') || 'Logout'}
               </Button>
             </div>
@@ -513,7 +504,7 @@ export default function DoctorDashboard() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { t, locale } = useLocale();
+  const { t, locale, isRTL } = useLocale();
 
   const getLocalizedPatientName = (appointment: any) => {
     if (!appointment) return 'Unknown Patient';
@@ -1132,7 +1123,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`}>
+    <div className={`min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/20 ${theme === "dark" ? "dark" : ""}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Background mesh to match old dashboard UI */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 rounded-full blur-3xl animate-float-slow"></div>
@@ -1158,8 +1149,8 @@ export default function DoctorDashboard() {
               {/* Overview Tab */}
               <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full w-full max-w-full">
                 {/* Welcome Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div>
+                <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                       {t('dd_welcome_back') || 'Welcome back'}, {locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
                     </h1>
@@ -1178,6 +1169,7 @@ export default function DoctorDashboard() {
                   <div className="mt-4 sm:mt-0 flex gap-2">
                     <Button
                       variant="outline"
+                      className={isRTL ? 'flex-row-reverse' : ''}
                       onClick={() => {
                         fetchDoctorData();
                         toast({
@@ -1186,7 +1178,7 @@ export default function DoctorDashboard() {
                         });
                       }}
                     >
-                      <Activity className="w-4 h-4 mr-2" />
+                      <Activity className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       {t('dd_refresh') || 'Refresh'}
                     </Button>
                   </div>
@@ -1196,8 +1188,8 @@ export default function DoctorDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_todays_appointments') || "Today's Appointments"}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                             {toArabicNumerals(todayStats?.stats?.todayAppointments || 0, locale)}
@@ -1207,24 +1199,24 @@ export default function DoctorDashboard() {
                           <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center text-sm">
-                        <span className="text-green-600 dark:text-green-400 flex items-center">
-                          <TrendingUp className="w-4 h-4 mr-1" />
+                      <div className={`mt-4 flex items-center text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <span className={`text-green-600 dark:text-green-400 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <TrendingUp className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                           {(() => {
                             const today = todayStats?.stats?.todayAppointments || 0;
                             const percentage = today > 0 ? `+${Math.round(today * 10)}%` : '0%';
                             return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">{t('dd_from_yesterday') || 'from yesterday'}</span>
+                        <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-2' : 'ml-2'}`}>{t('dd_from_yesterday') || 'from yesterday'}</span>
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                             {toArabicNumerals(analytics?.analytics?.totalPatients || 0, locale)}
@@ -1234,24 +1226,24 @@ export default function DoctorDashboard() {
                           <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center text-sm">
-                        <span className="text-green-600 dark:text-green-400 flex items-center">
-                          <TrendingUp className="w-4 h-4 mr-1" />
+                      <div className={`mt-4 flex items-center text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <span className={`text-green-600 dark:text-green-400 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <TrendingUp className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                           {(() => {
                             const thisMonth = analytics?.analytics?.thisMonthAppointments || 0;
                             const percentage = thisMonth > 0 ? `+${Math.round(thisMonth * 2)}%` : '0%';
                             return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">{t('dd_this_month') || 'this month'}</span>
+                        <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-2' : 'ml-2'}`}>{t('dd_this_month') || 'this month'}</span>
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_monthly_revenue') || 'Monthly Revenue'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                             {formatCurrency(analytics?.analytics?.totalRevenue || 0, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
@@ -1261,24 +1253,24 @@ export default function DoctorDashboard() {
                           <DollarSign className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center text-sm">
-                        <span className="text-green-600 dark:text-green-400 flex items-center">
-                          <TrendingUp className="w-4 h-4 mr-1" />
+                      <div className={`mt-4 flex items-center text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <span className={`text-green-600 dark:text-green-400 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <TrendingUp className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                           {(() => {
                             const revenue = analytics?.analytics?.totalRevenue || 0;
                             const percentage = revenue > 0 ? `+${Math.round(revenue / 100)}%` : '0%';
                             return toArabicNumerals(percentage, locale);
                           })()}
                         </span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">{t('vsLastWeek') || 'from last month'}</span>
+                        <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-2' : 'ml-2'}`}>{t('vsLastWeek') || 'from last month'}</span>
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={isRTL ? 'text-right' : 'text-left'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                             {toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}★
@@ -1413,7 +1405,7 @@ export default function DoctorDashboard() {
                 <div className="grid grid-cols-1 gap-6">
                   <Card className="bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23]">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
                         {t('dd_recent_patients') || 'Recent Patients'}
                       </CardTitle>
@@ -1421,12 +1413,12 @@ export default function DoctorDashboard() {
                     <CardContent className="space-y-4">
                       {patients.length > 0 ? (
                         patients.slice(0, 5).map((patient) => (
-                          <div key={patient.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg">
-                            <div className="flex items-center gap-3">
+                          <div key={patient.id} className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                 <User className="w-5 h-5 text-white" />
                               </div>
-                              <div>
+                              <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white">
                                   {getLocalizedName(patient, locale)}
                                 </p>
@@ -1466,10 +1458,10 @@ export default function DoctorDashboard() {
               {/* Appointments Tab */}
               <TabsContent value="appointments" className="py-6 px-4 h-full w-full max-w-full">
                 {/* Hero like old dashboard */}
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_upcoming_appointments_title') || 'Upcoming Appointments'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_consultations') || 'Manage today and upcoming consultations'}</p>
                     </div>
@@ -1479,7 +1471,7 @@ export default function DoctorDashboard() {
                   {/* Today's and Upcoming Appointments */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Calendar className="w-5 h-5" />
                         {t('dd_upcoming_schedule') || 'Upcoming Appointments'}
                       </CardTitle>
@@ -1494,11 +1486,11 @@ export default function DoctorDashboard() {
                             onClick={() => setAppointmentFilter(status)}
                             className={appointmentFilter === status ? "bg-emerald-600 hover:bg-emerald-700" : ""}
                           >
-                            {status === 'all' ? (t('all') || 'All') : 
-                             status === 'scheduled' ? (t('appointments_status_scheduled') || 'Scheduled') :
-                             status === 'confirmed' ? (t('appointments_status_confirmed') || 'Confirmed') :
-                             status === 'cancelled' ? (t('appointments_status_cancelled') || 'Cancelled') :
-                             (t('appointments_status_completed') || 'Completed')}
+                            {status === 'all' ? (t('all') || 'All') :
+                              status === 'scheduled' ? (t('appointments_status_scheduled') || 'Scheduled') :
+                                status === 'confirmed' ? (t('appointments_status_confirmed') || 'Confirmed') :
+                                  status === 'cancelled' ? (t('appointments_status_cancelled') || 'Cancelled') :
+                                    (t('appointments_status_completed') || 'Completed')}
                           </Button>
                         ))}
                       </div>
@@ -1520,183 +1512,184 @@ export default function DoctorDashboard() {
                         });
                         if (sortedAppointments.length > 0) {
                           return (
-                        <div className="space-y-4">
-                          {(showAllAppointments ? sortedAppointments : sortedAppointments.slice(0, 10)).map((appointment) => (
-                            <div
-                              key={appointment.id}
-                              className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex items-center gap-4 w-full lg:w-auto min-w-0">
-                                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                  <User className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                  <h4 className="font-medium text-gray-900 dark:text-white">
-                                    {getLocalizedPatientName(appointment)}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
-                                  </p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-500">
-                                    {appointment.appointment_type === 'home'
-                                      ? (t('dd_home_visit') || 'Home Visit')
-                                      : (t('dd_clinic_visit') || 'Clinic Visit')}
-                                  </p>
-                                  {appointment.symptoms && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                      {t('symptoms') || 'Symptoms'}: {appointment.symptoms}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
-                                <Badge
-                                  variant={
-                                    appointment.status === 'completed'
-                                      ? 'default'
-                                      : appointment.status === 'confirmed'
-                                        ? 'secondary'
-                                        : appointment.status === 'scheduled'
-                                          ? 'outline'
-                                          : 'destructive'
-                                  }
-                                  className={
-                                    appointment.status === 'completed'
-                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                      : appointment.status === 'confirmed'
-                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                        : appointment.status === 'scheduled'
-                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                                          : ''
-                                  }
+                            <div className="space-y-4">
+                              {(showAllAppointments ? sortedAppointments : sortedAppointments.slice(0, 10)).map((appointment) => (
+                                <div
+                                  key={appointment.id}
+                                  className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow ${isRTL ? 'lg:flex-row-reverse' : ''}`}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
-                                  {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
-                                </Badge>
-                                {(() => {
-                                  const isAbsent = (apt: Appointment) => {
-                                    if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
-                                    try {
-                                      const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
-                                      const now = new Date();
-                                      return aptDateTime < now;
-                                    } catch (e) {
-                                      return false;
-                                    }
-                                  };
-                                  
-                                  if (isAbsent(appointment)) {
-                                    return (
-                                      <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
-                                        {t('appointments_absent_badge') || 'Absent'}
+                                  <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                      <User className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                                      <h4 className="font-medium text-gray-900 dark:text-white">
+                                        {getLocalizedPatientName(appointment)}
+                                      </h4>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
+                                      </p>
+                                      <p className="text-sm text-gray-500 dark:text-gray-500">
+                                        {appointment.appointment_type === 'home'
+                                          ? (t('dd_home_visit') || 'Home Visit')
+                                          : (t('dd_clinic_visit') || 'Clinic Visit')}
+                                      </p>
+                                      {appointment.symptoms && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                          {t('symptoms') || 'Symptoms'}: {appointment.symptoms}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
+                                    <Badge
+                                      variant={
+                                        appointment.status === 'completed'
+                                          ? 'default'
+                                          : appointment.status === 'confirmed'
+                                            ? 'secondary'
+                                            : appointment.status === 'scheduled'
+                                              ? 'outline'
+                                              : 'destructive'
+                                      }
+                                      className={
+                                        appointment.status === 'completed'
+                                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                          : appointment.status === 'confirmed'
+                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                            : appointment.status === 'scheduled'
+                                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                              : ''
+                                      }
+                                    >
+                                      {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
+                                    </Badge>
+                                    {(() => {
+                                      const isAbsent = (apt: Appointment) => {
+                                        if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
+                                        try {
+                                          const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
+                                          const now = new Date();
+                                          return aptDateTime < now;
+                                        } catch (e) {
+                                          return false;
+                                        }
+                                      };
+
+                                      if (isAbsent(appointment)) {
+                                        return (
+                                          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
+                                            {t('appointments_absent_badge') || 'Absent'}
+                                          </Badge>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
+                                    {appointment.consultation_fee && (
+                                      <Badge variant="outline">
+                                        {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                                       </Badge>
-                                    );
-                                  }
-                                  return null;
-                                })()}
-                                {appointment.consultation_fee && (
-                                  <Badge variant="outline">
-                                    {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
-                                  </Badge>
-                                )}
-                                <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
-                                  {appointment.status === 'scheduled' && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                                      className="text-xs sm:text-sm whitespace-nowrap"
-                                    >
-                                      <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                      {t('dd_confirm') || 'Confirm'}
-                                    </Button>
-                                  )}
-                                  {appointment.status === 'confirmed' && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleStartConsultation(appointment)}
-                                      className="text-xs sm:text-sm whitespace-nowrap"
-                                    >
-                                      <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                      {t('dd_consult') || 'Consult'}
-                                    </Button>
-                                  )}
+                                    )}
+                                    <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
+                                      {appointment.status === 'scheduled' && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                        >
+                                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                          {t('dd_confirm') || 'Confirm'}
+                                        </Button>
+                                      )}
+                                      {appointment.status === 'confirmed' && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleStartConsultation(appointment)}
+                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                        >
+                                          <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                          {t('dd_consult') || 'Consult'}
+                                        </Button>
+                                      )}
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setActiveTab("patients");
+                                          toast({
+                                            title: t('patients') || 'Patients',
+                                            description: t('viewing_patient_profile') || 'Viewing patient profile...',
+                                          });
+                                        }}
+                                        className="text-xs sm:text-sm whitespace-nowrap"
+                                      >
+                                        <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                        {t('patients') || 'Patients'}
+                                      </Button>
+                                      {['scheduled', 'confirmed'].includes(appointment.status) && (
+                                        <Button
+                                          variant="destructive"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSelectedAppointment(appointment);
+                                            setShowCancelModal(true);
+                                          }}
+                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                        >
+                                          <XCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                          {t('dd_cancel') || 'Cancel'}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* View All/Show Less Button */}
+                              {sortedAppointments.length > 10 && (
+                                <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                                   <Button
                                     variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setActiveTab("patients");
-                                      toast({
-                                        title: t('patients') || 'Patients',
-                                        description: t('viewing_patient_profile') || 'Viewing patient profile...',
-                                      });
-                                    }}
-                                    className="text-xs sm:text-sm whitespace-nowrap"
+                                    onClick={() => setShowAllAppointments(!showAllAppointments)}
                                   >
-                                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                    {t('patients') || 'Patients'}
+                                    {showAllAppointments ? (
+                                      <>
+                                        {t('show_less') || 'Show Less'}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {t('view_all') || 'View All'} {sortedAppointments.length} {t('appointments') || 'Appointments'}
+                                      </>
+                                    )}
                                   </Button>
-                                  {['scheduled', 'confirmed'].includes(appointment.status) && (
-                                    <Button
-                                      variant="destructive"
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedAppointment(appointment);
-                                        setShowCancelModal(true);
-                                      }}
-                                      className="text-xs sm:text-sm whitespace-nowrap"
-                                    >
-                                      <XCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                      {t('dd_cancel') || 'Cancel'}
-                                    </Button>
-                                  )}
                                 </div>
-                              </div>
+                              )}
                             </div>
-                          ))}
-
-                          {/* View All/Show Less Button */}
-                          {sortedAppointments.length > 10 && (
-                            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                              <Button
-                                variant="outline"
-                                onClick={() => setShowAllAppointments(!showAllAppointments)}
-                              >
-                                {showAllAppointments ? (
-                                  <>
-                                    {t('show_less') || 'Show Less'}
-                                  </>
-                                ) : (
-                                  <>
-                                    {t('view_all') || 'View All'} {sortedAppointments.length} {t('appointments') || 'Appointments'}
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
                           );
                         } else {
                           return (
-                        <div className="text-center py-12">
-                          <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
-                          <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}
-                          </p>
-                          <Button
-                            onClick={() => {
-                              setActiveTab("schedule");
-                              toast({
-                                title: t('dd_new_appointment') || 'New Appointment',
-                                description: t('opening_booking_form') || 'Opening appointment booking form...',
-                              });
-                            }}
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            {t('dd_schedule_first') || 'Schedule First Appointment'}
-                          </Button>
-                        </div>
+                            <div className="text-center py-12">
+                              <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
+                              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                {t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}
+                              </p>
+                              <Button
+                                onClick={() => {
+                                  setActiveTab("schedule");
+                                  toast({
+                                    title: t('dd_new_appointment') || 'New Appointment',
+                                    description: t('opening_booking_form') || 'Opening appointment booking form...',
+                                  });
+                                }}
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('dd_schedule_first') || 'Schedule First Appointment'}
+                              </Button>
+                            </div>
                           );
                         }
                       })()}
@@ -1805,10 +1798,10 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="patients" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Users className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_patients_title') || 'Patients'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_patient_list_activity') || 'Your patient list and activity'}</p>
                     </div>
@@ -1819,11 +1812,11 @@ export default function DoctorDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
+                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                             <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                           </div>
-                          <div>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                               {toArabicNumerals((patients?.length || 0).toString(), locale)}
                             </p>
@@ -1835,11 +1828,11 @@ export default function DoctorDashboard() {
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
+                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                             <UserCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
                           </div>
-                          <div>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                               {toArabicNumerals((patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0).toString(), locale)}
                             </p>
@@ -1851,11 +1844,11 @@ export default function DoctorDashboard() {
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
+                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                             <Heart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                           </div>
-                          <div>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                               {toArabicNumerals((patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0).toString(), locale)}
                             </p>
@@ -1867,11 +1860,11 @@ export default function DoctorDashboard() {
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
+                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
                             <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                           </div>
-                          <div>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                               {toArabicNumerals(((() => {
                                 const dist = analytics?.analytics?.patientDemographics?.genderDistribution as Record<string, number> | undefined
@@ -1902,7 +1895,7 @@ export default function DoctorDashboard() {
                   {/* Patient List */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Users className="w-5 h-5" />
                         {t('patients') || 'Patients'}
                       </CardTitle>
@@ -1915,24 +1908,24 @@ export default function DoctorDashboard() {
                             return (
                               <div
                                 key={patient.id}
-                                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
+                                className={`flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                               >
-                                <div className="flex items-center gap-4">
+                                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                     <span className="text-white font-medium">
                                       {patientName?.charAt(0)?.toUpperCase() || 'P'}
                                     </span>
                                   </div>
-                                  <div>
+                                  <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <h4 className="font-medium text-gray-900 dark:text-white">
                                       {patientName}
                                     </h4>
-                                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                                      <span className="flex items-center gap-1">
+                                    <div className={`flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                         <Mail className="w-3 h-3" />
                                         {patient.email}
                                       </span>
-                                      <span className="flex items-center gap-1">
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                         <Phone className="w-3 h-3" />
                                         {formatPhoneNumber(patient.phone, locale)}
                                       </span>
@@ -1965,9 +1958,10 @@ export default function DoctorDashboard() {
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    className={isRTL ? 'flex-row-reverse' : ''}
                                     onClick={() => handleViewPatient(patient.id)}
                                   >
-                                    <FileText className="w-4 h-4 mr-1" />
+                                    <FileText className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                     {t('medical_records') || 'Records'}
                                   </Button>
                                 </div>
@@ -2179,11 +2173,11 @@ export default function DoctorDashboard() {
 
             {/* Patient Details Modal */}
             {showPatientModal && selectedPatient && (
-              <div 
+              <div
                 className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
                 onClick={() => setShowPatientModal(false)}
               >
-                <div 
+                <div
                   className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -2341,7 +2335,7 @@ export default function DoctorDashboard() {
 
             {/* Medical Record Form Modal */}
             {showMedicalRecordForm && selectedAppointment && (
-              <div 
+              <div
                 className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
                 onClick={() => {
                   setShowMedicalRecordForm(false);
@@ -2349,7 +2343,7 @@ export default function DoctorDashboard() {
                   setMedicalRecordForm({ diagnosis: '', treatment: '', prescription: '', notes: '' });
                 }}
               >
-                <div 
+                <div
                   className="bg-white dark:bg-[#0F0F12] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
                   onClick={(e) => e.stopPropagation()}
                 >

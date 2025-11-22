@@ -138,6 +138,7 @@ export default function MedicalRecordsSection() {
     notes: '',
     record_date: new Date().toISOString().split('T')[0]
   });
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
@@ -470,22 +471,25 @@ export default function MedicalRecordsSection() {
           </h2>
           <p className="text-muted-foreground">{t('mr_section_subtitle') || 'Keep your health information up to date'}</p>
         </div>
-        {!editing ? (
-          <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-            <Edit className="w-4 h-4 me-2" />
-            {t('mr_edit') || 'Edit'}
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={loading}>
-              <Save className="w-4 h-4 me-2" />
-              {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
+        {/* Hide edit button when on consultations tab */}
+        {activeTab !== 'records' && (
+          !editing ? (
+            <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
+              <Edit className="w-4 h-4 me-2" />
+              {t('mr_edit') || 'Edit'}
             </Button>
-            <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-              <X className="w-4 h-4 me-2" />
-              {t('mr_cancel') || 'Cancel'}
-            </Button>
-          </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button onClick={handleSave} disabled={loading}>
+                <Save className="w-4 h-4 me-2" />
+                {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
+              </Button>
+              <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
+                <X className="w-4 h-4 me-2" />
+                {t('mr_cancel') || 'Cancel'}
+              </Button>
+            </div>
+          )
         )}
       </div>
 
@@ -499,7 +503,7 @@ export default function MedicalRecordsSection() {
           </CardContent>
         </Card>
       ) : (
-        <Tabs defaultValue="overview" className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Tabs defaultValue="overview" className="w-full" dir={isRTL ? 'rtl' : 'ltr'} onValueChange={setActiveTab}>
           <TabsList className="flex flex-col h-auto w-full sm:grid sm:grid-cols-5">
             <TabsTrigger value="overview" disabled={editing && false}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
             <TabsTrigger value="allergies" disabled={editing && false}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>

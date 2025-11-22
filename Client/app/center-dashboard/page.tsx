@@ -3018,6 +3018,9 @@ export default function CenterDashboardPage() {
         centerService.getPatientLabHistory(patientId)
       ]);
 
+      console.log('🔍 [View Patient] Patient Response:', patientResponse);
+      console.log('🔍 [View Patient] Lab History Response:', labHistoryResponse);
+
       let patientData: any = {
         id: patientId,
         name: patientName || `Patient ${patientId}`
@@ -3030,8 +3033,26 @@ export default function CenterDashboardPage() {
 
       // Get all lab history and filter for completed appointments only, then take the 3 most recent
       const allLabHistory = labHistoryResponse?.labHistory || [];
+      console.log('📋 [View Patient] All Lab History:', allLabHistory);
+      console.log('📋 [View Patient] Total appointments:', allLabHistory.length);
+
+      // Log each appointment status for debugging
+      allLabHistory.forEach((apt: any, idx: number) => {
+        console.log(`  Appointment ${idx + 1}:`, {
+          id: apt.id,
+          status: apt.status,
+          booking_date: apt.booking_date,
+          appointment_date: apt.appointment_date,
+          test_type: apt.test_type_name || apt.lab_test_types?.name
+        });
+      });
+
       const completedAppointments = allLabHistory
-        .filter((appointment: any) => appointment.status === 'completed')
+        .filter((appointment: any) => {
+          const isCompleted = appointment.status === 'completed';
+          console.log(`  ✅ Checking appointment ${appointment.id}: status="${appointment.status}", isCompleted=${isCompleted}`);
+          return isCompleted;
+        })
         .sort((a: any, b: any) => {
           // Sort by booking_date descending (most recent first)
           const dateA = new Date(a.booking_date || a.appointment_date || 0);
@@ -3040,12 +3061,15 @@ export default function CenterDashboardPage() {
         })
         .slice(0, 3); // Take only the 3 most recent
 
+      console.log('✅ [View Patient] Completed Appointments:', completedAppointments);
+      console.log('✅ [View Patient] Number of completed appointments:', completedAppointments.length);
+
       patientData.recentVisits = completedAppointments;
 
       setSelectedPatient(patientData);
       setShowPatientModal(true);
     } catch (error) {
-      console.error('Error loading patient:', error);
+      console.error('❌ [View Patient] Error loading patient:', error);
       // Fallback to basic patient info
       setSelectedPatient({
         id: patientId,

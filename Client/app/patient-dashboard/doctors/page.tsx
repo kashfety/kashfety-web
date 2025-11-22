@@ -54,6 +54,7 @@ interface Doctor {
     experience_years: number
     bio?: string
     profile_picture?: string
+    profile_picture_url?: string
     email?: string
     phone?: string
     qualifications?: string
@@ -369,7 +370,7 @@ export default function PatientDoctorsPage() {
                                             <div className="flex flex-col items-center text-center">
                                                 {/* Avatar */}
                                                 <Avatar className="w-20 h-20 mb-4 border-4 border-blue-100 dark:border-blue-900">
-                                                    <AvatarImage src={doctor.profile_picture} alt={doctor.name} />
+                                                    <AvatarImage src={doctor.profile_picture_url || doctor.profile_picture} alt={doctor.name} />
                                                     <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
                                                         {getDoctorInitials(doctor)}
                                                     </AvatarFallback>

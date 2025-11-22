@@ -14,6 +14,9 @@ import CertificateUploadPromptModal from '@/components/CertificateUploadPromptMo
 import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
 import { useCustomAlert } from '@/hooks/use-custom-alert'
 
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuth()
@@ -161,6 +164,19 @@ export default function LoginPage() {
       <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
         <LocaleSwitcher />
         <ThemeToggle />
+      </div>
+
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-20">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/')}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('back_to_home') || 'Back to Home'}
+        </Button>
       </div>
 
       {/* Animated Background Elements */}

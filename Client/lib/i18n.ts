@@ -1111,6 +1111,7 @@ export const translations = {
 
     // Patient Dashboard - Doctors Page
     view_profile: "View Profile",
+    book_appointment: "Book Appointment",
     find_doctors: "Find Doctors",
     browse_doctors_desc: "Browse our network of qualified healthcare professionals",
     search_doctors_placeholder: "Search by name, specialty...",
@@ -2781,6 +2782,7 @@ export const translations = {
 
     // Patient Dashboard - Doctors Page
     view_profile: "عرض الملف الشخصي",
+    book_appointment: "حجز موعد",
     find_doctors: "البحث عن أطباء",
     browse_doctors_desc: "تصفح شبكة أطبائنا المؤهلين",
     search_doctors_placeholder: "ابحث بالاسم أو التخصص...",

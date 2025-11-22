@@ -17,7 +17,11 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="h-9 w-9">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+        >
           <Languages className="h-4 w-4" />
           <span className="sr-only">Switch language</span>
         </Button>

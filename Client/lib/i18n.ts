@@ -2019,6 +2019,11 @@ export const translations = {
     status_cancelled: "Cancelled",
     cd_confirm: "Confirm",
     cd_complete: "Complete",
+    duration: "Duration",
+    minutes: "Minutes",
+    category: "Category",
+    general: "General",
+    fee: "Fee",
   },
   ar: {
     // Navigation
@@ -3775,6 +3780,8 @@ export const translations = {
     cd_no_patients_registered: "لم يتم تسجيل مرضى بعد",
     cd_patients_will_appear: "سيظهر المرضى هنا عندما يحجزون مواعيد",
     patient: "مريض",
+    minutes: "دقائق",
+    general: "عام",
     failed_load_schedule_config: "فشل تحميل تكوين الجدول",
     please_select_test_type_first: "يرجى اختيار نوع تحليل أولاً",
   },

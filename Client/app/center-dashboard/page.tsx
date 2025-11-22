@@ -149,7 +149,7 @@ function TopNav({
           {t('cd_welcome_back')}, {getCenterDisplayName()}
         </h1>
         {nextAppointment && (
-          <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
             <Clock className="w-4 h-4" />
             <span>{t('cd_next')}: {getLocalizedNameUtil(nextAppointment, locale, 'patient_name')} {t('at')} <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${nextAppointment.time}`), locale, 'time')}</span></span>
           </div>
@@ -159,7 +159,7 @@ function TopNav({
       <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="text-center">
-            <p className="text-red-500 font-bold">{t('cd_upcoming_appointments')}</p>
+            <p className="text-gray-900 dark:text-white">{t('cd_upcoming_appointments')}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
           </div>
           <div className="text-center">
@@ -193,7 +193,7 @@ function TopNav({
                 </div>
                 <div className={`text-sm ${locale === 'ar' ? 'text-right' : 'text-left'}`}>
                   <p className="font-medium text-gray-900 dark:text-white">{centerProfile?.name || t('cd_medical_center')}</p>
-                  <p className="text-gray-500 dark:text-gray-400">{centerProfile?.email || t('cd_default_email')}</p>
+                  <p className="text-gray-500 dark:text-gray-200">{centerProfile?.email || t('cd_default_email')}</p>
                 </div>
                 <ChevronRight className={`w-4 h-4 text-gray-400 ${locale === 'ar' ? 'rotate-[270deg]' : 'rotate-90'}`} />
               </Button>
@@ -201,9 +201,9 @@ function TopNav({
             <DropdownMenuContent align={locale === 'ar' ? 'start' : 'end'} className="w-64">
               <div className="px-2 py-2 border-b">
                 <p className="font-medium text-gray-900 dark:text-white">{centerProfile?.name || t('cd_medical_center')}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{centerProfile?.email || t('cd_default_email')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-200">{centerProfile?.email || t('cd_default_email')}</p>
                 {centerProfile?.phone && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-200 flex items-center gap-1">
                     <Phone className="w-3 h-3" />
                     {centerProfile.phone}
                   </p>
@@ -298,7 +298,7 @@ function CenterOverview({
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-200">{stat.title}</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white" dir="ltr">{stat.value}</p>
                     <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month')}</p>
                   </div>
@@ -330,19 +330,19 @@ function CenterOverview({
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.appointments.length, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('dd_today')}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('dd_today')}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.stats?.todayCompleted || 0, locale)}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('completed')}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('completed')}</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
                       <div className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
                         {formatLocalizedNumber(todayStats.stats?.todayRevenue || 0, locale, { style: 'currency', currency: t('currency') })}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('cd_revenue')}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">{t('cd_revenue')}</div>
                     </div>
                   </div>
 
@@ -371,7 +371,7 @@ function CenterOverview({
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
-                              <span className="text-xs text-gray-500 w-8" dir="ltr">{formatLocalizedNumber(percentage, locale, { maximumFractionDigits: 0 })}%</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 w-8" dir="ltr">{formatLocalizedNumber(percentage, locale, { maximumFractionDigits: 0 })}%</span>
                             </div>
                           </div>
                         </div>
@@ -400,7 +400,7 @@ function CenterOverview({
                   )}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
+                <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                   <div className="text-center">
                     <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                     <p className="text-sm">{t('cd_no_data')}</p>
@@ -435,7 +435,7 @@ function CenterOverview({
                           appointment.status === 'cancelled' ? t('cd_cancelled') :
                             t('appointments_status_scheduled')}
                     </p>
-                    <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                       {getLocalizedNameUtil(appointment, locale, 'patient_name')} • {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • {
                         appointment.booking_date && appointment.booking_time ?
                           `${formatLocalizedDate(appointment.booking_date, locale)} ${t('at')} ${formatLocalizedDate(new Date(`2000-01-01 ${appointment.booking_time}`), locale, 'time')}` :
@@ -453,7 +453,7 @@ function CenterOverview({
                   <div className="w-2 h-2 rounded-full bg-gray-400"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.action}</p>
-                    <p className="text-xs text-gray-500">{activity.patient} • {activity.time}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{activity.patient} • {activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -517,7 +517,7 @@ function CenterPatients({
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
-                    <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                       {patient.age ? <><span>{t('age')}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
                       {patient.last_visit ? <><span>{t('cd_last_visit')}: </span><span dir="ltr">{formatLocalizedDate(patient.last_visit, locale)}</span></> : <span>{t('cd_no_recent_visits')}</span>}
@@ -536,7 +536,7 @@ function CenterPatients({
             )) : (
               <div className="text-center py-8">
                 <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                <p className="text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_patients_registered')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_patients_registered')}</p>
                 <p className="text-sm text-gray-400 text-center mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patients_will_appear')}</p>
               </div>
             )}
@@ -853,11 +853,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_revenue')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_revenue')}</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" dir="ltr">
                   {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') })}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
               </div>
             </div>
           </CardContent>
@@ -867,11 +867,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_bookings')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_bookings')}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
                   {formatLocalizedNumber(totalBookings, locale)}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -882,11 +882,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completion_rate')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completion_rate')}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
                   {formatLocalizedNumber(completionRate, locale)}%
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of')} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of')} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
               </div>
               <CheckCircle className="h-8 w-8 text-purple-500" />
             </div>
@@ -897,11 +897,11 @@ function CenterAnalytics({
           <CardContent className="p-4">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_patients')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_patients')}</p>
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" dir="ltr">
                   {formatLocalizedNumber(totalPatients, locale)}
                 </p>
-                <p className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_unique_patients_served')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_unique_patients_served')}</p>
               </div>
               <Users className="h-8 w-8 text-orange-500" />
             </div>
@@ -1049,7 +1049,7 @@ function CenterAnalytics({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <User className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                   <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_age_data')}</p>
@@ -1140,7 +1140,7 @@ function CenterAnalytics({
                         ></div>
                         <div className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <div className="text-sm font-semibold text-gray-900 dark:text-white">{entry.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          <div className="text-xs text-gray-500 dark:text-gray-200 font-medium">
                             <span dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
                             <span className="mx-1 opacity-60">•</span>
                             <span dir="ltr">{formatLocalizedNumber(Number(percentage), locale)}%</span>
@@ -1152,10 +1152,10 @@ function CenterAnalytics({
                 </div>
               </div>
             ) : (
-              <div className="h-[280px] flex items-center justify-center text-gray-500">
+              <div className="h-[280px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <Users className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p className="text-base font-medium text-gray-600 dark:text-gray-400 mb-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_gender_data')}</p>
+                  <p className="text-base font-medium text-gray-600 dark:text-gray-200 mb-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_gender_data')}</p>
                   <p className="text-sm text-gray-400 dark:text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_data_will_appear_patients')}</p>
                 </div>
               </div>
@@ -1183,12 +1183,12 @@ function CenterAnalytics({
                       ></div>
                       <span className={`font-medium text-gray-900 dark:text-white text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{test.name}</span>
                     </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 font-medium" dir="ltr">{formatLocalizedNumber(test.value, locale)}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-200 font-medium" dir="ltr">{formatLocalizedNumber(test.value, locale)}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                   <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_test_data')}</p>
@@ -1551,7 +1551,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('no_services_for_schedule')}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                <p className="text-gray-600 dark:text-gray-200 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('no_services_schedule_desc')}
                 </p>
                 <div className="mt-4">
@@ -1613,7 +1613,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               <div className="space-y-4">
                 <div>
                   <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('select_test_type_manage')}</Label>
-                  <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc')}</p>
+                  <p className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc')}</p>
                 </div>
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1624,7 +1624,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                     {selectedServices.length === 0 ? (
                       <div className="p-4 text-center">
                         <TestTube className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('no_services_selected')}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('no_services_selected')}</p>
                         <p className="text-xs text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('select_services_first')}</p>
                       </div>
                     ) : (
@@ -1662,7 +1662,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           {selectedTestType && (
             <>
               {loading && (
-                <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                <div className={`flex items-center gap-2 text-gray-600 dark:text-gray-200 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500"></div>
                   <span dir={isRTL ? 'rtl' : 'ltr'}>{t('loading_schedule_config')}</span>
                 </div>
@@ -1762,7 +1762,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             {/* Generated Slots Preview */}
                             {slots.length > 0 && (
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   {(t('generated_time_slots_total')).replace('{count}', formatLocalizedNumber(slots.length, locale))}
                                 </Label>
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -1782,7 +1782,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
                             {/* Copy from other days */}
                             <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                              <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from')}  </span>
+                              <span className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from')}  </span>
                               {DAYS_OF_WEEK.filter(d => d.value !== day.value && getDayConfig(d.value).isAvailable).map(sourceDay => (
                                 <Button
                                   key={sourceDay.value}
@@ -1815,15 +1815,15 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days')}</Label>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days')}</Label>
                       <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days')}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots')}</Label>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots')}</Label>
                       <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots')}</p>
                     </div>
                     <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type')}</Label>
+                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type')}</Label>
                       <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
                     </div>
                   </div>
@@ -1960,7 +1960,7 @@ function Sidebar({
             <div className="space-y-6">
               <div>
                 {!isCollapsed && (
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-200">
                     {t('dashboard')}
                   </div>
                 )}
@@ -1982,7 +1982,7 @@ function Sidebar({
 
               <div>
                 {!isCollapsed && (
-                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-200">
                     {t('management')}
                   </div>
                 )}
@@ -3180,7 +3180,7 @@ export default function CenterDashboardPage() {
                                 }`}></div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
                                 </p>
                               </div>
@@ -3269,7 +3269,7 @@ export default function CenterDashboardPage() {
                       )) : (
                         <div className="text-center py-8">
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today')}</p>
+                          <p className="text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today')}</p>
                           <p className="text-sm text-gray-400 mt-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear')}</p>
                         </div>
                       )}
@@ -3512,14 +3512,14 @@ export default function CenterDashboardPage() {
                                   </div>
                                   <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <h4 className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <p className="text-sm text-gray-500 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description')}
                                     </p>
                                     <div className="flex items-center gap-4 mt-2">
-                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {t('duration')}: <span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes')}
                                       </span>
-                                      <span className="text-xs text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {t('category')}: {testType.category ? (testType.category === 'lab' ? (t('lab')) : testType.category === 'imaging' ? (t('imaging')) : testType.category) : (t('general'))}
                                       </span>
                                     </div>
@@ -3573,15 +3573,15 @@ export default function CenterDashboardPage() {
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('online_booking_enabled')}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('online_booking_enabled')}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('instant_confirmation')}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('instant_confirmation')}</span>
                                     </div>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                       <CheckCircle className="w-4 h-4 text-green-500" />
-                                      <span className="text-gray-600 dark:text-gray-400">{t('automated_scheduling')}</span>
+                                      <span className="text-gray-600 dark:text-gray-200">{t('automated_scheduling')}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -3654,7 +3654,7 @@ export default function CenterDashboardPage() {
                           <div className="text-center py-8">
                             <TestTube className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                             <div className="space-y-2">
-                              <p className="text-gray-600 dark:text-gray-400">{t('no_active_services_title')}</p>
+                              <p className="text-gray-600 dark:text-gray-200">{t('no_active_services_title')}</p>
                               <p className="text-sm text-gray-500 dark:text-gray-500">{t('no_active_services_desc')}</p>
                             </div>
                           </div>
@@ -3680,22 +3680,22 @@ export default function CenterDashboardPage() {
                                       </div>
                                       <h3 className={`font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>{displayName}</h3>
                                     </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <p className="text-xs text-gray-600 dark:text-gray-200 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {getLocalizedFieldValue(testType, locale, 'description') || testType.description || t('cd_no_description')}
                                     </p>
                                     <div className="space-y-2">
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('duration')}:</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('duration')}:</span>
                                         <span className="font-medium"><span dir="ltr">{formatLocalizedNumber(testType.default_duration || 30, locale)}</span> {t('minutes_short')}</span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('fee')}:</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('fee')}:</span>
                                         <span className="font-medium text-emerald-600 dark:text-emerald-400">
                                           {formatLocalizedNumber(parseFloat(state.fee || '0') || 0, locale, { style: 'currency', currency: 'SYP' })}
                                         </span>
                                       </div>
                                       <div className={`flex items-center justify-between text-xs ${isRTL ? 'flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <span className="text-gray-500">{t('category')}:</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('category')}:</span>
                                         <Badge variant="secondary" className="text-xs">
                                           {t(`category_${testType.category}`) || testType.category || t('category_general')}
                                         </Badge>
@@ -3748,7 +3748,7 @@ export default function CenterDashboardPage() {
                         <CheckCircle className={`w-5 h-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('enable_all')}</div>
-                          <div className="text-xs text-gray-500">{t('activate_all_services')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('activate_all_services')}</div>
                         </div>
                       </Button>
 
@@ -3772,7 +3772,7 @@ export default function CenterDashboardPage() {
                         <XCircle className={`w-5 h-5 text-red-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('disable_all')}</div>
-                          <div className="text-xs text-gray-500">{t('deactivate_all_services')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('deactivate_all_services')}</div>
                         </div>
                       </Button>
 
@@ -3801,7 +3801,7 @@ export default function CenterDashboardPage() {
                         <RotateCcw className={`w-5 h-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <div className={isRTL ? 'text-right' : 'text-left'}>
                           <div className="font-medium">{t('reset_pricing')}</div>
-                          <div className="text-xs text-gray-500">{t('restore_default_prices')}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t('restore_default_prices')}</div>
                         </div>
                       </Button>
                     </div>
@@ -3874,7 +3874,7 @@ export default function CenterDashboardPage() {
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</p>
-                                <p className="text-sm text-gray-500" dir="ltr">{centerProfile.email || t('cd_no_email_set')}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir="ltr">{centerProfile.email || t('cd_no_email_set')}</p>
                               </div>
                             </div>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
@@ -4128,7 +4128,7 @@ export default function CenterDashboardPage() {
                           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <div className={isRTL ? 'text-right' : 'text-left'}>
                               <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test')}</p>
-                              <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <span dir="ltr">{test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available')}</span> • <span dir="ltr">{formatLocalizedNumber(test.fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
                               </p>
                             </div>
@@ -4137,7 +4137,7 @@ export default function CenterDashboardPage() {
                                 test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
                                   test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700' :
                                     test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
-                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 border-gray-300 dark:border-gray-700'
+                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200 border-gray-300 dark:border-gray-700'
                                 }`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 {test.status === 'completed' ? (t('appointments_status_completed')) :
                                   test.status === 'confirmed' ? (t('appointments_status_confirmed')) :
@@ -4158,7 +4158,7 @@ export default function CenterDashboardPage() {
                             </div>
                           </div>
                           {test.result_notes && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-sm text-gray-600 dark:text-gray-200 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
                               <span className="font-medium">{t('cd_notes')}:</span> {test.result_notes}
                             </p>
                           )}
@@ -4168,7 +4168,7 @@ export default function CenterDashboardPage() {
                   ) : (
                     <div className="text-center py-8">
                       <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_lab_history')}</p>
+                      <p className="text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_lab_history')}</p>
                       <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_tests_yet')}</p>
                     </div>
                   )}
@@ -4190,19 +4190,19 @@ export default function CenterDashboardPage() {
                             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
                               <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_personal_details')}</h4>
                               <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <strong>{t('cd_patient_full_name')}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided')}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <strong>{t('cd_patient_gender')}:</strong> {record.gender ? (record.gender.toLowerCase() === 'male' ? (t('gender_male')) : record.gender.toLowerCase() === 'female' ? (t('gender_female')) : record.gender) : (t('cd_value_not_provided'))}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <strong>{t('cd_patient_dob')}:</strong> <span dir="ltr">{record.date_of_birth ? formatLocalizedDate(record.date_of_birth, locale) : (t('cd_value_not_provided'))}</span>
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <strong>{t('cd_patient_phone')}:</strong> <span dir="ltr">{record.phone || (t('cd_value_not_provided'))}</span>
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <strong>{t('cd_patient_email')}:</strong> <span dir="ltr">{record.email || (t('cd_value_not_provided'))}</span>
                                 </p>
                               </div>
@@ -4215,28 +4215,28 @@ export default function CenterDashboardPage() {
                                 {record.emergency_contact && Object.keys(record.emergency_contact).length > 0 ? (
                                   <>
                                     {record.emergency_contact.name && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                         <strong>{t('cd_contact_name')}:</strong> {record.emergency_contact.name}
                                       </p>
                                     )}
                                     {record.emergency_contact.phone && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                         <strong>{t('cd_patient_phone')}:</strong> <span dir="ltr">{record.emergency_contact.phone}</span>
                                       </p>
                                     )}
                                     {record.emergency_contact.relationship && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                         <strong>{t('cd_contact_relationship')}:</strong> {record.emergency_contact.relationship}
                                       </p>
                                     )}
                                     {record.emergency_contact.email && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                         <strong>{t('cd_patient_email')}:</strong> <span dir="ltr">{record.emergency_contact.email}</span>
                                       </p>
                                     )}
                                   </>
                                 ) : (
-                                  <p className="text-sm text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_emergency_contact')}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_emergency_contact')}</p>
                                 )}
                               </div>
                             </div>
@@ -4248,19 +4248,19 @@ export default function CenterDashboardPage() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_medical_history')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {record.medical_history || (t('cd_no_medical_history'))}
                                 </p>
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_allergies')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {record.allergies || (t('cd_no_allergies'))}
                                 </p>
                               </div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_medications')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {record.medications || (t('cd_no_medications'))}
                                 </p>
                               </div>
@@ -4271,10 +4271,10 @@ export default function CenterDashboardPage() {
                           <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
                             <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registration_details')}</h4>
                             <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <strong>{t('cd_registered_date')}:</strong> <span dir="ltr">{record.created_at ? formatLocalizedDate(record.created_at, locale) : (t('cd_unknown'))}</span>
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <strong>{t('cd_last_updated_date')}:</strong> <span dir="ltr">{record.updated_at ? formatLocalizedDate(record.updated_at, locale) : (t('cd_not_updated'))}</span>
                               </p>
                             </div>
@@ -4285,7 +4285,7 @@ export default function CenterDashboardPage() {
                   ) : (
                     <div className="text-center py-8">
                       <Heart className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500">{t('cd_no_patient_registration')}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{t('cd_no_patient_registration')}</p>
                       <p className="text-sm text-gray-400 mt-1">{t('cd_registration_details_appear')}</p>
                     </div>
                   )}
@@ -4347,7 +4347,7 @@ export default function CenterDashboardPage() {
                   className="mt-2"
                   onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {t('cd_upload_pdf_hint')}
                 </p>
               </div>

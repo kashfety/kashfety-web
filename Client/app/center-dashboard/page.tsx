@@ -167,15 +167,15 @@ function TopNav({
       <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="text-center">
-            <p className="text-gray-700 dark:text-gray-200">{t('cd_upcoming_appointments')}</p>
+            <p className="text-gray-900 dark:text-white">{t('cd_upcoming_appointments')}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-700 dark:text-gray-200">{t('cd_revenue')}</p>
+            <p className="text-gray-900 dark:text-white">{t('cd_revenue')}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayRevenue, locale, { style: 'currency', currency: t('currency') })}</p>
           </div>
           <div className="text-center">
-            <p className="text-gray-700 dark:text-gray-200">{t('completed')}</p>
+            <p className="text-gray-900 dark:text-white">{t('completed')}</p>
             <p className="font-semibold text-emerald-600" dir="ltr">{formatLocalizedNumber(todayStats?.stats?.todayCompleted || 0, locale)}</p>
           </div>
         </div>

@@ -130,14 +130,6 @@ function TopNav({
 }) {
   const { t, locale, isRTL } = useLocale();
 
-  // Debug: Test translation function
-  console.log('=== Translation Debug ===');
-  console.log('Locale:', locale);
-  console.log('t("cd_upcoming_appointments"):', t('cd_upcoming_appointments'));
-  console.log('t("cd_revenue"):', t('cd_revenue'));
-  console.log('t("completed"):', t('completed'));
-  console.log('========================');
-
   const displayRevenue = todayStats?.stats?.todayRevenue || 0;
   const displayAppointments = todayStats?.stats?.todayAppointments || 0;
   const nextAppointment = todayStats?.stats?.nextAppointment;
@@ -167,7 +159,7 @@ function TopNav({
       <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="text-center">
-            <p className="text-gray-900 dark:text-white">{t('cd_upcoming_appointments')}</p>
+            <p className="text-red-500 font-bold">{t('cd_upcoming_appointments')}</p>
             <p className="font-semibold text-gray-900 dark:text-white" dir="ltr">{formatLocalizedNumber(displayAppointments, locale)}</p>
           </div>
           <div className="text-center">

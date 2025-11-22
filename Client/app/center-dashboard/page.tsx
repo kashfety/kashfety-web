@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from "next-themes";
 import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
+import DoctorScheduleCalendar from '@/components/DoctorScheduleCalendar';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -60,6 +61,7 @@ import {
   Home,
   ChevronRight,
   Stethoscope,
+  Grid3X3,
   MessagesSquare,
   Video,
   HelpCircle,
@@ -1971,6 +1973,9 @@ function Sidebar({
                   <NavItem tab="appointments" icon={Calendar} isActive={activeTab === "appointments"}>
                     {t('appointments')}
                   </NavItem>
+                  <NavItem tab="schedule-calendar" icon={Grid3X3} isActive={activeTab === "schedule-calendar"}>
+                    {t('dd_schedule_calendar_tab') || 'Schedule Calendar'}
+                  </NavItem>
                   <NavItem tab="patients" icon={Users} isActive={activeTab === "patients"}>
                     {t('patients')}
                   </NavItem>
@@ -3332,6 +3337,34 @@ export default function CenterDashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Schedule Calendar Tab */}
+              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full">
+                <DoctorScheduleCalendar
+                  appointments={allAppointments || []}
+                  onAppointmentClick={(appointment: any) => {
+                    console.log('Appointment clicked:', appointment);
+                    // You can add modal or detailed view here if needed
+                  }}
+                  onStatusUpdate={async (appointmentId: string, newStatus: string) => {
+                    try {
+                      await handleUpdateAppointmentStatus(appointmentId, newStatus);
+                      toast({
+                        title: t('success'),
+                        description: t('dd_appointment_status_updated') || 'Appointment status has been updated successfully.'
+                      });
+                      // Refresh data
+                      await loadCenterData();
+                    } catch (error) {
+                      toast({
+                        title: t('error'),
+                        description: t('dd_failed_to_update_status') || 'Failed to update appointment status.',
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                />
               </TabsContent>
 
               {/* Patients Tab */}

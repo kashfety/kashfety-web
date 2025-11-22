@@ -2091,6 +2091,13 @@ export const translations = {
     schedule_summary: "Schedule Summary",
     select_test_type_manage: "Select test type to manage schedule",
     test_type_selection_desc: "Select the lab test type you want to configure the schedule for. Each test type can have unique operating hours.",
+    cd_name_appears_arabic: "Arabic name for multi-language support",
+    cd_no_age_data: "No age data available",
+    cd_no_gender_data: "No gender data available",
+    cd_no_test_data: "No test data available",
+    gender_male: "Male",
+    gender_female: "Female",
+    gender_other: "Other",
   },
   ar: {
     // Navigation

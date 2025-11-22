@@ -831,6 +831,10 @@ export const translations = {
     dd_weekly_schedule_desc: "Your patient appointments this week",
     dd_appointments_trend: "Appointments Trend",
     dd_appointments_trend_desc: "Your appointments and consultations over time",
+    dd_appointments_legend_title: "Appointments",
+    dd_appointments_legend_desc: "Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.",
+    dd_consultations_legend_title: "Consultations",
+    dd_consultations_legend_desc: "Completed appointments only. Tracks finalized visits and revenue-generating activities.",
     dd_patients: "Patients",
     dd_appointments: "Appointments",
     dd_consultations: "Consultations",
@@ -1143,6 +1147,7 @@ export const translations = {
 
     // Patient Dashboard - Doctors Page
     view_profile: "View Profile",
+    book_appointment: "Book Appointment",
     find_doctors: "Find Doctors",
     browse_doctors_desc: "Browse our network of qualified healthcare professionals",
     search_doctors_placeholder: "Search by name, specialty...",
@@ -2515,6 +2520,10 @@ export const translations = {
     dd_weekly_schedule_desc: "مواعيد مرضاك هذا الأسبوع",
     dd_appointments_trend: "اتجاه المواعيد",
     dd_appointments_trend_desc: "مواعيدك واستشاراتك على مدار الوقت",
+    dd_appointments_legend_title: "المواعيد",
+    dd_appointments_legend_desc: "إجمالي الحجوزات التي تم إجراؤها، بغض النظر عن الحالة (مجدولة، مؤكدة، مكتملة، أو ملغاة). يمثل إجمالي الطلب.",
+    dd_consultations_legend_title: "الاستشارات",
+    dd_consultations_legend_desc: "المواعيد المكتملة فقط. يتتبع الزيارات المنجزة والأنشطة المدرة للدخل.",
     dd_patients: "المرضى",
     dd_appointments: "المواعيد",
     dd_consultations: "الاستشارات",
@@ -2809,6 +2818,7 @@ export const translations = {
 
     // Patient Dashboard - Doctors Page
     view_profile: "عرض الملف الشخصي",
+    book_appointment: "حجز موعد",
     find_doctors: "البحث عن أطباء",
     browse_doctors_desc: "تصفح شبكة أطبائنا المؤهلين",
     search_doctors_placeholder: "ابحث بالاسم أو التخصص...",

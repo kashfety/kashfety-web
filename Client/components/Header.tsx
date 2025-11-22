@@ -89,30 +89,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             {/* Logo - switches between light and dark mode */}
             <div
               onClick={() => {
-                if (user) {
-                  // Navigate based on user role
-                  switch (user.role) {
-                    case 'patient':
-                      router.push('/patient-dashboard/doctors');
-                      break;
-                    case 'doctor':
-                      router.push('/doctor-dashboard');
-                      break;
-                    case 'center':
-                      router.push('/center-dashboard');
-                      break;
-                    case 'admin':
-                      router.push('/admin-dashboard');
-                      break;
-                    case 'super_admin':
-                      router.push('/super-admin-dashboard');
-                      break;
-                    default:
-                      router.push('/');
-                  }
-                } else {
-                  router.push('/');
-                }
+                router.push('/');
               }}
               className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48 cursor-pointer hover:opacity-80 transition-opacity"
             >
@@ -139,7 +116,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
                   servicesSection.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+              className="text-foreground/70 transition-colors"
             >
               {t('header_services') || 'Services'}
             </Button>
@@ -152,7 +129,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
                   aboutSection.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+              className="text-foreground/70 transition-colors"
             >
               {t('header_about') || 'About us'}
             </Button>
@@ -165,7 +142,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
                   reviewsSection.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-foreground/70 hover:text-[#4DBCC4] transition-colors"
+              className="text-foreground/70 transition-colors"
             >
               {t('header_reviews') || 'Reviews'}
             </Button>
@@ -200,7 +177,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             <Button
               variant="outline"
               onClick={handleAuthAction}
-              className="border-2 border-[#4DBCC4] dark:border-[#2a5f6b] text-[#4DBCC4] dark:text-[#2a5f6b] hover:bg-[#4DBCC4] dark:hover:bg-[#2a5f6b] hover:text-white transition-all duration-300 px-3 sm:px-6 py-2 text-sm"
+              className="border-2 border-[#4DBCC4] dark:border-[#2a5f6b] text-[#4DBCC4] dark:text-[#2a5f6b] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-foreground transition-all duration-300 px-3 sm:px-6 py-2 text-sm"
             >
               <span className="hidden sm:inline">{t('header_login_signup') || 'Login / Sign up'}</span>
               <span className="sm:hidden">{t('header_login') || 'Login'}</span>

@@ -432,9 +432,6 @@ export default function HomePage() {
 
       {/* Scroll to Top Button */}
       <ScrollToTop />
-
-      {/* Cursor Trail Effect */}
-      <CursorTrail />
     </div>
   );
 }

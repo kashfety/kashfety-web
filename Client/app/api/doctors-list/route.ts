@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         // Build query
         let query = supabase
             .from('users')
-            .select('id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, qualifications', { count: 'exact' })
+            .select('id, name, first_name, last_name, first_name_ar, last_name_ar, name_ar, email, phone, specialty, consultation_fee, rating, experience_years, bio, profile_picture, profile_picture_url, qualifications', { count: 'exact' })
             .eq('role', 'doctor')
             .order('rating', { ascending: false })
             .range(offset, offset + limit - 1);

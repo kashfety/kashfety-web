@@ -244,7 +244,7 @@ export default function MyLabsPage() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">{t('type') || 'Type'}</label>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('type') || (locale === 'ar' ? 'النوع' : 'Type')}</label>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger><SelectValue placeholder={t('appointments_type_placeholder') || 'All'} /></SelectTrigger>
                     <SelectContent>

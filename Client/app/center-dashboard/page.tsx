@@ -4185,7 +4185,18 @@ export default function CenterDashboardPage() {
                               <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <TestTube className="w-5 h-5 text-emerald-600" />
                                 <p className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(visit.lab_test_types, locale, 'name') || visit.test_type_name || t('cd_unknown_test')}
+                                  {(() => {
+                                    // Try multiple possible locations for test type name
+                                    const testName = getLocalizedNameUtil(visit.lab_test_types, locale, 'name')
+                                      || visit.test_type_name
+                                      || visit.lab_test_types?.name
+                                      || visit.lab_test_types?.name_en
+                                      || visit.test_type?.name
+                                      || visit.test_name
+                                      || t('cd_unknown_test');
+                                    console.log('🔍 Test name for visit:', { visit, testName });
+                                    return testName;
+                                  })()}
                                 </p>
                               </div>
 

@@ -359,9 +359,6 @@ function Sidebar({
                   <NavItem tab="patients" icon={Users} isActive={activeTab === "patients"}>
                     {t('dd_patients_tab') || 'Patients'}
                   </NavItem>
-                  <NavItem tab="analytics" icon={BarChart2} isActive={activeTab === "analytics"}>
-                    {t('dd_analytics_tab') || t('analytics') || 'Analytics'}
-                  </NavItem>
                   <NavItem tab="reviews" icon={Star} isActive={activeTab === "reviews"}>
                     {t('dd_reviews_tab') || 'Reviews'}
                   </NavItem>
@@ -561,6 +558,7 @@ export default function DoctorDashboard() {
   // Pagination states
   const [showAllAppointments, setShowAllAppointments] = useState(false);
   const [showAllPatients, setShowAllPatients] = useState(false);
+  const [appointmentFilter, setAppointmentFilter] = useState<string>('all');
 
   // Patient Medical Records Modal States
   const [selectedPatient, setSelectedPatient] = useState<PatientDetails | null>(null);
@@ -633,7 +631,7 @@ export default function DoctorDashboard() {
     try {
       const url = new URL(window.location.href);
       const initialTab = url.searchParams.get('tab');
-      if (initialTab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics', 'reviews'].includes(initialTab)) {
+      if (initialTab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'reviews'].includes(initialTab)) {
         setActiveTab(initialTab);
       }
     } catch { }
@@ -644,7 +642,7 @@ export default function DoctorDashboard() {
   // React to query param changes without full remount (e.g., FAB switching tabs)
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'analytics', 'reviews'].includes(tab) && tab !== activeTab) {
+    if (tab && ['overview', 'appointments', 'patients', 'schedule', 'centers', 'profile', 'reviews'].includes(tab) && tab !== activeTab) {
       setActiveTab(tab);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1256,7 +1254,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_monthly_revenue') || 'Monthly Revenue'}</p>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                            ${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}
+                            {formatCurrency(analytics?.analytics?.totalRevenue || 0, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                           </p>
                         </div>
                         <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -1465,350 +1463,6 @@ export default function DoctorDashboard() {
                 </div>
               </TabsContent>
 
-              {/* Analytics Tab (in-place, same route) */}
-              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6 w-full max-w-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl gradient-emerald">
-                    <BarChart2 className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dd_practice_analytics') || 'Practice Analytics'}</h1>
-                    <p className="text-emerald-600/80 dark:text-emerald-400/80">{t('dd_practice_analytics_subtitle') || 'Insights and performance metrics for your medical practice'}</p>
-                  </div>
-                </div>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_patient_satisfaction') || 'Patient Satisfaction'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}/٥</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_completion_rate') || 'Completion Rate'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.completionRate || 0).toString(), locale)}%</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_this_month') || 'This Month'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.thisMonthAppointments || 0).toString(), locale)} {t('dd_appts') || 'appts'}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_revenue') || 'Revenue'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="hover-lift">
-                    {(() => {
-                      const appts = (todayStats?.appointments || []) as any[]
-                      const counts: Record<string, number> = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 }
-                      const fmt = (d: Date) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]
-                      appts.forEach(a => { const dt = new Date(`${a.appointment_date}T00:00:00`); counts[fmt(dt)] = (counts[fmt(dt)] || 0) + 1 })
-                      const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                      const series = order.map(name => ({ name, patients: counts[name] || 0 }))
-                      return <ScheduleChart data={series} />
-                    })()}
-                  </div>
-                  <div className="hover-lift">
-                    {(() => {
-                      // Build monthly series from DB appointments
-                      const byMonthTotal: Record<string, number> = {}
-                      const byMonthCompleted: Record<string, number> = {}
-                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                        ; (allAppointments || []).forEach((apt: any) => {
-                          const d = new Date(apt.appointment_date)
-                          const key = months[d.getMonth()]
-                          byMonthTotal[key] = (byMonthTotal[key] || 0) + 1
-                          if ((apt.status || '').toLowerCase() === 'completed') byMonthCompleted[key] = (byMonthCompleted[key] || 0) + 1
-                        })
-                      // Show last 7 months (including current)
-                      const now = new Date()
-                      const order: string[] = []
-                      for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
-                      const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return (
-                        <div className="flex flex-col h-full">
-                          <AppointmentsChart data={data} />
-                          <div className="px-6 pb-6 pt-2">
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
-                              <div className="flex gap-2 items-start">
-                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_appointments_legend_title') || 'Appointments'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
-                                    {t('dd_appointments_legend_desc') || 'Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.'}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 items-start">
-                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_consultations_legend_title') || 'Consultations'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
-                                    {t('dd_consultations_legend_desc') || 'Completed appointments only. Tracks finalized visits and revenue-generating activities.'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })()}
-                  </div>
-                </div>
-
-                {/* Floating Calendar FAB with real count (same tab-switching logic) */}
-                <div className="fixed bottom-8 right-8 z-50">
-                  <button
-                    onClick={() => {
-                      setActiveTab("appointments");
-                      router.replace(`${pathname}?tab=appointments`, { scroll: false });
-                    }}
-                    className="group relative w-16 h-16 gradient-emerald text-white rounded-2xl shadow-2xl hover:shadow-emerald-500/25 transition-all duration-500 hover-lift animate-float"
-                  >
-                    <Calendar className="h-6 w-6 mx-auto group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center animate-breathe">
-                      {todayStats?.stats?.todayAppointments || 0}
-                    </div>
-                    <div className="absolute inset-0 rounded-2xl bg-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  </button>
-                </div>
-
-                {/* Recent Patients */}
-                <div className="grid grid-cols-1 gap-6">
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23]">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        {t('dd_recent_patients') || 'Recent Patients'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {patients.length > 0 ? (
-                        patients.slice(0, 5).map((patient) => (
-                          <div key={patient.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-white" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900 dark:text-white">
-                                  {getLocalizedName(patient, locale)}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-500">
-                                  {toArabicNumerals((patient.totalAppointments || 0).toString(), locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  handleViewPatient(patient.id);
-                                  setActiveTab("patients");
-                                }}
-                              >
-                                {t('dd_view') || 'View'}
-                              </Button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8">
-                          <UserCheck className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">No patients yet</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Analytics Tab (in-place, same route) */}
-              <TabsContent value="analytics" className="py-6 px-4 h-full space-y-6 w-full max-w-full">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl gradient-emerald">
-                    <BarChart2 className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dd_practice_analytics') || 'Practice Analytics'}</h1>
-                    <p className="text-emerald-600/80 dark:text-emerald-400/80">{t('dd_practice_analytics_subtitle') || 'Insights and performance metrics for your medical practice'}</p>
-                  </div>
-                </div>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_patient_satisfaction') || 'Patient Satisfaction'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}/٥</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_completion_rate') || 'Completion Rate'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.completionRate || 0).toString(), locale)}%</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_this_month') || 'This Month'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{toArabicNumerals((analytics?.analytics?.thisMonthAppointments || 0).toString(), locale)} {t('dd_appts') || 'appts'}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-emerald-200 dark:border-emerald-800">
-                    <CardContent className="p-6">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_revenue') || 'Revenue'}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${toArabicNumerals((analytics?.analytics?.totalRevenue || 0).toLocaleString(), locale)}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="hover-lift">
-                    {(() => {
-                      const appts = (todayStats?.appointments || []) as any[]
-                      const counts: Record<string, number> = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 }
-                      const fmt = (d: Date) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]
-                      appts.forEach(a => { const dt = new Date(`${a.appointment_date}T00:00:00`); counts[fmt(dt)] = (counts[fmt(dt)] || 0) + 1 })
-                      const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                      const series = order.map(name => ({ name, patients: counts[name] || 0 }))
-                      return <ScheduleChart data={series} />
-                    })()}
-                  </div>
-                  <div className="hover-lift">
-                    {(() => {
-                      // Build monthly series from DB appointments
-                      const byMonthTotal: Record<string, number> = {}
-                      const byMonthCompleted: Record<string, number> = {}
-                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                        ; (allAppointments || []).forEach((apt: any) => {
-                          const d = new Date(apt.appointment_date)
-                          const key = months[d.getMonth()]
-                          byMonthTotal[key] = (byMonthTotal[key] || 0) + 1
-                          if ((apt.status || '').toLowerCase() === 'completed') byMonthCompleted[key] = (byMonthCompleted[key] || 0) + 1
-                        })
-                      // Show last 7 months (including current)
-                      const now = new Date()
-                      const order: string[] = []
-                      for (let i = 6; i >= 0; i--) { const m = new Date(now.getFullYear(), now.getMonth() - i, 1); order.push(months[m.getMonth()]) }
-                      const data = order.map((m) => ({ name: m, appointments: byMonthTotal[m] || 0, consultations: byMonthCompleted[m] || 0 }))
-                      return (
-                        <div className="flex flex-col h-full">
-                          <AppointmentsChart data={data} />
-                          <div className="px-6 pb-6 pt-2">
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
-                              <div className="flex gap-2 items-start">
-                                <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_appointments_legend_title') || 'Appointments'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
-                                    {t('dd_appointments_legend_desc') || 'Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.'}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 items-start">
-                                <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_consultations_legend_title') || 'Consultations'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
-                                    {t('dd_consultations_legend_desc') || 'Completed appointments only. Tracks finalized visits and revenue-generating activities.'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })()}
-                  </div>
-                </div>
-
-                {/* Floating Calendar FAB with real count (same tab-switching logic) */}
-                <div className="fixed bottom-8 right-8 z-50">
-                  <button
-                    onClick={() => {
-                      setActiveTab("appointments");
-                      router.replace(`${pathname}?tab=appointments`, { scroll: false });
-                    }}
-                    className="group relative w-16 h-16 gradient-emerald text-white rounded-2xl shadow-2xl hover:shadow-emerald-500/25 transition-all duration-500 hover-lift animate-float"
-                  >
-                    <Calendar className="h-6 w-6 mx-auto group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center animate-breathe">
-                      {todayStats?.stats?.todayAppointments || 0}
-                    </div>
-                    <div className="absolute inset-0 rounded-2xl bg-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  </button>
-                </div>
-
-                {/* Recent Patients */}
-                <div className="grid grid-cols-1 gap-6">
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23]">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        {t('dd_recent_patients') || 'Recent Patients'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {patients.length > 0 ? (
-                        patients.slice(0, 5).map((patient) => (
-                          <div key={patient.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-white" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900 dark:text-white">
-                                  {getLocalizedName(patient, locale)}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-500">
-                                  {toArabicNumerals((patient.totalAppointments || 0).toString(), locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  handleViewPatient(patient.id);
-                                  setActiveTab("patients");
-                                }}
-                              >
-                                {t('dd_view') || 'View'}
-                              </Button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8">
-                          <UserCheck className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">No patients yet</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
               {/* Appointments Tab */}
               <TabsContent value="appointments" className="py-6 px-4 h-full w-full max-w-full">
                 {/* Hero like old dashboard */}
@@ -1831,9 +1485,43 @@ export default function DoctorDashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {allAppointments && allAppointments.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {['all', 'scheduled', 'confirmed', 'cancelled', 'completed'].map((status) => (
+                          <Button
+                            key={status}
+                            variant={appointmentFilter === status ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setAppointmentFilter(status)}
+                            className={appointmentFilter === status ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                          >
+                            {status === 'all' ? (t('all') || 'All') : 
+                             status === 'scheduled' ? (t('appointments_status_scheduled') || 'Scheduled') :
+                             status === 'confirmed' ? (t('appointments_status_confirmed') || 'Confirmed') :
+                             status === 'cancelled' ? (t('appointments_status_cancelled') || 'Cancelled') :
+                             (t('appointments_status_completed') || 'Completed')}
+                          </Button>
+                        ))}
+                      </div>
+                      {(() => {
+                        let filtered = allAppointments;
+                        if (appointmentFilter !== 'all') {
+                          filtered = allAppointments.filter(a => (a.status || '').toLowerCase() === appointmentFilter);
+                        }
+                        const statusOrder: Record<string, number> = { 'scheduled': 1, 'confirmed': 2, 'cancelled': 3, 'completed': 4 };
+                        const sortedAppointments = [...filtered].sort((a, b) => {
+                          const statusA = (a.status || '').toLowerCase();
+                          const statusB = (b.status || '').toLowerCase();
+                          const orderA = statusOrder[statusA] || 99;
+                          const orderB = statusOrder[statusB] || 99;
+                          if (orderA !== orderB) return orderA - orderB;
+                          const dateA = new Date(`${a.appointment_date}T${a.appointment_time || '00:00'}`);
+                          const dateB = new Date(`${b.appointment_date}T${b.appointment_time || '00:00'}`);
+                          return dateB.getTime() - dateA.getTime();
+                        });
+                        if (sortedAppointments.length > 0) {
+                          return (
                         <div className="space-y-4">
-                          {(showAllAppointments ? allAppointments : allAppointments.slice(0, 10)).map((appointment) => (
+                          {(showAllAppointments ? sortedAppointments : sortedAppointments.slice(0, 10)).map((appointment) => (
                             <div
                               key={appointment.id}
                               className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
@@ -1907,7 +1595,7 @@ export default function DoctorDashboard() {
                                 })()}
                                 {appointment.consultation_fee && (
                                   <Badge variant="outline">
-                                    ${locale === 'ar' ? toArabicNumerals(appointment.consultation_fee.toString(), locale) : appointment.consultation_fee}
+                                    {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                                   </Badge>
                                 )}
                                 <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
@@ -1968,7 +1656,7 @@ export default function DoctorDashboard() {
                           ))}
 
                           {/* View All/Show Less Button */}
-                          {allAppointments.length > 10 && (
+                          {sortedAppointments.length > 10 && (
                             <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                               <Button
                                 variant="outline"
@@ -1980,14 +1668,16 @@ export default function DoctorDashboard() {
                                   </>
                                 ) : (
                                   <>
-                                    {t('view_all') || 'View All'} {allAppointments.length} {t('appointments') || 'Appointments'}
+                                    {t('view_all') || 'View All'} {sortedAppointments.length} {t('appointments') || 'Appointments'}
                                   </>
                                 )}
                               </Button>
                             </div>
                           )}
                         </div>
-                      ) : (
+                          );
+                        } else {
+                          return (
                         <div className="text-center py-12">
                           <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
@@ -2007,7 +1697,9 @@ export default function DoctorDashboard() {
                             {t('dd_schedule_first') || 'Schedule First Appointment'}
                           </Button>
                         </div>
-                      )}
+                          );
+                        }
+                      })()}
                     </CardContent>
                   </Card>
 

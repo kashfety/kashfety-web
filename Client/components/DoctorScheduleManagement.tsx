@@ -20,6 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { useLocale } from "@/components/providers/locale-provider";
+import { formatCurrency } from "@/lib/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1026,7 +1027,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_default_fee') || 'Default Fee'}</Label>
-                  <p className="text-lg font-semibold">${toArabicNumerals(defaultConsultationFee)}</p>
+                  <p className="text-lg font-semibold">{formatCurrency(defaultConsultationFee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}</p>
                 </div>
               </div>
             </CardContent>

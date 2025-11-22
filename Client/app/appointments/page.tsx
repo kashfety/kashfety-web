@@ -142,7 +142,7 @@ export default function MyAppointmentsPage() {
       const doctorAr = (a.doctor?.name_ar || a.doctor?.first_name_ar || '').toLowerCase()
       const specialtyEn = (a.specialty || '').toLowerCase()
       const specialtyAr = (a.doctor?.specialty_ar || '').toLowerCase()
-      
+
       return (
         doctorEn.includes(q) ||
         doctorAr.includes(q) ||
@@ -150,7 +150,37 @@ export default function MyAppointmentsPage() {
         specialtyAr.includes(q)
       )
     }
-    return appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
+
+    // Filter appointments
+    const filtered = appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
+
+    // Sort appointments with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
+    // Within each status group, sort by date (latest to oldest)
+    const statusOrder: Record<string, number> = {
+      'scheduled': 1,
+      'confirmed': 2,
+      'cancelled': 3,
+      'completed': 4
+    }
+
+    return filtered.sort((a, b) => {
+      const statusA = (a.status || '').toLowerCase()
+      const statusB = (b.status || '').toLowerCase()
+
+      // First, sort by status
+      const orderA = statusOrder[statusA] || 999
+      const orderB = statusOrder[statusB] || 999
+
+      if (orderA !== orderB) {
+        return orderA - orderB
+      }
+
+      // Within same status, sort by date (latest to oldest)
+      const dateA = new Date(a.appointment_date + 'T' + a.appointment_time).getTime()
+      const dateB = new Date(b.appointment_date + 'T' + b.appointment_time).getTime()
+
+      return dateB - dateA // Descending order (latest first)
+    })
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 
   const showingCountText = useMemo(() => {
@@ -462,7 +492,7 @@ export default function MyAppointmentsPage() {
 
   const isAbsent = (appointment: Appointment) => {
     if (appointment.status !== 'scheduled' && appointment.status !== 'confirmed') return false;
-    
+
     try {
       const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const now = new Date();
@@ -745,9 +775,9 @@ export default function MyAppointmentsPage() {
       <CancelModal isOpen={cancelModalOpen} onClose={() => setCancelModalOpen(false)} appointment={selectedAppointment} onSuccess={handleModalSuccess} />
       <ReviewModal isOpen={reviewOpen} onClose={() => setReviewOpen(false)} appointmentId={selectedAppointment?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} patientId={user?.id || ''} onSuccess={() => { setReviewOpen(false); setReviewedIds(prev => new Set(prev).add(selectedAppointment?.id || '')); }} />
       <VisitSummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} appointmentId={selectedAppointment?.id || ''} patientId={user?.id || ''} doctorId={selectedAppointment?.doctor_id || ''} />
-      <BookingModal 
-        isOpen={isBookingModalOpen} 
-        onClose={() => setIsBookingModalOpen(false)} 
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
         initialMode="doctor"
         onSuccess={refreshAppointments}
       />

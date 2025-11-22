@@ -29,15 +29,18 @@ export function toArabicNumerals(value: number | string, locale?: Locale): strin
 export function formatPhoneNumber(phoneNumber: string | undefined | null, locale?: Locale): string {
   if (!phoneNumber) return '';
 
-  // Remove all non-digit characters
-  const digitsOnly = phoneNumber.replace(/\D/g, '');
+  // Handle composite keys (e.g. phone_PATIENT_id)
+  let cleanNumber = phoneNumber;
+  if (cleanNumber.includes('_PATIENT_')) {
+    cleanNumber = cleanNumber.split('_PATIENT_')[0];
+  }
 
   if (locale === 'ar') {
     // Convert to Arabic numerals
-    return toArabicNumerals(phoneNumber, locale);
+    return toArabicNumerals(cleanNumber, locale);
   }
 
-  return phoneNumber;
+  return cleanNumber;
 }
 
 /**

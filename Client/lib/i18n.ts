@@ -282,12 +282,48 @@ export function formatLocalizedNumber(value: number | string, locale: Locale, op
 }
 
 /**
+ * Format time string with AM/PM localization for Arabic
+ * Converts 24-hour format to 12-hour with proper AM/PM in Arabic (ص/م)
+ * @param timeString - Time string in 24-hour format (e.g., "09:00", "13:30")
+ * @param locale - Current locale
+ * @returns Formatted time string with localized numerals and AM/PM
+ */
+export function formatLocalizedTime(timeString: string, locale: Locale): string {
+  if (!timeString) return '';
+
+  // Parse the time string (handle both "HH:MM" and "HH:MM AM/PM" formats)
+  const timeMatch = timeString.match(/(\d{1,2}):(\d{2})/);
+  if (!timeMatch) return timeString;
+
+  let hours = parseInt(timeMatch[1]);
+  const minutes = timeMatch[2];
+
+  // Convert to 12-hour format
+  const isPM = hours >= 12;
+  const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+
+  const formattedTime = `${hours12.toString().padStart(2, '0')}:${minutes}`;
+
+  if (locale === 'ar') {
+    // Convert to Arabic numerals and add Arabic AM/PM
+    const arabicTime = toArabicNumerals(formattedTime, locale);
+    const period = isPM ? 'م' : 'ص'; // م for PM (مساءً), ص for AM (صباحاً)
+    return `${arabicTime} ${period}`;
+  }
+
+  // For English, add AM/PM
+  const period = isPM ? 'PM' : 'AM';
+  return `${formattedTime} ${period}`;
+}
+
+/**
+ * Legacy function - kept for backward compatibility
  * Format time string for appointment display with locale support
  * @param timeString - Time string (e.g., "09:00 AM")
  * @param locale - Current locale
  * @returns Formatted time string
  */
-export function formatLocalizedTime(timeString: string, locale: Locale): string {
+export function formatLocalizedTimeSimple(timeString: string, locale: Locale): string {
   if (locale === 'ar') {
     return toArabicNumerals(timeString, locale);
   }

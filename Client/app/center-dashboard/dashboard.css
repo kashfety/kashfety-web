@@ -84,15 +84,15 @@
 
 /* Pie Chart Tooltip Styling */
 .pie-chart-tooltip {
-  color: #1f2937 !important;
+  color: #10B981 !important;
 }
 
 .pie-chart-tooltip * {
-  color: #1f2937 !important;
+  color: #10B981 !important;
 }
 
 .pie-chart-tooltip .recharts-tooltip-content {
-  background-color: rgba(255, 255, 255, 0.98) !important;
+  background-color: rgba(16, 24, 35, 0.98) !important;
   color: #1f2937 !important;
   border: 2px solid #10B981 !important;
   border-radius: 12px !important;

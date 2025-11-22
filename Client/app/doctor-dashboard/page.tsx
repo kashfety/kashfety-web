@@ -270,14 +270,14 @@ function Sidebar({
     return (
       <button
         onClick={() => handleNavigation(tab)}
-        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-${isRTL ? 'right' : 'left'} ${isActive
-          ? `bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-${isRTL ? 'l' : 'r'}-2 border-blue-500`
+        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'} ${isActive
+          ? `bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ${isRTL ? 'border-l-2' : 'border-r-2'} border-blue-500`
           : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
           } ${isCollapsed ? 'justify-center' : ''}`}
         title={isCollapsed ? children?.toString() : ''}
       >
         <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : isRTL ? 'ml-3' : 'mr-3'}`} />
-        {!isCollapsed && <span className={isRTL ? 'mr-3' : 'ml-3'}>{children}</span>}
+        {!isCollapsed && <span>{children}</span>}
       </button>
     );
   }
@@ -307,24 +307,12 @@ function Sidebar({
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t('dd_portal') || 'Doctor Portal'}
-              </span>
+              {!isCollapsed && (
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {t('dd_portal') || 'Doctor Portal'}
+                </span>
+              )}
             </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex-1 overflow-y-auto py-4 px-4">
-            {/* Remove the expand button section */}
-            {false && (
-              <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors absolute top-4 right-2"
-                title={t('dd_expand_sidebar') || "Expand sidebar"}
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </button>
-            )}
           </div>
 
           {/* Navigation */}
@@ -336,7 +324,7 @@ function Sidebar({
                     {t('dd_dashboard') || 'Dashboard'}
                   </div>
                 )}
-                <div className={isCollapsed ? 'space-y-2' : ''}>
+                <div className="space-y-1">
                   <NavItem tab="overview" icon={Home} isActive={activeTab === "overview"}>
                     {t('dd_overview_tab') || 'Overview'}
                   </NavItem>
@@ -361,7 +349,7 @@ function Sidebar({
                     {t('dd_management_section') || 'Management'}
                   </div>
                 )}
-                <div className={isCollapsed ? 'space-y-2' : ''}>
+                <div className="space-y-1">
                   <NavItem tab="schedule" icon={Clock} isActive={activeTab === "schedule"}>
                     {t('dd_schedule_tab') || 'Schedule'}
                   </NavItem>
@@ -373,13 +361,6 @@ function Sidebar({
                   </NavItem>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Bottom Navigation */}
-          <div className={`py-4 border-t border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-4'}`}>
-            <div>
-
             </div>
           </div>
         </div>
@@ -1288,13 +1269,13 @@ export default function DoctorDashboard() {
                 </div>
 
                 {/* Emerald Hero and Live Status like new UI */}
-                <div className="relative p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/30 dark:via-transparent dark:to-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-emerald-950/30 dark:via-transparent dark:to-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow">
                       <Stethoscope className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-emerald-800 dark:text-emerald-300">Doctor Professional Dashboard</h3>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <h3 className="text-xl font-semibold text-emerald-800 dark:text-emerald-300">{t('dd_professional_dashboard') || 'Doctor Professional Dashboard'}</h3>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_practice_overview') || "Here's your comprehensive practice overview for today"}</p>
                     </div>
                   </div>
@@ -2003,10 +1984,10 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="schedule" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_schedule_title') || 'Schedule'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_availability') || 'Manage your availability and time slots'}</p>
                     </div>
@@ -2024,10 +2005,10 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="centers" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Building2 className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_centers_title') || 'Centers'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
                     </div>
@@ -2039,10 +2020,10 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="reviews" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_reviews_title') || 'Reviews & Ratings'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_reviews_subtitle') || 'View feedback from your patients'}</p>
                     </div>
@@ -2150,10 +2131,10 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="profile" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_profile_settings_title') || 'Profile Settings'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_update_practice_info') || 'Update your personal and practice information'}</p>
                     </div>

@@ -2389,14 +2389,37 @@ export default function CenterDashboardPage() {
 
       // Create stats from appointment data
       const upcomingBookings = appointmentData;
-      const completedToday = upcomingBookings.filter((b: any) => b.status === 'completed').length;
+
+      // Sort appointments: Scheduled -> Confirmed -> Cancelled -> Completed, then by date (latest to oldest)
+      const statusOrder: Record<string, number> = {
+        'scheduled': 1,
+        'confirmed': 2,
+        'cancelled': 3,
+        'completed': 4
+      };
+
+      const sortedBookings = [...upcomingBookings].sort((a, b) => {
+        const statusA = statusOrder[a.status?.toLowerCase()] || 999;
+        const statusB = statusOrder[b.status?.toLowerCase()] || 999;
+
+        if (statusA !== statusB) {
+          return statusA - statusB;
+        }
+
+        // Within same status, sort by date (latest to oldest)
+        const dateA = new Date(a.appointment_date || a.booking_date || 0).getTime();
+        const dateB = new Date(b.appointment_date || b.booking_date || 0).getTime();
+        return dateB - dateA;
+      });
+
+      const completedToday = sortedBookings.filter((b: any) => b.status === 'completed').length;
       // Only count scheduled and confirmed appointments for upcoming count
-      const upcomingCount = upcomingBookings.filter((b: any) => b.status === 'scheduled' || b.status === 'confirmed').length;
+      const upcomingCount = sortedBookings.filter((b: any) => b.status === 'scheduled' || b.status === 'confirmed').length;
       // Only count revenue from completed appointments
-      const revenueToday = upcomingBookings
+      const revenueToday = sortedBookings
         .filter((b: any) => b.status === 'completed')
         .reduce((sum: number, b: any) => sum + (Number(b.fee) || 0), 0);
-      const nextAppointment = upcomingBookings.find((b: any) => b.status === 'scheduled' || b.status === 'confirmed');
+      const nextAppointment = sortedBookings.find((b: any) => b.status === 'scheduled' || b.status === 'confirmed');
 
       setTodayStats({
         stats: {
@@ -2410,7 +2433,7 @@ export default function CenterDashboardPage() {
             type: nextAppointment.test_type_name || 'Lab Test'
           } : null
         },
-        appointments: upcomingBookings
+        appointments: sortedBookings
       });
 
       // Service states are already set from lab test types API above
@@ -3181,7 +3204,7 @@ export default function CenterDashboardPage() {
                               <div className={isRTL ? 'text-right' : 'text-left'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
+                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_date ? formatLocalizedDate(appointment.appointment_date, locale, 'short') : appointment.booking_date ? formatLocalizedDate(appointment.booking_date, locale, 'short') : ''} {appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
                                 </p>
                               </div>
                             </div>

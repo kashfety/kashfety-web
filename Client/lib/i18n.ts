@@ -2019,7 +2019,6 @@ export const translations = {
     status_cancelled: "Cancelled",
     cd_confirm: "Confirm",
     cd_complete: "Complete",
-    age: "Age",
   },
   ar: {
     // Navigation

@@ -331,7 +331,7 @@ export default function DoctorScheduleCalendar({
                     <div className="overflow-x-auto">
                         <div className="min-w-full relative">
                             {/* Sticky Header Row */}
-                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>>
+                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>
                                 <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700">
                                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                                         <Clock className="w-4 h-4" />

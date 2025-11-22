@@ -3013,10 +3013,9 @@ export default function CenterDashboardPage() {
   const handleViewPatient = async (patientId: string, patientName?: string) => {
     try {
       // Load comprehensive patient data using proper API methods
-      const [patientResponse, labHistoryResponse, medicalRecordsResponse] = await Promise.all([
+      const [patientResponse, labHistoryResponse] = await Promise.all([
         centerService.getPatientDetails(patientId),
-        centerService.getPatientLabHistory(patientId),
-        centerService.getPatientMedicalRecords(patientId)
+        centerService.getPatientLabHistory(patientId)
       ]);
 
       let patientData: any = {
@@ -3029,8 +3028,19 @@ export default function CenterDashboardPage() {
         patientData = { ...patientData, ...patientResponse.patient };
       }
 
-      patientData.labHistory = labHistoryResponse?.labHistory || [];
-      patientData.medicalRecords = medicalRecordsResponse?.medicalRecords || [];
+      // Get all lab history and filter for completed appointments only, then take the 3 most recent
+      const allLabHistory = labHistoryResponse?.labHistory || [];
+      const completedAppointments = allLabHistory
+        .filter((appointment: any) => appointment.status === 'completed')
+        .sort((a: any, b: any) => {
+          // Sort by booking_date descending (most recent first)
+          const dateA = new Date(a.booking_date || a.appointment_date || 0);
+          const dateB = new Date(b.booking_date || b.appointment_date || 0);
+          return dateB.getTime() - dateA.getTime();
+        })
+        .slice(0, 3); // Take only the 3 most recent
+
+      patientData.recentVisits = completedAppointments;
 
       setSelectedPatient(patientData);
       setShowPatientModal(true);
@@ -3040,8 +3050,7 @@ export default function CenterDashboardPage() {
       setSelectedPatient({
         id: patientId,
         name: patientName || `Patient ${patientId}`,
-        labHistory: [],
-        medicalRecords: []
+        recentVisits: []
       });
       setShowPatientModal(true);
     }
@@ -4111,7 +4120,7 @@ export default function CenterDashboardPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Patient Basic Info */}
+              {/* Patient Basic Info - Contact Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_information')}</CardTitle>
@@ -4130,186 +4139,93 @@ export default function CenterDashboardPage() {
                       <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_phone')}</Label>
                       <Input value={selectedPatient.phone || t('cd_value_not_provided')} readOnly dir="ltr" className="text-left" />
                     </div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registered_date')}</Label>
-                      <Input value={selectedPatient.created_at ? formatLocalizedDate(selectedPatient.created_at, locale) : t('cd_value_not_provided')} readOnly dir="ltr" className="text-left" />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Past Lab Tests History with This Center */}
+              {/* Recent Visits (3 Most Recent Completed Appointments) */}
               <Card>
                 <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_lab_test_history')}</CardTitle>
+                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_recent_visits')}</CardTitle>
+                  <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {t('cd_last_3_completed_visits')}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {selectedPatient.labHistory?.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedPatient.labHistory.map((test: any, index: number) => (
-                        <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                              <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(test.lab_test_types, locale, 'name') || t('cd_unknown_test')}</p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <span dir="ltr">{test.booking_date ? formatLocalizedDate(test.booking_date, locale) : t('cd_date_not_available')}</span> • <span dir="ltr">{formatLocalizedNumber(test.fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
-                              </p>
-                            </div>
-                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <Badge className={`${test.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
-                                test.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
-                                  test.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700' :
-                                    test.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
-                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200 border-gray-300 dark:border-gray-700'
-                                }`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                {test.status === 'completed' ? (t('appointments_status_completed')) :
-                                  test.status === 'confirmed' ? (t('appointments_status_confirmed')) :
-                                    test.status === 'scheduled' ? (t('appointments_status_scheduled')) :
-                                      test.status === 'cancelled' ? (t('appointments_status_cancelled')) :
-                                        test.status}
-                              </Badge>
-                              {test.result_file_url && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                                  onClick={() => window.open(test.result_file_url, '_blank')}
-                                >
-                                  {t('cd_view_result')}
-                                </Button>
+                  {selectedPatient.recentVisits?.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedPatient.recentVisits.map((visit: any, index: number) => (
+                        <div key={index} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                          <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <TestTube className="w-5 h-5 text-emerald-600" />
+                                <p className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {getLocalizedNameUtil(visit.lab_test_types, locale, 'name') || visit.test_type_name || t('cd_unknown_test')}
+                                </p>
+                              </div>
+
+                              <div className={`space-y-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('cd_appointment_date')}:</strong> <span dir="ltr">{visit.booking_date || visit.appointment_date ? formatLocalizedDate(visit.booking_date || visit.appointment_date, locale) : t('cd_date_not_available')}</span>
+                                </p>
+                                {visit.booking_time && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <strong>{t('cd_appointment_time')}:</strong> <span dir="ltr">{formatLocalizedDate(new Date(`2000-01-01 ${visit.booking_time}`), locale, 'time')}</span>
+                                  </p>
+                                )}
+                                <p className="text-sm text-gray-600 dark:text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <strong>{t('fee')}:</strong> <span dir="ltr">{formatLocalizedNumber(visit.fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
+                                </p>
+                              </div>
+
+                              {/* Test Result Section */}
+                              {visit.result_file_url || visit.result_notes ? (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                  <p className={`text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {t('cd_test_result')}
+                                  </p>
+                                  {visit.result_notes && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-200 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <strong>{t('cd_notes')}:</strong> {visit.result_notes}
+                                    </p>
+                                  )}
+                                  {visit.result_file_url && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                      onClick={() => window.open(visit.result_file_url, '_blank')}
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      {t('cd_view_result')}
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                  <p className={`text-sm text-gray-500 dark:text-gray-400 italic ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {t('cd_no_result_uploaded')}
+                                  </p>
+                                </div>
                               )}
                             </div>
-                          </div>
-                          {test.result_notes && (
-                            <p className="text-sm text-gray-600 dark:text-gray-200 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <span className="font-medium">{t('cd_notes')}:</span> {test.result_notes}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_lab_history')}</p>
-                      <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_tests_yet')}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
 
-              {/* Patient Registration & Medical Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className={`text-lg ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_registration_info')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedPatient.medicalRecords?.length > 0 ? (
-                    <div className="space-y-6">
-                      {selectedPatient.medicalRecords.map((record: any, index: number) => (
-                        <div key={index} className="space-y-4">
-                          {/* Personal Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_personal_details')}</h4>
-                              <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_full_name')}:</strong> {getLocalizedNameUtil(record, locale, 'name') || t('cd_value_not_provided')}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_gender')}:</strong> {record.gender ? (record.gender.toLowerCase() === 'male' ? (t('gender_male')) : record.gender.toLowerCase() === 'female' ? (t('gender_female')) : record.gender) : (t('cd_value_not_provided'))}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_dob')}:</strong> <span dir="ltr">{record.date_of_birth ? formatLocalizedDate(record.date_of_birth, locale) : (t('cd_value_not_provided'))}</span>
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_phone')}:</strong> <span dir="ltr">{record.phone || (t('cd_value_not_provided'))}</span>
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  <strong>{t('cd_patient_email')}:</strong> <span dir="ltr">{record.email || (t('cd_value_not_provided'))}</span>
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Emergency Contact */}
-                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                              <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_emergency_contact')}</h4>
-                              <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                {record.emergency_contact && Object.keys(record.emergency_contact).length > 0 ? (
-                                  <>
-                                    {record.emergency_contact.name && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_contact_name')}:</strong> {record.emergency_contact.name}
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.phone && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_patient_phone')}:</strong> <span dir="ltr">{record.emergency_contact.phone}</span>
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.relationship && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_contact_relationship')}:</strong> {record.emergency_contact.relationship}
-                                      </p>
-                                    )}
-                                    {record.emergency_contact.email && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                        <strong>{t('cd_patient_email')}:</strong> <span dir="ltr">{record.emergency_contact.email}</span>
-                                      </p>
-                                    )}
-                                  </>
-                                ) : (
-                                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_emergency_contact')}</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Medical History */}
-                          <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_medical_history')}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_medical_history')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.medical_history || (t('cd_no_medical_history'))}
-                                </p>
-                              </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_patient_allergies')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.allergies || (t('cd_no_allergies'))}
-                                </p>
-                              </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_medications')}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {record.medications || (t('cd_no_medications'))}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Registration Details */}
-                          <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                            <h4 className={`font-medium text-gray-900 dark:text-white mb-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_registration_details')}</h4>
-                            <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                              <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <strong>{t('cd_registered_date')}:</strong> <span dir="ltr">{record.created_at ? formatLocalizedDate(record.created_at, locale) : (t('cd_unknown'))}</span>
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <strong>{t('cd_last_updated_date')}:</strong> <span dir="ltr">{record.updated_at ? formatLocalizedDate(record.updated_at, locale) : (t('cd_not_updated'))}</span>
-                              </p>
-                            </div>
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700 ml-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {t('completed')}
+                            </Badge>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Heart className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="text-gray-500 dark:text-gray-400">{t('cd_no_patient_registration')}</p>
-                      <p className="text-sm text-gray-400 mt-1">{t('cd_registration_details_appear')}</p>
+                      <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                      <p className="text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_completed_visits')}</p>
+                      <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completed_visits_will_appear')}</p>
                     </div>
                   )}
                 </CardContent>

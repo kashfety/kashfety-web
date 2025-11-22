@@ -3031,8 +3031,8 @@ export default function CenterDashboardPage() {
         patientData = { ...patientData, ...patientResponse.patient };
       }
 
-      // Get all lab history and filter for completed appointments only, then take the 3 most recent
-      const allLabHistory = labHistoryResponse?.labHistory || [];
+      // Get all lab history - API returns 'bookings' not 'labHistory'
+      const allLabHistory = labHistoryResponse?.bookings || labHistoryResponse?.labHistory || [];
       console.log('📋 [View Patient] All Lab History:', allLabHistory);
       console.log('📋 [View Patient] Total appointments:', allLabHistory.length);
 

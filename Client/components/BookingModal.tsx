@@ -1507,9 +1507,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          <DialogContent 
-            className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] !overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-            style={{ overflowX: 'hidden', maxWidth: '100%' }}
+          <DialogContent
+            className="max-w-2xl w-full max-h-[90vh] !overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
+            style={{ overflowX: 'hidden' }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -1520,8 +1520,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 duration: 0.4,
                 bounce: 0.25
               }}
-              className="rounded-2xl overflow-hidden w-full max-w-full"
-              style={{ overflowX: 'hidden', maxWidth: '100%' }}
+              className="rounded-2xl overflow-hidden"
+              style={{ overflowX: 'hidden' }}
             >
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
@@ -1536,9 +1536,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 </DialogHeader>
               </motion.div>
 
-              <div 
-                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 w-full max-w-full box-border"
-                style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box', scrollbarGutter: 'stable', contain: 'paint', paddingRight: '4px' }}
+              <div
+                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 box-border"
+                style={{ overflowX: 'hidden', boxSizing: 'border-box', scrollbarGutter: 'stable', contain: 'paint', paddingRight: '4px' }}
               >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">

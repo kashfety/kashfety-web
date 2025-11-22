@@ -31,6 +31,7 @@ interface Doctor {
   specialty: string;
   experience_years: number;
   profile_picture: string;
+  profile_picture_url?: string;
   consultation_fee: number;
   rating: number;
   home_available?: boolean;
@@ -1508,8 +1509,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
           <DialogContent
-            className="max-w-2xl w-full max-h-[90vh] !overflow-x-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-            style={{ overflowX: 'hidden' }}
+            className="max-w-4xl w-full max-h-[85vh] overflow-hidden border-2 border-[#4DBCC4]/20 dark:border-[#4DBCC4]/40 p-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -1520,8 +1520,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                 duration: 0.4,
                 bounce: 0.25
               }}
-              className="rounded-2xl overflow-hidden"
-              style={{ overflowX: 'hidden' }}
+              className="rounded-2xl overflow-hidden h-full"
             >
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
@@ -1537,8 +1536,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
               </motion.div>
 
               <div
-                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto !overflow-x-hidden bg-white dark:bg-gray-900 box-border"
-                style={{ overflowX: 'hidden', boxSizing: 'border-box', scrollbarGutter: 'stable', contain: 'paint', paddingRight: '4px' }}
+                className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900"
+                style={{ scrollbarGutter: 'stable' }}
               >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
@@ -1882,7 +1881,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-5 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-4">
                                   <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture_url || doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-3">
@@ -2014,7 +2013,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-5">
                                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-[#4DBCC4] transition-all">
-                                    <Image src={doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
+                                    <Image src={doctor.profile_picture_url || doctor.profile_picture || '/default-avatar.jpg'} alt={getLocalizedName(doctor)} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-3">

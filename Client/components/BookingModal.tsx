@@ -1675,8 +1675,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         <div className="grid grid-cols-2 gap-5 p-2 mb-5">
                           <Card
                             className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${tempSearchMethod === "centers"
-                                ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
-                                : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
+                              ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                              : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
                               }`}
                             onClick={() => setTempSearchMethod("centers")}
                           >
@@ -1689,8 +1689,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
                           <Card
                             className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${tempSearchMethod === "doctors"
-                                ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
-                                : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
+                              ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                              : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
                               }`}
                             onClick={() => setTempSearchMethod("doctors")}
                           >
@@ -1705,13 +1705,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     )}
 
                     <Button
-                      onClick={() => {
+                      onClick={async () => {
                         if (tempSearchMethod) {
+                          // Set searchMethod first
                           setSearchMethod(tempSearchMethod);
-                          handleSpecialtySelect();
-                        } else {
-                          handleSpecialtySelect();
+                          // Wait for state to update, then proceed
+                          await new Promise(resolve => setTimeout(resolve, 0));
                         }
+                        handleSpecialtySelect();
                       }}
                       disabled={!selectedSpecialty || !selectedLocation || (!tempSearchMethod && selectedLocation !== "home")}
                       className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"

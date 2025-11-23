@@ -2527,39 +2527,33 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             ) : (
                               <div>
                                 <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
-                                  {availableSlots.map((slot, index) => (
+                                  {availableSlots.filter(slot => slot.is_available && !slot.is_booked).map((slot, index) => (
                                     <motion.div
                                       key={slot.time}
                                       initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ delay: index * 0.03 }}
-                                      whileHover={slot.is_available && !slot.is_booked ? { scale: 1.05, y: -2 } : {}}
-                                      whileTap={slot.is_available && !slot.is_booked ? { scale: 0.95 } : {}}
+                                      whileHover={{ scale: 1.05, y: -2 }}
+                                      whileTap={{ scale: 0.95 }}
                                     >
                                       <Button
                                         variant={selectedTime === slot.time ? "default" : "outline"}
                                         size="lg"
                                         onClick={() => setSelectedTime(slot.time)}
-                                        disabled={slot.is_booked || !slot.is_available}
                                         className={`
                                 w-full font-bold text-base py-6
-                                ${slot.is_booked || !slot.is_available
-                                            ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
-                                            : selectedTime === slot.time
-                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
-                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                ${selectedTime === slot.time
+                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
+                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                       >
                                         {slot.time}
-                                        {slot.is_booked && (
-                                          <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
-                                        )}
                                       </Button>
                                     </motion.div>
                                   ))}
                                 </div>
 
-                                {availableSlots.length === 0 && (
+                                {availableSlots.filter(slot => slot.is_available && !slot.is_booked).length === 0 && (
                                   <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
                                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                                       <Clock className="w-8 h-8 text-red-500" />

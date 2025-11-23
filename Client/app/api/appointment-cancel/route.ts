@@ -53,18 +53,37 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get user ID from token
+    // Get user ID from token and fetch role from database
     let userId = null;
+    let userRoleFromDB = null;
+
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '');
         const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         const { data: { user } } = await supabaseAuth.auth.getUser(token);
         userId = user?.id;
+
+        // Fetch user role from database instead of relying on token metadata
+        if (userId) {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', userId)
+            .single();
+
+          if (!userError && userData) {
+            userRoleFromDB = userData.role;
+            console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
+          }
+        }
       } catch (error) {
         console.log('⚠️ Could not get user ID:', error);
       }
     }
+
+    // Use database role instead of token role
+    userRole = userRoleFromDB || userRole;
 
     // First, check if the appointment exists and get doctor_id
     const { data: appointment, error: fetchError } = await supabase
@@ -88,7 +107,8 @@ export async function PUT(request: NextRequest) {
       doctorId: appointment.doctor_id,
       patientId: appointment.patient_id,
       isAppointmentDoctor,
-      userRole
+      userRole,
+      userRoleFromDB
     });
 
     // Check if appointment is already cancelled
@@ -108,7 +128,9 @@ export async function PUT(request: NextRequest) {
       isDoctorOrAdmin,
       isAppointmentDoctor,
       canBypassRestrictions,
-      userRole
+      userRole,
+      userRoleFromDB,
+      userId
     });
 
     if (appointment.appointment_date && appointment.appointment_time) {
@@ -141,7 +163,7 @@ export async function PUT(request: NextRequest) {
             success: false,
             message: 'Cannot cancel a past appointment',
             code: 'APPOINTMENT_IN_PAST',
-            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userRoleFromDB, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
 
@@ -153,7 +175,7 @@ export async function PUT(request: NextRequest) {
             message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
             code: 'CANCELLATION_TOO_LATE',
             hoursRemaining: hoursUntilAppointment,
-            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userRoleFromDB, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
       } else {

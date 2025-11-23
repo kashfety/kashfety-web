@@ -812,7 +812,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
+            <div className={isRTL ? 'text-right' : 'text-left'}>
               <Label className="text-base font-medium">{t('dd_select_center_manage') || 'Select Center to Manage Schedule'}</Label>
               <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_center_selection_desc') || 'Choose which medical center you want to set your schedule for. You can only manage schedules for centers assigned to you.'}</p>
             </div>
@@ -823,8 +823,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                   <div
                     key={center.id}
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedCenterId === center.id
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
                       }`}
                     onClick={() => {
                       setSelectedCenterId(center.id);

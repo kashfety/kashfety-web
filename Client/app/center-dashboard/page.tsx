@@ -3202,7 +3202,7 @@ export default function CenterDashboardPage() {
                   <CardContent>
                     <div className="space-y-4">
                       {todayStats?.appointments?.length > 0 ? todayStats.appointments.map((appointment: any, index: number) => (
-                        <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 space-y-3 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800">
+                        <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 space-y-3 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800" dir={isRTL ? 'rtl' : 'ltr'}>
                           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <div className={`w-3 h-3 rounded-full ${appointment.status === 'completed' ? 'bg-green-500' :
@@ -3211,9 +3211,15 @@ export default function CenterDashboardPage() {
                                     'bg-yellow-500'
                                 }`}></div>
                               <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
-                                  {getLocalizedNameUtil(appointment, locale, 'test_type_name')} • <span dir="ltr">{appointment.appointment_date ? formatLocalizedDate(appointment.appointment_date, locale, 'short') : appointment.booking_date ? formatLocalizedDate(appointment.booking_date, locale, 'short') : ''} {appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}</span> • <span dir="ltr">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
+                                <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
+                                <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'space-x-reverse' : ''}`}>
+                                  <span>{getLocalizedNameUtil(appointment, locale, 'test_type_name')}</span>
+                                  <span className={isRTL ? 'mr-1' : 'ml-1'}>•</span>
+                                  <span dir="ltr" className="inline-block">
+                                    {appointment.appointment_date ? formatLocalizedDate(appointment.appointment_date, locale, 'short') : appointment.booking_date ? formatLocalizedDate(appointment.booking_date, locale, 'short') : ''} {appointment.appointment_time ? formatLocalizedTime(appointment.appointment_time, locale) : appointment.booking_time ? formatLocalizedTime(appointment.booking_time, locale) : t('cd_na')}
+                                  </span>
+                                  <span className={isRTL ? 'mr-1' : 'ml-1'}>•</span>
+                                  <span dir="ltr" className="inline-block">{formatLocalizedNumber(appointment.fee || appointment.consultation_fee || 0, locale, { style: 'currency', currency: t('currency') })}</span>
                                 </p>
                               </div>
                             </div>
@@ -3221,7 +3227,7 @@ export default function CenterDashboardPage() {
                               appointment.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
                                 appointment.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
                                   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700'
-                              }`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              }`}>
                               {appointment.status === 'completed' ? (t('appointments_status_completed')) :
                                 appointment.status === 'confirmed' ? (t('appointments_status_confirmed')) :
                                   appointment.status === 'cancelled' ? (t('appointments_status_cancelled')) :
@@ -3231,26 +3237,26 @@ export default function CenterDashboardPage() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className={`flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             {appointment.status === 'scheduled' && (
                               <>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_confirm')}
+                                  <CheckCircle className="w-4 h-4" />
+                                  <span>{t('cd_confirm')}</span>
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
-                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_cancel')}
+                                  <XCircle className="w-4 h-4" />
+                                  <span>{t('cd_cancel')}</span>
                                 </Button>
                               </>
                             )}
@@ -3260,19 +3266,19 @@ export default function CenterDashboardPage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
-                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cd_complete')}
+                                  <CheckCircle className="w-4 h-4" />
+                                  <span>{t('cd_complete')}</span>
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
-                                  className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                  <XCircle className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                  {t('cancel')}
+                                  <XCircle className="w-4 h-4" />
+                                  <span>{t('cancel')}</span>
                                 </Button>
                               </>
                             )}
@@ -3281,28 +3287,28 @@ export default function CenterDashboardPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleUploadResult(appointment)}
-                                className={`${isRTL ? 'flex-row-reverse' : ''}`}
+                                className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                               >
-                                <Upload className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                {t('cd_upload_result')}
+                                <Upload className="w-4 h-4" />
+                                <span>{t('cd_upload_result')}</span>
                               </Button>
                             )}
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewPatient(appointment.patient_id, appointment.patient_name)}
-                              className={`${isRTL ? 'flex-row-reverse' : ''} hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`}
+                              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`}
                             >
-                              <User className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                              {t('cd_view_patient')}
+                              <User className="w-4 h-4" />
+                              <span>{t('cd_view_patient')}</span>
                             </Button>
                           </div>
                         </div>
                       )) : (
                         <div className="text-center py-8">
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_appointments_today')}</p>
-                          <p className="text-sm text-gray-400 mt-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointments_will_appear')}</p>
+                          <p className="text-gray-500 dark:text-gray-400 text-center">{t('cd_no_appointments_today')}</p>
+                          <p className="text-sm text-gray-400 mt-1 text-center">{t('cd_appointments_will_appear')}</p>
                         </div>
                       )}
                     </div>

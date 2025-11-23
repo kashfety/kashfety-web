@@ -397,8 +397,8 @@ export default function DoctorCenterManagement() {
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
           <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('dd_add_center') || 'Add Center / Clinic'}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <CardContent className={`space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${isRTL ? 'md:grid-flow-col md:auto-cols-fr' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
             <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
             <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />

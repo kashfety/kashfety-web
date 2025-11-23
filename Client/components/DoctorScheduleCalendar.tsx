@@ -329,7 +329,7 @@ export default function DoctorScheduleCalendar({
             <div className="relative z-10">
                 <div className="shadow-2xl border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
-                        <div className="min-w-full relative">
+                        <div className="min-w-full relative" dir={isRTL ? 'rtl' : 'ltr'}>
                             {/* Sticky Header Row */}
                             <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>
                                 <div className={`p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -370,7 +370,7 @@ export default function DoctorScheduleCalendar({
                                     })()
                                 ) : (
                                     // Multiple day headers for week view
-                                    (isRTL ? Object.keys(appointmentsByDate).reverse() : Object.keys(appointmentsByDate)).map((dateStr) => {
+                                    Object.keys(appointmentsByDate).map((dateStr) => {
                                         const date = new Date(dateStr + 'T00:00:00');
                                         const isToday = date.toDateString() === new Date().toDateString();
                                         return (
@@ -486,7 +486,7 @@ export default function DoctorScheduleCalendar({
                                         })()
                                     ) : (
                                         // Multiple day columns for week view
-                                        (isRTL ? Object.keys(appointmentsByDate).reverse() : Object.keys(appointmentsByDate)).map((dateStr) => {
+                                        Object.keys(appointmentsByDate).map((dateStr) => {
                                             const appointment = getAppointmentForSlot(dateStr, timeSlot);
                                             const isToday = new Date(dateStr + 'T00:00:00').toDateString() === new Date().toDateString();
                                             return (

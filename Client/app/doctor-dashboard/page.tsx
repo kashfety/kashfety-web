@@ -1468,15 +1468,15 @@ export default function DoctorDashboard() {
                 </div>
                 <div className="space-y-6 scroll-animation" data-animation="slide-in-up">
                   {/* Today's and Upcoming Appointments */}
-                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-                    <CardHeader>
+                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
                       <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Calendar className="w-5 h-5" />
                         {t('dd_upcoming_schedule') || 'Upcoming Appointments'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className={`flex flex-wrap gap-2 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         {['all', 'scheduled', 'confirmed', 'cancelled', 'completed'].map((status) => (
                           <Button
                             key={status}

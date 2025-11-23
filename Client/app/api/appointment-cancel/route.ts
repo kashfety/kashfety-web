@@ -53,10 +53,23 @@ export async function PUT(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // First, check if the appointment exists
+    // Get user ID from token
+    let userId = null;
+    if (authHeader) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        const { data: { user } } = await supabaseAuth.auth.getUser(token);
+        userId = user?.id;
+      } catch (error) {
+        console.log('⚠️ Could not get user ID:', error);
+      }
+    }
+
+    // First, check if the appointment exists and get doctor_id
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
-      .select('id, status, appointment_date, appointment_time')
+      .select('id, status, appointment_date, appointment_time, doctor_id, patient_id')
       .eq('id', appointmentId)
       .single();
 
@@ -67,6 +80,16 @@ export async function PUT(request: NextRequest) {
         message: 'Appointment not found'
       }, { status: 404 });
     }
+
+    // Check if the user is the doctor for this appointment (alternative to role check)
+    const isAppointmentDoctor = userId && appointment.doctor_id === userId;
+    console.log('🔍 [Appointment Cancel] User check:', {
+      userId,
+      doctorId: appointment.doctor_id,
+      patientId: appointment.patient_id,
+      isAppointmentDoctor,
+      userRole
+    });
 
     // Check if appointment is already cancelled
     if (appointment.status === 'cancelled') {
@@ -79,6 +102,14 @@ export async function PUT(request: NextRequest) {
     // Check if cancellation is within 24 hours of appointment time
     // Note: Doctors and admins can cancel anytime, patients have 24-hour restriction
     const isDoctorOrAdmin = userRole === 'doctor' || userRole === 'admin' || userRole === 'super_admin';
+    const canBypassRestrictions = isDoctorOrAdmin || isAppointmentDoctor;
+
+    console.log('🔐 [Appointment Cancel] Authorization:', {
+      isDoctorOrAdmin,
+      isAppointmentDoctor,
+      canBypassRestrictions,
+      userRole
+    });
 
     if (appointment.appointment_date && appointment.appointment_time) {
       // Parse appointment date and time correctly
@@ -97,11 +128,11 @@ export async function PUT(request: NextRequest) {
         willBlock24h: hoursUntilAppointment < 24,
         willBlockPast: hoursUntilAppointment <= 0,
         userRole: userRole,
-        bypassingRestriction: isDoctorOrAdmin
+        bypassingRestriction: canBypassRestrictions
       });
 
-      // Only apply restrictions for patients
-      if (!isDoctorOrAdmin) {
+      // Only apply restrictions for patients (not doctors/admins or the appointment's doctor)
+      if (!canBypassRestrictions) {
         // Check if appointment is in the past
         if (hoursUntilAppointment <= 0) {
           return NextResponse.json({
@@ -121,7 +152,7 @@ export async function PUT(request: NextRequest) {
           }, { status: 400 });
         }
       } else {
-        console.log('✅ [Appointment Cancel] Doctor/Admin bypass - allowing cancellation regardless of time');
+        console.log('✅ [Appointment Cancel] User authorized to bypass time restrictions');
       }
     }    // Update the appointment status to cancelled
     console.log('💾 Cancelling appointment...');

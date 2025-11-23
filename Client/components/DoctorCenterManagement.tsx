@@ -395,7 +395,7 @@ export default function DoctorCenterManagement() {
       {/* Create new center (generic or personal clinic) */}
       <Card dir={isRTL ? 'rtl' : 'ltr'}>
         <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle>{t('dd_add_center') || 'Add Center / Clinic'}</CardTitle>
+          <CardTitle className={isRTL ? 'text-right' : 'text-left'}>{t('dd_add_center') || 'Add Center / Clinic'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

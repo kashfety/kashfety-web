@@ -74,10 +74,11 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'
 export default function SuperAdminOverview({ stats, loading, onRefresh, setActiveTab }: SuperAdminOverviewProps) {
     const [selectedPeriod, setSelectedPeriod] = useState('30');
     const router = useRouter();
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('ar-SY', {
+        const localeCode = locale === 'ar' ? 'ar-SY' : 'en-US';
+        return new Intl.NumberFormat(localeCode, {
             style: 'currency',
             currency: 'SYP',
             minimumFractionDigits: 0,

@@ -155,7 +155,9 @@ export default function MyAppointmentsPage() {
     const filtered = appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
 
     // Sort appointments with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
-    // Within each status group, sort by date (latest to oldest)
+    // Within each status group, sort by date:
+    // - Scheduled/Confirmed: earliest first (ascending)
+    // - Cancelled/Completed: latest first (descending)
     const statusOrder: Record<string, number> = {
       'scheduled': 1,
       'confirmed': 2,
@@ -175,11 +177,17 @@ export default function MyAppointmentsPage() {
         return orderA - orderB
       }
 
-      // Within same status, sort by date (latest to oldest)
+      // Within same status, sort by date
       const dateA = new Date(a.appointment_date + 'T' + a.appointment_time).getTime()
       const dateB = new Date(b.appointment_date + 'T' + b.appointment_time).getTime()
 
-      return dateB - dateA // Descending order (latest first)
+      // For scheduled and confirmed appointments, show earliest first (ascending)
+      // For cancelled and completed, show latest first (descending)
+      if (statusA === 'scheduled' || statusA === 'confirmed') {
+        return dateA - dateB // Ascending order (earliest first)
+      } else {
+        return dateB - dateA // Descending order (latest first)
+      }
     })
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 

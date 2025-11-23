@@ -513,8 +513,8 @@ export default function PatientDoctorsPage() {
                                         </div>
                                     </DialogHeader>
 
-                                    <Tabs defaultValue="overview" className="mt-6">
-                                        <TabsList className="grid w-full grid-cols-3">
+                                    <Tabs defaultValue="overview" className="mt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <TabsList className={`grid w-full grid-cols-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             <TabsTrigger value="overview">{t('overview') || 'Overview'}</TabsTrigger>
                                             <TabsTrigger value="centers">{t('centers') || 'Centers'}</TabsTrigger>
                                             <TabsTrigger value="contact">{t('contact') || 'Contact'}</TabsTrigger>

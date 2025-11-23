@@ -462,8 +462,8 @@ export default function PatientLabsPage() {
                                         </div>
                                     </DialogHeader>
 
-                                    <Tabs defaultValue="overview" className="mt-6">
-                                        <TabsList className="grid w-full grid-cols-3">
+                                    <Tabs defaultValue="overview" className="mt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <TabsList className={`grid w-full grid-cols-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             <TabsTrigger value="overview">{t('overview') || 'Overview'}</TabsTrigger>
                                             <TabsTrigger value="tests">{t('tests_tab') || 'Tests Available'}</TabsTrigger>
                                             <TabsTrigger value="contact">{t('contact') || 'Contact'}</TabsTrigger>

@@ -370,7 +370,7 @@ export default function DoctorScheduleCalendar({
                                     })()
                                 ) : (
                                     // Multiple day headers for week view
-                                    Object.keys(appointmentsByDate).map((dateStr) => {
+                                    (isRTL ? Object.keys(appointmentsByDate).reverse() : Object.keys(appointmentsByDate)).map((dateStr) => {
                                         const date = new Date(dateStr + 'T00:00:00');
                                         const isToday = date.toDateString() === new Date().toDateString();
                                         return (
@@ -486,7 +486,7 @@ export default function DoctorScheduleCalendar({
                                         })()
                                     ) : (
                                         // Multiple day columns for week view
-                                        Object.keys(appointmentsByDate).map((dateStr) => {
+                                        (isRTL ? Object.keys(appointmentsByDate).reverse() : Object.keys(appointmentsByDate)).map((dateStr) => {
                                             const appointment = getAppointmentForSlot(dateStr, timeSlot);
                                             const isToday = new Date(dateStr + 'T00:00:00').toDateString() === new Date().toDateString();
                                             return (

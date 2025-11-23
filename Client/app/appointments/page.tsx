@@ -104,6 +104,19 @@ export default function MyAppointmentsPage() {
   const [endDate, setEndDate] = useState<string>('') // YYYY-MM-DD
   const [searchText, setSearchText] = useState<string>('')
 
+  // Helper function to check if appointment is absent
+  const isAbsent = (appointment: Appointment) => {
+    if (appointment.status !== 'scheduled' && appointment.status !== 'confirmed') return false;
+
+    try {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      return appointmentDateTime < now;
+    } catch (e) {
+      return false;
+    }
+  }
+
   const filteredAppointments = useMemo(() => {
     const matchesStatus = (a: Appointment) => statusFilter === 'all' || (a.status || '').toLowerCase() === statusFilter
     const matchesType = (a: Appointment) => {
@@ -507,18 +520,6 @@ export default function MyAppointmentsPage() {
         return t('appointments_status_pending') || 'Pending'
       default:
         return s.charAt(0).toUpperCase() + s.slice(1)
-    }
-  }
-
-  const isAbsent = (appointment: Appointment) => {
-    if (appointment.status !== 'scheduled' && appointment.status !== 'confirmed') return false;
-
-    try {
-      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
-      const now = new Date();
-      return appointmentDateTime < now;
-    } catch (e) {
-      return false;
     }
   }
 

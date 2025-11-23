@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -26,35 +27,28 @@ export async function PUT(request: NextRequest) {
     let userId = null;
     let userRoleFromDB = null;
 
-    // Create two Supabase clients:
-    // 1. Anon client for validating JWT tokens
-    // 2. Service role client for database operations (bypasses RLS)
-    const supabaseAnon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '');
 
-        // Use anon client to properly validate the JWT token
-        const { data: { user }, error: authError } = await supabaseAnon.auth.getUser(token);
+        // Decode the custom JWT token (not Supabase Auth)
+        const decoded = jwt.verify(token, JWT_SECRET) as any;
 
-        if (authError) {
-          console.log('⚠️ Auth error:', authError);
-        } else if (user) {
-          userId = user.id;
-          // Try multiple sources for role
-          userRole = user.user_metadata?.role || user.app_metadata?.role || user.role;
-          console.log('👤 [Appointment Cancel] User details:', {
-            userId: user.id,
-            email: user.email,
-            role: userRole,
-            user_metadata: user.user_metadata,
-            app_metadata: user.app_metadata
+        if (decoded) {
+          userId = decoded.id;  // The user's database ID
+          userRole = decoded.role;  // The user's role from the token
+
+          console.log('👤 [Appointment Cancel] Decoded JWT:', {
+            userId: decoded.id,
+            uid: decoded.uid,
+            email: decoded.email,
+            role: decoded.role,
+            name: decoded.name
           });
 
-          // Fetch user role from database instead of relying on token metadata
-          // Use service role client for database query
+          // Optionally fetch fresh role from database for extra security
           const { data: userData, error: userError } = await supabase
             .from('users')
             .select('role')
@@ -67,20 +61,18 @@ export async function PUT(request: NextRequest) {
           } else if (userError) {
             console.log('⚠️ Could not fetch user role from database:', userError);
           }
+
+          // Use database role if available, otherwise use token role
+          userRole = userRoleFromDB || userRole;
         } else {
-          console.log('⚠️ Token validation failed - no user returned');
+          console.log('⚠️ Token validation failed - no payload returned');
         }
       } catch (error) {
-        console.log('⚠️ Could not determine user from token:', error);
+        console.log('⚠️ Could not decode JWT token:', error);
       }
     } else {
       console.log('⚠️ No authorization header provided');
-    }
-
-    // Use database role instead of token role
-    userRole = userRoleFromDB || userRole;
-
-    // First, check if the appointment exists and get doctor_id
+    }    // First, check if the appointment exists and get doctor_id
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
       .select('id, status, appointment_date, appointment_time, doctor_id, patient_id')

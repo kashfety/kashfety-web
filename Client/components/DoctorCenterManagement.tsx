@@ -323,8 +323,8 @@ export default function DoctorCenterManagement() {
             <Card
               key={center.id}
               className={`cursor-pointer transition-all ${isSelected
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'hover:border-gray-300 dark:hover:border-gray-600'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               onClick={() => toggleCenterSelection(center.id)}
               dir={isRTL ? 'rtl' : 'ltr'}
@@ -397,10 +397,10 @@ export default function DoctorCenterManagement() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input className="w-full rounded-md border px-3 py-2 bg-background" placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} />
-            <input className="w-full rounded-md border px-3 py-2 bg-background" placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} />
-            <input className="w-full rounded-md border px-3 py-2 bg-background" placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} />
-            <input className="w-full rounded-md border px-3 py-2 bg-background" placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} />
+            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
+            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
+            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
+            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
           </div>
           <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}><input type="radio" checked={newCenter.center_type === 'generic'} onChange={() => setNewCenter({ ...newCenter, center_type: 'generic' })} /> {t('generic_center') || 'Generic Center'}</label>

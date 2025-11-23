@@ -1010,11 +1010,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   };
 
   // Step navigation handlers (updated for 4-step flow)
-  const handleSpecialtySelect = async () => {
-    if (selectedSpecialty && selectedLocation && searchMethod) {
-      console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod });
+  const handleSpecialtySelect = async (method?: string) => {
+    const searchMethodToUse = method || searchMethod;
+    if (selectedSpecialty && selectedLocation && searchMethodToUse) {
+      console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod: searchMethodToUse });
 
-      if (searchMethod === "centers") {
+      if (searchMethodToUse === "centers") {
         // Fetch centers that have doctors with this specialty
         await fetchCentersBySpecialty(selectedSpecialty, selectedLocation);
       } else {
@@ -1707,12 +1708,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     <Button
                       onClick={async () => {
                         if (tempSearchMethod) {
-                          // Set searchMethod first
                           setSearchMethod(tempSearchMethod);
-                          // Wait for state to update, then proceed
-                          await new Promise(resolve => setTimeout(resolve, 0));
+                          await handleSpecialtySelect(tempSearchMethod);
+                        } else {
+                          await handleSpecialtySelect();
                         }
-                        handleSpecialtySelect();
                       }}
                       disabled={!selectedSpecialty || !selectedLocation || (!tempSearchMethod && selectedLocation !== "home")}
                       className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"

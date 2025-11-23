@@ -68,7 +68,7 @@ import BannerManagement from '@/components/admin/BannerManagement';
 import SpecialtyManagement from '@/components/admin/SpecialtyManagement';
 import LabTestTypesManagement from '@/components/admin/LabTestTypesManagement';
 
-interface DashboardStats {
+export interface DashboardStats {
     overview: {
         totalUsers: number;
         totalPatients: number;
@@ -96,17 +96,19 @@ interface DashboardStats {
     };
 }
 
-// Admin Sidebar Component
-function AdminSidebar({
+// Admin Sidebar Component - Exported for reuse in Super Admin
+export function AdminSidebar({
     activeTab,
     setActiveTab,
     toast,
-    user
+    user,
+    additionalSections
 }: {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     toast: any;
     user: any;
+    additionalSections?: React.ReactNode | ((activeTab: string, setActiveTab: (tab: string) => void) => React.ReactNode);
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { t, isRTL } = useLocale();
@@ -140,6 +142,11 @@ function AdminSidebar({
             </button>
         );
     }
+
+    // Render additional sections (can be function or ReactNode)
+    const renderedAdditionalSections = typeof additionalSections === 'function'
+        ? additionalSections(activeTab, setActiveTab)
+        : additionalSections;
 
     return (
         <>
@@ -176,6 +183,9 @@ function AdminSidebar({
                     {/* Navigation */}
                     <div className="flex-1 overflow-y-auto py-4 px-4">
                         <div className="space-y-6">
+                            {/* Render additional sections first (for super admin) */}
+                            {renderedAdditionalSections}
+
                             <div>
                                 <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                     {t('admin_dashboard') || 'Dashboard'}
@@ -400,14 +410,23 @@ function AdminTopNav({
     );
 }
 
-export default function AdminDashboardPage() {
+// Reusable Admin Dashboard Component - Exported for Super Admin
+export function AdminDashboard({
+    additionalSidebarSections,
+    additionalTabs,
+    defaultTab = 'overview'
+}: {
+    additionalSidebarSections?: React.ReactNode;
+    additionalTabs?: Record<string, React.ReactNode>;
+    defaultTab?: string;
+}) {
     const { user, loading } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const { theme } = useTheme();
     const { t, isRTL } = useLocale();
     const [mounted, setMounted] = useState(false);
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState(defaultTab);
     const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
 
@@ -529,7 +548,13 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className={`flex h-screen relative z-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} toast={toast} user={user} />
+                <AdminSidebar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    toast={toast}
+                    user={user}
+                    additionalSections={additionalSidebarSections}
+                />
 
                 <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
                     <header className="h-14 sm:h-16 border-b border-gray-200 dark:border-[#1F1F23] flex-shrink-0 relative">
@@ -639,6 +664,13 @@ export default function AdminDashboardPage() {
                                         <AdminProfileSettings />
                                     </div>
                                 )}
+
+                                {/* Render additional tabs */}
+                                {additionalTabs && additionalTabs[activeTab] && (
+                                    <div className="px-4 sm:px-6 py-4 sm:py-6">
+                                        {additionalTabs[activeTab]}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </main>
@@ -646,4 +678,9 @@ export default function AdminDashboardPage() {
             </div>
         </div>
     );
+}
+
+// Default Admin Dashboard Page Component
+export default function AdminDashboardPage() {
+    return <AdminDashboard />;
 }

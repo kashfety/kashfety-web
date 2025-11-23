@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function PUT(request: NextRequest) {
   try {
@@ -25,19 +26,22 @@ export async function PUT(request: NextRequest) {
     let userId = null;
     let userRoleFromDB = null;
 
+    // Create two Supabase clients:
+    // 1. Anon client for validating JWT tokens
+    // 2. Service role client for database operations (bypasses RLS)
+    const supabaseAnon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (authHeader) {
       try {
         const token = authHeader.replace('Bearer ', '');
-        const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
+        // Use anon client to properly validate the JWT token
+        const { data: { user }, error: authError } = await supabaseAnon.auth.getUser(token);
 
         if (authError) {
           console.log('⚠️ Auth error:', authError);
-        }
-
-        if (user) {
+        } else if (user) {
           userId = user.id;
           // Try multiple sources for role
           userRole = user.user_metadata?.role || user.app_metadata?.role || user.role;
@@ -50,18 +54,21 @@ export async function PUT(request: NextRequest) {
           });
 
           // Fetch user role from database instead of relying on token metadata
-          if (userId) {
-            const { data: userData, error: userError } = await supabase
-              .from('users')
-              .select('role')
-              .eq('id', userId)
-              .single();
+          // Use service role client for database query
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', userId)
+            .single();
 
-            if (!userError && userData) {
-              userRoleFromDB = userData.role;
-              console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
-            }
+          if (!userError && userData) {
+            userRoleFromDB = userData.role;
+            console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
+          } else if (userError) {
+            console.log('⚠️ Could not fetch user role from database:', userError);
           }
+        } else {
+          console.log('⚠️ Token validation failed - no user returned');
         }
       } catch (error) {
         console.log('⚠️ Could not determine user from token:', error);

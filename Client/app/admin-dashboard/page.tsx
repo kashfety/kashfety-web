@@ -416,8 +416,8 @@ export function AdminDashboard({
     additionalTabs,
     defaultTab = 'overview'
 }: {
-    additionalSidebarSections?: React.ReactNode;
-    additionalTabs?: Record<string, React.ReactNode>;
+    additionalSidebarSections?: React.ReactNode | ((activeTab: string, setActiveTab: (tab: string) => void) => React.ReactNode);
+    additionalTabs?: Record<string, React.ReactNode | ((stats: DashboardStats | null, loading: boolean, onRefresh: () => void, setActiveTab: (tab: string) => void) => React.ReactNode)>;
     defaultTab?: string;
 }) {
     const { user, loading } = useAuth();
@@ -668,7 +668,9 @@ export function AdminDashboard({
                                 {/* Render additional tabs */}
                                 {additionalTabs && additionalTabs[activeTab] && (
                                     <div className="px-4 sm:px-6 py-4 sm:py-6">
-                                        {additionalTabs[activeTab]}
+                                        {typeof additionalTabs[activeTab] === 'function'
+                                            ? (additionalTabs[activeTab] as Function)(dashboardStats, statsLoading, fetchDashboardStats, setActiveTab)
+                                            : additionalTabs[activeTab]}
                                     </div>
                                 )}
                             </div>

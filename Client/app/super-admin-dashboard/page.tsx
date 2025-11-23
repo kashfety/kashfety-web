@@ -58,11 +58,13 @@ export default function SuperAdminDashboardPage() {
         );
     };
 
-    // Define super admin specific tabs content
+    // Define super admin specific tabs content as functions that receive dashboard state
     const superAdminTabs = {
-        'super-overview': <SuperAdminOverview />,
-        'admin-management': <AdminManagement />,
-        'admin-activity': <AdminActivity />
+        'super-overview': (stats: any, loading: boolean, onRefresh: () => void, setActiveTab: (tab: string) => void) => (
+            <SuperAdminOverview stats={stats} loading={loading} onRefresh={onRefresh} setActiveTab={setActiveTab} />
+        ),
+        'admin-management': () => <AdminManagement />,
+        'admin-activity': () => <AdminActivity />
     };
 
     return (

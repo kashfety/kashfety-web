@@ -138,7 +138,9 @@ export default function MyLabsPage() {
     const filteredBookings = bookings.filter(b => statusOk(b) && catOk(b) && dateOk(b) && searchOk(b));
 
     // Sort bookings with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
-    // Within each status group, sort by date (latest to oldest)
+    // Within each status group, sort by date:
+    // - Scheduled/Confirmed: earliest first (ascending)
+    // - Cancelled/Completed: latest first (descending)
     const statusOrder: Record<string, number> = {
       'scheduled': 1,
       'confirmed': 2,
@@ -158,11 +160,17 @@ export default function MyLabsPage() {
         return orderA - orderB
       }
 
-      // Within same status, sort by date (latest to oldest)
+      // Within same status, sort by date
       const dateA = new Date(a.booking_date + 'T' + a.booking_time).getTime()
       const dateB = new Date(b.booking_date + 'T' + b.booking_time).getTime()
 
-      return dateB - dateA // Descending order (latest first)
+      // For scheduled and confirmed appointments, show earliest first (ascending)
+      // For cancelled and completed, show latest first (descending)
+      if (statusA === 'scheduled' || statusA === 'confirmed') {
+        return dateA - dateB // Ascending order (earliest first)
+      } else {
+        return dateB - dateA // Descending order (latest first)
+      }
     })
   }, [bookings, statusFilter, categoryFilter, startDate, endDate, searchText]);
 

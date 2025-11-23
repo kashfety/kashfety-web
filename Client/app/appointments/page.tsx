@@ -18,7 +18,7 @@ import BookingModal from "@/components/BookingModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, localizeSpecialty } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -333,11 +333,16 @@ export default function MyAppointmentsPage() {
         const appointmentTime = apt.appointment_time
 
         // Format date with proper locale
-        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+        let formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         })
+
+        // Convert to Arabic numerals for Arabic locale
+        if (locale === 'ar') {
+          formattedDate = toArabicNumerals(formattedDate, locale);
+        }
 
         console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
 
@@ -385,7 +390,9 @@ export default function MyAppointmentsPage() {
           appointment_date: apt.appointment_date,
           appointment_time: apt.appointment_time,
           doctor_id: apt.doctor_id || apt.doctor?.id || null,
-          center_id: apt.center_id || null
+          center_id: apt.center_id || null,
+          doctor: apt.doctor, // Keep doctor object for search functionality
+          center: center
         }
       })
 
@@ -659,7 +666,7 @@ export default function MyAppointmentsPage() {
                           {getLocalizedDoctorName(appointment)}
                         </CardTitle>
                         <CardDescription className="text-emerald-600 font-medium">
-                          {appointment.specialty}
+                          {localizeSpecialty(locale, appointment.specialty)}
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">

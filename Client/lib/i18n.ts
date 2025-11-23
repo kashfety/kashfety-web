@@ -1940,6 +1940,10 @@ export const translations = {
     profile_picture_no_image: "No profile picture uploaded",
     profile_picture_upload_hint: "Click to upload a new profile picture",
     profile_picture_supported_formats: "Supported formats: JPEG, PNG, WebP, GIF (Max 5MB)",
+    dp_picture_updated_title: "Profile Picture Updated!",
+    dp_picture_updated_desc: "Your profile picture has been uploaded successfully",
+    dp_profile_updated_title: "Profile Updated!",
+    dp_profile_updated_desc: "Your profile and consultation fee have been updated successfully",
 
     // Center Dashboard specific translations
     cd_center_name_arabic: "Center Name (Arabic)",
@@ -3792,6 +3796,10 @@ export const translations = {
     profile_picture_no_image: "لم يتم رفع صورة للملف الشخصي",
     profile_picture_upload_hint: "انقر لرفع صورة جديدة للملف الشخصي",
     profile_picture_supported_formats: "الصيغ المدعومة: JPEG, PNG, WebP, GIF (الحد الأقصى 5 ميجابايت)",
+    dp_picture_updated_title: "تم تحديث صورة الملف!",
+    dp_picture_updated_desc: "تم رفع صورة ملفك بنجاح",
+    dp_profile_updated_title: "تم تحديث الملف الشخصي!",
+    dp_profile_updated_desc: "تم تحديث ملفك ورسوم الاستشارة بنجاح",
 
     // Center Dashboard specific translations
     cd_center_name_arabic: "اسم المركز (بالعربية)",

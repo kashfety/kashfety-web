@@ -129,7 +129,6 @@ function SuperAdminSidebar({
     toast: any;
 }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const isCollapsed = false;
     const { t, isRTL } = useLocale();
 
     function handleNavigation(tab: string) {
@@ -154,11 +153,10 @@ function SuperAdminSidebar({
                 className={`w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'} ${isActive
                     ? `bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 ${isRTL ? 'border-l-2' : 'border-r-2'} border-yellow-500`
                     : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
-                    } ${isCollapsed ? 'justify-center' : ''}`}
-                title={isCollapsed ? children?.toString() : ''}
+                    }`}
             >
-                <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : isRTL ? 'ml-3' : 'mr-3'}`} />
-                {!isCollapsed && <span className={isRTL ? 'mr-3' : 'ml-3'}>{children}</span>}
+                <Icon className={`h-4 w-4 flex-shrink-0 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                <span className={isRTL ? 'mr-3' : 'ml-3'}>{children}</span>
             </button>
         );
     }
@@ -178,59 +176,33 @@ function SuperAdminSidebar({
           fixed inset-y-0 z-[70] bg-white dark:bg-[#0F0F12] transform transition-all duration-300 ease-in-out
           lg:translate-x-0 lg:static border-gray-200 dark:border-[#1F1F23]
           ${isRTL ? 'right-0 border-l' : 'left-0 border-r'}
-          ${isCollapsed ? 'lg:w-16 sidebar-collapsed' : 'lg:w-64'}
+          lg:w-64
           ${isMobileMenuOpen ? "translate-x-0 w-64" : isRTL ? "translate-x-full w-64" : "-translate-x-full w-64"}
         `}
             >
                 <div className="h-full flex flex-col">
                     {/* Logo */}
-                    <div className={`h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] ${isCollapsed ? 'px-2' : 'px-6'}`}>
-                        <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'gap-3'} ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] px-6">
+                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
                                 <Crown className="w-4 h-4 text-white" />
                             </div>
-                            {!isCollapsed && (
-                                <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    {t('super_admin_portal') || 'Super Admin'}
-                                </span>
-                            )}
+                            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {t('super_admin_portal') || 'Super Admin'}
+                            </span>
                         </div>
-
-                        {/* Collapse Button - Desktop Only */}
-                        {!isCollapsed && (
-                            <button
-                                onClick={() => setIsCollapsed(!isCollapsed)}
-                                className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors"
-                                title={t('admin_collapse_sidebar') || "Collapse sidebar"}
-                            >
-                                <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                            </button>
-                        )}
-
-                        {/* Expand Button when Collapsed */}
-                        {isCollapsed && (
-                            <button
-                                onClick={() => setIsCollapsed(!isCollapsed)}
-                                className={`hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F23] rounded-lg transition-colors absolute top-4 ${isRTL ? 'left-2' : 'right-2'}`}
-                                title={t('admin_expand_sidebar') || "Expand sidebar"}
-                            >
-                                <ChevronRight className={`w-4 h-4 text-gray-600 dark:text-gray-300 ${isRTL ? 'rotate-180' : ''}`} />
-                            </button>
-                        )}
                     </div>
 
                     {/* Navigation */}
-                    <div className={`flex-1 overflow-y-auto py-4 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                    <div className="flex-1 overflow-y-auto py-4 px-4">
                         <div className="space-y-6">
                             {/* Super Admin Section */}
                             <div>
-                                {!isCollapsed && (
-                                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">
-                                        <Crown className="inline h-3 w-3 mr-1" />
-                                        {t('super_admin_section') || 'Super Admin'}
-                                    </div>
-                                )}
-                                <div className={isCollapsed ? 'space-y-2' : ''}>
+                                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">
+                                    <Crown className="inline h-3 w-3 mr-1" />
+                                    {t('super_admin_section') || 'Super Admin'}
+                                </div>
+                                <div>
                                     <NavItem tab="super-overview" icon={Home} isActive={activeTab === "super-overview"}>
                                         {t('super_admin_overview') || 'Super Overview'}
                                     </NavItem>
@@ -246,14 +218,12 @@ function SuperAdminSidebar({
                                 </div>
                             </div>
 
-                            {/* Regular Admin Section */}
+                            {/* Dashboard Section */}
                             <div>
-                                {!isCollapsed && (
-                                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                        {t('super_admin_dashboard_section') || 'Admin Dashboard'}
-                                    </div>
-                                )}
-                                <div className={isCollapsed ? 'space-y-2' : ''}>
+                                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                    {t('super_admin_dashboard_section') || 'Dashboard'}
+                                </div>
+                                <div>
                                     <NavItem tab="overview" icon={BarChart3} isActive={activeTab === "overview"}>
                                         {t('super_admin_overview_tab') || 'Overview'}
                                     </NavItem>
@@ -271,12 +241,10 @@ function SuperAdminSidebar({
 
                             {/* Management Section */}
                             <div>
-                                {!isCollapsed && (
-                                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                        {t('super_admin_management_section') || 'Management'}
-                                    </div>
-                                )}
-                                <div className={isCollapsed ? 'space-y-2' : ''}>
+                                <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                    {t('super_admin_management_section') || 'Management'}
+                                </div>
+                                <div>
                                     <NavItem tab="doctor-approvals" icon={UserCheck} isActive={activeTab === "doctor-approvals"}>
                                         {t('super_admin_doctor_approvals') || 'Doctor Approvals'}
                                     </NavItem>

@@ -1886,8 +1886,8 @@ export default function DoctorDashboard() {
                   </div>
 
                   {/* Patient List */}
-                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-                    <CardHeader>
+                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
                       <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Users className="w-5 h-5" />
                         {t('patients') || 'Patients'}

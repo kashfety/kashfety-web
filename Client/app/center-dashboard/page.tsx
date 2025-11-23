@@ -3210,9 +3210,9 @@ export default function CenterDashboardPage() {
                                   appointment.status === 'cancelled' ? 'bg-red-500' :
                                     'bg-yellow-500'
                                 }`}></div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="font-medium text-gray-900 dark:text-white">{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'space-x-reverse' : ''}`}>
+                              <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
+                                <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right space-x-reverse' : 'text-left'}`}>
                                   <span>{getLocalizedNameUtil(appointment, locale, 'test_type_name')}</span>
                                   <span className={isRTL ? 'mr-1' : 'ml-1'}>•</span>
                                   <span dir="ltr" className="inline-block">

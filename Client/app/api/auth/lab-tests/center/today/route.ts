@@ -9,7 +9,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as strin
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
-  
+
   // Try backend first if JWT provided
   if (authHeader) {
     try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       console.log('📊 Backend response status:', response.status, response.statusText);
       const responseText = await response.text();
       console.log('📊 Backend response preview:', responseText.slice(0, 200));
-      
+
       if (response.ok) {
         const data = JSON.parse(responseText);
         return NextResponse.json(data);
@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
 
   // Supabase fallback: requires center_id query param
   if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
-  
+
   try {
     const centerId = searchParams.get('center_id');
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
-    
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // Get ALL upcoming bookings for this center (no date filter)
     console.log('Fetching ALL bookings for center:', centerId);
 
@@ -55,6 +55,11 @@ export async function GET(request: NextRequest) {
         ),
         patients:patient_id (
           name,
+          name_ar,
+          first_name,
+          first_name_ar,
+          last_name,
+          last_name_ar,
           email,
           phone
         )
@@ -75,14 +80,25 @@ export async function GET(request: NextRequest) {
       ...booking,
       // Map field names to match dashboard expectations
       patient_name: booking.patients?.name || 'Unknown Patient',
+      name: booking.patients?.name,
+      name_ar: booking.patients?.name_ar,
+      first_name: booking.patients?.first_name,
+      first_name_ar: booking.patients?.first_name_ar,
+      last_name: booking.patients?.last_name,
+      last_name_ar: booking.patients?.last_name_ar,
+      patient_phone: booking.patients?.phone || '',
+      patient_email: booking.patients?.email || '',
       test_type_name: booking.lab_test_types?.name || 'Unknown Test',
       appointment_date: booking.booking_date,
-      appointment_time: booking.booking_time
+      appointment_time: booking.booking_time,
+      appointment_type: booking.lab_test_types?.category || 'lab',
+      type: 'lab',
+      consultation_fee: booking.total_amount || booking.amount || booking.fee || 0
     }));
 
     console.log('Transformed bookings:', transformedBookings.length, 'bookings');
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       appointments: transformedBookings,
       bookings: transformedBookings // Keep both for compatibility

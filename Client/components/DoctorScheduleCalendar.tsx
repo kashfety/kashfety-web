@@ -258,8 +258,9 @@ export default function DoctorScheduleCalendar({
             </div>
 
             {/* Header */}
-            <div className={`relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                <div className={`space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className={`relative z-10 flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row' : 'sm:flex-row'} justify-between items-start sm:items-center mb-8 gap-4`}>
+                {/* Title Section - appears on right in RTL, left in LTR */}
+                <div className={`space-y-2 ${isRTL ? 'text-right order-2 sm:order-1' : 'text-left order-1'}`}>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-600 bg-clip-text text-transparent">
                         {t('dd_schedule_calendar') || 'Schedule Calendar'}
                     </h1>
@@ -268,7 +269,8 @@ export default function DoctorScheduleCalendar({
                     </p>
                 </div>
 
-                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {/* Controls Section - appears on left in RTL, right in LTR */}
+                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse order-1 sm:order-2' : 'order-2'}`}>
                     {/* View Mode Toggle */}
                     <div className="flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-white/20 dark:border-gray-700/20">
                         <Button

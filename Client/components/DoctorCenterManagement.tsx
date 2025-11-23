@@ -404,14 +404,16 @@ export default function DoctorCenterManagement() {
             <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
             <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
           </div>
-          <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
             <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}><input type="radio" checked={newCenter.center_type === 'generic'} onChange={() => setNewCenter({ ...newCenter, center_type: 'generic' })} /> {t('generic_center') || 'Generic Center'}</label>
             <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}><input type="radio" checked={newCenter.center_type === 'personal'} onChange={() => setNewCenter({ ...newCenter, center_type: 'personal', set_as_primary: true })} /> {t('personal_clinic') || 'Personal Clinic'}</label>
             <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}><input type="checkbox" checked={newCenter.set_as_primary} onChange={(e) => setNewCenter({ ...newCenter, set_as_primary: e.target.checked })} /> {t('set_as_primary') || 'Set as Primary'}</label>
           </div>
-          <Button onClick={createCenter} disabled={creating || !newCenter.name}>
-            {creating ? (t('saving') || 'Saving...') : (t('create') || 'Create')}
-          </Button>
+          <div className={isRTL ? 'flex justify-end' : 'flex justify-start'}>
+            <Button onClick={createCenter} disabled={creating || !newCenter.name}>
+              {creating ? (t('saving') || 'Saving...') : (t('create') || 'Create')}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

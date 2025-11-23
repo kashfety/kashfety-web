@@ -1598,17 +1598,11 @@ export default function DoctorDashboard() {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => {
-                                          setActiveTab("patients");
-                                          toast({
-                                            title: t('patients') || 'Patients',
-                                            description: t('viewing_patient_profile') || 'Viewing patient profile...',
-                                          });
-                                        }}
+                                        onClick={() => handleViewPatient(appointment.patient_id)}
                                         className="text-xs sm:text-sm whitespace-nowrap"
                                       >
                                         <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                        {t('patients') || 'Patients'}
+                                        {t('view_patient') || 'View Patient'}
                                       </Button>
                                       {['scheduled', 'confirmed'].includes(appointment.status) && (
                                         <Button

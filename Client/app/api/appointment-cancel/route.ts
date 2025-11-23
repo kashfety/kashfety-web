@@ -27,12 +27,28 @@ export async function PUT(request: NextRequest) {
       try {
         const token = authHeader.replace('Bearer ', '');
         const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const { data: { user } } = await supabaseAuth.auth.getUser(token);
-        userRole = user?.user_metadata?.role || user?.role;
-        console.log('👤 [Appointment Cancel] User role:', userRole);
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
+        if (authError) {
+          console.log('⚠️ Auth error:', authError);
+        }
+
+        if (user) {
+          // Try multiple sources for role
+          userRole = user.user_metadata?.role || user.app_metadata?.role || user.role;
+          console.log('👤 [Appointment Cancel] User details:', {
+            userId: user.id,
+            email: user.email,
+            role: userRole,
+            user_metadata: user.user_metadata,
+            app_metadata: user.app_metadata
+          });
+        }
       } catch (error) {
-        console.log('⚠️ Could not determine user role, applying default policy');
+        console.log('⚠️ Could not determine user role:', error);
       }
+    } else {
+      console.log('⚠️ No authorization header provided');
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -64,7 +80,7 @@ export async function PUT(request: NextRequest) {
     // Note: Doctors and admins can cancel anytime, patients have 24-hour restriction
     const isDoctorOrAdmin = userRole === 'doctor' || userRole === 'admin' || userRole === 'super_admin';
 
-    if (appointment.appointment_date && appointment.appointment_time && !isDoctorOrAdmin) {
+    if (appointment.appointment_date && appointment.appointment_time) {
       // Parse appointment date and time correctly
       const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const now = new Date();
@@ -84,26 +100,29 @@ export async function PUT(request: NextRequest) {
         bypassingRestriction: isDoctorOrAdmin
       });
 
-      // Check if appointment is in the past
-      if (hoursUntilAppointment <= 0) {
-        return NextResponse.json({
-          success: false,
-          message: 'Cannot cancel a past appointment',
-          code: 'APPOINTMENT_IN_PAST'
-        }, { status: 400 });
-      }
+      // Only apply restrictions for patients
+      if (!isDoctorOrAdmin) {
+        // Check if appointment is in the past
+        if (hoursUntilAppointment <= 0) {
+          return NextResponse.json({
+            success: false,
+            message: 'Cannot cancel a past appointment',
+            code: 'APPOINTMENT_IN_PAST'
+          }, { status: 400 });
+        }
 
-      // Block cancellation if less than 24 hours away (patients only)
-      if (hoursUntilAppointment < 24) {
-        return NextResponse.json({
-          success: false,
-          message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
-          code: 'CANCELLATION_TOO_LATE',
-          hoursRemaining: hoursUntilAppointment
-        }, { status: 400 });
+        // Block cancellation if less than 24 hours away (patients only)
+        if (hoursUntilAppointment < 24) {
+          return NextResponse.json({
+            success: false,
+            message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
+            code: 'CANCELLATION_TOO_LATE',
+            hoursRemaining: hoursUntilAppointment
+          }, { status: 400 });
+        }
+      } else {
+        console.log('✅ [Appointment Cancel] Doctor/Admin bypass - allowing cancellation regardless of time');
       }
-    } else if (isDoctorOrAdmin) {
-      console.log('✅ [Appointment Cancel] Doctor/Admin bypass - allowing cancellation regardless of time');
     }    // Update the appointment status to cancelled
     console.log('💾 Cancelling appointment...');
     const { data: updatedAppointment, error: updateError } = await supabase

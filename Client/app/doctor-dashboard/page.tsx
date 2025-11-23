@@ -991,6 +991,12 @@ export default function DoctorDashboard() {
           statusText: response.statusText,
           errorData
         });
+
+        // Log debug info if available
+        if (errorData.debug) {
+          console.log('🔍 [Cancel Appointment] Debug info:', errorData.debug);
+        }
+
         toast({
           title: t('error') || "Error",
           description: errorData.message || t('dd_error_cancel_appointment') || "Failed to cancel appointment",

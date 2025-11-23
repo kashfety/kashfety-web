@@ -349,14 +349,16 @@ export default function DoctorCenterManagement() {
                   </div>
 
                   {center.phone && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      📞 {center.phone}
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse' : 'flex items-center gap-1'}`}>
+                      <span>📞</span>
+                      <span>{center.phone}</span>
                     </p>
                   )}
 
                   {center.email && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      ✉️ {center.email}
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse' : 'flex items-center gap-1'}`}>
+                      <span>✉️</span>
+                      <span>{center.email}</span>
                     </p>
                   )}
 

@@ -2048,7 +2048,7 @@ export default function DoctorDashboard() {
                     <p className="ml-3 text-gray-600 dark:text-gray-400">{t('dd_loading_reviews') || 'Loading reviews...'}</p>
                   </div>
                 ) : reviews.length === 0 ? (
-                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                     <CardContent className="p-12 text-center">
                       <Star className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -2062,10 +2062,10 @@ export default function DoctorDashboard() {
                 ) : (
                   <div className="space-y-4">
                     {/* Average Rating Summary */}
-                    <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+                    <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                       <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                               {toArabicNumerals(
@@ -2093,14 +2093,14 @@ export default function DoctorDashboard() {
                           ? review.patient_name_ar
                           : (review.patient_name || review.patient?.name || t('dd_anonymous_patient') || 'Anonymous Patient');
                         return (
-                          <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5">
+                          <Card key={review.id} className="border-0 shadow-lg shadow-emerald-500/5" dir={isRTL ? 'rtl' : 'ltr'}>
                             <CardContent className="p-6">
-                              <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
+                              <div className={`flex items-start justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
                                     {patientName.charAt(0).toUpperCase()}
                                   </div>
-                                  <div>
+                                  <div className={isRTL ? 'text-right' : 'text-left'}>
                                     <p className="font-semibold text-gray-900 dark:text-white">
                                       {patientName}
                                     </p>
@@ -2113,7 +2113,7 @@ export default function DoctorDashboard() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                   {[1, 2, 3, 4, 5].map((star) => (
                                     <Star
                                       key={star}
@@ -2123,13 +2123,13 @@ export default function DoctorDashboard() {
                                         }`}
                                     />
                                   ))}
-                                  <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+                                  <span className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'mr-2' : 'ml-2'}`}>
                                     {toArabicNumerals((review.rating || 0).toFixed(1), locale)}
                                   </span>
                                 </div>
                               </div>
                               {review.comment && (
-                                <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed">
+                                <p className={`text-gray-700 dark:text-gray-300 mt-3 leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
                                   {review.comment}
                                 </p>
                               )}

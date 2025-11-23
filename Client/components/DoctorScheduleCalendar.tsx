@@ -450,12 +450,6 @@ export default function DoctorScheduleCalendar({
                                                                             <Eye className="w-4 h-4 mr-2" />
                                                                             {t('dd_view_details') || 'View Details'}
                                                                         </DropdownMenuItem>
-                                                                        {appointment.status !== 'completed' && (
-                                                                            <DropdownMenuItem onClick={() => onStatusUpdate?.(appointment.id, 'completed')} className="hover:bg-green-50 dark:hover:bg-green-900/20">
-                                                                                <CalendarIcon className="w-4 h-4 mr-2" />
-                                                                                {t('dd_mark_completed') || 'Mark Completed'}
-                                                                            </DropdownMenuItem>
-                                                                        )}
                                                                     </DropdownMenuContent>
                                                                 </DropdownMenu>
                                                             </div>
@@ -523,12 +517,6 @@ export default function DoctorScheduleCalendar({
                                                                             <Eye className="w-4 h-4 mr-2" />
                                                                             {t('dd_view_details') || 'View Details'}
                                                                         </DropdownMenuItem>
-                                                                        {appointment.status !== 'completed' && (
-                                                                            <DropdownMenuItem onClick={() => onStatusUpdate?.(appointment.id, 'completed')} className="hover:bg-green-50 dark:hover:bg-green-900/20">
-                                                                                <CalendarIcon className="w-4 h-4 mr-2" />
-                                                                                {t('dd_mark_completed') || 'Mark Completed'}
-                                                                            </DropdownMenuItem>
-                                                                        )}
                                                                     </DropdownMenuContent>
                                                                 </DropdownMenu>
                                                             </div>

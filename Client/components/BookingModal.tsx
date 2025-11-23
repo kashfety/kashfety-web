@@ -91,6 +91,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<"clinic" | "home" | "">("");
   const [searchMethod, setSearchMethod] = useState<"centers" | "doctors" | "">("");
+  const [tempSearchMethod, setTempSearchMethod] = useState<"centers" | "doctors" | "">("");  // Temporary selection before search
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
   const [centers, setCenters] = useState<Center[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -1009,11 +1010,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   };
 
   // Step navigation handlers (updated for 4-step flow)
-  const handleSpecialtySelect = async () => {
-    if (selectedSpecialty && selectedLocation && searchMethod) {
-      console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod });
+  const handleSpecialtySelect = async (method?: string) => {
+    const searchMethodToUse = method || searchMethod;
+    if (selectedSpecialty && selectedLocation && searchMethodToUse) {
+      console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod: searchMethodToUse });
 
-      if (searchMethod === "centers") {
+      if (searchMethodToUse === "centers") {
         // Fetch centers that have doctors with this specialty
         await fetchCentersBySpecialty(selectedSpecialty, selectedLocation);
       } else {
@@ -1471,6 +1473,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setSelectedSpecialty("");
     setSelectedLocation("");
     setSearchMethod("");
+    setTempSearchMethod("");  // Reset temporary search method selection
     setCenters([]);
     setDoctors([]);
     setSelectedDoctor(null);
@@ -1670,25 +1673,31 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         transition={{ duration: 0.3 }}
                       >
                         <h3 className="text-xl font-bold mb-5 text-gray-900 dark:text-white">{t('booking_how_find_doctor') || 'How would you like to find your doctor?'}</h3>
-                        <div className="grid grid-cols-2 gap-5 p-2">
+                        <div className="grid grid-cols-2 gap-5 p-2 mb-5">
                           <Card
-                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
-                            onClick={() => setSearchMethod("centers")}
+                            className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${tempSearchMethod === "centers"
+                              ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                              : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
+                              }`}
+                            onClick={() => setTempSearchMethod("centers")}
                           >
                             <CardContent className="p-7 text-center">
-                              <Building className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
-                              <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_centers') || 'Find Centers'}</div>
+                              <Building className={`w-10 h-10 mx-auto mb-3 ${tempSearchMethod === "centers" ? 'text-[#4DBCC4]' : 'text-gray-600 dark:text-gray-400'}`} />
+                              <div className={`font-bold text-lg mb-2 ${tempSearchMethod === "centers" ? 'text-[#4DBCC4] dark:text-[#4DBCC4]' : 'text-gray-800 dark:text-gray-200'}`}>{t('booking_find_centers') || 'Find Centers'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_centers_desc') || 'Browse medical centers first, then view their doctors'}</div>
                             </CardContent>
                           </Card>
 
                           <Card
-                            className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50"
-                            onClick={() => setSearchMethod("doctors")}
+                            className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:scale-[1.01] ${tempSearchMethod === "doctors"
+                              ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                              : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:ring-2 hover:ring-[#4DBCC4]/50'
+                              }`}
+                            onClick={() => setTempSearchMethod("doctors")}
                           >
                             <CardContent className="p-7 text-center">
-                              <User className="w-10 h-10 mx-auto mb-3 text-[#4DBCC4]" />
-                              <div className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">{t('booking_find_doctors') || 'Find Doctors'}</div>
+                              <User className={`w-10 h-10 mx-auto mb-3 ${tempSearchMethod === "doctors" ? 'text-[#4DBCC4]' : 'text-gray-600 dark:text-gray-400'}`} />
+                              <div className={`font-bold text-lg mb-2 ${tempSearchMethod === "doctors" ? 'text-[#4DBCC4] dark:text-[#4DBCC4]' : 'text-gray-800 dark:text-gray-200'}`}>{t('booking_find_doctors') || 'Find Doctors'}</div>
                               <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{t('booking_find_doctors_desc') || 'Browse doctors directly based on your specialty'}</div>
                             </CardContent>
                           </Card>
@@ -1697,12 +1706,19 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     )}
 
                     <Button
-                      onClick={handleSpecialtySelect}
-                      disabled={!selectedSpecialty || !selectedLocation || (!searchMethod && selectedLocation !== "home")}
+                      onClick={async () => {
+                        if (tempSearchMethod) {
+                          setSearchMethod(tempSearchMethod);
+                          await handleSpecialtySelect(tempSearchMethod);
+                        } else {
+                          await handleSpecialtySelect();
+                        }
+                      }}
+                      disabled={!selectedSpecialty || !selectedLocation || (!tempSearchMethod && selectedLocation !== "home")}
                       className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
                       size="lg"
                     >
-                      {selectedLocation === "home" ? (t('booking_find_doctors') || 'Find Doctors') : searchMethod === "centers" ? (t('booking_find_centers') || 'Find Centers') : searchMethod === "doctors" ? (t('booking_find_doctors') || 'Find Doctors') : (t('booking_next') || 'Next')}
+                      {selectedLocation === "home" ? (t('booking_find_doctors') || 'Find Doctors') : tempSearchMethod === "centers" ? (t('booking_find_centers') || 'Find Centers') : tempSearchMethod === "doctors" ? (t('booking_find_doctors') || 'Find Doctors') : (t('booking_search') || 'Search')}
                     </Button>
                   </div>
                 )}
@@ -2511,39 +2527,33 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             ) : (
                               <div>
                                 <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
-                                  {availableSlots.map((slot, index) => (
+                                  {availableSlots.filter(slot => slot.is_available && !slot.is_booked).map((slot, index) => (
                                     <motion.div
                                       key={slot.time}
                                       initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ delay: index * 0.03 }}
-                                      whileHover={slot.is_available && !slot.is_booked ? { scale: 1.05, y: -2 } : {}}
-                                      whileTap={slot.is_available && !slot.is_booked ? { scale: 0.95 } : {}}
+                                      whileHover={{ scale: 1.05, y: -2 }}
+                                      whileTap={{ scale: 0.95 }}
                                     >
                                       <Button
                                         variant={selectedTime === slot.time ? "default" : "outline"}
                                         size="lg"
                                         onClick={() => setSelectedTime(slot.time)}
-                                        disabled={slot.is_booked || !slot.is_available}
                                         className={`
                                 w-full font-bold text-base py-6
-                                ${slot.is_booked || !slot.is_available
-                                            ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-300 dark:border-gray-600 opacity-60"
-                                            : selectedTime === slot.time
-                                              ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
-                                              : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
+                                ${selectedTime === slot.time
+                                            ? "ring-4 ring-[#4DBCC4]/30 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] border-2 border-[#4DBCC4] shadow-xl !text-white"
+                                            : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                       >
                                         {slot.time}
-                                        {slot.is_booked && (
-                                          <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
-                                        )}
                                       </Button>
                                     </motion.div>
                                   ))}
                                 </div>
 
-                                {availableSlots.length === 0 && (
+                                {availableSlots.filter(slot => slot.is_available && !slot.is_booked).length === 0 && (
                                   <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
                                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                                       <Clock className="w-8 h-8 text-red-500" />

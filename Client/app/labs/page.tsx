@@ -138,7 +138,10 @@ export default function MyLabsPage() {
     const filteredBookings = bookings.filter(b => statusOk(b) && catOk(b) && dateOk(b) && searchOk(b));
 
     // Sort bookings with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
-    // Within each status group, sort by date (latest to oldest)
+    // Within each status group, sort by date:
+    // - Scheduled/Confirmed: earliest first (ascending)
+    // - Cancelled/Completed: latest first (descending)
+    // Note: Absent bookings are treated as cancelled for sorting
     const statusOrder: Record<string, number> = {
       'scheduled': 1,
       'confirmed': 2,
@@ -150,19 +153,29 @@ export default function MyLabsPage() {
       const statusA = (a.status || '').toLowerCase()
       const statusB = (b.status || '').toLowerCase()
 
-      // First, sort by status
-      const orderA = statusOrder[statusA] || 999
-      const orderB = statusOrder[statusB] || 999
+      // Treat absent bookings as cancelled for sorting
+      const isAbsentA = isAbsent(a)
+      const isAbsentB = isAbsent(b)
+
+      // First, sort by status (absent treated as cancelled)
+      const orderA = isAbsentA ? statusOrder['cancelled'] : (statusOrder[statusA] || 999)
+      const orderB = isAbsentB ? statusOrder['cancelled'] : (statusOrder[statusB] || 999)
 
       if (orderA !== orderB) {
         return orderA - orderB
       }
 
-      // Within same status, sort by date (latest to oldest)
+      // Within same status, sort by date
       const dateA = new Date(a.booking_date + 'T' + a.booking_time).getTime()
       const dateB = new Date(b.booking_date + 'T' + b.booking_time).getTime()
 
-      return dateB - dateA // Descending order (latest first)
+      // For scheduled and confirmed appointments (that are not absent), show earliest first (ascending)
+      // For cancelled, completed, and absent appointments, show latest first (descending)
+      if ((statusA === 'scheduled' || statusA === 'confirmed') && !isAbsentA) {
+        return dateA - dateB // Ascending order (earliest first)
+      } else {
+        return dateB - dateA // Descending order (latest first)
+      }
     })
   }, [bookings, statusFilter, categoryFilter, startDate, endDate, searchText]);
 

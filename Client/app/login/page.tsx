@@ -14,7 +14,7 @@ import CertificateUploadPromptModal from '@/components/CertificateUploadPromptMo
 import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
 import { useCustomAlert } from '@/hooks/use-custom-alert'
 
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
@@ -28,6 +28,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false)
   const [showCertificateUploadModal, setShowCertificateUploadModal] = useState(false)
   const [doctorToken, setDoctorToken] = useState<string>('')
@@ -318,13 +319,13 @@ export default function LoginPage() {
               <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                 {t('auth_password_label') || 'Password'}
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <motion.input
                   whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(16, 185, 129, 0.3)" }}
                   transition={{ duration: 0.2 }}
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={password}
@@ -333,8 +334,15 @@ export default function LoginPage() {
                     if (passwordError) setPasswordError('')
                   }}
                   placeholder={t('auth_password_placeholder') || 'Enter your password'}
-                  className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all`}
+                  className={`appearance-none block w-full px-3 py-2 pr-10 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
                 {passwordError && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}

@@ -18,7 +18,7 @@ import BookingModal from "@/components/BookingModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals } from "@/lib/i18n"
+import { toArabicNumerals, localizeSpecialty } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -155,7 +155,10 @@ export default function MyAppointmentsPage() {
     const filtered = appointments.filter(a => matchesStatus(a) && matchesType(a) && matchesDate(a) && matchesSearch(a))
 
     // Sort appointments with custom order: Scheduled -> Confirmed -> Cancelled -> Completed
-    // Within each status group, sort by date (latest to oldest)
+    // Within each status group, sort by date:
+    // - Scheduled/Confirmed: earliest first (ascending)
+    // - Cancelled/Completed: latest first (descending)
+    // Note: Absent appointments are treated as cancelled for sorting
     const statusOrder: Record<string, number> = {
       'scheduled': 1,
       'confirmed': 2,
@@ -167,19 +170,29 @@ export default function MyAppointmentsPage() {
       const statusA = (a.status || '').toLowerCase()
       const statusB = (b.status || '').toLowerCase()
 
-      // First, sort by status
-      const orderA = statusOrder[statusA] || 999
-      const orderB = statusOrder[statusB] || 999
+      // Treat absent appointments as cancelled for sorting
+      const isAbsentA = isAbsent(a)
+      const isAbsentB = isAbsent(b)
+
+      // First, sort by status (absent treated as cancelled)
+      const orderA = isAbsentA ? statusOrder['cancelled'] : (statusOrder[statusA] || 999)
+      const orderB = isAbsentB ? statusOrder['cancelled'] : (statusOrder[statusB] || 999)
 
       if (orderA !== orderB) {
         return orderA - orderB
       }
 
-      // Within same status, sort by date (latest to oldest)
+      // Within same status, sort by date
       const dateA = new Date(a.appointment_date + 'T' + a.appointment_time).getTime()
       const dateB = new Date(b.appointment_date + 'T' + b.appointment_time).getTime()
 
-      return dateB - dateA // Descending order (latest first)
+      // For scheduled and confirmed appointments (that are not absent), show earliest first (ascending)
+      // For cancelled, completed, and absent appointments, show latest first (descending)
+      if ((statusA === 'scheduled' || statusA === 'confirmed') && !isAbsentA) {
+        return dateA - dateB // Ascending order (earliest first)
+      } else {
+        return dateB - dateA // Descending order (latest first)
+      }
     })
   }, [appointments, statusFilter, typeFilter, startDate, endDate, searchText])
 
@@ -325,11 +338,16 @@ export default function MyAppointmentsPage() {
         const appointmentTime = apt.appointment_time
 
         // Format date with proper locale
-        const formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+        let formattedDate = appointmentDate.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         })
+
+        // Convert to Arabic numerals for Arabic locale
+        if (locale === 'ar') {
+          formattedDate = toArabicNumerals(formattedDate, locale);
+        }
 
         console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
 
@@ -377,7 +395,9 @@ export default function MyAppointmentsPage() {
           appointment_date: apt.appointment_date,
           appointment_time: apt.appointment_time,
           doctor_id: apt.doctor_id || apt.doctor?.id || null,
-          center_id: apt.center_id || null
+          center_id: apt.center_id || null,
+          doctor: apt.doctor, // Keep doctor object for search functionality
+          center: center
         }
       })
 
@@ -651,7 +671,7 @@ export default function MyAppointmentsPage() {
                           {getLocalizedDoctorName(appointment)}
                         </CardTitle>
                         <CardDescription className="text-emerald-600 font-medium">
-                          {appointment.specialty}
+                          {localizeSpecialty(locale, appointment.specialty)}
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">

@@ -76,6 +76,15 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
     const router = useRouter();
     const { t } = useLocale();
 
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('ar-SY', {
+            style: 'currency',
+            currency: 'SYP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    };
+
     if (loading) {
         return (
             <div className="space-y-6">
@@ -238,7 +247,7 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Revenue</p>
-                                <p className="text-2xl font-bold">${overview.totalRevenue.toLocaleString()}</p>
+                                <p className="text-2xl font-bold">{formatCurrency(overview.totalRevenue)}</p>
                                 <p className="text-xs text-green-600">+{overview.averageRevenue}% avg</p>
                             </div>
                             <DollarSign className="h-8 w-8 text-green-500" />
@@ -394,8 +403,8 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Button 
-                            className="h-20 flex-col space-y-2" 
+                        <Button
+                            className="h-20 flex-col space-y-2"
                             variant="outline"
                             onClick={() => {
                                 if (setActiveTab) {
@@ -408,8 +417,8 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                             <Shield className="h-6 w-6" />
                             <span>Manage Admins</span>
                         </Button>
-                        <Button 
-                            className="h-20 flex-col space-y-2" 
+                        <Button
+                            className="h-20 flex-col space-y-2"
                             variant="outline"
                             onClick={() => {
                                 if (setActiveTab) {

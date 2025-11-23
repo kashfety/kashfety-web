@@ -16,6 +16,7 @@ import { useTheme } from "next-themes";
 import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
 import DoctorScheduleCalendar from '@/components/DoctorScheduleCalendar';
+import AppointmentDetailsModal from '@/components/AppointmentDetailsModal';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -2028,6 +2029,7 @@ export default function CenterDashboardPage() {
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [appointmentDetailsOpen, setAppointmentDetailsOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadNotes, setUploadNotes] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -3313,8 +3315,8 @@ export default function CenterDashboardPage() {
                 <DoctorScheduleCalendar
                   appointments={allAppointments || []}
                   onAppointmentClick={(appointment: any) => {
-                    console.log('Appointment clicked:', appointment);
-                    // You can add modal or detailed view here if needed
+                    setSelectedAppointment(appointment);
+                    setAppointmentDetailsOpen(true);
                   }}
                   onStatusUpdate={async (appointmentId: string, newStatus: string) => {
                     try {
@@ -4357,6 +4359,18 @@ export default function CenterDashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Appointment Details Modal */}
+      {selectedAppointment && (
+        <AppointmentDetailsModal
+          isOpen={appointmentDetailsOpen}
+          onClose={() => {
+            setAppointmentDetailsOpen(false);
+            setSelectedAppointment(null);
+          }}
+          appointment={selectedAppointment}
+        />
       )}
     </div>
   );

@@ -133,22 +133,27 @@ export async function PUT(request: NextRequest) {
 
       // Only apply restrictions for patients (not doctors/admins or the appointment's doctor)
       if (!canBypassRestrictions) {
+        console.log('⚠️ [Appointment Cancel] User does NOT have bypass privileges - applying restrictions');
         // Check if appointment is in the past
         if (hoursUntilAppointment <= 0) {
+          console.log('❌ [Appointment Cancel] Blocking: appointment is in the past');
           return NextResponse.json({
             success: false,
             message: 'Cannot cancel a past appointment',
-            code: 'APPOINTMENT_IN_PAST'
+            code: 'APPOINTMENT_IN_PAST',
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
 
         // Block cancellation if less than 24 hours away (patients only)
         if (hoursUntilAppointment < 24) {
+          console.log('❌ [Appointment Cancel] Blocking: within 24 hours');
           return NextResponse.json({
             success: false,
             message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
             code: 'CANCELLATION_TOO_LATE',
-            hoursRemaining: hoursUntilAppointment
+            hoursRemaining: hoursUntilAppointment,
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
       } else {

@@ -939,6 +939,13 @@ export default function DoctorDashboard() {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
+      console.log('🔄 [Cancel Appointment] Starting cancellation:', {
+        appointmentId: selectedAppointment.id,
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+        reason: cancelReason || 'Cancelled by doctor'
+      });
+
       // Try fallback route first for Vercel compatibility
       let response;
       try {
@@ -979,6 +986,11 @@ export default function DoctorDashboard() {
         fetchDoctorData(); // Refresh dashboard data
       } else {
         const errorData = await response.json();
+        console.log('❌ [Cancel Appointment] Error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
         toast({
           title: t('error') || "Error",
           description: errorData.message || t('dd_error_cancel_appointment') || "Failed to cancel appointment",

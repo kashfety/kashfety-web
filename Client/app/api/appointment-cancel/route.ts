@@ -22,6 +22,10 @@ export async function PUT(request: NextRequest) {
     // Get authorization header to check user role
     const authHeader = request.headers.get('authorization');
     let userRole = null;
+    let userId = null;
+    let userRoleFromDB = null;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (authHeader) {
       try {
@@ -34,6 +38,7 @@ export async function PUT(request: NextRequest) {
         }
 
         if (user) {
+          userId = user.id;
           // Try multiple sources for role
           userRole = user.user_metadata?.role || user.app_metadata?.role || user.role;
           console.log('👤 [Appointment Cancel] User details:', {
@@ -43,43 +48,26 @@ export async function PUT(request: NextRequest) {
             user_metadata: user.user_metadata,
             app_metadata: user.app_metadata
           });
-        }
-      } catch (error) {
-        console.log('⚠️ Could not determine user role:', error);
-      }
-    } else {
-      console.log('⚠️ No authorization header provided');
-    }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+          // Fetch user role from database instead of relying on token metadata
+          if (userId) {
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', userId)
+              .single();
 
-    // Get user ID from token and fetch role from database
-    let userId = null;
-    let userRoleFromDB = null;
-
-    if (authHeader) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-        const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const { data: { user } } = await supabaseAuth.auth.getUser(token);
-        userId = user?.id;
-
-        // Fetch user role from database instead of relying on token metadata
-        if (userId) {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', userId)
-            .single();
-
-          if (!userError && userData) {
-            userRoleFromDB = userData.role;
-            console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
+            if (!userError && userData) {
+              userRoleFromDB = userData.role;
+              console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
+            }
           }
         }
       } catch (error) {
-        console.log('⚠️ Could not get user ID:', error);
+        console.log('⚠️ Could not determine user from token:', error);
       }
+    } else {
+      console.log('⚠️ No authorization header provided');
     }
 
     // Use database role instead of token role

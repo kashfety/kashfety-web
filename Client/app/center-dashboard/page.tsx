@@ -505,7 +505,7 @@ function CenterPatients({
       </div>
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader>
+        <CardHeader className={`${isRTL ? 'text-right' : 'text-left'}`}>
           <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`}>
             {t('cd_patient_records')}
           </CardTitle>

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, User, Phone, Mail, MapPin, FileText, Stethoscope, CheckCircle } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MapPin, FileText, Stethoscope, CheckCircle, Building2 } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
 
 interface Appointment {
@@ -28,6 +28,17 @@ interface Appointment {
     last_name_ar?: string;
     patient_phone?: string;
     patient_email?: string;
+    center_id?: string;
+    center?: {
+        id: string;
+        name: string;
+        name_ar?: string;
+        address?: string;
+        phone?: string;
+    };
+    center_name?: string;
+    center_name_ar?: string;
+    center_address?: string;
 }
 
 interface AppointmentDetailsModalProps {
@@ -149,6 +160,17 @@ export default function AppointmentDetailsModal({
         return type;
     };
 
+    // Get localized center/clinic name
+    const getLocalizedCenterName = () => {
+        if (appointment.center_name_ar && locale === 'ar') {
+            return appointment.center_name_ar;
+        }
+        if (appointment.center?.name_ar && locale === 'ar') {
+            return appointment.center.name_ar;
+        }
+        return appointment.center_name || appointment.center?.name || '';
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
@@ -177,9 +199,9 @@ export default function AppointmentDetailsModal({
                                 <Button
                                     size="sm"
                                     onClick={() => onStartConsultation(appointment)}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                    className={`bg-emerald-600 hover:bg-emerald-700 text-white ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                    <Stethoscope className="w-4 h-4 mr-1" />
+                                    <Stethoscope className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                     {t('dd_start_consultation') || 'Start Consultation'}
                                 </Button>
                             )}
@@ -188,9 +210,9 @@ export default function AppointmentDetailsModal({
                                     size="sm"
                                     variant="outline"
                                     onClick={() => onStatusUpdate(appointment.id, 'completed')}
-                                    className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20"
+                                    className={`border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20 ${isRTL ? 'flex-row-reverse' : ''}`}
                                 >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    <CheckCircle className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                     {t('dd_mark_completed') || 'Mark Completed'}
                                 </Button>
                             )}
@@ -261,6 +283,60 @@ export default function AppointmentDetailsModal({
                         </CardContent>
                     </Card>
 
+                    {/* Clinic/Center Information - Only show if appointment has a center */}
+                    {(appointment.center_id || appointment.center || appointment.center_name) && (
+                        <Card className="bg-gradient-to-br from-indigo-50/50 to-blue-50/50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-200 dark:border-indigo-800">
+                            <CardContent className="p-6">
+                                <h3 className={`text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                    <Building2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                    {t('dd_clinic_info') || 'Clinic Information'}
+                                </h3>
+                                <div className="space-y-3">
+                                    <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center">
+                                            <Building2 className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                                            <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                                {getLocalizedCenterName()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {(appointment.center_address || appointment.center?.address) && (
+                                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse ml-0 mr-15' : 'flex-row ml-15 mr-0'}`}>
+                                            <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                                                <MapPin className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                            </div>
+                                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                    {t('dd_address') || 'Address'}
+                                                </p>
+                                                <p className="font-semibold text-gray-900 dark:text-white">
+                                                    {appointment.center_address || appointment.center?.address}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {(appointment.center?.phone) && (
+                                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse ml-0 mr-15' : 'flex-row ml-15 mr-0'}`}>
+                                            <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                                                <Phone className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                            </div>
+                                            <div className={isRTL ? 'text-right' : 'text-left'}>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                    {t('dd_phone') || 'Phone'}
+                                                </p>
+                                                <p className="font-semibold text-gray-900 dark:text-white">
+                                                    {appointment.center.phone}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Patient Information */}
                     <Card className="bg-gradient-to-br from-emerald-50/50 to-blue-50/50 dark:from-emerald-900/20 dark:to-blue-900/20 border border-emerald-200 dark:border-emerald-800">
                         <CardContent className="p-6">
@@ -280,11 +356,11 @@ export default function AppointmentDetailsModal({
                                     </div>
                                 </div>
                                 {appointment.patient_phone && (
-                                    <div className="flex items-center gap-3 ml-15">
+                                    <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse ml-0 mr-15' : 'flex-row ml-15 mr-0'}`}>
                                         <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                                             <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                         </div>
-                                        <div>
+                                        <div className={isRTL ? 'text-right' : 'text-left'}>
                                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                                                 {t('dd_phone') || 'Phone'}
                                             </p>
@@ -295,11 +371,11 @@ export default function AppointmentDetailsModal({
                                     </div>
                                 )}
                                 {appointment.patient_email && (
-                                    <div className="flex items-center gap-3 ml-15">
+                                    <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse ml-0 mr-15' : 'flex-row ml-15 mr-0'}`}>
                                         <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                                             <Mail className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                                         </div>
-                                        <div>
+                                        <div className={isRTL ? 'text-right' : 'text-left'}>
                                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                                                 {t('dd_email') || 'Email'}
                                             </p>
@@ -365,9 +441,9 @@ export default function AppointmentDetailsModal({
                     {appointment.status === 'confirmed' && onStartConsultation && (
                         <Button
                             onClick={() => onStartConsultation(appointment)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className={`bg-emerald-600 hover:bg-emerald-700 text-white ${isRTL ? 'flex-row-reverse' : ''}`}
                         >
-                            <Stethoscope className="w-4 h-4 mr-2" />
+                            <Stethoscope className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                             {t('dd_start_consultation') || 'Start Consultation'}
                         </Button>
                     )}

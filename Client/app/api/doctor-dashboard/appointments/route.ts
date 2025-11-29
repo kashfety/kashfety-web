@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Join patient user data to get name/phone/email
+    // Join patient user data and center data to get name/phone/email and clinic info
     const { data, error } = await supabase
       .from('appointments')
       .select(`
@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
         chief_complaint,
         notes,
         patient_id,
+        center_id,
         users:users!appointments_patient_id_fkey (
           name, 
           name_ar,
@@ -55,6 +56,13 @@ export async function GET(request: NextRequest) {
           last_name_ar,
           phone, 
           email
+        ),
+        center:centers!fk_appointments_center (
+          id,
+          name,
+          name_ar,
+          address,
+          phone
         )
       `)
       .eq('doctor_id', doctorId)
@@ -72,6 +80,7 @@ export async function GET(request: NextRequest) {
 
     const appointments = (data || []).map((row: any) => {
       const user = Array.isArray(row.users) ? row.users[0] : row.users;
+      const center = Array.isArray(row.center) ? row.center[0] : row.center;
       return {
         id: row.id,
         appointment_date: row.appointment_date,
@@ -84,6 +93,7 @@ export async function GET(request: NextRequest) {
         chief_complaint: row.chief_complaint,
         notes: row.notes,
         patient_id: row.patient_id,
+        center_id: row.center_id,
         patient_name: user?.name || 'Patient',
         name: user?.name,
         name_ar: user?.name_ar,
@@ -93,6 +103,10 @@ export async function GET(request: NextRequest) {
         last_name_ar: user?.last_name_ar,
         patient_phone: user?.phone || null,
         patient_email: user?.email || null,
+        center: center || null,
+        center_name: center?.name || null,
+        center_name_ar: center?.name_ar || null,
+        center_address: center?.address || null,
       };
     });
 

@@ -163,6 +163,17 @@ interface Appointment {
   first_name_ar?: string;
   last_name?: string;
   last_name_ar?: string;
+  center_id?: string;
+  center?: {
+    id: string;
+    name: string;
+    name_ar?: string;
+    address?: string;
+    phone?: string;
+  };
+  center_name?: string;
+  center_name_ar?: string;
+  center_address?: string;
 }
 
 interface MedicalRecord {
@@ -512,6 +523,18 @@ export default function DoctorDashboard() {
       return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
     }
     return appointment.patient_name || appointment.users?.name || 'Unknown Patient';
+  };
+
+  // Get localized center/clinic name
+  const getLocalizedCenterName = (appointment: Appointment) => {
+    if (!appointment) return '';
+    if (appointment.center_name_ar && locale === 'ar') {
+      return appointment.center_name_ar;
+    }
+    if (appointment.center?.name_ar && locale === 'ar') {
+      return appointment.center.name_ar;
+    }
+    return appointment.center_name || appointment.center?.name || '';
   };
 
   // States
@@ -1534,6 +1557,12 @@ export default function DoctorDashboard() {
                                           ? (t('dd_home_visit') || 'Home Visit')
                                           : (t('dd_clinic_visit') || 'Clinic Visit')}
                                       </p>
+                                      {(appointment.center_id || appointment.center || appointment.center_name) && (
+                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                          <Building2 className="w-3 h-3" />
+                                          {getLocalizedCenterName(appointment)}
+                                        </p>
+                                      )}
                                       {appointment.symptoms && (
                                         <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                           {t('symptoms') || 'Symptoms'}: {appointment.symptoms}

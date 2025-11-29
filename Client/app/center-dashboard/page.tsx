@@ -1237,6 +1237,12 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   // Track which test types have been initialized
   const [initializedTypes, setInitializedTypes] = useState<Set<string>>(new Set());
 
+  // Bulk selection state
+  const [bulkSelectedTypes, setBulkSelectedTypes] = useState<Set<string>>(new Set());
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkSelectedDays, setBulkSelectedDays] = useState<Set<number>>(new Set());
+  const [showDaySelection, setShowDaySelection] = useState(false);
+
   // Days of week configuration (like doctor dashboard)
   const DAYS_OF_WEEK = [
     { value: 0, labelKey: 'day_sunday', label: 'Sunday' },
@@ -1533,6 +1539,98 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
     }
   };
 
+  // Bulk save function
+  const handleBulkSave = async (testTypeIds: string[], days: number[], startTime: string, endTime: string) => {
+    if (!user?.id || testTypeIds.length === 0 || days.length === 0) {
+      toast({
+        title: t('error'),
+        description: t('please_select_test_types_and_days') || 'Please select test types and days',
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setBulkSaving(true);
+    try {
+      console.log('💾 [BulkSave] Saving schedule for', testTypeIds.length, 'test types');
+      console.log('💾 [BulkSave] Days:', days, 'Time:', startTime, '-', endTime);
+
+      // Generate time slots for the given time range
+      const generateBulkSlots = (start: string, end: string, duration: number = 30) => {
+        const slots: { time: string; duration: number }[] = [];
+        const startDate = new Date(`2000-01-01T${start}:00`);
+        const endDate = new Date(`2000-01-01T${end}:00`);
+        let current = new Date(startDate);
+
+        while (current < endDate) {
+          const timeStr = current.toTimeString().substring(0, 5);
+          slots.push({
+            time: timeStr,
+            duration: duration
+          });
+          current = new Date(current.getTime() + duration * 60000);
+        }
+
+        return slots;
+      };
+
+      const slots = generateBulkSlots(startTime, endTime, 30);
+
+      // Create schedule array for selected days
+      const schedule = days.map((dayValue) => ({
+        day_of_week: dayValue,
+        is_available: true,
+        slots: slots,
+        break_start: undefined,
+        break_end: undefined,
+        notes: `${DAYS_OF_WEEK.find(d => d.value === dayValue)?.label || 'Day'} schedule (bulk update)`
+      }));
+
+      // Save schedule for each selected test type
+      const savePromises = testTypeIds.map(async (testTypeId) => {
+        try {
+          await centerService.saveLabSchedule(testTypeId, schedule);
+          console.log(`✅ [BulkSave] Saved schedule for test type: ${testTypeId}`);
+          return { success: true, testTypeId };
+        } catch (error) {
+          console.error(`❌ [BulkSave] Failed to save schedule for test type: ${testTypeId}`, error);
+          return { success: false, testTypeId, error };
+        }
+      });
+
+      const results = await Promise.all(savePromises);
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+
+      if (failCount === 0) {
+        toast({
+          title: t('success'),
+          description: t('bulk_schedule_saved_success') || `Successfully saved schedule for ${formatLocalizedNumber(successCount, locale)} test types`,
+          variant: "default"
+        });
+        // Clear bulk selection after successful save
+        setBulkSelectedTypes(new Set());
+        setBulkSelectedDays(new Set());
+        setShowDaySelection(false);
+      } else {
+        toast({
+          title: t('partial_success') || 'Partial Success',
+          description: t('bulk_schedule_partial_success') || `Saved for ${formatLocalizedNumber(successCount, locale)} test types, failed for ${formatLocalizedNumber(failCount, locale)}`,
+          variant: "default"
+        });
+      }
+    } catch (error) {
+      console.error('❌ [BulkSave] Failed to save bulk schedule:', error);
+      toast({
+        title: t('error'),
+        description: t('failed_bulk_save_schedule') || 'Failed to save bulk schedule',
+        variant: "destructive"
+      });
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
   const copySchedule = (fromDay: number, toDay: number) => {
     const sourceConfig = getDayConfig(fromDay);
     if (sourceConfig) {
@@ -1655,6 +1753,204 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                       <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('selected')}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bulk Selection Card */}
+          <Card className="border-2 border-emerald-200 dark:border-emerald-800">
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Grid3X3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                {t('bulk_schedule_management') || 'Bulk Schedule Management'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {t('select_test_types_bulk') || 'Select Test Types for Bulk Update'}
+                  </Label>
+                  <p className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {t('bulk_schedule_desc') || 'Select multiple test types to apply the same schedule to all of them at once'}
+                  </p>
+                </div>
+
+                {/* Bulk Selection Checkboxes */}
+                <div className="space-y-3">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      {t('select_test_types') || 'Select Test Types'}
+                    </Label>
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const allIds = new Set(selectedServices.map(s => s.id));
+                          setBulkSelectedTypes(allIds);
+                          setShowBulkActions(allIds.size > 0);
+                        }}
+                      >
+                        {t('select_all') || 'Select All'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setBulkSelectedTypes(new Set());
+                          setShowBulkActions(false);
+                        }}
+                      >
+                        {t('deselect_all') || 'Deselect All'}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 max-h-60 overflow-y-auto">
+                    {selectedServices.map((type) => {
+                      const displayName = locale === 'ar' && type.name_ar ? type.name_ar : type.name;
+                      const isSelected = bulkSelectedTypes.has(type.id);
+                      return (
+                        <div key={type.id} className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              setBulkSelectedTypes(prev => {
+                                const newSet = new Set(prev);
+                                if (checked) {
+                                  newSet.add(type.id);
+                                } else {
+                                  newSet.delete(type.id);
+                                }
+                                return newSet;
+                              });
+                            }}
+                          />
+                          <Label className={`text-sm font-medium cursor-pointer ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            {displayName}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {bulkSelectedTypes.size > 0 && (
+                  <div className="space-y-4 p-4 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/20">
+                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      <span className={`font-medium text-emerald-700 dark:text-emerald-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        {t('selected_count') || 'Selected'}: {formatLocalizedNumber(bulkSelectedTypes.size, locale)} {t('test_types') || 'test types'}
+                      </span>
+                    </div>
+
+                    {/* Bulk Action Buttons */}
+                    <div className="space-y-3">
+                      <div>
+                        <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          {t('bulk_action_options') || 'Bulk Action Options'}
+                        </Label>
+                      </div>
+                      
+                      <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Button
+                          onClick={async () => {
+                            // All day, every day
+                            await handleBulkSave(Array.from(bulkSelectedTypes), DAYS_OF_WEEK.map(d => d.value), '09:00', '17:00');
+                          }}
+                          disabled={bulkSaving}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('all_day_every_day') || 'All Day, Every Day'}</span>
+                        </Button>
+
+                        <Button
+                          onClick={() => {
+                            // Show day selection for "all day, some days"
+                            if (bulkSelectedDays.size === 0) {
+                              // Initialize with all days selected
+                              setBulkSelectedDays(new Set(DAYS_OF_WEEK.map(d => d.value)));
+                            }
+                            setShowDaySelection(true);
+                          }}
+                          variant="outline"
+                          className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20"
+                        >
+                          <Clock className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('all_day_some_days') || 'All Day, Some Days'}</span>
+                        </Button>
+                      </div>
+
+                      {/* Day Selection for "Some Days" */}
+                      {showDaySelection && (
+                        <div className="space-y-3 p-4 border rounded-lg bg-white dark:bg-gray-800">
+                          <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            {t('select_days') || 'Select Days'}
+                          </Label>
+                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            {DAYS_OF_WEEK.map((day) => {
+                              const isDaySelected = bulkSelectedDays.has(day.value);
+                              return (
+                                <Button
+                                  key={day.value}
+                                  variant={isDaySelected ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => {
+                                    setBulkSelectedDays(prev => {
+                                      const newSet = new Set(prev);
+                                      if (isDaySelected) {
+                                        newSet.delete(day.value);
+                                      } else {
+                                        newSet.add(day.value);
+                                      }
+                                      return newSet;
+                                    });
+                                  }}
+                                  className={isDaySelected ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                                >
+                                  {t(day.labelKey) || day.label}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                          <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Button
+                              onClick={async () => {
+                                if (bulkSelectedDays.size === 0) {
+                                  toast({
+                                    title: t('error'),
+                                    description: t('select_at_least_one_day') || 'Please select at least one day',
+                                    variant: "destructive"
+                                  });
+                                  return;
+                                }
+                                await handleBulkSave(Array.from(bulkSelectedTypes), Array.from(bulkSelectedDays), '09:00', '17:00');
+                              }}
+                              disabled={bulkSaving || bulkSelectedDays.size === 0}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              <span dir={isRTL ? 'rtl' : 'ltr'}>
+                                {bulkSaving ? (t('saving') || 'Saving...') : (t('apply_to_selected') || `Apply to ${formatLocalizedNumber(bulkSelectedTypes.size, locale)} Test Types`)}
+                              </span>
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setBulkSelectedDays(new Set());
+                                setShowDaySelection(false);
+                              }}
+                              variant="outline"
+                              size="sm"
+                            >
+                              {t('cancel') || 'Cancel'}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

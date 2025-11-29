@@ -9,10 +9,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as strin
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
-  
+
   console.log('📅 [Schedule GET] Request received');
   console.log('📅 [Schedule GET] Query params:', searchParams.toString());
-  
+
   if (authHeader) {
     try {
       const qs = searchParams.toString();
@@ -43,29 +43,29 @@ export async function GET(request: NextRequest) {
           const token = authHeader2.replace(/^Bearer\s+/i, '');
           const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
           doctorId = (payload.id || payload.userId || payload.user_id || payload.sub || '').toString();
-        } catch {}
+        } catch { }
       }
     }
     const centerId = searchParams.get('center_id');
-    
+
     console.log('📅 [Schedule GET] Doctor ID:', doctorId);
     console.log('📅 [Schedule GET] Center ID:', centerId);
-    
+
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
-    
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // Build query
     let query = supabase
       .from('doctor_schedules')
       .select('*, centers:center_id(id, name, name_ar, address)')
       .eq('doctor_id', doctorId);
-    
+
     // Filter by center if specified
     if (centerId) {
       console.log('📅 [Schedule GET] Filtering by center:', centerId);
       query = query.eq('center_id', centerId);
-      
+
       // Verify assignment for specific center
       const { data: assignment, error: aErr } = await supabase
         .from('doctor_centers')
@@ -73,71 +73,71 @@ export async function GET(request: NextRequest) {
         .eq('doctor_id', doctorId)
         .eq('center_id', centerId)
         .single();
-      
+
       if (aErr || !assignment) {
         console.error('📅 [Schedule GET] Assignment verification failed:', aErr);
         return NextResponse.json({ error: 'You are not assigned to this center' }, { status: 403 });
       }
       console.log('📅 [Schedule GET] Assignment verified ✅');
     }
-    
+
     query = query.order('center_id').order('day_of_week', { ascending: true });
-    
+
     console.log('📅 [Schedule GET] Fetching schedules...');
     const { data: schedule, error } = await query;
-    
+
     if (error) {
       console.error('📅 [Schedule GET] Fetch error:', error);
       console.error('📅 [Schedule GET] Error details:', JSON.stringify(error, null, 2));
-      
+
       // Try a simpler query without joins as fallback
       console.log('📅 [Schedule GET] Trying fallback query without joins...');
       let fallbackQuery = supabase
         .from('doctor_schedules')
         .select('*')
         .eq('doctor_id', doctorId);
-      
+
       if (centerId) {
         fallbackQuery = fallbackQuery.eq('center_id', centerId);
       }
-      
+
       fallbackQuery = fallbackQuery.order('day_of_week', { ascending: true });
-      
+
       const { data: scheduleSimple, error: simpleError } = await fallbackQuery;
-      
+
       if (simpleError) {
         console.error('📅 [Schedule GET] Fallback query also failed:', simpleError);
         throw error; // Throw original error
       }
-      
+
       console.log('📅 [Schedule GET] Fallback query succeeded');
       // Use the simple query results instead
       const scheduleWithFallback = scheduleSimple;
-      
+
       // Continue with the fallback data
       console.log('📅 [Schedule GET] Found', scheduleWithFallback?.length || 0, 'schedule entries (fallback)');
-      
+
       // Get doctor info and return
       const { data: doctor } = await supabase
         .from('users')
         .select('home_visits_available, consultation_fee')
         .eq('id', doctorId)
         .single();
-      
-      return NextResponse.json({ 
-        success: true, 
+
+      return NextResponse.json({
+        success: true,
         schedule: scheduleWithFallback || [],
-        home_visits_available: doctor?.home_visits_available || false, 
+        home_visits_available: doctor?.home_visits_available || false,
         default_consultation_fee: doctor?.consultation_fee || null,
         center_specific: !!centerId
       });
     }
-    
+
     console.log('📅 [Schedule GET] Found', schedule?.length || 0, 'schedule entries');
-    
+
     // Ensure schedule is an array and has proper structure
     const scheduleArray = Array.isArray(schedule) ? schedule : [];
-    
+
     // Log detailed schedule data for debugging
     if (scheduleArray.length > 0) {
       console.log('📅 [Schedule GET] Schedule data:', JSON.stringify(scheduleArray, null, 2));
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
     } else {
       console.log('📅 [Schedule GET] No schedule entries found - returning empty array');
     }
-    
+
     // Get doctor's home visit availability and consultation fee
     console.log('📅 [Schedule GET] Fetching doctor profile...');
     const { data: doctor, error: doctorError } = await supabase
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
       .select('home_visits_available, consultation_fee')
       .eq('id', doctorId)
       .single();
-    
+
     if (doctorError) {
       console.error('📅 [Schedule GET] Doctor fetch error:', doctorError);
     } else {
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
         consultation_fee: doctor?.consultation_fee
       });
     }
-    
+
     // Group schedule by center if no specific center requested
     let groupedSchedule: any = {};
     if (!centerId) {
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       scheduleArray.forEach((item: any) => {
         const cid = item.center_id || 'general';
         const centerName = item.centers?.name || 'General Schedule';
-        
+
         if (!groupedSchedule[cid]) {
           groupedSchedule[cid] = {
             center_id: cid,
@@ -191,22 +191,22 @@ export async function GET(request: NextRequest) {
       });
       console.log('📅 [Schedule GET] Grouped into', Object.keys(groupedSchedule).length, 'centers');
     }
-    
+
     const responseData = {
-      success: true, 
+      success: true,
       schedule: centerId ? scheduleArray : Object.values(groupedSchedule),
-      home_visits_available: doctor?.home_visits_available || false, 
+      home_visits_available: doctor?.home_visits_available || false,
       default_consultation_fee: doctor?.consultation_fee || null,
       center_specific: !centerId
     };
-    
+
     console.log('📅 [Schedule GET] Response:', {
       success: responseData.success,
       schedule_count: centerId ? scheduleArray.length : Object.keys(groupedSchedule).length,
       home_visits_available: responseData.home_visits_available,
       default_consultation_fee: responseData.default_consultation_fee
     });
-    
+
     return NextResponse.json(responseData);
   } catch (e: any) {
     console.error('📅 [Schedule GET] Fallback error:', e);
@@ -218,10 +218,10 @@ export async function PUT(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   const body = await request.json();
-  
+
   console.log('📅 [Schedule PUT] Request received');
   console.log('📅 [Schedule PUT] Body:', JSON.stringify(body, null, 2));
-  
+
   if (authHeader) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/doctor-dashboard/schedule`, {
@@ -246,24 +246,24 @@ export async function PUT(request: NextRequest) {
           const token = authHeader2.replace(/^Bearer\s+/i, '');
           const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
           doctorId = (payload.id || payload.userId || payload.user_id || payload.sub || '').toString();
-        } catch {}
+        } catch { }
       }
     }
     const centerId = searchParams.get('center_id') || body?.center_id;
-    
+
     console.log('📅 [Schedule PUT] Doctor ID:', doctorId);
     console.log('📅 [Schedule PUT] Center ID:', centerId);
-    
+
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     if (!centerId) return NextResponse.json({ error: 'Center ID is required' }, { status: 400 });
     if (!Array.isArray(body?.schedule || body)) return NextResponse.json({ error: 'schedule array required' }, { status: 400 });
-    
+
     const scheduleArray = Array.isArray(body) ? body : body.schedule;
     console.log('📅 [Schedule PUT] Schedule array length:', scheduleArray.length);
     console.log('📅 [Schedule PUT] Schedule data:', JSON.stringify(scheduleArray, null, 2));
-    
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // Verify assignment
     console.log('📅 [Schedule PUT] Verifying doctor-center assignment...');
     const { data: assignment, error: aErr } = await supabase
@@ -272,18 +272,18 @@ export async function PUT(request: NextRequest) {
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .single();
-    
+
     if (aErr || !assignment) {
       console.error('📅 [Schedule PUT] Assignment verification failed:', aErr);
       return NextResponse.json({ error: 'You are not assigned to this medical center. Please go to Centers tab to select your assigned centers first.' }, { status: 403 });
     }
     console.log('📅 [Schedule PUT] Assignment verified ✅');
-    
+
     // Validate schedule format
     if (scheduleArray.length === 0) {
       console.log('⚠️ Empty schedule received, clearing doctor schedule for this center');
     }
-    
+
     // ============================================
     // NOTE: Conflict validation removed
     // ============================================
@@ -293,7 +293,7 @@ export async function PUT(request: NextRequest) {
     // Conflict detection only applies within the same center (handled during deletion/insertion).
     console.log('📅 Allowing schedules at multiple centers on the same day');
     // ============================================
-    
+
     // Try to use the database function first (if it exists)
     console.log('📡 Attempting to call setup_doctor_weekly_schedule function...');
     const { error: funcError } = await supabase
@@ -302,23 +302,19 @@ export async function PUT(request: NextRequest) {
         p_schedule: scheduleArray,
         p_center_id: centerId
       });
-    
+
     // If RPC function doesn't exist or fails, use manual insert approach
     if (funcError) {
       console.log('⚠️ RPC function not available, using manual insert approach');
       console.log('RPC Error:', funcError);
-      
-      // IMPORTANT: Database has unique constraint on (doctor_id, day_of_week)
-      // NOT (doctor_id, day_of_week, center_id)
-      // So we need to delete based on the specific days we're about to insert
-      
+
       // Extract the days we're about to insert
       const daysToInsert = scheduleArray.map((item: any) => item.day_of_week);
       console.log('📅 Days to insert:', daysToInsert);
-      
-      // Conflict check already done at the top, proceed with deletion and insertion
+
+      // Delete existing schedules for this doctor, center, and these specific days
+      // This ensures we can insert fresh data without conflicts
       if (daysToInsert.length > 0) {
-        // Delete existing schedules for this doctor, center, and these specific days
         console.log('🗑️ Deleting existing schedules for doctor:', doctorId, 'center:', centerId, 'days:', daysToInsert);
         const { error: delErr } = await supabase
           .from('doctor_schedules')
@@ -326,14 +322,14 @@ export async function PUT(request: NextRequest) {
           .eq('doctor_id', doctorId)
           .eq('center_id', centerId)
           .in('day_of_week', daysToInsert);
-        
+
         if (delErr) {
           console.error('❌ Delete error:', delErr);
           throw delErr;
         }
         console.log('✅ Existing schedules deleted for center:', centerId, 'days:', daysToInsert);
       }
-      
+
       // Build rows to insert - ensure all required fields are present
       const rows = scheduleArray.map((item: any) => ({
         doctor_id: doctorId,
@@ -346,16 +342,28 @@ export async function PUT(request: NextRequest) {
         break_end: item.break_end ?? null,
         notes: item.notes ?? null,
       }));
-      
-      console.log('📅 Inserting', rows.length, 'schedule rows manually...');
+
+      console.log('📅 Inserting', rows.length, 'schedule rows...');
       console.log('Rows to insert:', JSON.stringify(rows, null, 2));
-      
-      // Insert new schedules
+
+      // Try to insert new schedules
+      // If the database constraint hasn't been updated yet, this will fail with a unique constraint error
+      // In that case, we'll provide a helpful error message
       const { error: insErr } = await supabase
         .from('doctor_schedules')
         .insert(rows);
-      
+
       if (insErr) {
+        // Check if it's the unique constraint error
+        if (insErr.code === '23505' && insErr.message?.includes('doctor_schedules_doctor_id_day_of_week_key')) {
+          console.error('❌ Database constraint error: The database needs to be updated to allow multiple centers per day');
+          return NextResponse.json({
+            error: 'Database constraint violation',
+            message: 'The database constraint needs to be updated to allow schedules at multiple centers on the same day. Please run the migration script: migrations/fix_doctor_schedules_constraint.sql',
+            details: 'The current database only allows one schedule per doctor per day. To allow schedules at multiple centers, the unique constraint must include center_id.',
+            migration_script: 'migrations/fix_doctor_schedules_constraint.sql'
+          }, { status: 409 });
+        }
         console.error('❌ Insert error:', insErr);
         throw insErr;
       }
@@ -363,9 +371,9 @@ export async function PUT(request: NextRequest) {
     } else {
       console.log('✅ RPC function completed successfully');
     }
-    
+
     console.log('✅ Schedule updated successfully for center:', centerId);
-    
+
     // Get the updated schedule for this specific center
     const { data: updatedSchedule, error: fetchError } = await supabase
       .from('doctor_schedules')
@@ -373,15 +381,15 @@ export async function PUT(request: NextRequest) {
       .eq('doctor_id', doctorId)
       .eq('center_id', centerId)
       .order('day_of_week');
-    
+
     if (fetchError) {
       console.error('❌ Error fetching updated schedule:', fetchError);
       throw fetchError;
     }
-    
+
     console.log('📅 Updated schedule retrieved:', updatedSchedule?.length, 'records');
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       success: true,
       message: 'Schedule updated successfully',
       schedule: updatedSchedule,

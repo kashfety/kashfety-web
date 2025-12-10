@@ -400,40 +400,40 @@ export default function DoctorCenterManagement() {
         <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
           <CardTitle className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_add_center') || 'Add Center / Clinic'}</CardTitle>
         </CardHeader>
-        <CardContent className={`space-y-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardContent className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('name') || 'Name'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('name') || 'Name'}</Label>
               <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
             </div>
-            <div dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
               <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
             </div>
-            <div dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
               <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir="ltr" />
             </div>
-            <div dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'}</Label>
               <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} dir="ltr" />
             </div>
           </div>
-          <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <input type="radio" checked={newCenter.center_type === 'generic'} onChange={() => setNewCenter({ ...newCenter, center_type: 'generic' })} />
-              <span dir={isRTL ? 'rtl' : 'ltr'}>{t('generic_center') || 'Generic Center'}</span>
+          <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <label className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <input type="radio" checked={newCenter.center_type === 'generic'} onChange={() => setNewCenter({ ...newCenter, center_type: 'generic' })} className={isRTL ? 'ml-2' : 'mr-2'} />
+              <span className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('generic_center') || 'Generic Center'}</span>
             </label>
-            <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <input type="radio" checked={newCenter.center_type === 'personal'} onChange={() => setNewCenter({ ...newCenter, center_type: 'personal', set_as_primary: true })} />
-              <span dir={isRTL ? 'rtl' : 'ltr'}>{t('personal_clinic') || 'Personal Clinic'}</span>
+            <label className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <input type="radio" checked={newCenter.center_type === 'personal'} onChange={() => setNewCenter({ ...newCenter, center_type: 'personal', set_as_primary: true })} className={isRTL ? 'ml-2' : 'mr-2'} />
+              <span className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('personal_clinic') || 'Personal Clinic'}</span>
             </label>
-            <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <input type="checkbox" checked={newCenter.set_as_primary} onChange={(e) => setNewCenter({ ...newCenter, set_as_primary: e.target.checked })} />
-              <span dir={isRTL ? 'rtl' : 'ltr'}>{t('set_as_primary') || 'Set as Primary'}</span>
+            <label className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <input type="checkbox" checked={newCenter.set_as_primary} onChange={(e) => setNewCenter({ ...newCenter, set_as_primary: e.target.checked })} className={isRTL ? 'ml-2' : 'mr-2'} />
+              <span className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('set_as_primary') || 'Set as Primary'}</span>
             </label>
           </div>
-          <div className={isRTL ? 'flex justify-end' : 'flex justify-start'} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <Button onClick={createCenter} disabled={creating || !newCenter.name} dir={isRTL ? 'rtl' : 'ltr'}>
               <span dir={isRTL ? 'rtl' : 'ltr'}>{creating ? (t('saving') || 'Saving...') : (t('create') || 'Create')}</span>
             </Button>
@@ -448,12 +448,12 @@ export default function DoctorCenterManagement() {
         </CardHeader>
         <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_selected_centers') || 'Selected Centers'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_selected_centers') || 'Selected Centers'}</Label>
               <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(selectedCenters.length.toString(), locale)} {t('dd_centers_unit') || 'centers'}</p>
             </div>
-            <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_primary_center') || 'Primary Center'}</Label>
+            <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_primary_center') || 'Primary Center'}</Label>
               <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{(primaryCenter || (selectedCenters.length > 0 ? selectedCenters[0] : ''))
                 ? getLocalizedCenterName(centers.find(c => c.id === primaryCenter) || { id: '', name: '', address: '', is_assigned: false, is_primary: false })
                 : (t('dd_none_selected') || 'None selected')

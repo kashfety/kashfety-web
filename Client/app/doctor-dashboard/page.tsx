@@ -1493,14 +1493,14 @@ export default function DoctorDashboard() {
                 <div className="space-y-6 scroll-animation" data-animation="slide-in-up">
                   {/* Today's and Upcoming Appointments */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Calendar className="w-5 h-5" />
-                        {t('dd_upcoming_schedule') || 'Upcoming Appointments'}
+                        <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_upcoming_schedule') || 'Upcoming Appointments'}</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className={`flex flex-wrap gap-2 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex flex-wrap gap-2 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {['all', 'scheduled', 'confirmed', 'cancelled', 'completed'].map((status) => (
                           <Button
                             key={status}
@@ -1508,12 +1508,15 @@ export default function DoctorDashboard() {
                             size="sm"
                             onClick={() => setAppointmentFilter(status)}
                             className={appointmentFilter === status ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                            dir={isRTL ? 'rtl' : 'ltr'}
                           >
-                            {status === 'all' ? (t('all') || 'All') :
-                              status === 'scheduled' ? (t('appointments_status_scheduled') || 'Scheduled') :
-                                status === 'confirmed' ? (t('appointments_status_confirmed') || 'Confirmed') :
-                                  status === 'cancelled' ? (t('appointments_status_cancelled') || 'Cancelled') :
-                                    (t('appointments_status_completed') || 'Completed')}
+                            <span dir={isRTL ? 'rtl' : 'ltr'}>
+                              {status === 'all' ? (t('all') || 'All') :
+                                status === 'scheduled' ? (t('appointments_status_scheduled') || 'Scheduled') :
+                                  status === 'confirmed' ? (t('appointments_status_confirmed') || 'Confirmed') :
+                                    status === 'cancelled' ? (t('appointments_status_cancelled') || 'Cancelled') :
+                                      (t('appointments_status_completed') || 'Completed')}
+                            </span>
                           </Button>
                         ))}
                       </div>
@@ -1546,90 +1549,94 @@ export default function DoctorDashboard() {
                                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                       <User className="w-6 h-6 text-white" />
                                     </div>
-                                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                                      <h4 className="font-medium text-gray-900 dark:text-white">
+                                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <h4 className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {getLocalizedPatientName(appointment)}
                                       </h4>
-                                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        {new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); return dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); } catch { return appointment.appointment_time; } })()}
+                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        {toArabicNumerals(new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); const timeStr = dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); return locale === 'ar' ? toArabicNumerals(timeStr, locale) : timeStr; } catch { return appointment.appointment_time; } })()}
                                       </p>
-                                      <p className="text-sm text-gray-500 dark:text-gray-500">
+                                      <p className="text-sm text-gray-500 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {appointment.appointment_type === 'home'
                                           ? (t('dd_home_visit') || 'Home Visit')
                                           : (t('dd_clinic_visit') || 'Clinic Visit')}
                                       </p>
                                       {(appointment.center_id || appointment.center || appointment.center_name) && (
-                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                          <Building2 className="w-3 h-3" />
-                                          {getLocalizedCenterName(appointment)}
+                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                          <Building2 className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                          <span dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(appointment)}</span>
                                         </p>
                                       )}
                                       {appointment.symptoms && (
-                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                        <p className={`text-xs text-gray-500 dark:text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                           {t('symptoms') || 'Symptoms'}: {appointment.symptoms}
                                         </p>
                                       )}
                                     </div>
                                   </div>
-                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
-                                    <Badge
-                                      variant={
-                                        appointment.status === 'completed'
-                                          ? 'default'
-                                          : appointment.status === 'confirmed'
-                                            ? 'secondary'
-                                            : appointment.status === 'scheduled'
-                                              ? 'outline'
-                                              : 'destructive'
-                                      }
-                                      className={
-                                        appointment.status === 'completed'
-                                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                          : appointment.status === 'confirmed'
-                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                            : appointment.status === 'scheduled'
-                                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                                              : ''
-                                      }
-                                    >
-                                      {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
-                                    </Badge>
-                                    {(() => {
-                                      const isAbsent = (apt: Appointment) => {
-                                        if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
-                                        try {
-                                          const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
-                                          const now = new Date();
-                                          return aptDateTime < now;
-                                        } catch (e) {
-                                          return false;
+                                  <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <Badge
+                                        variant={
+                                          appointment.status === 'completed'
+                                            ? 'default'
+                                            : appointment.status === 'confirmed'
+                                              ? 'secondary'
+                                              : appointment.status === 'scheduled'
+                                                ? 'outline'
+                                                : 'destructive'
                                         }
-                                      };
-
-                                      if (isAbsent(appointment)) {
-                                        return (
-                                          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">
-                                            {t('appointments_absent_badge') || 'Absent'}
-                                          </Badge>
-                                        );
-                                      }
-                                      return null;
-                                    })()}
-                                    {appointment.consultation_fee && (
-                                      <Badge variant="outline">
-                                        {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
+                                        className={
+                                          appointment.status === 'completed'
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                            : appointment.status === 'confirmed'
+                                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                              : appointment.status === 'scheduled'
+                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                                : ''
+                                        }
+                                        dir={isRTL ? 'rtl' : 'ltr'}
+                                      >
+                                        {(() => { const s = (appointment.status || '').toLowerCase(); if (s === 'scheduled') return t('appointments_status_scheduled') || 'Scheduled'; if (s === 'confirmed') return t('appointments_status_confirmed') || 'Confirmed'; if (s === 'completed') return t('appointments_status_completed') || 'Completed'; if (s === 'cancelled') return t('appointments_status_cancelled') || 'Cancelled'; return appointment.status; })()}
                                       </Badge>
-                                    )}
-                                    <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
+                                      {(() => {
+                                        const isAbsent = (apt: Appointment) => {
+                                          if (apt.status !== 'scheduled' && apt.status !== 'confirmed') return false;
+                                          try {
+                                            const aptDateTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
+                                            const now = new Date();
+                                            return aptDateTime < now;
+                                          } catch (e) {
+                                            return false;
+                                          }
+                                        };
+
+                                        if (isAbsent(appointment)) {
+                                          return (
+                                            <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100" dir={isRTL ? 'rtl' : 'ltr'}>
+                                              {t('appointments_absent_badge') || 'Absent'}
+                                            </Badge>
+                                          );
+                                        }
+                                        return null;
+                                      })()}
+                                      {appointment.consultation_fee && (
+                                        <Badge variant="outline" dir="ltr">
+                                          {formatCurrency(appointment.consultation_fee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className={`flex flex-wrap items-center gap-1 w-full sm:w-auto ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                       {appointment.status === 'scheduled' && (
                                         <Button
                                           variant="outline"
                                           size="sm"
                                           onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
-                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                          className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                                          dir={isRTL ? 'rtl' : 'ltr'}
                                         >
-                                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                          {t('dd_confirm') || 'Confirm'}
+                                          <CheckCircle className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_confirm') || 'Confirm'}</span>
                                         </Button>
                                       )}
                                       {appointment.status === 'confirmed' && (
@@ -1637,20 +1644,22 @@ export default function DoctorDashboard() {
                                           variant="outline"
                                           size="sm"
                                           onClick={() => handleStartConsultation(appointment)}
-                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                          className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                                          dir={isRTL ? 'rtl' : 'ltr'}
                                         >
-                                          <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                          {t('dd_consult') || 'Consult'}
+                                          <Stethoscope className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_consult') || 'Consult'}</span>
                                         </Button>
                                       )}
                                       <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleViewPatient(appointment.patient_id)}
-                                        className="text-xs sm:text-sm whitespace-nowrap"
+                                        className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                                        dir={isRTL ? 'rtl' : 'ltr'}
                                       >
-                                        <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                        {t('view_patient') || 'View Patient'}
+                                        <User className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{t('view_patient') || 'View Patient'}</span>
                                       </Button>
                                       {['scheduled', 'confirmed'].includes(appointment.status) && (
                                         <Button
@@ -1660,10 +1669,11 @@ export default function DoctorDashboard() {
                                             setSelectedAppointment(appointment);
                                             setShowCancelModal(true);
                                           }}
-                                          className="text-xs sm:text-sm whitespace-nowrap"
+                                          className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                                          dir={isRTL ? 'rtl' : 'ltr'}
                                         >
-                                          <XCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                          {t('dd_cancel') || 'Cancel'}
+                                          <XCircle className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_cancel') || 'Cancel'}</span>
                                         </Button>
                                       )}
                                     </div>
@@ -1673,20 +1683,23 @@ export default function DoctorDashboard() {
 
                               {/* View All/Show Less Button */}
                               {sortedAppointments.length > 10 && (
-                                <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <Button
                                     variant="outline"
                                     onClick={() => setShowAllAppointments(!showAllAppointments)}
+                                    dir={isRTL ? 'rtl' : 'ltr'}
                                   >
-                                    {showAllAppointments ? (
-                                      <>
-                                        {t('show_less') || 'Show Less'}
-                                      </>
-                                    ) : (
-                                      <>
-                                        {t('view_all') || 'View All'} {sortedAppointments.length} {t('appointments') || 'Appointments'}
-                                      </>
-                                    )}
+                                    <span dir={isRTL ? 'rtl' : 'ltr'}>
+                                      {showAllAppointments ? (
+                                        <>
+                                          {t('show_less') || 'Show Less'}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {t('view_all') || 'View All'} {toArabicNumerals(sortedAppointments.length.toString(), locale)} {t('appointments') || 'Appointments'}
+                                        </>
+                                      )}
+                                    </span>
                                   </Button>
                                 </div>
                               )}
@@ -1694,10 +1707,10 @@ export default function DoctorDashboard() {
                           );
                         } else {
                           return (
-                            <div className="text-center py-12">
+                            <div className="text-center py-12" dir={isRTL ? 'rtl' : 'ltr'}>
                               <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
-                              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                              <h3 className={`text-lg font-medium text-gray-900 dark:text-white mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
+                              <p className={`text-gray-600 dark:text-gray-400 mb-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 {t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}
                               </p>
                               <Button
@@ -1708,9 +1721,11 @@ export default function DoctorDashboard() {
                                     description: t('opening_booking_form') || 'Opening appointment booking form...',
                                   });
                                 }}
+                                className={isRTL ? 'flex-row-reverse' : ''}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
-                                <Plus className="w-4 h-4 mr-2" />
-                                {t('dd_schedule_first') || 'Schedule First Appointment'}
+                                <Plus className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_first') || 'Schedule First Appointment'}</span>
                               </Button>
                             </div>
                           );

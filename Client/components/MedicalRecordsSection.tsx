@@ -463,29 +463,29 @@ export default function MedicalRecordsSection() {
 
   return (
     <div className="w-full" id="medical-records" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+      <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+          <h2 className={`text-2xl font-bold text-foreground flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <Heart className="w-6 h-6 text-[#4DBCC4]" />
-            {t('mr_section_title') || 'Your Medical Information'}
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_section_title') || 'Your Medical Information'}</span>
           </h2>
-          <p className="text-muted-foreground">{t('mr_section_subtitle') || 'Keep your health information up to date'}</p>
+          <p className={`text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_section_subtitle') || 'Keep your health information up to date'}</p>
         </div>
         {/* Hide edit button when on consultations tab */}
         {activeTab !== 'records' && (
           !editing ? (
-            <Button onClick={() => setEditing(true)} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-              <Edit className="w-4 h-4 me-2" />
+            <Button onClick={() => setEditing(true)} variant="outline" className={`border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Edit className="w-4 h-4" />
               {t('mr_edit') || 'Edit'}
             </Button>
           ) : (
-            <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={loading}>
-                <Save className="w-4 h-4 me-2" />
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Button onClick={handleSave} disabled={loading} className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <Save className="w-4 h-4" />
                 {loading ? (t('mr_saving_section') || 'Saving...') : (t('mr_save') || 'Save')}
               </Button>
-              <Button onClick={handleCancel} variant="outline" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out">
-                <X className="w-4 h-4 me-2" />
+              <Button onClick={handleCancel} variant="outline" className={`border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4] hover:text-white hover:border-[#4DBCC4] dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4] dark:hover:text-white transition-all duration-200 ease-in-out flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <X className="w-4 h-4" />
                 {t('mr_cancel') || 'Cancel'}
               </Button>
             </div>
@@ -512,19 +512,19 @@ export default function MedicalRecordsSection() {
             <TabsTrigger value="records" disabled={editing}>{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <TabsContent value="overview" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Card dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <Heart className="w-5 h-5 text-[#4DBCC4]" />
-                  {t('mr_medical_history') || 'Medical History'}
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_medical_history') || 'Medical History'}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                 {editing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="medical_history" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_medical_history') || 'Medical History'}</Label>
+                  <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div dir={isRTL ? 'rtl' : 'ltr'}>
+                      <Label htmlFor="medical_history" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_medical_history') || 'Medical History'}</Label>
                       <Textarea
                         id="medical_history"
                         value={editForm.medical_history}
@@ -532,15 +532,16 @@ export default function MedicalRecordsSection() {
                         placeholder={t('mr_medical_history_placeholder') || "Enter your medical history, past conditions, surgeries, etc."}
                         rows={6}
                         className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       />
                     </div>
                   </div>
                 ) : (
-                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                  <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
                     {medicalInfo?.medical_history ? (
-                      <p className="text-foreground whitespace-pre-wrap">{medicalInfo.medical_history}</p>
+                      <p className="text-foreground whitespace-pre-wrap" dir={isRTL ? 'rtl' : 'ltr'}>{medicalInfo.medical_history}</p>
                     ) : (
-                      <p className="text-muted-foreground italic">{t('mr_no_medical_history') || 'No medical history recorded'}</p>
+                      <p className="text-muted-foreground italic" dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_no_medical_history') || 'No medical history recorded'}</p>
                     )}
                   </div>
                 )}

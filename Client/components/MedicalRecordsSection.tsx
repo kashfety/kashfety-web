@@ -504,12 +504,12 @@ export default function MedicalRecordsSection() {
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="w-full" dir={isRTL ? 'rtl' : 'ltr'} onValueChange={setActiveTab}>
-          <TabsList className="flex flex-col h-auto w-full sm:grid sm:grid-cols-5">
-            <TabsTrigger value="overview" disabled={editing && false}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
-            <TabsTrigger value="allergies" disabled={editing && false}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
-            <TabsTrigger value="medications" disabled={editing && false}>{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
-            <TabsTrigger value="emergency" disabled={editing && false}>{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
-            <TabsTrigger value="records" disabled={editing}>{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
+          <TabsList className="flex flex-col h-auto w-full sm:grid sm:grid-cols-5" dir={isRTL ? 'rtl' : 'ltr'}>
+            <TabsTrigger value="overview" disabled={editing && false} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_overview') || 'Overview'}</TabsTrigger>
+            <TabsTrigger value="allergies" disabled={editing && false} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_allergies') || 'Allergies'}</TabsTrigger>
+            <TabsTrigger value="medications" disabled={editing && false} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_medications') || 'Medications'}</TabsTrigger>
+            <TabsTrigger value="emergency" disabled={editing && false} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_emergency') || 'Emergency Contact'}</TabsTrigger>
+            <TabsTrigger value="records" disabled={editing} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_consultations') || 'Consultations'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -549,33 +549,34 @@ export default function MedicalRecordsSection() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="allergies">
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <TabsContent value="allergies" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Card dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <AlertTriangle className="w-5 h-5 text-red-500" />
-                  {t('mr_allergies') || 'Allergies'}
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_allergies') || 'Allergies'}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                 {editing ? (
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
+                  <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       <Input
                         value={allergyInput}
                         onChange={(e) => setAllergyInput(e.target.value)}
                         placeholder={t('mr_add_allergy_placeholder') || "Add an allergy"}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addAllergy())}
                         className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       />
-                      <Button onClick={addAllergy} type="button" className="shrink-0">
+                      <Button onClick={addAllergy} type="button" className="shrink-0" dir={isRTL ? 'rtl' : 'ltr'}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {allergiesList.map((allergy, index) => (
-                        <Badge key={index} variant="destructive" className="flex items-center gap-1">
-                          {allergy}
+                        <Badge key={index} variant="destructive" className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{allergy}</span>
                           <X
                             className="w-3 h-3 cursor-pointer"
                             onClick={() => removeAllergy(allergy)}
@@ -585,16 +586,16 @@ export default function MedicalRecordsSection() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
+                  <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {allergiesList.length > 0 ? (
                       allergiesList.map((allergy, index) => (
-                        <Badge key={index} variant="destructive">
-                          <AlertTriangle className="w-3 h-3 me-1" />
-                          {allergy}
+                        <Badge key={index} variant="destructive" className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <AlertTriangle className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{allergy}</span>
                         </Badge>
                       ))
                     ) : (
-                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_allergies') || 'No allergies recorded'}</p>
+                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_no_allergies') || 'No allergies recorded'}</p>
                     )}
                   </div>
                 )}
@@ -602,33 +603,34 @@ export default function MedicalRecordsSection() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="medications">
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <TabsContent value="medications" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Card dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <Pill className="w-5 h-5 text-[#4DBCC4]" />
-                  {t('mr_medications') || 'Medications'}
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_medications') || 'Medications'}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                 {editing ? (
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
+                  <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       <Input
                         value={medicationInput}
                         onChange={(e) => setMedicationInput(e.target.value)}
                         placeholder={t('mr_add_medication_placeholder') || "Add a medication"}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMedication())}
                         className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       />
-                      <Button onClick={addMedication} type="button" className="shrink-0">
+                      <Button onClick={addMedication} type="button" className="shrink-0" dir={isRTL ? 'rtl' : 'ltr'}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {medicationsList.map((medication, index) => (
-                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                          {medication}
+                        <Badge key={index} variant="secondary" className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{medication}</span>
                           <X
                             className="w-3 h-3 cursor-pointer"
                             onClick={() => removeMedication(medication)}
@@ -638,16 +640,16 @@ export default function MedicalRecordsSection() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
+                  <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {medicationsList.length > 0 ? (
                       medicationsList.map((medication, index) => (
-                        <Badge key={index} variant="secondary">
-                          <Pill className="w-3 h-3 me-1" />
-                          {medication}
+                        <Badge key={index} variant="secondary" className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <Pill className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{medication}</span>
                         </Badge>
                       ))
                     ) : (
-                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_medications') || 'No medications recorded'}</p>
+                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_no_medications') || 'No medications recorded'}</p>
                     )}
                   </div>
                 )}
@@ -818,24 +820,25 @@ export default function MedicalRecordsSection() {
       {/* Create/Edit Medical Record Dialog */}
       <Dialog open={showRecordDialog} onOpenChange={setShowRecordDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
-          <DialogHeader>
-            <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>
+          <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+            <DialogTitle className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
               {editingRecord ? (t('mr_edit_record') || 'Edit Medical Record') : (t('mr_create_record') || 'Create Medical Record')}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="record_date" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_record_date') || 'Record Date'}</Label>
+          <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label htmlFor="record_date" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_record_date') || 'Record Date'}</Label>
               <Input
                 id="record_date"
                 type="date"
                 value={recordForm.record_date}
                 onChange={(e) => setRecordForm(prev => ({ ...prev, record_date: e.target.value }))}
                 className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir="ltr"
               />
             </div>
-            <div>
-              <Label htmlFor="diagnosis" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_diagnosis') || 'Diagnosis'} *</Label>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label htmlFor="diagnosis" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_diagnosis') || 'Diagnosis'} *</Label>
               <Textarea
                 id="diagnosis"
                 value={recordForm.diagnosis}
@@ -843,11 +846,12 @@ export default function MedicalRecordsSection() {
                 placeholder={t('mr_diagnosis_placeholder') || "Enter diagnosis"}
                 rows={3}
                 className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="treatment" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_treatment') || 'Treatment'} *</Label>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label htmlFor="treatment" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_treatment') || 'Treatment'} *</Label>
               <Textarea
                 id="treatment"
                 value={recordForm.treatment}
@@ -855,11 +859,12 @@ export default function MedicalRecordsSection() {
                 placeholder={t('mr_treatment_placeholder') || "Enter treatment details"}
                 rows={4}
                 className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="prescription" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_prescription') || 'Prescription'}</Label>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label htmlFor="prescription" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_prescription') || 'Prescription'}</Label>
               <Textarea
                 id="prescription"
                 value={recordForm.prescription}
@@ -867,10 +872,11 @@ export default function MedicalRecordsSection() {
                 placeholder={t('mr_prescription_placeholder') || "Enter prescription details (optional)"}
                 rows={3}
                 className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
-            <div>
-              <Label htmlFor="notes" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_notes') || 'Additional Notes'}</Label>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label htmlFor="notes" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_notes') || 'Additional Notes'}</Label>
               <Textarea
                 id="notes"
                 value={recordForm.notes}
@@ -878,17 +884,18 @@ export default function MedicalRecordsSection() {
                 placeholder={t('mr_notes_placeholder') || "Enter any additional notes (optional)"}
                 rows={3}
                 className={`mt-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className={isRTL ? 'flex-row-reverse' : ''} dir={isRTL ? 'rtl' : 'ltr'}>
             <Button variant="outline" onClick={() => {
               setShowRecordDialog(false);
               setEditingRecord(null);
-            }}>
+            }} dir={isRTL ? 'rtl' : 'ltr'}>
               {t('mr_cancel') || 'Cancel'}
             </Button>
-            <Button onClick={handleSaveRecord} disabled={recordsLoading}>
+            <Button onClick={handleSaveRecord} disabled={recordsLoading} dir={isRTL ? 'rtl' : 'ltr'}>
               {recordsLoading ? (t('mr_saving') || 'Saving...') : (t('mr_save') || 'Save')}
             </Button>
           </DialogFooter>

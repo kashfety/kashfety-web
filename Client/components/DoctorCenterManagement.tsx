@@ -285,7 +285,7 @@ export default function DoctorCenterManagement() {
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="flex items-center justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Building className="h-5 w-5" />
           <h2 className="text-xl font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_medical_center_assignments') || 'Medical Center Assignments'}</h2>

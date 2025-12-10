@@ -3569,7 +3569,7 @@ export const translations = {
     reschedule_error_default: "فشل في إعادة جدولة الموعد. يرجى المحاولة مرة أخرى.",
 
     // Lab-specific translations
-    reschedule_lab_title: "إعادة جدولة فحص المختبر",
+    reschedule_lab_title: "تغيير الموعد",
     cancel_lab_title: "إلغاء فحص المختبر",
     lab_booking_to_cancel: "فحص المختبر المراد إلغاؤه",
     lab_cancel_warning_title: "سياسة الإلغاء",

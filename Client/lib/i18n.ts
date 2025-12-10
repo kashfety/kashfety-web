@@ -3533,7 +3533,7 @@ export const translations = {
     cd_default_email: "admin@center.com",
 
     // Reschedule Modal
-    reschedule_title: "إعادة جدولة الموعد",
+    reschedule_title: "تغيير الموعد",
     reschedule_current_appointment: "الموعد الحالي",
     reschedule_doctor_label: "الطبيب",
     reschedule_date_tbd: "التاريخ سيُحدد لاحقاً",

@@ -15,6 +15,8 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
+import { toArabicNumerals, formatLocalizedDate, getLocalizedMonths } from "@/lib/i18n";
+import { ar } from "date-fns/locale";
 
 interface Appointment {
   id: string;
@@ -512,13 +514,13 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
                   >
-                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-800 shadow-md">
+                    <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-200 dark:border-blue-800 shadow-md" dir={isRTL ? 'rtl' : 'ltr'}>
                       <CardContent className="p-4">
                         <motion.h3
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
-                          className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2"
+                          className={`font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                         >
                           <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           {t('reschedule_current_appointment') || 'Current Appointment'}
@@ -528,11 +530,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4, staggerChildren: 0.1 }}
                           className="space-y-2"
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           >
                             <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             <span className="font-medium text-gray-900 dark:text-gray-100">{appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}</span>
@@ -550,30 +553,42 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           >
                             <CalendarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             <span className="text-gray-900 dark:text-gray-100">
-                              {appointment.appointment_date || appointment.date || t('reschedule_date_tbd') || 'Date TBD'} {t('reschedule_at') || 'at'}{' '}
-                              {appointment.appointment_time?.substring(0, 5) || appointment.time || t('reschedule_time_tbd') || 'Time TBD'}
+                              {(() => {
+                                const dateStr = appointment.appointment_date || appointment.date;
+                                const timeStr = appointment.appointment_time?.substring(0, 5) || appointment.time;
+                                if (locale === 'ar') {
+                                  const formattedDate = dateStr ? formatLocalizedDate(dateStr, locale, 'short') : (t('reschedule_date_tbd') || 'Date TBD');
+                                  const formattedTime = timeStr ? toArabicNumerals(timeStr, locale) : (t('reschedule_time_tbd') || 'Time TBD');
+                                  return `${formattedDate} ${t('reschedule_at') || 'at'} ${formattedTime}`;
+                                }
+                                return `${dateStr || t('reschedule_date_tbd') || 'Date TBD'} ${t('reschedule_at') || 'at'} ${timeStr || t('reschedule_time_tbd') || 'Time TBD'}`;
+                              })()}
                             </span>
                           </motion.div>
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           >
                             <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             <span className="text-gray-900 dark:text-gray-100">
-                              {appointment.duration ? `${appointment.duration} ${t('reschedule_min') || 'min'}` : `30 ${t('reschedule_min') || 'min'}`} - {appointment.type || t('reschedule_consultation') || 'Consultation'}
+                              {(() => {
+                                const duration = appointment.duration || '30';
+                                const durationText = locale === 'ar' ? toArabicNumerals(duration, locale) : duration;
+                                return `${durationText} ${t('reschedule_min') || 'min'} - ${appointment.type || t('reschedule_consultation') || 'Consultation'}`;
+                              })()}
                             </span>
                           </motion.div>
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="flex items-center gap-2"
+                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           >
                             <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             <span className="text-gray-900 dark:text-gray-100">{appointment.location || appointment.address || t('reschedule_medical_center') || 'Medical Center'}</span>
@@ -583,10 +598,10 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.4 }}
-                              className="flex items-center gap-2"
+                              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                             >
                               <span className="w-4 h-4 text-blue-600 dark:text-blue-400">📞</span>
-                              <span className="text-gray-900 dark:text-gray-100">{appointment.phone}</span>
+                              <span className="text-gray-900 dark:text-gray-100" dir="ltr">{locale === 'ar' ? toArabicNumerals(appointment.phone, locale) : appointment.phone}</span>
                             </motion.div>
                           )}
                           {appointment.notes && appointment.notes !== 'No additional notes' && appointment.notes.trim() !== '' && (
@@ -659,7 +674,23 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           selected={selectedDate}
                           onSelect={handleDateSelect}
                           disabled={isDateDisabled}
+                          locale={locale === 'ar' ? ar : undefined}
                           className="rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-lg p-4 pr-4 bg-white dark:bg-gray-800 w-full"
+                          dir={isRTL ? 'rtl' : 'ltr'}
+                          formatters={{
+                            formatDay: (date) => {
+                              const day = date.getDate();
+                              return locale === 'ar' ? toArabicNumerals(day.toString(), locale) : day.toString();
+                            },
+                            formatCaption: (date, options) => {
+                              if (locale === 'ar') {
+                                const month = getLocalizedMonths(locale)[date.getMonth()];
+                                const year = toArabicNumerals(date.getFullYear().toString(), locale);
+                                return `${month} ${year}`;
+                              }
+                              return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                            }
+                          }}
                         />
                       </div>
 
@@ -703,7 +734,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                                             : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                     >
-                                      {slot.time}
+                                      <span dir="ltr">{locale === 'ar' ? toArabicNumerals(slot.time, locale) : slot.time}</span>
                                       {slot.is_booked && (
                                         <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
                                       )}

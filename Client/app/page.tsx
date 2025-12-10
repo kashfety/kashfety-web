@@ -391,7 +391,11 @@ export default function HomePage() {
                     { number: "24/7", label: t('stat_support_available') || 'Support Available', color: "text-[#4DBCC4]" }
                   ].map((stat, index) => {
                     // Convert number to Arabic numerals if locale is Arabic
-                    const displayNumber = locale === 'ar' ? toArabicNumerals(stat.number, locale) : stat.number;
+                    let displayNumber = locale === 'ar' ? toArabicNumerals(stat.number, locale) : stat.number;
+                    // Replace 'k' with Arabic equivalent 'ألف' (thousand) when locale is Arabic
+                    if (locale === 'ar') {
+                      displayNumber = displayNumber.replace(/k/gi, 'ألف');
+                    }
                     return (
                       <motion.div
                         key={index}

@@ -21,7 +21,11 @@ export default function StatsCard({ title, value, icon: Icon, description, trend
   const { locale, isRTL } = useLocale();
   
   // Convert value to Arabic numerals if locale is Arabic
-  const displayValue = locale === 'ar' ? toArabicNumerals(value, locale) : value;
+  let displayValue = locale === 'ar' ? toArabicNumerals(value, locale) : value;
+  // Replace 'k' with Arabic equivalent 'ألف' (thousand) when locale is Arabic
+  if (locale === 'ar') {
+    displayValue = displayValue.replace(/k/gi, 'ألف');
+  }
   const displayTrend = trend ? (locale === 'ar' ? toArabicNumerals(trend.value.toString(), locale) : trend.value.toString()) : null;
 
   return (

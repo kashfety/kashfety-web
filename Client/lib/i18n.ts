@@ -1681,6 +1681,7 @@ export const translations = {
 
     // Reschedule Modal
     reschedule_title: "Reschedule Appointment",
+    reschedule_with: "with",
     reschedule_current_appointment: "Current Appointment",
     reschedule_doctor_label: "Doctor",
     reschedule_date_tbd: "Date TBD",
@@ -3534,6 +3535,7 @@ export const translations = {
 
     // Reschedule Modal
     reschedule_title: "تغيير الموعد",
+    reschedule_with: "مع",
     reschedule_current_appointment: "الموعد الحالي",
     reschedule_doctor_label: "الطبيب",
     reschedule_date_tbd: "التاريخ سيُحدد لاحقاً",

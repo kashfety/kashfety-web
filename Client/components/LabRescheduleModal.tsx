@@ -239,8 +239,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                 bounce: 0.3
               }}
             >
-              <DialogHeader>
-                <DialogTitle className={`text-2xl font-bold text-center ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('reschedule_lab_title') || 'Reschedule Lab Test'}
                 </DialogTitle>
               </DialogHeader>
@@ -288,7 +288,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                 <div className="grid lg:grid-cols-2 gap-6">
                   {/* Calendar */}
                   <div>
-                    <Label className="text-lg font-semibold mb-4 block">
+                    <Label className={`text-lg font-semibold mb-4 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('lab_select_new_date') || 'Select New Date'}
                     </Label>
                     <Calendar
@@ -325,7 +325,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
 
                   {/* Time Slots */}
                   <div>
-                    <Label className="text-lg font-semibold mb-4 block">
+                    <Label className={`text-lg font-semibold mb-4 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('lab_select_new_time') || 'Select New Time'}
                     </Label>
                     {selectedDate ? (
@@ -380,7 +380,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
 
                 {/* Reason */}
                 <div>
-                  <Label htmlFor="reason" className="text-base font-medium">
+                  <Label htmlFor="reason" className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {t('lab_reschedule_reason') || 'Reason for Rescheduling (Optional)'}
                   </Label>
                   <Textarea

@@ -762,10 +762,10 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
+      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Calendar className="h-5 w-5" />
-          <span>{t('dd_loading_schedule') || 'Loading schedule...'}</span>
+          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_loading_schedule') || 'Loading schedule...'}</span>
         </div>
       </div>
     );
@@ -774,47 +774,49 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Calendar className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">{t('dd_schedule_management') || 'Schedule Management'}</h2>
+          <h2 className="text-xl font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_management') || 'Schedule Management'}</h2>
         </div>
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Button
             onClick={refreshSchedule}
             variant="outline"
             size="sm"
             disabled={loading || !selectedCenterId}
             className={isRTL ? 'flex-row-reverse' : ''}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
             <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('dd_refresh') || 'Refresh'}
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_refresh') || 'Refresh'}</span>
           </Button>
           <Button
             onClick={saveSchedule}
             disabled={saving || !selectedCenterId}
             size="sm"
             className={isRTL ? 'flex-row-reverse' : ''}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
             <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {saving ? (t('dd_saving') || 'Saving...') : (t('dd_save_schedule') || 'Save Schedule')}
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('dd_saving') || 'Saving...') : (t('dd_save_schedule') || 'Save Schedule')}</span>
           </Button>
         </div>
       </div>
 
       {/* Center Selection */}
       <Card dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <Building className="h-5 w-5" />
-            {t('dd_center_selection') || 'Medical Center Selection'}
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_center_selection') || 'Medical Center Selection'}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className={isRTL ? 'text-right' : 'text-left'}>
-              <Label className="text-base font-medium">{t('dd_select_center_manage') || 'Select Center to Manage Schedule'}</Label>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_center_selection_desc') || 'Choose which medical center you want to set your schedule for. You can only manage schedules for centers assigned to you.'}</p>
+        <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_select_center_manage') || 'Select Center to Manage Schedule'}</Label>
+              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_center_selection_desc') || 'Choose which medical center you want to set your schedule for. You can only manage schedules for centers assigned to you.'}</p>
             </div>
 
             {assignedCenters.length > 0 ? (
@@ -830,34 +832,34 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                       setSelectedCenterId(center.id);
                     }}
                   >
-                    <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <h3 className="font-medium text-sm">{getLocalizedCenterName(center)}</h3>
-                        <div className={`flex items-center gap-1 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <MapPin className="h-3 w-3 text-gray-500" />
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <h3 className="font-medium text-sm" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(center)}</h3>
+                        <div className={`flex items-center gap-1 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <MapPin className={`h-3 w-3 text-gray-500 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          <p className="text-xs text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                             {center.address}
                           </p>
                         </div>
                         {center.is_primary && (
-                          <Badge variant="secondary" className="mt-2 text-xs">
+                          <Badge variant="secondary" className="mt-2 text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                             {t('dd_primary') || 'Primary'}
                           </Badge>
                         )}
                       </div>
                       {selectedCenterId === center.id && (
-                        <CheckCircle className="h-5 w-5 text-blue-500" />
+                        <CheckCircle className={`h-5 w-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'}>
                 <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <div className="space-y-2">
-                  <p className="text-gray-600 dark:text-gray-400">{t('dd_no_centers_assigned_title') || 'No centers assigned to you yet.'}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">{t('dd_no_centers_assigned_desc') || 'Please go to the "Centers" tab to select which medical centers you want to work at, then return here to set your schedule.'}</p>
+                <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_no_centers_assigned_title') || 'No centers assigned to you yet.'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_no_centers_assigned_desc') || 'Please go to the "Centers" tab to select which medical centers you want to work at, then return here to set your schedule.'}</p>
                 </div>
               </div>
             )}
@@ -869,17 +871,17 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         <>
           {/* Home Visits Setting */}
           <Card dir={isRTL ? 'rtl' : 'ltr'}>
-            <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Home className="h-5 w-5" />
-                {t('dd_home_visits') || 'Home Visits'}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits') || 'Home Visits'}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <Label className="text-base font-medium">{t('dd_accept_home_visits') || 'Accept Home Visit Appointments'}</Label>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_home_visits_desc') || 'Enable this to allow patients to book home visit appointments with you'}</p>
+            <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_accept_home_visits') || 'Accept Home Visit Appointments'}</Label>
+                  <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits_desc') || 'Enable this to allow patients to book home visit appointments with you'}</p>
                 </div>
                 <Switch
                   checked={homeVisitsAvailable}
@@ -891,25 +893,25 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
           {/* Weekly Schedule */}
           <Card dir={isRTL ? 'rtl' : 'ltr'}>
-            <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Clock className="h-5 w-5" />
-                {(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {(() => {
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {(() => {
                   const center = centers.find(c => c.id === selectedCenterId);
                   return center ? getLocalizedCenterName(center) : '';
-                })()}
+                })()}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
               {DAYS_OF_WEEK.map(day => {
                 const config = getDayConfig(day.value);
                 const slots = generateSlotsForDay(day.value);
 
                 return (
-                  <div key={day.value} className="space-y-4 p-4 border rounded-lg">
+                  <div key={day.value} className="space-y-4 p-4 border rounded-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                     {/* Day Header */}
-                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <h3 className="text-lg font-medium">{t((day as any).labelKey) || (day as any).labelKey}</h3>
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h3 className={`text-lg font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t((day as any).labelKey) || (day as any).labelKey}</h3>
                       <Switch
                         checked={config.isAvailable || false}
                         onCheckedChange={(checked) => updateDayConfig(day.value, 'isAvailable', checked)}
@@ -917,27 +919,31 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                     </div>
 
                     {config.isAvailable && (
-                      <div className="space-y-4 ml-4">
+                      <div className={`space-y-4 ${isRTL ? 'mr-4' : 'ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {/* Time Range */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label>{t('dd_start_time') || 'Start Time'}</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_start_time') || 'Start Time'}</Label>
                             <Input
                               type="time"
                               value={config.startTime || '09:00'}
                               onChange={(e) => updateDayConfig(day.value, 'startTime', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_end_time') || 'End Time'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_end_time') || 'End Time'}</Label>
                             <Input
                               type="time"
                               value={config.endTime || '17:00'}
                               onChange={(e) => updateDayConfig(day.value, 'endTime', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
                             <Input
                               type="number"
                               min="15"
@@ -945,44 +951,50 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                               step="15"
                               value={config.duration || 30}
                               onChange={(e) => updateDayConfig(day.value, 'duration', parseInt(e.target.value))}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
                         </div>
 
                         {/* Break Time */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>{t('dd_break_start_optional') || 'Break Start (optional)'}</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_break_start_optional') || 'Break Start (optional)'}</Label>
                             <Input
                               type="time"
                               value={config.breakStart || ''}
                               onChange={(e) => updateDayConfig(day.value, 'breakStart', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_break_end_optional') || 'Break End (optional)'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_break_end_optional') || 'Break End (optional)'}</Label>
                             <Input
                               type="time"
                               value={config.breakEnd || ''}
                               onChange={(e) => updateDayConfig(day.value, 'breakEnd', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
                         </div>
 
                         {/* Generated Slots Preview */}
                         {slots.length > 0 && (
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               {(t('dd_generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', toArabicNumerals(slots.length))}
                             </Label>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                            <div className={`mt-2 flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               {slots.slice(0, 8).map((slot, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
+                                <Badge key={index} variant="outline" className="text-xs" dir="ltr">
                                   {slot.time}
                                 </Badge>
                               ))}
                               {slots.length > 8 && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {(t('dd_more_count') || '+{count} more').replace('{count}', toArabicNumerals(slots.length - 8))}
                                 </Badge>
                               )}
@@ -991,8 +1003,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                         )}
 
                         {/* Copy from other days */}
-                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('dd_copy_from') || 'Copy from:'}</span>
+                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_copy_from') || 'Copy from:'}</span>
                           {DAYS_OF_WEEK.filter(d => d.value !== day.value && dayConfigs[d.value]?.isAvailable).map(sourceDay => (
                             <Button
                               key={sourceDay.value}
@@ -1000,6 +1012,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                               size="sm"
                               onClick={() => copySchedule(sourceDay.value, day.value)}
                               className="text-xs"
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
                               {t((sourceDay as any).labelKey) || (sourceDay as any).labelKey}
                             </Button>
@@ -1015,29 +1028,29 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
           {/* Schedule Summary */}
           <Card dir={isRTL ? 'rtl' : 'ltr'}>
-            <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <CheckCircle className="h-5 w-5" />
-                {t('dd_schedule_summary') || 'Schedule Summary'}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_summary') || 'Schedule Summary'}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_working_days') || 'Working Days'}</Label>
-                  <p className="text-lg font-semibold">{toArabicNumerals(Object.values(dayConfigs).filter(config => config.isAvailable).length)} {t('days') || 'days'}</p>
+            <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_working_days') || 'Working Days'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(Object.values(dayConfigs).filter(config => config.isAvailable).length)} {t('days') || 'days'}</p>
                 </div>
-                <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                  <p className="text-lg font-semibold">{toArabicNumerals(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0))} {t('slots') || 'slots'}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_weekly_slots') || 'Total Weekly Slots'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0))} {t('slots') || 'slots'}</p>
                 </div>
-                <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_home_visits') || 'Home Visits'}</Label>
-                  <p className="text-lg font-semibold">{homeVisitsAvailable ? (t('dd_available') || 'Available') : (t('dd_not_available') || 'Not Available')}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits') || 'Home Visits'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{homeVisitsAvailable ? (t('dd_available') || 'Available') : (t('dd_not_available') || 'Not Available')}</p>
                 </div>
-                <div className={isRTL ? 'text-right' : 'text-left'}>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_default_fee') || 'Default Fee'}</Label>
-                  <p className="text-lg font-semibold">{formatCurrency(defaultConsultationFee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_default_fee') || 'Default Fee'}</Label>
+                  <p className="text-lg font-semibold" dir="ltr">{formatCurrency(defaultConsultationFee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}</p>
                 </div>
               </div>
             </CardContent>
@@ -1047,40 +1060,41 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
       {/* Conflict Alert Dialog */}
       <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
-        <AlertDialogContent className="max-w-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+        <AlertDialogContent className="max-w-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
+          <AlertDialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+            <AlertDialogTitle className={`text-red-600 dark:text-red-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <span>⚠️</span>
-              <span>{t('schedule_conflict') || 'Schedule Conflict'}</span>
+              <span dir={isRTL ? 'rtl' : 'ltr'}>{t('schedule_conflict') || 'Schedule Conflict'}</span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <p className="text-gray-700 dark:text-gray-300">{conflictMessage}</p>
+            <AlertDialogDescription className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{conflictMessage}</p>
 
               {conflictDetails.length > 0 && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <p className={`font-semibold text-gray-800 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {t('conflict_details') || 'Conflict Details:'}
                   </p>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
                     {conflictDetails.map((conflict, index) => (
-                      <div key={index} className="flex items-start gap-2 text-sm">
-                        <span className="text-red-500 mt-0.5">•</span>
-                        <span className="text-gray-700 dark:text-gray-300">{conflict}</span>
+                      <div key={index} className={`flex items-start gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <span className={`text-red-500 mt-0.5 ${isRTL ? 'ml-1' : 'mr-1'}`}>•</span>
+                        <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{conflict}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {t('schedule_conflict_instruction') || 'Please adjust your schedule to avoid overlapping time slots on the same day at different centers.'}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''} dir={isRTL ? 'rtl' : 'ltr'}>
             <AlertDialogAction
               onClick={() => setShowConflictDialog(false)}
               className="bg-primary hover:bg-primary/90"
+              dir={isRTL ? 'rtl' : 'ltr'}
             >
               {t('understood') || 'Understood'}
             </AlertDialogAction>

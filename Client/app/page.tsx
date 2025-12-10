@@ -14,13 +14,14 @@ import ScrollToTop from "@/components/ScrollToTop";
 import CursorTrail from "@/components/CursorTrail";
 import { useLocale } from "@/components/providers/locale-provider";
 import { useAuth } from "@/lib/providers/auth-provider";
+import { toArabicNumerals } from "@/lib/i18n";
 
 export default function HomePage() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [bookingModalMode, setBookingModalMode] = useState<'doctor' | 'lab'>('doctor');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { scrollYProgress } = useScroll();
-  const { t, isRTL } = useLocale();
+  const { t, isRTL, locale } = useLocale();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -381,39 +382,45 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: 0.8 }}
                   viewport={{ once: true }}
                   className="grid grid-cols-2 gap-3 sm:gap-4 text-center"
+                  dir={isRTL ? 'rtl' : 'ltr'}
                 >
                   {[
                     { number: "500+", label: t('stat_verified_doctors') || 'Verified Doctors', color: "text-[#4DBCC4]" },
                     { number: "10k+", label: t('stat_happy_patients') || 'Happy Patients', color: "text-[#4DBCC4]" },
                     { number: "50+", label: t('stat_medical_centers') || 'Medical Centers', color: "text-[#4DBCC4]" },
                     { number: "24/7", label: t('stat_support_available') || 'Support Available', color: "text-[#4DBCC4]" }
-                  ].map((stat, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        duration: 0.5,
-                        delay: 0.8 + index * 0.1,
-                        type: "spring",
-                        stiffness: 200
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      viewport={{ once: true }}
-                      className="bg-card p-3 sm:p-4 rounded-lg border border-border"
-                    >
+                  ].map((stat, index) => {
+                    // Convert number to Arabic numerals if locale is Arabic
+                    const displayNumber = locale === 'ar' ? toArabicNumerals(stat.number, locale) : stat.number;
+                    return (
                       <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ delay: 1 + index * 0.1 }}
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{
+                          duration: 0.5,
+                          delay: 0.8 + index * 0.1,
+                          type: "spring",
+                          stiffness: 200
+                        }}
+                        whileHover={{ scale: 1.05 }}
                         viewport={{ once: true }}
-                        className={`text-xl sm:text-2xl lg:text-3xl font-bold ${stat.color}`}
+                        className="bg-card p-3 sm:p-4 rounded-lg border border-border"
                       >
-                        {stat.number}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ delay: 1 + index * 0.1 }}
+                          viewport={{ once: true }}
+                          className={`text-xl sm:text-2xl lg:text-3xl font-bold ${stat.color}`}
+                          dir="ltr"
+                        >
+                          {displayNumber}
+                        </motion.div>
+                        <div className="text-muted-foreground text-xs sm:text-sm" dir={isRTL ? 'rtl' : 'ltr'}>{stat.label}</div>
                       </motion.div>
-                      <div className="text-muted-foreground text-xs sm:text-sm">{stat.label}</div>
-                    </motion.div>
-                  ))}
+                    );
+                  })}
                 </motion.div>
               </div>
             </motion.div>

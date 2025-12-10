@@ -365,8 +365,8 @@ export default function DoctorCenterManagement() {
                   )}
 
                   {isSelected && (
-                    <div className={`flex items-center justify-between pt-2 border-t ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                      <span className={`text-xs text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{isPrimary ? (t('dd_primary_center') || 'Primary Center') : (t('dd_click_to_set_primary') || 'Click to set as primary')}</span>
+                    <div className="flex items-center justify-between pt-2 border-t" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <span className={`text-xs text-gray-500 flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{isPrimary ? (t('dd_primary_center') || 'Primary Center') : (t('dd_click_to_set_primary') || 'Click to set as primary')}</span>
                       {isPrimary ? (
                         <Badge variant="default" className={`text-xs ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <Star className={`h-3 w-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
@@ -380,7 +380,7 @@ export default function DoctorCenterManagement() {
                             e.stopPropagation();
                             setPrimary(center.id);
                           }}
-                          className="text-xs h-6"
+                          className="text-xs h-6 flex-shrink-0"
                           dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_set_primary') || 'Set Primary'}</span>

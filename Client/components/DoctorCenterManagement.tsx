@@ -316,7 +316,7 @@ export default function DoctorCenterManagement() {
       </Card>
 
       {/* Centers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
         {centers.map(center => {
           const isSelected = selectedCenters.includes(center.id);
           const isPrimary = primaryCenter === center.id;
@@ -332,11 +332,11 @@ export default function DoctorCenterManagement() {
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <CardHeader className={`pb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                  <CardTitle className={`text-base ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(center)}</CardTitle>
-                  <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="flex items-start justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <CardTitle className={`text-base flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(center)}</CardTitle>
+                  <div className="flex items-center gap-1 flex-shrink-0" dir={isRTL ? 'rtl' : 'ltr'}>
                     {isSelected && (
-                      <CheckCircle className={`h-5 w-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      <CheckCircle className="h-5 w-5 text-blue-500" />
                     )}
                   </div>
                 </div>
@@ -401,11 +401,23 @@ export default function DoctorCenterManagement() {
           <CardTitle className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_add_center') || 'Add Center / Clinic'}</CardTitle>
         </CardHeader>
         <CardContent className={`space-y-3 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${isRTL ? 'md:grid-flow-col md:auto-cols-fr' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
-            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
-            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir="ltr" />
-            <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} dir="ltr" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('name') || 'Name'}</Label>
+              <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('name') || 'Name'} value={newCenter.name} onChange={(e) => setNewCenter({ ...newCenter, name: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
+            </div>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
+              <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('address') || 'Address'} value={newCenter.address} onChange={(e) => setNewCenter({ ...newCenter, address: e.target.value })} dir={isRTL ? 'rtl' : 'ltr'} />
+            </div>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
+              <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('phone') || 'Phone'} value={newCenter.phone} onChange={(e) => setNewCenter({ ...newCenter, phone: e.target.value })} dir="ltr" />
+            </div>
+            <div dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className={`text-sm font-medium mb-1 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'}</Label>
+              <input className={`w-full rounded-md border px-3 py-2 bg-background ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t('email') || 'Email'} value={newCenter.email} onChange={(e) => setNewCenter({ ...newCenter, email: e.target.value })} dir="ltr" />
+            </div>
           </div>
           <div className={`flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <label className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>

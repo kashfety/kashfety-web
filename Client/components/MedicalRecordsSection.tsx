@@ -655,20 +655,20 @@ export default function MedicalRecordsSection() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="emergency">
-            <Card>
-              <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <TabsContent value="emergency" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Card dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <Phone className="w-5 h-5 text-[#4DBCC4]" />
-                  {t('mr_emergency_contact') || 'Emergency Contact Information'}
+                  <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_emergency_contact') || 'Emergency Contact Information'}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                 {editing ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="emergency_name" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_contact_name') || 'Contact Name'}</Label>
+                  <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div dir={isRTL ? 'rtl' : 'ltr'}>
+                        <Label htmlFor="emergency_name" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_contact_name') || 'Contact Name'}</Label>
                         <Input
                           id="emergency_name"
                           value={editForm.emergency_contact.name || ''}
@@ -678,10 +678,11 @@ export default function MedicalRecordsSection() {
                           }))}
                           placeholder={t('mr_full_name_placeholder') || "Full name"}
                           className={isRTL ? 'text-right' : 'text-left'}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="emergency_relationship" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_relationship') || 'Relationship'}</Label>
+                      <div dir={isRTL ? 'rtl' : 'ltr'}>
+                        <Label htmlFor="emergency_relationship" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_relationship') || 'Relationship'}</Label>
                         <Input
                           id="emergency_relationship"
                           value={editForm.emergency_contact.relationship || ''}
@@ -691,11 +692,12 @@ export default function MedicalRecordsSection() {
                           }))}
                           placeholder={t('mr_relationship_placeholder') || "e.g., Spouse, Parent, Sibling"}
                           className={isRTL ? 'text-right' : 'text-left'}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         />
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="emergency_phone" className={isRTL ? 'text-right' : 'text-left'}>{t('mr_phone') || 'Phone Number'}</Label>
+                    <div dir={isRTL ? 'rtl' : 'ltr'}>
+                      <Label htmlFor="emergency_phone" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_phone') || 'Phone Number'}</Label>
                       <Input
                         id="emergency_phone"
                         value={editForm.emergency_contact.phone || ''}
@@ -705,31 +707,32 @@ export default function MedicalRecordsSection() {
                         }))}
                         placeholder={t('mr_phone_contact_placeholder') || "+1 (555) 123-4567"}
                         className={isRTL ? 'text-right' : 'text-left'}
+                        dir="ltr"
                       />
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full">
+                  <div className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
                     {medicalInfo?.emergency_contact?.name ? (
-                      <div className="space-y-2 w-full">
-                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                      <div className="space-y-2 w-full" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <strong>{t('mr_emergency_name') || 'Name'}:</strong> {medicalInfo.emergency_contact.name}
                           </p>
                         </div>
-                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <strong>{t('mr_relationship') || 'Relationship'}:</strong> {medicalInfo.emergency_contact.relationship}
                           </p>
                         </div>
-                        <div className={`w-full flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className={`w-full ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                            <strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{medicalInfo.emergency_contact.phone}</span>
+                            <strong>{t('mr_phone') || 'Phone'}:</strong> <span dir="ltr">{locale === 'ar' ? toArabicNumerals(medicalInfo.emergency_contact.phone || '', locale) : medicalInfo.emergency_contact.phone}</span>
                           </p>
                         </div>
                       </div>
                     ) : (
-                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>
+                      <p className={`text-muted-foreground italic ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_no_emergency_contact') || 'No emergency contact recorded'}</p>
                     )}
                   </div>
                 )}
@@ -737,68 +740,68 @@ export default function MedicalRecordsSection() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="records">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <TabsContent value="records" dir={isRTL ? 'rtl' : 'ltr'}>
+            <Card dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <FileText className="w-5 h-5 text-[#4DBCC4]" />
-                    {t('mr_tab_consultations') || 'Consultations'}
+                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_tab_consultations') || 'Consultations'}</span>
                   </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                 {recordsLoading ? (
-                  <div className="flex items-center justify-center py-8">
+                  <div className={`flex items-center justify-center py-8 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4DBCC4]"></div>
-                    <p className={`ms-3 text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_loading_records') || 'Loading records...'}</p>
+                    <p className={`${isRTL ? 'me-3' : 'ms-3'} text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_loading_records') || 'Loading records...'}</p>
                   </div>
                 ) : medicalRecords.length === 0 ? (
-                  <div className="text-center py-8">
+                  <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'}>
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className={`text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_no_consultations') || 'No consultations found'}</p>
+                    <p className={`text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_no_consultations') || 'No consultations found'}</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                     {medicalRecords.map((record) => (
-                      <Card key={record.id} className={`border-l-4 border-l-[#4DBCC4] ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className={`text-lg mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>{record.diagnosis}</CardTitle>
-                              <div className={`flex flex-wrap gap-2 text-sm text-muted-foreground ${isRTL ? 'justify-start' : 'justify-start'}`}>
+                      <Card key={record.id} className={`${isRTL ? 'border-r-4 border-r-[#4DBCC4]' : 'border-l-4 border-l-[#4DBCC4]'} ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <CardTitle className={`text-lg mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{record.diagnosis}</CardTitle>
+                              <div className={`flex flex-wrap gap-2 text-sm text-muted-foreground ${isRTL ? 'flex-row-reverse justify-start' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 {record.doctor && (
-                                  <div className="flex items-center gap-1">
+                                  <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     <User className="w-4 h-4" />
-                                    <span>{t('mr_dr') || 'Dr.'} {getLocalizedDoctorName(record.doctor)}</span>
+                                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_dr') || 'Dr.'} {getLocalizedDoctorName(record.doctor)}</span>
                                     {getLocalizedSpecialty(record.doctor) && (
-                                      <Badge variant="outline" className="ms-1">{getLocalizedSpecialty(record.doctor)}</Badge>
+                                      <Badge variant="outline" className={isRTL ? 'me-1' : 'ms-1'} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedSpecialty(record.doctor)}</Badge>
                                     )}
                                   </div>
                                 )}
-                                <div className="flex items-center gap-1">
+                                <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   <Calendar className="w-4 h-4" />
-                                  <span>{toArabicNumerals(new Date(record.record_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</span>
+                                  <span dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(new Date(record.record_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}</span>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div>
-                            <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_treatment') || 'Treatment'}</Label>
-                            <p className={`text-foreground mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{record.treatment}</p>
+                        <CardContent className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_treatment') || 'Treatment'}</Label>
+                            <p className={`text-foreground mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{record.treatment}</p>
                           </div>
                           {record.prescription && (
-                            <div>
-                              <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_prescription') || 'Prescription'}</Label>
-                              <p className={`text-foreground mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>{record.prescription}</p>
+                            <div dir={isRTL ? 'rtl' : 'ltr'}>
+                              <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_prescription') || 'Prescription'}</Label>
+                              <p className={`text-foreground mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{record.prescription}</p>
                             </div>
                           )}
                           {record.notes && (
-                            <div>
-                              <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('mr_notes') || 'Notes'}</Label>
-                              <p className={`text-foreground mt-1 whitespace-pre-wrap ${isRTL ? 'text-right' : 'text-left'}`}>{record.notes}</p>
+                            <div dir={isRTL ? 'rtl' : 'ltr'}>
+                              <Label className={`text-sm font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('mr_notes') || 'Notes'}</Label>
+                              <p className={`text-foreground mt-1 whitespace-pre-wrap ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{record.notes}</p>
                             </div>
                           )}
                         </CardContent>

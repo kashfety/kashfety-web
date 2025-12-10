@@ -2042,11 +2042,11 @@ export default function DoctorDashboard() {
 
               <TabsContent value="schedule" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="flex items-center gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_schedule_title') || 'Schedule'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_availability') || 'Manage your availability and time slots'}</p>
+                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_title') || 'Schedule'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_availability') || 'Manage your availability and time slots'}</p>
                     </div>
                   </div>
                 </div>

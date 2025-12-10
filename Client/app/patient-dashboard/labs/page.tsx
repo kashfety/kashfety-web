@@ -319,7 +319,7 @@ export default function PatientLabsPage() {
                                         className="border-0 shadow-xl shadow-blue-500/5 hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                                         onClick={() => fetchCenterDetails(center.id)}
                                     >
-                                        <CardContent className="p-6">
+                                        <CardContent className="p-6" dir={isRTL ? 'rtl' : 'ltr'}>
                                             <div className="flex flex-col items-center text-center">
                                                 {/* Icon/Avatar */}
                                                 <div className="w-20 h-20 mb-4 rounded-full bg-blue-600 flex items-center justify-center">
@@ -329,12 +329,12 @@ export default function PatientLabsPage() {
                                                 </div>
 
                                                 {/* Name */}
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                <h3 className={`text-lg font-semibold text-gray-900 dark:text-white mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                                     {getLocalizedCenterName(center)}
                                                 </h3>
 
                                                 {/* Location */}
-                                                <div className="flex items-center gap-2 mb-3 text-sm text-gray-600 dark:text-gray-400">
+                                                <div className={`flex items-center gap-2 mb-3 text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                                     <MapPin className="w-4 h-4" />
                                                     <span className="line-clamp-1">{center.address}</span>
                                                 </div>
@@ -438,24 +438,24 @@ export default function PatientLabsPage() {
 
                     {/* Center Details Modal */}
                     <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {loadingDetails ? (
                                 <div className="flex items-center justify-center py-12">
                                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                                 </div>
                             ) : selectedCenter ? (
                                 <>
-                                    <DialogHeader>
-                                        <div className="flex items-start gap-4">
+                                    <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center">
                                                 <span className="text-white text-xl font-semibold">
                                                     {getCenterInitials(selectedCenter)}
                                                 </span>
                                             </div>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{getLocalizedCenterName(selectedCenter)}</DialogTitle>
-                                                <DialogDescription className="text-lg mt-1">
-                                                    <MapPin className="w-4 h-4 inline mr-1" />
+                                                <DialogTitle className={`text-2xl ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(selectedCenter)}</DialogTitle>
+                                                <DialogDescription className={`text-lg mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                    <MapPin className={`w-4 h-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                                     {selectedCenter.address}
                                                 </DialogDescription>
                                             </div>

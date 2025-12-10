@@ -1378,22 +1378,22 @@ export default function DoctorDashboard() {
                       return (
                         <div className="flex flex-col h-full">
                           <AppointmentsChart data={data} />
-                          <div className="px-6 pb-6 pt-2">
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
-                              <div className="flex gap-2 items-start">
+                          <div className="px-6 pb-6 pt-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div className={`flex gap-2 items-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_appointments_legend_title') || 'Appointments'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <span className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_appointments_legend_title') || 'Appointments'}:</span>
+                                  <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-1' : 'ml-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {t('dd_appointments_legend_desc') || 'Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.'}
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex gap-2 items-start">
+                              <div className={`flex gap-2 items-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
-                                <div>
-                                  <span className="font-semibold text-gray-900 dark:text-white">{t('dd_consultations_legend_title') || 'Consultations'}:</span>
-                                  <span className="text-gray-600 dark:text-gray-400 ml-1">
+                                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <span className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_consultations_legend_title') || 'Consultations'}:</span>
+                                  <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-1' : 'ml-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {t('dd_consultations_legend_desc') || 'Completed appointments only. Tracks finalized visits and revenue-generating activities.'}
                                   </span>
                                 </div>
@@ -1424,35 +1424,35 @@ export default function DoctorDashboard() {
                 </div>
 
                 {/* Recent Patients */}
-                <div className="grid grid-cols-1 gap-6">
-                  <Card className="bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23]">
-                    <CardHeader>
-                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="grid grid-cols-1 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Card className="bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-[#1F1F23]" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        {t('dd_recent_patients') || 'Recent Patients'}
+                        <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_recent_patients') || 'Recent Patients'}</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                       {patients.length > 0 ? (
                         patients.slice(0, 5).map((patient) => (
-                          <div key={patient.id} className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div key={patient.id} className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1F1F23] rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                 <User className="w-5 h-5 text-white" />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="font-medium text-gray-900 dark:text-white">
+                              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {getLocalizedName(patient, locale)}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : (t('no_recent_visit') || 'No recent visit')}
+                                <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {patient.lastAppointment ? `${t('last_visit') || 'Last visit'}: ${toArabicNumerals(new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)}` : (t('no_recent_visit') || 'No recent visit')}
                                 </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {toArabicNumerals((patient.totalAppointments || 0).toString(), locale)} {t('dd_appointments_word') || 'appointments'} • {formatPhoneNumber(patient.phone, locale)}
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -1460,6 +1460,7 @@ export default function DoctorDashboard() {
                                   handleViewPatient(patient.id);
                                   setActiveTab("patients");
                                 }}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
                                 {t('dd_view') || 'View'}
                               </Button>
@@ -1467,9 +1468,9 @@ export default function DoctorDashboard() {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8">
+                        <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'}>
                           <UserCheck className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">No patients yet</p>
+                          <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_no_patients') || 'No patients yet'}</p>
                         </div>
                       )}
                     </CardContent>

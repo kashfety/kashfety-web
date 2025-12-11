@@ -505,8 +505,8 @@ function CenterPatients({
       </div>
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className={`flex flex-col ${isRTL ? 'items-end text-right' : 'items-start text-left'} space-y-1.5 p-6`} dir={isRTL ? 'rtl' : 'ltr'}>
-          <CardTitle className={`text-2xl font-semibold leading-none tracking-tight ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left' }}>
+          <CardTitle className="text-2xl font-semibold leading-none tracking-tight" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
             {t('cd_patient_records')}
           </CardTitle>
         </CardHeader>
@@ -518,9 +518,9 @@ function CenterPatients({
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-white" />
                   </div>
-                  <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <p className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
-                    <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                    <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getPatientDisplayName(patient)}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                       {patient.age ? <><span>{t('age')}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}
                       {patient.last_visit ? <><span>{t('cd_last_visit')}: </span><span dir="ltr">{formatLocalizedDate(patient.last_visit, locale)}</span></> : <span>{t('cd_no_recent_visits')}</span>}

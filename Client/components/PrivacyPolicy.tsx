@@ -17,20 +17,190 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
             <DialogContent className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
                     <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('privacy_policy') || 'Privacy Policy'}
+                        {locale === 'ar' ? 'سياسة الخصوصية' : (t('privacy_policy') || 'Privacy Policy')}
                     </DialogTitle>
                     <DialogDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('privacy_last_updated') || 'Last updated: Please review this policy carefully'}
+                        {locale === 'ar' ? 'آخر تحديث: يرجى مراجعة هذه السياسة بعناية' : (t('privacy_last_updated') || 'Last updated: Please review this policy carefully')}
                     </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-4">
                     <div className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <section>
-                            <h2 className="text-xl font-semibold mb-3">1. {t('privacy_introduction') || 'Introduction'}</h2>
-                            <p className="text-muted-foreground leading-relaxed">
-                                {t('privacy_intro_text') || 'This Privacy Policy explains how the Platform ("we", "our", "us") collects, uses, stores, and protects your personal information. By using the Platform, you agree to the terms outlined here.'}
-                            </p>
-                        </section>
+                        {locale === 'ar' ? (
+                            <>
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">1. المقدمة</h2>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                        توضح هذه السياسة كيفية جمع واستخدام وتخزين وحماية المعلومات الشخصية للمستخدمين على المنصة ("نحن" أو "المنصة"). باستخدامك المنصة، فإنك توافق على شروط سياسة الخصوصية هذه.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">2. المعلومات التي نقوم بجمعها</h2>
+                                    <p className="text-muted-foreground mb-3">
+                                        قد نقوم بجمع الأنواع التالية من المعلومات:
+                                    </p>
+                                    
+                                    <h3 className="text-lg font-medium mb-2">2.1 المعلومات الشخصية</h3>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>الاسم الكامل</li>
+                                        <li>رقم الهاتف</li>
+                                        <li>البريد الإلكتروني</li>
+                                        <li>تاريخ الميلاد</li>
+                                        <li>الجنس</li>
+                                        <li>العنوان (إذا لزم لتقديم الخدمة)</li>
+                                    </ul>
+
+                                    <h3 className="text-lg font-medium mb-2 mt-4">2.2 المعلومات الطبية والصحية</h3>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>تفاصيل المواعيد</li>
+                                        <li>اختيار مقدمي الرعاية الطبية</li>
+                                        <li>طلبات الفحوصات المخبرية</li>
+                                        <li>نتائج المختبرات التي يتم تحميلها على حساب المستخدم</li>
+                                        <li>ملاحظات أو توصيات مقدمي الرعاية الصحية</li>
+                                    </ul>
+
+                                    <h3 className="text-lg font-medium mb-2 mt-4">2.3 المعلومات التقنية</h3>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>معلومات الجهاز</li>
+                                        <li>عنوان IP</li>
+                                        <li>سجلات الاستخدام</li>
+                                        <li>بيانات التحليل</li>
+                                        <li>الكوكيز والتقنيات المشابهة</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">3. كيفية استخدام المعلومات</h2>
+                                    <p className="text-muted-foreground mb-2">قد تُستخدم المعلومات لتلبية أغراض مثل:</p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>إنشاء وإدارة الحساب</li>
+                                        <li>معالجة وتأكيد المواعيد</li>
+                                        <li>مشاركة المعلومات مع الطبيب أو المختبر المختص</li>
+                                        <li>عرض نتائج المختبر على حساب المستخدم</li>
+                                        <li>إرسال الإشعارات والتحديثات</li>
+                                        <li>تحسين أداء ووظائف المنصة</li>
+                                    </ul>
+                                    <p className="text-muted-foreground mt-3 font-medium">
+                                        لا تُستخدم المعلومات الطبية للإعلانات أو أي أغراض خارج نطاق الخدمة.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">4. مشاركة المعلومات</h2>
+                                    <p className="text-muted-foreground mb-3">
+                                        قد تُشارك المعلومات فقط مع:
+                                    </p>
+                                    
+                                    <h3 className="text-lg font-medium mb-2">4.1 مقدمي الرعاية الطبية</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        الأطباء والعيادات المرتبطون بمواعيد المستخدم.
+                                    </p>
+
+                                    <h3 className="text-lg font-medium mb-2">4.2 المختبرات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        المختبرات التي تقوم بإجراء الفحوصات وتحميل النتائج على حساب المستخدم.
+                                    </p>
+
+                                    <h3 className="text-lg font-medium mb-2">4.3 مقدمو الخدمات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        الطرف الثالث الضروري لتشغيل المنصة، مثل: خدمات الرسائل القصيرة والبريد الإلكتروني، خدمات الاستضافة السحابية، مقدمو خدمات الدفع (إن وجد).
+                                    </p>
+
+                                    <h3 className="text-lg font-medium mb-2">4.4 الالتزام القانوني</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        قد نكشف عن المعلومات إذا كان ذلك مطلوبًا بموجب قوانين الجمهورية العربية السورية أو بأمر قضائي مختص.
+                                    </p>
+
+                                    <p className="text-muted-foreground font-medium">
+                                        لا يتم بيع أي معلومات شخصية للمستخدمين.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">5. تخزين البيانات وأمانها</h2>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>تُخزن البيانات باستخدام أساليب آمنة ومعتمدة صناعيًا.</li>
+                                        <li>يتم تطبيق تدابير تقنية وإدارية لحماية البيانات من الوصول غير المصرح به أو الفقدان أو سوء الاستخدام.</li>
+                                        <li>لا يوجد نظام رقمي مضمون بالكامل ضد المخاطر، لكننا نعمل على تعزيز الأمان باستمرار.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">6. حقوق المستخدمين</h2>
+                                    <p className="text-muted-foreground mb-2">
+                                        قد يكون للمستخدمين، حسب القوانين المعمول بها، الحق في:
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>الوصول إلى معلوماتهم الشخصية</li>
+                                        <li>طلب تصحيح البيانات غير الدقيقة</li>
+                                        <li>طلب حذف بعض المعلومات عند السماح القانوني</li>
+                                        <li>سحب الموافقة على الاستخدام الاختياري للبيانات</li>
+                                        <li>طلب نسخة من بياناتهم</li>
+                                    </ul>
+                                    <p className="text-muted-foreground mt-3">
+                                        يمكن تقديم هذه الطلبات من خلال قنوات الدعم داخل المنصة.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">7. مدة الاحتفاظ بالبيانات</h2>
+                                    <p className="text-muted-foreground">
+                                        نحتفظ بالبيانات الشخصية فقط طالما كان ذلك ضروريًا لتقديم الخدمات، أو للامتثال للالتزامات القانونية، أو لحل النزاعات.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">8. خصوصية الأطفال</h2>
+                                    <p className="text-muted-foreground">
+                                        المنصة غير مخصصة للمستخدمين دون سن 18 عامًا إلا إذا كان هناك إشراف من الوالد أو الوصي القانوني. لا نقوم بجمع بيانات knowingly من القصر بدون موافقة مناسبة.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">9. الكوكيز والتقنيات المشابهة</h2>
+                                    <p className="text-muted-foreground mb-2">
+                                        قد نستخدم الكوكيز أو أدوات مماثلة من أجل:
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>الحفاظ على أمان الجلسة</li>
+                                        <li>تحسين الأداء</li>
+                                        <li>تحليل أنماط الاستخدام</li>
+                                        <li>تحسين تجربة المستخدم</li>
+                                    </ul>
+                                    <p className="text-muted-foreground mt-3">
+                                        يمكن للمستخدم ضبط إعدادات الكوكيز من خلال المتصفح.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">10. التغييرات على سياسة الخصوصية</h2>
+                                    <p className="text-muted-foreground">
+                                        يجوز تحديث هذه السياسة من وقت لآخر. تصبح التحديثات نافذة بمجرد نشرها على المنصة. استمرار الاستخدام يعني قبول السياسة المحدّثة.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">11. القانون والاختصاص القضائي</h2>
+                                    <p className="text-muted-foreground">
+                                        تحكم سياسة الخصوصية هذه القوانين في <strong>الجمهورية العربية السورية</strong>. أي نزاعات تخضع للاختصاص الحصري لمحاكم الجمهورية العربية السورية.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">12. الاتصال</h2>
+                                    <p className="text-muted-foreground">
+                                        لأي استفسارات أو طلبات بخصوص سياسة الخصوصية، يمكن للمستخدم التواصل من خلال قنوات الدعم المتاحة داخل المنصة.
+                                    </p>
+                                </section>
+                            </>
+                        ) : (
+                            <>
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">1. {t('privacy_introduction') || 'Introduction'}</h2>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                        {t('privacy_intro_text') || 'This Privacy Policy explains how the Platform ("we", "our", "us") collects, uses, stores, and protects your personal information. By using the Platform, you agree to the terms outlined here.'}
+                                    </p>
+                                </section>
 
                         <section>
                             <h2 className="text-xl font-semibold mb-3">2. {t('privacy_information_collected') || 'Information We Collect'}</h2>
@@ -191,6 +361,8 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                                 {t('privacy_contact_text') || 'If you have any questions or requests regarding this Privacy Policy, please contact us through the support channels provided in the Platform.'}
                             </p>
                         </section>
+                            </>
+                        )}
                     </div>
                 </ScrollArea>
             </DialogContent>

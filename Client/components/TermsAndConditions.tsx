@@ -17,20 +17,177 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
             <DialogContent className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
                     <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('terms_and_conditions') || 'Terms & Conditions'}
+                        {locale === 'ar' ? 'الشروط والأحكام' : (t('terms_and_conditions') || 'Terms & Conditions')}
                     </DialogTitle>
                     <DialogDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                        {t('terms_last_updated') || 'Last updated: Please review these terms carefully'}
+                        {locale === 'ar' ? 'آخر تحديث: يرجى مراجعة هذه الشروط بعناية' : (t('terms_last_updated') || 'Last updated: Please review these terms carefully')}
                     </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[70vh] pr-4">
                     <div className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <section>
-                            <h2 className="text-xl font-semibold mb-3">1. {t('terms_introduction') || 'Introduction'}</h2>
-                            <p className="text-muted-foreground leading-relaxed">
-                                {t('terms_intro_text') || 'By using this platform ("the Platform"), you agree to these Terms & Conditions ("Terms"). If you do not agree, you must stop using the Platform.'}
-                            </p>
-                        </section>
+                        {locale === 'ar' ? (
+                            <>
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">1. المقدمة</h2>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                        باستخدام هذه المنصة ("المنصة")، فإنك توافق على هذه الشروط والأحكام ("الشروط"). إذا لم توافق، يجب عليك التوقف عن استخدام المنصة.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">2. التعاريف</h2>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li><strong>المنصة:</strong> التطبيق والموقع الإلكتروني الذي يوفر خدمات طبية ومخبرية.</li>
+                                        <li><strong>المستخدم / المريض:</strong> أي شخص يستخدم المنصة.</li>
+                                        <li><strong>مقدم الرعاية الطبية:</strong> أي طبيب أو عيادة أو متخصص صحي يقدم خدمات عبر المنصة.</li>
+                                        <li><strong>المختبر:</strong> أي مختبر يقدم خدمات فحص أو تشخيص عبر المنصة.</li>
+                                        <li><strong>الموعد:</strong> أي استشارة أو زيارة مخبرية محجوزة من قبل المستخدم.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">3. نطاق الخدمات</h2>
+                                    <p className="text-muted-foreground mb-2">توفر المنصة الخدمات الرقمية التالية:</p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>حجز الاستشارات الطبية</li>
+                                        <li>حجز الفحوصات المخبرية</li>
+                                        <li>إدارة المواعيد</li>
+                                        <li>عرض نتائج المختبرات على حساب المستخدم</li>
+                                    </ul>
+                                    <p className="text-muted-foreground mt-3">
+                                        المنصة <strong>لا تقدم</strong> استشارات أو تشخيص طبي. جميع الخدمات الطبية مسؤولية مقدمي الرعاية الصحية والمختبرات.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">4. الحساب الشخصي للمستخدم</h2>
+                                    <h3 className="text-lg font-medium mb-2">4.1 دقة المعلومات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        يجب على المستخدم تقديم معلومات صحيحة وكاملة عند إنشاء الحساب أو حجز أي خدمة.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">4.2 أمان الحساب</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        المستخدم مسؤول عن الحفاظ على سرية بيانات الدخول الخاصة به، وعن أي نشاط يتم من خلال حسابه.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">4.3 سوء الاستخدام</h3>
+                                    <p className="text-muted-foreground">
+                                        يجوز للمنصة تعليق أو إنهاء أي حساب يشارك في سوء الاستخدام أو انتهاك الشروط.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">5. المواعيد وإعادة الجدولة والإلغاء</h2>
+                                    <h3 className="text-lg font-medium mb-2">5.1 الحجز</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        يمكن للمستخدمين حجز المواعيد وفقًا للأوقات المتاحة المعروضة على المنصة.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">5.2 إعادة الجدولة</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        يمكن إعادة جدولة المواعيد <strong>فقط إذا تبقى أكثر من 24 ساعة قبل الموعد المحدد</strong>. لا يُسمح بإعادة الجدولة خلال 24 ساعة قبل الموعد.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">5.3 الإلغاء</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        يمكن إلغاء المواعيد <strong>فقط إذا تبقى أكثر من 24 ساعة قبل الموعد المحدد</strong>. لا يُسمح بالإلغاء خلال 24 ساعة قبل الموعد.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">5.4 عدم الحضور</h3>
+                                    <p className="text-muted-foreground">
+                                        إذا لم يحضر المستخدم الموعد دون إلغاء، يصبح الموعد غير قابل للتعديل أو الاسترجاع.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">6. خدمات المختبر</h2>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>يمكن للمختبرات تحميل نتائج الفحوصات مباشرة على <strong>حساب المستخدم</strong>.</li>
+                                        <li>المنصة لا تقوم بتفسير أو تعديل نتائج الفحوصات.</li>
+                                        <li>المختبر مسؤول عن دقة الفحوصات ووقت المعالجة وتوافر الخدمة.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">7. المدفوعات</h2>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>يتم تحديد الرسوم من قبل مقدم الرعاية الطبية أو المختبر.</li>
+                                        <li>طرق الدفع تعتمد على نوع الخدمة المحجوزة.</li>
+                                        <li>أي استرداد (إن وجد) يخضع لسياسة مقدم الخدمة وقاعدة الـ24 ساعة للإلغاء.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">8. الخصوصية وحماية البيانات</h2>
+                                    <h3 className="text-lg font-medium mb-2">8.1 جمع البيانات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        نجمع المعلومات اللازمة لإنشاء الحسابات وإدارة الحجوزات وتقديم الخدمات.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">8.2 استخدام البيانات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        قد تُستخدم المعلومات لتأكيد المواعيد، ومشاركة نتائج المختبر على حساب المستخدم، وإرسال الإشعارات، وتحسين أداء المنصة.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">8.3 مشاركة البيانات</h3>
+                                    <p className="text-muted-foreground mb-3">
+                                        قد تُشارك البيانات فقط مع: مقدمي الرعاية الطبية المرتبطين بمواعيد المستخدم، المختبرات التي تقوم بإجراء الفحوصات المطلوبة، مزودي الخدمات الضروريين لتشغيل المنصة (مثل خدمات الرسائل القصيرة أو البريد الإلكتروني). لا يتم بيع أي معلومات شخصية للمستخدمين.
+                                    </p>
+                                    <h3 className="text-lg font-medium mb-2">8.4 الأمان</h3>
+                                    <p className="text-muted-foreground">
+                                        يتم تطبيق إجراءات تقنية وإدارية لحماية البيانات، لكن لا يوجد نظام رقمي خالٍ تمامًا من المخاطر.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">9. مسؤوليات المستخدم</h2>
+                                    <p className="text-muted-foreground mb-2">يوافق المستخدم على:</p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>استخدام المنصة بشكل قانوني</li>
+                                        <li>اتباع تعليمات مقدم الرعاية الصحية</li>
+                                        <li>عدم سوء الاستخدام أو الاحتيال أو محاولة تعطيل المنصة</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">10. قيود المنصة</h2>
+                                    <p className="text-muted-foreground">
+                                        لا تضمن المنصة توافر أو دقة أو أداء مقدمي الرعاية الطبية أو المختبرات. لا تتحمل المنصة مسؤولية النتائج الطبية أو الأخطاء أو التأخيرات.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">11. التعديلات</h2>
+                                    <p className="text-muted-foreground">
+                                        يجوز للمنصة تحديث الخدمات أو الميزات أو هذه الشروط في أي وقت. استمرار الاستخدام يعني قبول التحديثات.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">12. تحديد المسؤولية</h2>
+                                    <p className="text-muted-foreground mb-2">بأقصى حد يسمح به القانون:</p>
+                                    <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                                        <li>المنصة غير مسؤولة عن الاستشارات الطبية أو التشخيص أو النتائج العلاجية أو التأخيرات أو الأخطاء من مقدمي الخدمات أو المختبرات.</li>
+                                        <li>المنصة غير مسؤولة عن مشكلات ناجمة عن خطأ المستخدم أو مشاكل تقنية أو أعطال الأجهزة أو خدمات الأطراف الخارجية.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">13. القانون والاختصاص القضائي</h2>
+                                    <p className="text-muted-foreground">
+                                        تحكم هذه الشروط القوانين في <strong>الجمهورية العربية السورية</strong>. أي نزاعات تخضع للاختصاص الحصري لمحاكم الجمهورية العربية السورية.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">14. الاتصال</h2>
+                                    <p className="text-muted-foreground">
+                                        يمكن للمستخدمين التواصل مع الدعم من خلال القنوات المتوفرة داخل المنصة.
+                                    </p>
+                                </section>
+                            </>
+                        ) : (
+                            <>
+                                <section>
+                                    <h2 className="text-xl font-semibold mb-3">1. {t('terms_introduction') || 'Introduction'}</h2>
+                                    <p className="text-muted-foreground leading-relaxed">
+                                        {t('terms_intro_text') || 'By using this platform ("the Platform"), you agree to these Terms & Conditions ("Terms"). If you do not agree, you must stop using the Platform.'}
+                                    </p>
+                                </section>
 
                         <section>
                             <h2 className="text-xl font-semibold mb-3">2. {t('terms_definitions') || 'Definitions'}</h2>
@@ -179,6 +336,8 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
                                 {t('terms_contact_text') || 'Users may contact support through the communication channels provided within the Platform.'}
                             </p>
                         </section>
+                            </>
+                        )}
                     </div>
                 </ScrollArea>
             </DialogContent>

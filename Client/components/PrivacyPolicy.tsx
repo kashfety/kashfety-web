@@ -24,8 +24,11 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+            <DialogContent
+                className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl [&>button]:left-4 [&>button]:right-auto' : 'ltr'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
+            >
+                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
                     <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('privacy_policy') || 'Privacy Policy'}
                     </DialogTitle>
@@ -33,25 +36,25 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                         {lastUpdatedText}
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-[70vh] pr-4">
+                <ScrollArea className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`}>
                     <div className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {locale === 'ar' ? (
                             <>
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">1. المقدمة</h2>
-                                    <p className="text-muted-foreground leading-relaxed" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>1. المقدمة</h2>
+                                    <p className="text-muted-foreground leading-relaxed" dir={isRTL ? 'rtl' : 'ltr'}>
                                         توضح هذه السياسة كيفية جمع واستخدام وتخزين وحماية المعلومات الشخصية للمستخدمين على المنصة ("نحن" أو "المنصة"). باستخدامك المنصة، فإنك توافق على شروط سياسة الخصوصية هذه.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">2. المعلومات التي نقوم بجمعها</h2>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>2. المعلومات التي نقوم بجمعها</h2>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد نقوم بجمع الأنواع التالية من المعلومات:
                                     </p>
 
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">2.1 المعلومات الشخصية</h3>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>2.1 المعلومات الشخصية</h3>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>الاسم الكامل</li>
                                         <li>رقم الهاتف</li>
                                         <li>البريد الإلكتروني</li>
@@ -60,8 +63,8 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                                         <li>العنوان (إذا لزم لتقديم الخدمة)</li>
                                     </ul>
 
-                                    <h3 className="text-lg font-medium mb-2 mt-4" dir="rtl">2.2 المعلومات الطبية والصحية</h3>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2 mt-4" dir={isRTL ? 'rtl' : 'ltr'}>2.2 المعلومات الطبية والصحية</h3>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>تفاصيل المواعيد</li>
                                         <li>اختيار مقدمي الرعاية الطبية</li>
                                         <li>طلبات الفحوصات المخبرية</li>
@@ -69,8 +72,8 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                                         <li>ملاحظات أو توصيات مقدمي الرعاية الصحية</li>
                                     </ul>
 
-                                    <h3 className="text-lg font-medium mb-2 mt-4" dir="rtl">2.3 المعلومات التقنية</h3>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2 mt-4" dir={isRTL ? 'rtl' : 'ltr'}>2.3 المعلومات التقنية</h3>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>معلومات الجهاز</li>
                                         <li>عنوان IP</li>
                                         <li>سجلات الاستخدام</li>
@@ -79,10 +82,10 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">3. كيفية استخدام المعلومات</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">قد تُستخدم المعلومات لتلبية أغراض مثل:</p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>3. كيفية استخدام المعلومات</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>قد تُستخدم المعلومات لتلبية أغراض مثل:</p>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>إنشاء وإدارة الحساب</li>
                                         <li>معالجة وتأكيد المواعيد</li>
                                         <li>مشاركة المعلومات مع الطبيب أو المختبر المختص</li>
@@ -90,115 +93,115 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                                         <li>إرسال الإشعارات والتحديثات</li>
                                         <li>تحسين أداء ووظائف المنصة</li>
                                     </ul>
-                                    <p className="text-muted-foreground mt-3 font-medium" dir="rtl">
+                                    <p className="text-muted-foreground mt-3 font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
                                         لا تُستخدم المعلومات الطبية للإعلانات أو أي أغراض خارج نطاق الخدمة.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">4. مشاركة المعلومات</h2>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>4. مشاركة المعلومات</h2>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد تُشارك المعلومات فقط مع:
                                     </p>
 
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.1 مقدمي الرعاية الطبية</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.1 مقدمي الرعاية الطبية</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         الأطباء والعيادات المرتبطون بمواعيد المستخدم.
                                     </p>
 
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.2 المختبرات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.2 المختبرات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         المختبرات التي تقوم بإجراء الفحوصات وتحميل النتائج على حساب المستخدم.
                                     </p>
 
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.3 مقدمو الخدمات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.3 مقدمو الخدمات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         الطرف الثالث الضروري لتشغيل المنصة، مثل: خدمات الرسائل القصيرة والبريد الإلكتروني، خدمات الاستضافة السحابية، مقدمو خدمات الدفع (إن وجد).
                                     </p>
 
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.4 الالتزام القانوني</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.4 الالتزام القانوني</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد نكشف عن المعلومات إذا كان ذلك مطلوبًا بموجب قوانين الجمهورية العربية السورية أو بأمر قضائي مختص.
                                     </p>
 
-                                    <p className="text-muted-foreground font-medium" dir="rtl">
+                                    <p className="text-muted-foreground font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
                                         لا يتم بيع أي معلومات شخصية للمستخدمين.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">5. تخزين البيانات وأمانها</h2>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>5. تخزين البيانات وأمانها</h2>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>تُخزن البيانات باستخدام أساليب آمنة ومعتمدة صناعيًا.</li>
                                         <li>يتم تطبيق تدابير تقنية وإدارية لحماية البيانات من الوصول غير المصرح به أو الفقدان أو سوء الاستخدام.</li>
                                         <li>لا يوجد نظام رقمي مضمون بالكامل ضد المخاطر، لكننا نعمل على تعزيز الأمان باستمرار.</li>
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">6. حقوق المستخدمين</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>6. حقوق المستخدمين</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد يكون للمستخدمين، حسب القوانين المعمول بها، الحق في:
                                     </p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>الوصول إلى معلوماتهم الشخصية</li>
                                         <li>طلب تصحيح البيانات غير الدقيقة</li>
                                         <li>طلب حذف بعض المعلومات عند السماح القانوني</li>
                                         <li>سحب الموافقة على الاستخدام الاختياري للبيانات</li>
                                         <li>طلب نسخة من بياناتهم</li>
                                     </ul>
-                                    <p className="text-muted-foreground mt-3" dir="rtl">
+                                    <p className="text-muted-foreground mt-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن تقديم هذه الطلبات من خلال قنوات الدعم داخل المنصة.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">7. مدة الاحتفاظ بالبيانات</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>7. مدة الاحتفاظ بالبيانات</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         نحتفظ بالبيانات الشخصية فقط طالما كان ذلك ضروريًا لتقديم الخدمات، أو للامتثال للالتزامات القانونية، أو لحل النزاعات.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">8. خصوصية الأطفال</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>8. خصوصية الأطفال</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         المنصة غير مخصصة للمستخدمين دون سن 18 عامًا إلا إذا كان هناك إشراف من الوالد أو الوصي القانوني. لا نقوم بجمع بيانات knowingly من القصر بدون موافقة مناسبة.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">9. الكوكيز والتقنيات المشابهة</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>9. الكوكيز والتقنيات المشابهة</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد نستخدم الكوكيز أو أدوات مماثلة من أجل:
                                     </p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>الحفاظ على أمان الجلسة</li>
                                         <li>تحسين الأداء</li>
                                         <li>تحليل أنماط الاستخدام</li>
                                         <li>تحسين تجربة المستخدم</li>
                                     </ul>
-                                    <p className="text-muted-foreground mt-3" dir="rtl">
+                                    <p className="text-muted-foreground mt-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن للمستخدم ضبط إعدادات الكوكيز من خلال المتصفح.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">10. التغييرات على سياسة الخصوصية</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>10. التغييرات على سياسة الخصوصية</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يجوز تحديث هذه السياسة من وقت لآخر. تصبح التحديثات نافذة بمجرد نشرها على المنصة. استمرار الاستخدام يعني قبول السياسة المحدّثة.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">11. القانون والاختصاص القضائي</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>11. القانون والاختصاص القضائي</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         تحكم سياسة الخصوصية هذه القوانين في <strong>الجمهورية العربية السورية</strong>. أي نزاعات تخضع للاختصاص الحصري لمحاكم الجمهورية العربية السورية.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">12. الاتصال</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>12. الاتصال</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         لأي استفسارات أو طلبات بخصوص سياسة الخصوصية، يمكن للمستخدم التواصل من خلال قنوات الدعم المتاحة داخل المنصة.
                                     </p>
                                 </section>

@@ -24,8 +24,11 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+            <DialogContent
+                className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl [&>button]:left-4 [&>button]:right-auto' : 'ltr'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
+            >
+                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
                     <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('terms_and_conditions') || 'Terms & Conditions'}
                     </DialogTitle>
@@ -33,20 +36,20 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
                         {lastUpdatedText}
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className="h-[70vh] pr-4">
+                <ScrollArea className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`}>
                     <div className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {locale === 'ar' ? (
                             <>
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">1. المقدمة</h2>
-                                    <p className="text-muted-foreground leading-relaxed" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>1. المقدمة</h2>
+                                    <p className="text-muted-foreground leading-relaxed" dir={isRTL ? 'rtl' : 'ltr'}>
                                         باستخدام هذه المنصة ("المنصة")، فإنك توافق على هذه الشروط والأحكام ("الشروط"). إذا لم توافق، يجب عليك التوقف عن استخدام المنصة.
                                     </p>
                                 </section>
 
                                 <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">2. التعاريف</h2>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>2. التعاريف</h2>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li><strong>المنصة:</strong> التطبيق والموقع الإلكتروني الذي يوفر خدمات طبية ومخبرية.</li>
                                         <li><strong>المستخدم / المريض:</strong> أي شخص يستخدم المنصة.</li>
                                         <li><strong>مقدم الرعاية الطبية:</strong> أي طبيب أو عيادة أو متخصص صحي يقدم خدمات عبر المنصة.</li>
@@ -55,137 +58,137 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">3. نطاق الخدمات</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">توفر المنصة الخدمات الرقمية التالية:</p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>3. نطاق الخدمات</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>توفر المنصة الخدمات الرقمية التالية:</p>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>حجز الاستشارات الطبية</li>
                                         <li>حجز الفحوصات المخبرية</li>
                                         <li>إدارة المواعيد</li>
                                         <li>عرض نتائج المختبرات على حساب المستخدم</li>
                                     </ul>
-                                    <p className="text-muted-foreground mt-3" dir="rtl">
+                                    <p className="text-muted-foreground mt-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         المنصة <strong>لا تقدم</strong> استشارات أو تشخيص طبي. جميع الخدمات الطبية مسؤولية مقدمي الرعاية الصحية والمختبرات.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">4. الحساب الشخصي للمستخدم</h2>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.1 دقة المعلومات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>4. الحساب الشخصي للمستخدم</h2>
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.1 دقة المعلومات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يجب على المستخدم تقديم معلومات صحيحة وكاملة عند إنشاء الحساب أو حجز أي خدمة.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.2 أمان الحساب</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.2 أمان الحساب</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         المستخدم مسؤول عن الحفاظ على سرية بيانات الدخول الخاصة به، وعن أي نشاط يتم من خلال حسابه.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">4.3 سوء الاستخدام</h3>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>4.3 سوء الاستخدام</h3>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يجوز للمنصة تعليق أو إنهاء أي حساب يشارك في سوء الاستخدام أو انتهاك الشروط.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">5. المواعيد وإعادة الجدولة والإلغاء</h2>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">5.1 الحجز</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>5. المواعيد وإعادة الجدولة والإلغاء</h2>
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>5.1 الحجز</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن للمستخدمين حجز المواعيد وفقًا للأوقات المتاحة المعروضة على المنصة.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">5.2 إعادة الجدولة</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>5.2 إعادة الجدولة</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن إعادة جدولة المواعيد <strong>فقط إذا تبقى أكثر من 24 ساعة قبل الموعد المحدد</strong>. لا يُسمح بإعادة الجدولة خلال 24 ساعة قبل الموعد.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">5.3 الإلغاء</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>5.3 الإلغاء</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن إلغاء المواعيد <strong>فقط إذا تبقى أكثر من 24 ساعة قبل الموعد المحدد</strong>. لا يُسمح بالإلغاء خلال 24 ساعة قبل الموعد.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">5.4 عدم الحضور</h3>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>5.4 عدم الحضور</h3>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         إذا لم يحضر المستخدم الموعد دون إلغاء، يصبح الموعد غير قابل للتعديل أو الاسترجاع.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">6. خدمات المختبر</h2>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>6. خدمات المختبر</h2>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>يمكن للمختبرات تحميل نتائج الفحوصات مباشرة على <strong>حساب المستخدم</strong>.</li>
                                         <li>المنصة لا تقوم بتفسير أو تعديل نتائج الفحوصات.</li>
                                         <li>المختبر مسؤول عن دقة الفحوصات ووقت المعالجة وتوافر الخدمة.</li>
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">7. المدفوعات</h2>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>7. المدفوعات</h2>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>يتم تحديد الرسوم من قبل مقدم الرعاية الطبية أو المختبر.</li>
                                         <li>طرق الدفع تعتمد على نوع الخدمة المحجوزة.</li>
                                         <li>أي استرداد (إن وجد) يخضع لسياسة مقدم الخدمة وقاعدة الـ24 ساعة للإلغاء.</li>
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">8. الخصوصية وحماية البيانات</h2>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">8.1 جمع البيانات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>8. الخصوصية وحماية البيانات</h2>
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>8.1 جمع البيانات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         نجمع المعلومات اللازمة لإنشاء الحسابات وإدارة الحجوزات وتقديم الخدمات.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">8.2 استخدام البيانات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>8.2 استخدام البيانات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد تُستخدم المعلومات لتأكيد المواعيد، ومشاركة نتائج المختبر على حساب المستخدم، وإرسال الإشعارات، وتحسين أداء المنصة.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">8.3 مشاركة البيانات</h3>
-                                    <p className="text-muted-foreground mb-3" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>8.3 مشاركة البيانات</h3>
+                                    <p className="text-muted-foreground mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
                                         قد تُشارك البيانات فقط مع: مقدمي الرعاية الطبية المرتبطين بمواعيد المستخدم، المختبرات التي تقوم بإجراء الفحوصات المطلوبة، مزودي الخدمات الضروريين لتشغيل المنصة (مثل خدمات الرسائل القصيرة أو البريد الإلكتروني). لا يتم بيع أي معلومات شخصية للمستخدمين.
                                     </p>
-                                    <h3 className="text-lg font-medium mb-2" dir="rtl">8.4 الأمان</h3>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                    <h3 className="text-lg font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>8.4 الأمان</h3>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يتم تطبيق إجراءات تقنية وإدارية لحماية البيانات، لكن لا يوجد نظام رقمي خالٍ تمامًا من المخاطر.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">9. مسؤوليات المستخدم</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">يوافق المستخدم على:</p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>9. مسؤوليات المستخدم</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>يوافق المستخدم على:</p>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>استخدام المنصة بشكل قانوني</li>
                                         <li>اتباع تعليمات مقدم الرعاية الصحية</li>
                                         <li>عدم سوء الاستخدام أو الاحتيال أو محاولة تعطيل المنصة</li>
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">10. قيود المنصة</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>10. قيود المنصة</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         لا تضمن المنصة توافر أو دقة أو أداء مقدمي الرعاية الطبية أو المختبرات. لا تتحمل المنصة مسؤولية النتائج الطبية أو الأخطاء أو التأخيرات.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">11. التعديلات</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>11. التعديلات</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يجوز للمنصة تحديث الخدمات أو الميزات أو هذه الشروط في أي وقت. استمرار الاستخدام يعني قبول التحديثات.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">12. تحديد المسؤولية</h2>
-                                    <p className="text-muted-foreground mb-2" dir="rtl">بأقصى حد يسمح به القانون:</p>
-                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>12. تحديد المسؤولية</h2>
+                                    <p className="text-muted-foreground mb-2" dir={isRTL ? 'rtl' : 'ltr'}>بأقصى حد يسمح به القانون:</p>
+                                    <ul className={`list-disc space-y-2 text-muted-foreground ${isRTL ? 'list-inside mr-4' : 'list-inside ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <li>المنصة غير مسؤولة عن الاستشارات الطبية أو التشخيص أو النتائج العلاجية أو التأخيرات أو الأخطاء من مقدمي الخدمات أو المختبرات.</li>
                                         <li>المنصة غير مسؤولة عن مشكلات ناجمة عن خطأ المستخدم أو مشاكل تقنية أو أعطال الأجهزة أو خدمات الأطراف الخارجية.</li>
                                     </ul>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">13. القانون والاختصاص القضائي</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>13. القانون والاختصاص القضائي</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         تحكم هذه الشروط القوانين في <strong>الجمهورية العربية السورية</strong>. أي نزاعات تخضع للاختصاص الحصري لمحاكم الجمهورية العربية السورية.
                                     </p>
                                 </section>
 
-                                <section dir="rtl" className={isRTL ? 'text-right' : ''}>
-                                    <h2 className="text-xl font-semibold mb-3" dir="rtl">14. الاتصال</h2>
-                                    <p className="text-muted-foreground" dir="rtl">
+                                <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                                    <h2 className="text-xl font-semibold mb-3" dir={isRTL ? 'rtl' : 'ltr'}>14. الاتصال</h2>
+                                    <p className="text-muted-foreground" dir={isRTL ? 'rtl' : 'ltr'}>
                                         يمكن للمستخدمين التواصل مع الدعم من خلال القنوات المتوفرة داخل المنصة.
                                     </p>
                                 </section>

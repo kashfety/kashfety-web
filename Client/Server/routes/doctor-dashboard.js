@@ -559,7 +559,9 @@ router.get('/appointments', authenticateToken, async (req, res) => {
         chief_complaint,
         notes,
         patient_id,
-        users!fk_appointments_patient (name, name_ar, first_name, first_name_ar, last_name, last_name_ar, phone, email)
+        center_id,
+        users!fk_appointments_patient (name, name_ar, first_name, first_name_ar, last_name, last_name_ar, phone, email),
+        center:centers!fk_appointments_center (id, name, name_ar, address, phone)
       `)
       .eq('doctor_id', req.user.id)
       .order('appointment_date', { ascending: false })
@@ -588,7 +590,7 @@ router.get('/appointments', authenticateToken, async (req, res) => {
 
       const { data: fallbackAppointments } = await fallbackQuery;
 
-      // Enrich with patient names
+      // Enrich with patient names and center info
       const enrichedAppointments = [];
       for (const apt of fallbackAppointments || []) {
         const { data: patient } = await supabase
@@ -598,11 +600,25 @@ router.get('/appointments', authenticateToken, async (req, res) => {
           .eq('role', 'patient')
           .single();
 
+        let center = null;
+        if (apt.center_id) {
+          const { data: centerData } = await supabase
+            .from('centers')
+            .select('id, name, name_ar, address, phone')
+            .eq('id', apt.center_id)
+            .single();
+          center = centerData;
+        }
+
         enrichedAppointments.push({
           ...apt,
           patient_name: patient?.name || 'Unknown Patient',
           patient_phone: patient?.phone,
-          patient_email: patient?.email
+          patient_email: patient?.email,
+          center: center,
+          center_name: center?.name,
+          center_name_ar: center?.name_ar,
+          center_address: center?.address
         });
       }
 
@@ -614,22 +630,37 @@ router.get('/appointments', authenticateToken, async (req, res) => {
     }
 
     // Format successful response
-    const formattedAppointments = appointments?.map(apt => ({
-      id: apt.id,
-      appointment_date: apt.appointment_date,
-      appointment_time: apt.appointment_time,
-      status: apt.status,
-      type: apt.type,
-      appointment_type: apt.appointment_type,
-      consultation_fee: apt.consultation_fee,
-      symptoms: apt.symptoms,
-      chief_complaint: apt.chief_complaint,
-      notes: apt.notes,
-      patient_id: apt.patient_id,
-      patient_name: apt.users?.name || 'Unknown Patient',
-      patient_phone: apt.users?.phone,
-      patient_email: apt.users?.email
-    })) || [];
+    const formattedAppointments = appointments?.map(apt => {
+      const user = Array.isArray(apt.users) ? apt.users[0] : apt.users;
+      const center = Array.isArray(apt.center) ? apt.center[0] : apt.center;
+      return {
+        id: apt.id,
+        appointment_date: apt.appointment_date,
+        appointment_time: apt.appointment_time,
+        status: apt.status,
+        type: apt.type,
+        appointment_type: apt.appointment_type,
+        consultation_fee: apt.consultation_fee,
+        symptoms: apt.symptoms,
+        chief_complaint: apt.chief_complaint,
+        notes: apt.notes,
+        patient_id: apt.patient_id,
+        center_id: apt.center_id,
+        patient_name: user?.name || 'Unknown Patient',
+        name: user?.name,
+        name_ar: user?.name_ar,
+        first_name: user?.first_name,
+        first_name_ar: user?.first_name_ar,
+        last_name: user?.last_name,
+        last_name_ar: user?.last_name_ar,
+        patient_phone: user?.phone,
+        patient_email: user?.email,
+        center: center,
+        center_name: center?.name,
+        center_name_ar: center?.name_ar,
+        center_address: center?.address
+      };
+    }) || [];
 
     res.json({
       success: true,

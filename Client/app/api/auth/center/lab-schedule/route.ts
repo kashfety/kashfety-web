@@ -98,107 +98,13 @@ export async function PUT(request: NextRequest) {
     console.log('🏢 [Lab Schedule PUT] Using center_id:', centerId);
 
     // ============================================
-    // VALIDATION: Check for timing conflicts with existing schedules for OTHER test types
+    // NOTE: Conflict validation removed for lab schedules
     // ============================================
-    console.log('🔍 [Lab Schedule PUT] Checking for timing conflicts...');
-    
-    // Get all existing schedules for this center for OTHER test types
-    const { data: existingSchedules, error: fetchError } = await supabase
-      .from('center_lab_schedules')
-      .select('*')
-      .eq('center_id', centerId)
-      .neq('lab_test_type_id', lab_test_type_id); // Exclude the test type we're updating
-
-    if (fetchError) {
-      console.error('❌ Failed to fetch existing schedules:', fetchError);
-      return NextResponse.json({ error: 'Failed to validate schedule conflicts' }, { status: 500 });
-    }
-
-    console.log(`📋 Found ${existingSchedules?.length || 0} existing schedules for other test types`);
-
-    // Check for conflicts
-    const conflicts: string[] = [];
-    
-    for (const newDay of schedule) {
-      if (!newDay.is_available || !Array.isArray(newDay.slots) || newDay.slots.length === 0) {
-        continue; // Skip unavailable days or days without slots
-      }
-
-      const dayOfWeek = Number(newDay.day_of_week);
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayName = dayNames[dayOfWeek] || `Day ${dayOfWeek}`;
-
-      // Find existing schedules for the same day of week
-      const sameDaySchedules = (existingSchedules || []).filter((existing: any) => 
-        existing.day_of_week === dayOfWeek && existing.is_available
-      );
-
-      if (sameDaySchedules.length === 0) continue; // No conflict possible
-
-      // Convert new schedule slots to time ranges for comparison
-      for (const newSlot of newDay.slots) {
-        const newTime = typeof newSlot === 'string' ? newSlot : (newSlot.time || newSlot.start_time);
-        const newDuration = typeof newSlot === 'object' ? (newSlot.duration || newDay.slot_duration || 30) : (newDay.slot_duration || 30);
-        
-        if (!newTime) continue;
-
-        // Parse new slot time
-        const [newHour, newMin] = newTime.split(':').map(Number);
-        const newStartMinutes = newHour * 60 + newMin;
-        const newEndMinutes = newStartMinutes + newDuration;
-
-        // Check against all existing schedules on this day
-        for (const existing of sameDaySchedules) {
-          // Get test type name for better error message
-          const { data: testTypeData } = await supabase
-            .from('lab_test_types')
-            .select('name')
-            .eq('id', existing.lab_test_type_id)
-            .single();
-          
-          const existingTestName = testTypeData?.name || 'Another test';
-
-          // Parse existing time slots
-          const existingSlots = typeof existing.time_slots === 'string' 
-            ? JSON.parse(existing.time_slots || '[]')
-            : existing.time_slots || [];
-
-          for (const existingSlot of existingSlots) {
-            const existingTime = typeof existingSlot === 'string' ? existingSlot : existingSlot.time;
-            const existingDuration = typeof existingSlot === 'object' ? (existingSlot.duration || existing.slot_duration || 30) : (existing.slot_duration || 30);
-            
-            if (!existingTime) continue;
-
-            const [existingHour, existingMin] = existingTime.split(':').map(Number);
-            const existingStartMinutes = existingHour * 60 + existingMin;
-            const existingEndMinutes = existingStartMinutes + existingDuration;
-
-            // Check for overlap: two time slots overlap if one starts before the other ends
-            const hasOverlap = (
-              (newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes)
-            );
-
-            if (hasOverlap) {
-              const conflictMsg = `${dayName} at ${newTime} conflicts with existing schedule for ${existingTestName} at ${existingTime}`;
-              conflicts.push(conflictMsg);
-              console.log('⚠️ Conflict detected:', conflictMsg);
-            }
-          }
-        }
-      }
-    }
-
-    // If conflicts detected, return 409 with details
-    if (conflicts.length > 0) {
-      console.log(`❌ Found ${conflicts.length} scheduling conflict(s)`);
-      return NextResponse.json({
-        error: 'schedule_conflict',
-        message: 'You cannot have overlapping time slots on the same day for different test types.',
-        conflicts: conflicts
-      }, { status: 409 });
-    }
-
-    console.log('✅ No timing conflicts detected');
+    // Different lab test types are allowed to have overlapping schedules on the same day.
+    // This allows centers to offer multiple test types simultaneously, which is common
+    // in medical centers where different tests can be performed in parallel.
+    console.log('📅 [Lab Schedule PUT] Allowing overlapping schedules for different test types');
+    // ============================================
 
     // First, delete existing schedule for this test type
     const { error: deleteError } = await supabase

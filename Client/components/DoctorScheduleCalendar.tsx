@@ -62,7 +62,7 @@ export default function DoctorScheduleCalendar({
 
     // Helper to get localized patient name
     const getLocalizedPatientName = (appointment: Appointment) => {
-        if (!appointment) return 'Unknown Patient';
+        if (!appointment) return t('cd_unknown_patient') || 'Unknown Patient';
 
         if (locale === 'ar') {
             // Try name_ar first
@@ -79,7 +79,7 @@ export default function DoctorScheduleCalendar({
         if (appointment.first_name || appointment.last_name) {
             return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
         }
-        return appointment.patient_name || 'Unknown Patient';
+        return appointment.patient_name || (t('cd_unknown_patient') || 'Unknown Patient');
     };
 
     // Helper to convert numbers to Arabic numerals
@@ -250,7 +250,7 @@ export default function DoctorScheduleCalendar({
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto min-h-screen">
+        <div className="p-6 max-w-7xl mx-auto min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
             {/* Floating background elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -258,17 +258,19 @@ export default function DoctorScheduleCalendar({
             </div>
 
             {/* Header */}
-            <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-600 bg-clip-text text-transparent">
+            <div className={`relative z-10 flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row' : 'sm:flex-row'} justify-between items-start sm:items-center mb-8 gap-4`} dir={isRTL ? 'rtl' : 'ltr'}>
+                {/* Title Section - appears on right in RTL, left in LTR */}
+                <div className={`space-y-2 flex-1 ${isRTL ? 'order-2 sm:order-1' : 'order-1'}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                    <h1 className={`text-3xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-teal-600 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
                         {t('dd_schedule_calendar') || 'Schedule Calendar'}
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-lg">
+                    <p className="text-gray-600 dark:text-gray-400 text-lg" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
                         {t('dd_schedule_calendar_desc') || 'View and manage your appointments in calendar format'}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4">
+                {/* Controls Section - appears on left in RTL, right in LTR */}
+                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse order-1 sm:order-2' : 'order-2'}`}>
                     {/* View Mode Toggle */}
                     <div className="flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-white/20 dark:border-gray-700/20">
                         <Button
@@ -276,7 +278,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('day')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'day'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                ? `${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-500 to-teal-600 text-white shadow-md`
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -287,7 +289,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('week')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'week'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                ? `${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-500 to-teal-600 text-white shadow-md`
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -296,14 +298,14 @@ export default function DoctorScheduleCalendar({
                     </div>
 
                     {/* Navigation */}
-                    <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-white/20 dark:border-gray-700/20">
+                    <div className={`flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-white/20 dark:border-gray-700/20 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={navigatePrevious}
                             className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                         >
-                            <ChevronLeft className="w-4 h-4" />
+                            {isRTL ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                         </Button>
                         <Button
                             variant="ghost"
@@ -319,7 +321,7 @@ export default function DoctorScheduleCalendar({
                             onClick={navigateNext}
                             className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                         >
-                            <ChevronRight className="w-4 h-4" />
+                            {isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </Button>
                     </div>
                 </div>
@@ -329,11 +331,11 @@ export default function DoctorScheduleCalendar({
             <div className="relative z-10">
                 <div className="shadow-2xl border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
-                        <div className="min-w-full relative">
+                        <div className="min-w-full relative" dir={isRTL ? 'rtl' : 'ltr'}>
                             {/* Sticky Header Row */}
-                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`}>
-                                <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700">
-                                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <div className={`grid ${viewMode === 'day' ? 'grid-cols-2' : 'grid-cols-8'} border-b-2 border-emerald-200 dark:border-emerald-800 sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <div className={`p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                    <span className={`text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         <Clock className="w-4 h-4" />
                                         {t('dd_time') || 'Time'}
                                     </span>
@@ -431,11 +433,12 @@ export default function DoctorScheduleCalendar({
                                                         <div
                                                             className="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer h-full transform hover:-translate-y-1 hover:scale-[1.02] backdrop-blur-sm"
                                                             onClick={() => onAppointmentClick?.(appointment)}
+                                                            dir={isRTL ? 'rtl' : 'ltr'}
                                                         >
                                                             {/* Gradient overlay for hover effect */}
                                                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                                            <div className="relative z-10 flex items-start justify-between mb-3">
+                                                            <div className={`relative z-10 flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
                                                                     {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
@@ -446,35 +449,35 @@ export default function DoctorScheduleCalendar({
                                                                         </Button>
                                                                     </DropdownMenuTrigger>
                                                                     <DropdownMenuContent align="end" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                                                                        <DropdownMenuItem onClick={() => onAppointmentClick?.(appointment)} className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                                            <Eye className="w-4 h-4 mr-2" />
+                                                                        <DropdownMenuItem onClick={() => onAppointmentClick?.(appointment)} className={`hover:bg-blue-50 dark:hover:bg-blue-900/20 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                                                            <Eye className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                                                             {t('dd_view_details') || 'View Details'}
                                                                         </DropdownMenuItem>
                                                                     </DropdownMenuContent>
                                                                 </DropdownMenu>
                                                             </div>
 
-                                                            <div className="relative z-10 space-y-2">
-                                                                <div className="flex items-center text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                                                                    <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                            <div className="relative z-10 space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                                                <div className={`flex items-center text-sm font-semibold text-gray-900 dark:text-white mb-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                    <div className={`w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
+                                                                    <span className="truncate" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
-                                                                <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                                                    <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                                <div className={`flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                    <div className={`w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
+                                                                    <span className="truncate font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (
-                                                                    <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                                                                        <div className="w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                                    <div className={`flex items-center text-xs text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                        <div className={`w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                             <Phone className="w-2 h-2 text-white" />
                                                                         </div>
-                                                                        <span className="truncate font-medium">{appointment.patient_phone}</span>
+                                                                        <span className="truncate font-medium" dir="ltr">{appointment.patient_phone}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -498,11 +501,12 @@ export default function DoctorScheduleCalendar({
                                                         <div
                                                             className="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl p-3 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer h-full transform hover:-translate-y-1 hover:scale-[1.02] backdrop-blur-sm"
                                                             onClick={() => onAppointmentClick?.(appointment)}
+                                                            dir={isRTL ? 'rtl' : 'ltr'}
                                                         >
                                                             {/* Gradient overlay for hover effect */}
                                                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                                            <div className="relative z-10 flex items-start justify-between mb-3">
+                                                            <div className={`relative z-10 flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                                                 <Badge className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm ${getStatusColor(appointment.status)} border-0`}>
                                                                     {getLocalizedStatus(appointment.status)}
                                                                 </Badge>
@@ -513,35 +517,35 @@ export default function DoctorScheduleCalendar({
                                                                         </Button>
                                                                     </DropdownMenuTrigger>
                                                                     <DropdownMenuContent align="end" className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                                                                        <DropdownMenuItem onClick={() => onAppointmentClick?.(appointment)} className="hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                                            <Eye className="w-4 h-4 mr-2" />
+                                                                        <DropdownMenuItem onClick={() => onAppointmentClick?.(appointment)} className={`hover:bg-blue-50 dark:hover:bg-blue-900/20 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                                                            <Eye className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                                                                             {t('dd_view_details') || 'View Details'}
                                                                         </DropdownMenuItem>
                                                                     </DropdownMenuContent>
                                                                 </DropdownMenu>
                                                             </div>
 
-                                                            <div className="relative z-10 space-y-2">
-                                                                <div className="flex items-center text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                                                                    <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                            <div className="relative z-10 space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                                                <div className={`flex items-center text-sm font-semibold text-gray-900 dark:text-white mb-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                    <div className={`w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                         <User className="w-3 h-3 text-white" />
                                                                     </div>
-                                                                    <span className="truncate">{getLocalizedPatientName(appointment)}</span>
+                                                                    <span className="truncate" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getLocalizedPatientName(appointment)}</span>
                                                                 </div>
 
-                                                                <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                                                    <div className="w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                                <div className={`flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                    <div className={`w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                         <MapPin className="w-2 h-2 text-white" />
                                                                     </div>
-                                                                    <span className="truncate font-medium">{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
+                                                                    <span className="truncate font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getLocalizedAppointmentType(appointment.appointment_type)} • {getLocalizedConsultationType(appointment.type)}</span>
                                                                 </div>
 
                                                                 {appointment.patient_phone && (
-                                                                    <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                                                                        <div className="w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                                                    <div className={`flex items-center text-xs text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                                                        <div className={`w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`}>
                                                                             <Phone className="w-2 h-2 text-white" />
                                                                         </div>
-                                                                        <span className="truncate font-medium">{appointment.patient_phone}</span>
+                                                                        <span className="truncate font-medium" dir="ltr">{appointment.patient_phone}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -562,12 +566,12 @@ export default function DoctorScheduleCalendar({
             <div className={`relative z-10 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 ${isRTL ? 'rtl' : 'ltr'}`}>
                 <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                     <CardContent className="p-6">
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-1">
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
-                                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                     {toArabicNumerals(appointments.length)}
                                 </p>
                             </div>
@@ -575,7 +579,7 @@ export default function DoctorScheduleCalendar({
                                 <Calendar className="w-6 h-6 text-white" />
                             </div>
                         </div>
-                        <div className="mt-3 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"></div>
+                        <div className={`mt-3 h-1 ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-400 to-emerald-600 rounded-full`}></div>
                     </CardContent>
                 </Card>
 

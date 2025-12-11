@@ -477,15 +477,15 @@ export default function PatientDoctorsPage() {
 
                     {/* Doctor Details Modal */}
                     <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {loadingDetails ? (
                                 <div className="flex items-center justify-center py-12">
                                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                                 </div>
                             ) : selectedDoctor ? (
                                 <>
-                                    <DialogHeader>
-                                        <div className="flex items-start gap-4">
+                                    <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             <Avatar className="w-20 h-20 border-4 border-blue-100 dark:border-blue-900">
                                                 <AvatarImage src={selectedDoctor.profile_picture} alt={selectedDoctor.name} />
                                                 <AvatarFallback className="bg-blue-600 text-white text-xl font-semibold">
@@ -493,8 +493,8 @@ export default function PatientDoctorsPage() {
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <DialogTitle className="text-2xl">{getLocalizedDoctorName(selectedDoctor)}</DialogTitle>
-                                                <DialogDescription className="text-lg mt-1">
+                                                <DialogTitle className={`text-2xl ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedDoctorName(selectedDoctor)}</DialogTitle>
+                                                <DialogDescription className={`text-lg mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                                     {getLocalizedSpecialty(selectedDoctor)}
                                                 </DialogDescription>
                                                 <div className="flex items-center gap-4 mt-2">
@@ -513,8 +513,8 @@ export default function PatientDoctorsPage() {
                                         </div>
                                     </DialogHeader>
 
-                                    <Tabs defaultValue="overview" className="mt-6">
-                                        <TabsList className="grid w-full grid-cols-3">
+                                    <Tabs defaultValue="overview" className="mt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <TabsList className={`grid w-full grid-cols-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                             <TabsTrigger value="overview">{t('overview') || 'Overview'}</TabsTrigger>
                                             <TabsTrigger value="centers">{t('centers') || 'Centers'}</TabsTrigger>
                                             <TabsTrigger value="contact">{t('contact') || 'Contact'}</TabsTrigger>

@@ -15,7 +15,8 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals } from "@/lib/i18n";
+import { toArabicNumerals, formatLocalizedDate, getLocalizedMonths } from "@/lib/i18n";
+import { ar } from "date-fns/locale";
 
 interface LabBooking {
   id: string;
@@ -37,7 +38,7 @@ interface LabRescheduleModalProps {
 }
 
 export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess }: LabRescheduleModalProps) {
-  const { t, locale } = useLocale();
+  const { t, locale, isRTL } = useLocale();
   const { toast } = useToast();
   const { alertConfig, isOpen: alertOpen, hideAlert, showSuccess, showError } = useCustomAlert();
 
@@ -227,7 +228,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
     <AnimatePresence>
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <motion.div
               initial={{ scale: 0.7, opacity: 0, y: 50 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -238,33 +239,44 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                 bounce: 0.3
               }}
             >
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-center">
+              <DialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('reschedule_lab_title') || 'Reschedule Lab Test'}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-6 mt-6">
                 {/* Current Booking Info */}
-                <Card className="bg-blue-50 border-blue-200">
+                <Card className="bg-blue-50 border-blue-200" dir={isRTL ? 'rtl' : 'ltr'}>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2">
+                    <h3 className={`font-semibold text-blue-900 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('lab_current_booking') || 'Current Booking'}
                     </h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-2 gap-4 text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <CalendarIcon className="w-4 h-4 text-blue-600" />
                         <span className="text-blue-900 font-medium">{getLocalizedTestName(booking.type)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Clock className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-900">{toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} {t('at') || 'at'} {toArabicNumerals(booking.booking_time, locale)}</span>
+                        <span className="text-blue-900">
+                          {(() => {
+                            const dateStr = booking.booking_date;
+                            const timeStr = booking.booking_time;
+                            if (locale === 'ar') {
+                              const formattedDate = formatLocalizedDate(dateStr, locale, 'short');
+                              const formattedTime = toArabicNumerals(timeStr, locale);
+                              return `${formattedDate} ${t('at') || 'at'} ${formattedTime}`;
+                            }
+                            return `${toArabicNumerals(new Date(booking.booking_date).toLocaleDateString(locale || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} ${t('at') || 'at'} ${toArabicNumerals(booking.booking_time, locale)}`;
+                          })()}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <MapPin className="w-4 h-4 text-blue-600" />
                         <span className="text-blue-900">{getLocalizedCenterName(booking.center)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Badge className="bg-blue-100 text-blue-800">
                           {getLocalizedStatus(booking.status)}
                         </Badge>
@@ -276,7 +288,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                 <div className="grid lg:grid-cols-2 gap-6">
                   {/* Calendar */}
                   <div>
-                    <Label className="text-lg font-semibold mb-4 block">
+                    <Label className={`text-lg font-semibold mb-4 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('lab_select_new_date') || 'Select New Date'}
                     </Label>
                     <Calendar
@@ -291,13 +303,29 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                         const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                         return !availableDates.includes(d);
                       }}
+                      locale={locale === 'ar' ? ar : undefined}
                       className="rounded-md border"
+                      dir={isRTL ? 'rtl' : 'ltr'}
+                      formatters={{
+                        formatDay: (date) => {
+                          const day = date.getDate();
+                          return locale === 'ar' ? toArabicNumerals(day.toString(), locale) : day.toString();
+                        },
+                        formatCaption: (date, options) => {
+                          if (locale === 'ar') {
+                            const month = getLocalizedMonths(locale)[date.getMonth()];
+                            const year = toArabicNumerals(date.getFullYear().toString(), locale);
+                            return `${month} ${year}`;
+                          }
+                          return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                        }
+                      }}
                     />
                   </div>
 
                   {/* Time Slots */}
                   <div>
-                    <Label className="text-lg font-semibold mb-4 block">
+                    <Label className={`text-lg font-semibold mb-4 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('lab_select_new_time') || 'Select New Time'}
                     </Label>
                     {selectedDate ? (
@@ -328,9 +356,9 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                                       : "hover:bg-emerald-50"
                                   }`}
                               >
-                                {slot.time}
+                                <span dir="ltr">{locale === 'ar' ? toArabicNumerals(slot.time, locale) : slot.time}</span>
                                 {slot.is_booked && (
-                                  <span className="ml-1 text-xs">(Booked)</span>
+                                  <span className={`text-xs ${isRTL ? 'mr-1' : 'ml-1'}`}>({t('booking_time_booked') || 'Booked'})</span>
                                 )}
                               </Button>
                             </motion.div>
@@ -352,7 +380,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
 
                 {/* Reason */}
                 <div>
-                  <Label htmlFor="reason" className="text-base font-medium">
+                  <Label htmlFor="reason" className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {t('lab_reschedule_reason') || 'Reason for Rescheduling (Optional)'}
                   </Label>
                   <Textarea

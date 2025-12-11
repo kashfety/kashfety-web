@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar, 
-  Clock, 
-  Save, 
+import {
+  Calendar,
+  Clock,
+  Save,
   RotateCcw,
   CheckCircle,
   Home,
@@ -86,30 +86,31 @@ const generateTimeSlots = (
   const breakEndTime = breakEnd ? new Date(`2000-01-01T${breakEnd}:00`) : null;
 
   let current = new Date(start);
-  
+
   while (current < end) {
     const timeStr = current.toTimeString().substring(0, 5);
-    
+
     // Skip break time
     if (breakStartTime && breakEndTime && current >= breakStartTime && current < breakEndTime) {
       current = new Date(current.getTime() + duration * 60000);
       continue;
     }
-    
+
     slots.push({
       time: timeStr,
       duration: duration
     });
-    
+
     current = new Date(current.getTime() + duration * 60000);
   }
-  
+
   return slots;
 };
 
 export default function DoctorScheduleManagement({ doctorId }: ScheduleManagementProps) {
   const { toast } = useToast();
   const { t, locale } = useLocale();
+  const isRTL = locale === 'ar';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [schedule, setSchedule] = useState<ScheduleData[]>([]);
@@ -117,7 +118,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const [selectedCenterId, setSelectedCenterId] = useState<string>('');
   const [homeVisitsAvailable, setHomeVisitsAvailable] = useState(false);
   const [defaultConsultationFee, setDefaultConsultationFee] = useState<number>(0);
-  
+
   // Helper to get localized center name
   const getLocalizedCenterName = (center: Center) => {
     if (locale === 'ar' && center.name_ar) {
@@ -125,30 +126,34 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     }
     return center.name;
   };
-  
+
   // Helper to convert numbers to Arabic numerals
   const toArabicNumerals = (num: number | string): string => {
     if (locale !== 'ar') return String(num);
     const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
   };
-  
+
   // Conflict dialog state
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
   const [conflictDetails, setConflictDetails] = useState<string[]>([]);
-  
+
   // Store form states per center - key is center_id, value is dayConfigs
-  const [centerFormStates, setCenterFormStates] = useState<{[centerId: string]: {[key: number]: {
-    isAvailable: boolean;
-    startTime: string;
-    endTime: string;
-    breakStart: string;
-    breakEnd: string;
-    duration: number;
-    notes: string;
-  }}}>({});
-  
+  const [centerFormStates, setCenterFormStates] = useState<{
+    [centerId: string]: {
+      [key: number]: {
+        isAvailable: boolean;
+        startTime: string;
+        endTime: string;
+        breakStart: string;
+        breakEnd: string;
+        duration: number;
+        notes: string;
+      }
+    }
+  }>({});
+
   // Track which centers have been initialized
   const [initializedCenters, setInitializedCenters] = useState<Set<string>>(new Set());
   // Track which center's schedule was last fetched from server
@@ -171,7 +176,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       // ignore parse errors
     }
   }, [doctorId]);
-  
+
   // Current day configs for the selected center
   const dayConfigs = centerFormStates[selectedCenterId] || {};
 
@@ -190,7 +195,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   const initializeDayConfigs = () => {
     if (!selectedCenterId) return;
-    
+
     // If this center has already been initialized, don't reinitialize
     if (initializedCenters.has(selectedCenterId)) return;
 
@@ -200,17 +205,19 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       setInitializedCenters(prev => new Set([...prev, selectedCenterId!]));
       return;
     }
-    
-    const configs: {[key: number]: {
-      isAvailable: boolean;
-      startTime: string;
-      endTime: string;
-      breakStart: string;
-      breakEnd: string;
-      duration: number;
-      notes: string;
-    }} = {};
-    
+
+    const configs: {
+      [key: number]: {
+        isAvailable: boolean;
+        startTime: string;
+        endTime: string;
+        breakStart: string;
+        breakEnd: string;
+        duration: number;
+        notes: string;
+      }
+    } = {};
+
     DAYS_OF_WEEK.forEach(day => {
       const existingSchedule = schedule.find(s => s.center_id === selectedCenterId && s.day_of_week === day.value);
       const hasSlots = Array.isArray(existingSchedule?.time_slots) && existingSchedule.time_slots.length > 0;
@@ -218,13 +225,13 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         // If is_available missing/falsey, infer from presence of time slots
         isAvailable: (existingSchedule?.is_available ?? (hasSlots ? true : false)),
         startTime: existingSchedule?.time_slots?.[0]?.time || '09:00',
-        endTime: existingSchedule?.time_slots && existingSchedule.time_slots.length > 0 
+        endTime: existingSchedule?.time_slots && existingSchedule.time_slots.length > 0
           ? (() => {
-              const lastSlot = existingSchedule.time_slots[existingSchedule.time_slots.length - 1];
-              const endTime = new Date(`2000-01-01T${lastSlot.time}:00`);
-              endTime.setMinutes(endTime.getMinutes() + lastSlot.duration);
-              return endTime.toTimeString().substring(0, 5);
-            })()
+            const lastSlot = existingSchedule.time_slots[existingSchedule.time_slots.length - 1];
+            const endTime = new Date(`2000-01-01T${lastSlot.time}:00`);
+            endTime.setMinutes(endTime.getMinutes() + lastSlot.duration);
+            return endTime.toTimeString().substring(0, 5);
+          })()
           : '17:00',
         breakStart: existingSchedule?.break_start || '',
         breakEnd: existingSchedule?.break_end || '',
@@ -232,28 +239,30 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         notes: existingSchedule?.notes || ''
       };
     });
-    
+
     // Update the form state for this center from server schedule
     setCenterFormStates(prev => ({
       ...prev,
       [selectedCenterId]: configs
     }));
-    
+
     // Mark this center as initialized
     setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
   };
 
   // Build full 7-day configs from a schedule array (DB response)
   const buildConfigsFromSchedule = (centerId: string, scheduleRows: ScheduleData[]) => {
-    const configs: { [key: number]: {
-      isAvailable: boolean;
-      startTime: string;
-      endTime: string;
-      breakStart: string;
-      breakEnd: string;
-      duration: number;
-      notes: string;
-    } } = {};
+    const configs: {
+      [key: number]: {
+        isAvailable: boolean;
+        startTime: string;
+        endTime: string;
+        breakStart: string;
+        breakEnd: string;
+        duration: number;
+        notes: string;
+      }
+    } = {};
 
     // Index rows by normalized day (0..6), coerce types and handle 1..7 with 7→0 (Sunday=0)
     const rowsByDay: Record<number, ScheduleData> = {} as any;
@@ -313,7 +322,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   }, [doctorId]);
 
   useEffect(() => {
-  if (selectedCenterId) {
+    if (selectedCenterId) {
       // Clear initialization flag for the new center if it hasn't been initialized
       if (!initializedCenters.has(selectedCenterId)) {
         // This will trigger initialization in the next useEffect
@@ -336,7 +345,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const fetchCenters = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      
+
       // Try fallback route first for Vercel compatibility
       let response;
       try {
@@ -362,7 +371,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         const assignedCenters = response.data.assigned_centers || [];
         console.log('📅 [Schedule] Assigned centers:', assignedCenters.length);
         setCenters(assignedCenters);
-        
+
         // Only set default selection if there are assigned centers
         if (assignedCenters.length > 0) {
           // Prefer persisted selection if valid
@@ -401,17 +410,17 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     try {
       setLoading(true);
       const token = localStorage.getItem('auth_token');
-      
+
       console.log('📅 [Fetch Schedule] Starting fetch for center:', selectedCenterId);
       console.log('📅 [Fetch Schedule] Initialized centers:', Array.from(initializedCenters));
-      
+
       if (!selectedCenterId) {
         console.log('📅 [Fetch Schedule] No center selected, skipping fetch');
         setSchedule([]);
         setLoading(false);
         return;
       }
-      
+
       const response = await axios.get(
         `/api/doctor-dashboard/schedule?center_id=${selectedCenterId}`,
         {
@@ -425,19 +434,19 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         const rows: ScheduleData[] = response.data.schedule || [];
         console.log('📅 [Fetch Schedule] Schedule rows from DB:', rows.length);
         console.log('📅 [Fetch Schedule] Raw schedule data:', JSON.stringify(rows, null, 2));
-        
+
         setSchedule(rows);
-        
+
         // Always load from DB if center hasn't been initialized yet in this session
         // This ensures first visit to each center loads from database
         const shouldUpdateFromDB = !initializedCenters.has(selectedCenterId);
         console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
-        
+
         if (shouldUpdateFromDB) {
           console.log('📅 [Fetch Schedule] Building configs from schedule...');
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
           console.log('📅 [Fetch Schedule] Built configs:', JSON.stringify(newConfigs, null, 2));
-          
+
           setCenterFormStates(prev => {
             const updated = {
               ...prev,
@@ -446,7 +455,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
             console.log('📅 [Fetch Schedule] Updated form states:', JSON.stringify(updated, null, 2));
             return updated;
           });
-          
+
           setInitializedCenters(prev => {
             const updated = new Set([...prev, selectedCenterId]);
             console.log('📅 [Fetch Schedule] Updated initialized centers:', Array.from(updated));
@@ -456,11 +465,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           console.log('📅 [Fetch Schedule] Center already initialized, using existing form state');
           console.log('📅 [Fetch Schedule] Existing config:', JSON.stringify(centerFormStates[selectedCenterId], null, 2));
         }
-        
+
         setLastFetchedCenterId(selectedCenterId);
         setHomeVisitsAvailable(response.data.home_visits_available || false);
         setDefaultConsultationFee(response.data.default_consultation_fee || 0);
-        
+
         // Mark initial mount as complete after any fetch
         if (isInitialMount) {
           console.log('📅 [Fetch Schedule] Marking initial mount as complete');
@@ -482,11 +491,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   const refreshSchedule = async () => {
     if (!selectedCenterId) return;
-    
+
     try {
       setLoading(true);
       const token = localStorage.getItem('auth_token');
-      
+
       const response = await axios.get(
         `/api/doctor-dashboard/schedule?center_id=${selectedCenterId}`,
         {
@@ -497,20 +506,20 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
         setSchedule(rows);
-        
+
         // Force update form configs from server when explicitly refreshing
         const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
         setCenterFormStates(prev => ({
           ...prev,
           [selectedCenterId]: newConfigs
         }));
-        
+
         // Keep the center as initialized
         setInitializedCenters(prev => new Set([...prev, selectedCenterId]));
         setLastFetchedCenterId(selectedCenterId);
         setHomeVisitsAvailable(response.data.home_visits_available || false);
         setDefaultConsultationFee(response.data.default_consultation_fee || 0);
-        
+
         toast({
           title: t('success') || 'Success',
           description: t('dd_schedule_refreshed') || 'Schedule refreshed from server',
@@ -530,7 +539,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   const updateDayConfig = (day: number, field: string, value: any) => {
     if (!selectedCenterId) return;
-    
+
     setCenterFormStates(prev => ({
       ...prev,
       [selectedCenterId]: {
@@ -574,7 +583,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
     try {
       setSaving(true);
       const token = localStorage.getItem('auth_token');
-      
+
       if (!selectedCenterId) {
         toast({
           title: t('error') || 'Error',
@@ -583,10 +592,10 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         });
         return;
       }
-      
+
       console.log('📅 [Save Schedule] Starting save for center:', selectedCenterId);
       console.log('📅 [Save Schedule] Current form states:', centerFormStates);
-      
+
       // Build schedule array for API - only include days that are marked as available
       const scheduleData = DAYS_OF_WEEK
         .filter(day => {
@@ -602,9 +611,9 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         .map(day => {
           const config = getDayConfig(day.value);
           const slots = generateSlotsForDay(day.value);
-          
+
           console.log(`📅 [Save Schedule] Generated ${slots.length} slots for day ${day.value}`);
-          
+
           return {
             day_of_week: day.value,
             is_available: true,
@@ -627,7 +636,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,
-        { 
+        {
           schedule: scheduleData,
           center_id: selectedCenterId
         },
@@ -635,18 +644,18 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      
+
       console.log('📅 [Save Schedule] Response:', response.data);
 
       if (response.data.success) {
         // Update the schedule state with the response data
         setSchedule(response.data.schedule);
-        
+
         toast({
           title: t('success') || 'Success',
           description: t('dd_schedule_updated') || 'Schedule updated successfully',
         });
-        
+
         // Don't call fetchSchedule() again to avoid resetting the form
         // The form state should remain as the user configured it
       }
@@ -654,16 +663,16 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       console.error('Save schedule error:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
-      
+
       // Handle schedule conflict (409) with detailed message
       if (error.response?.status === 409) {
         console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
         const conflictData = error.response.data;
-        
+
         // Set conflict message and details
         const message = conflictData.message || 'You cannot have overlapping time slots on the same day at different centers.';
         const conflicts = conflictData.conflicts || [];
-        
+
         setConflictMessage(message);
         setConflictDetails(conflicts);
         setShowConflictDialog(true);
@@ -672,13 +681,13 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         // Generic error handling
         const errorMessage = error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule');
         console.log('📢 Error message:', errorMessage);
-        
+
         toast({
           title: t('error') || 'Error',
           description: errorMessage,
           variant: "destructive"
         });
-        
+
         // Also try alert as backup
         setTimeout(() => {
           alert(`Error\n\n${errorMessage}`);
@@ -692,7 +701,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
   const toggleHomeVisits = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      
+
       const response = await axios.put(
         `/api/doctor-dashboard/home-visits`,
         { home_visits_available: !homeVisitsAvailable },
@@ -710,13 +719,13 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
             : (t('dd_home_visits_disabled') || 'Home visits disabled')
           ),
         });
-        
+
         // Refresh centers data after toggling home visits
         setTimeout(() => {
           fetchCenters();
           toast({
             title: (t('centers_updated') || 'Centers Updated'),
-            description: (!homeVisitsAvailable 
+            description: (!homeVisitsAvailable
               ? (t('home_visit_center_added') || 'Home visit center has been added to your active centers')
               : (t('home_visit_center_removed') || 'Home visit center has been removed from your active centers')
             ),
@@ -735,7 +744,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   const copySchedule = (fromDay: number, toDay: number) => {
     if (!selectedCenterId) return;
-    
+
     const sourceConfig = dayConfigs[fromDay];
     if (sourceConfig) {
       setCenterFormStates(prev => ({
@@ -753,101 +762,104 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
+      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Calendar className="h-5 w-5" />
-          <span>{t('dd_loading_schedule') || 'Loading schedule...'}</span>
+          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_loading_schedule') || 'Loading schedule...'}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Calendar className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">{t('dd_schedule_management') || 'Schedule Management'}</h2>
+          <h2 className="text-xl font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_management') || 'Schedule Management'}</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
           <Button
             onClick={refreshSchedule}
             variant="outline"
             size="sm"
             disabled={loading || !selectedCenterId}
+            className={isRTL ? 'flex-row-reverse' : ''}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            {t('dd_refresh') || 'Refresh'}
+            <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_refresh') || 'Refresh'}</span>
           </Button>
           <Button
             onClick={saveSchedule}
             disabled={saving || !selectedCenterId}
             size="sm"
+            className={isRTL ? 'flex-row-reverse' : ''}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? (t('dd_saving') || 'Saving...') : (t('dd_save_schedule') || 'Save Schedule')}
+            <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('dd_saving') || 'Saving...') : (t('dd_save_schedule') || 'Save Schedule')}</span>
           </Button>
         </div>
       </div>
 
       {/* Center Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <Building className="h-5 w-5" />
-            {t('dd_center_selection') || 'Medical Center Selection'}
+            <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_center_selection') || 'Medical Center Selection'}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label className="text-base font-medium">{t('dd_select_center_manage') || 'Select Center to Manage Schedule'}</Label>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_center_selection_desc') || 'Choose which medical center you want to set your schedule for. You can only manage schedules for centers assigned to you.'}</p>
+        <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_select_center_manage') || 'Select Center to Manage Schedule'}</Label>
+              <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_center_selection_desc') || 'Choose which medical center you want to set your schedule for. You can only manage schedules for centers assigned to you.'}</p>
             </div>
-            
+
             {assignedCenters.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {assignedCenters.map(center => (
                   <div
                     key={center.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedCenterId === center.id
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
-                    }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedCenterId === center.id
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                      }`}
                     onClick={() => {
                       setSelectedCenterId(center.id);
                     }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-sm">{getLocalizedCenterName(center)}</h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          <MapPin className="h-3 w-3 text-gray-500" />
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <h3 className="font-medium text-sm" dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(center)}</h3>
+                        <div className={`flex items-center gap-1 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <MapPin className={`h-3 w-3 text-gray-500 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          <p className="text-xs text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                             {center.address}
                           </p>
                         </div>
                         {center.is_primary && (
-                          <Badge variant="secondary" className="mt-2 text-xs">
+                          <Badge variant="secondary" className="mt-2 text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                             {t('dd_primary') || 'Primary'}
                           </Badge>
                         )}
                       </div>
                       {selectedCenterId === center.id && (
-                        <CheckCircle className="h-5 w-5 text-blue-500" />
+                        <CheckCircle className={`h-5 w-5 text-blue-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'}>
                 <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <div className="space-y-2">
-                  <p className="text-gray-600 dark:text-gray-400">{t('dd_no_centers_assigned_title') || 'No centers assigned to you yet.'}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">{t('dd_no_centers_assigned_desc') || 'Please go to the "Centers" tab to select which medical centers you want to work at, then return here to set your schedule.'}</p>
+                <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_no_centers_assigned_title') || 'No centers assigned to you yet.'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_no_centers_assigned_desc') || 'Please go to the "Centers" tab to select which medical centers you want to work at, then return here to set your schedule.'}</p>
                 </div>
               </div>
             )}
@@ -858,18 +870,18 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       {selectedCenterId && (
         <>
           {/* Home Visits Setting */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Home className="h-5 w-5" />
-                {t('dd_home_visits') || 'Home Visits'}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits') || 'Home Visits'}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base font-medium">{t('dd_accept_home_visits') || 'Accept Home Visit Appointments'}</Label>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_home_visits_desc') || 'Enable this to allow patients to book home visit appointments with you'}</p>
+            <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_accept_home_visits') || 'Accept Home Visit Appointments'}</Label>
+                  <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits_desc') || 'Enable this to allow patients to book home visit appointments with you'}</p>
                 </div>
                 <Switch
                   checked={homeVisitsAvailable}
@@ -880,26 +892,26 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           </Card>
 
           {/* Weekly Schedule */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <Clock className="h-5 w-5" />
-                {(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {(() => {
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{(t('dd_weekly_schedule_for') || 'Weekly Schedule for')} {(() => {
                   const center = centers.find(c => c.id === selectedCenterId);
                   return center ? getLocalizedCenterName(center) : '';
-                })()}
+                })()}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
               {DAYS_OF_WEEK.map(day => {
                 const config = getDayConfig(day.value);
                 const slots = generateSlotsForDay(day.value);
 
                 return (
-                  <div key={day.value} className="space-y-4 p-4 border rounded-lg">
+                  <div key={day.value} className="space-y-4 p-4 border rounded-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                     {/* Day Header */}
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium">{t((day as any).labelKey) || (day as any).labelKey}</h3>
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h3 className={`text-lg font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t((day as any).labelKey) || (day as any).labelKey}</h3>
                       <Switch
                         checked={config.isAvailable || false}
                         onCheckedChange={(checked) => updateDayConfig(day.value, 'isAvailable', checked)}
@@ -907,27 +919,31 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                     </div>
 
                     {config.isAvailable && (
-                      <div className="space-y-4 ml-4">
+                      <div className={`space-y-4 ${isRTL ? 'mr-4' : 'ml-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {/* Time Range */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label>{t('dd_start_time') || 'Start Time'}</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_start_time') || 'Start Time'}</Label>
                             <Input
                               type="time"
                               value={config.startTime || '09:00'}
                               onChange={(e) => updateDayConfig(day.value, 'startTime', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_end_time') || 'End Time'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_end_time') || 'End Time'}</Label>
                             <Input
                               type="time"
                               value={config.endTime || '17:00'}
                               onChange={(e) => updateDayConfig(day.value, 'endTime', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_slot_duration_minutes') || 'Slot Duration (minutes)'}</Label>
                             <Input
                               type="number"
                               min="15"
@@ -935,44 +951,50 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                               step="15"
                               value={config.duration || 30}
                               onChange={(e) => updateDayConfig(day.value, 'duration', parseInt(e.target.value))}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
                         </div>
 
                         {/* Break Time */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>{t('dd_break_start_optional') || 'Break Start (optional)'}</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_break_start_optional') || 'Break Start (optional)'}</Label>
                             <Input
                               type="time"
                               value={config.breakStart || ''}
                               onChange={(e) => updateDayConfig(day.value, 'breakStart', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
-                          <div>
-                            <Label>{t('dd_break_end_optional') || 'Break End (optional)'}</Label>
+                          <div dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_break_end_optional') || 'Break End (optional)'}</Label>
                             <Input
                               type="time"
                               value={config.breakEnd || ''}
                               onChange={(e) => updateDayConfig(day.value, 'breakEnd', e.target.value)}
+                              dir="ltr"
+                              className={isRTL ? 'text-right' : 'text-left'}
                             />
                           </div>
                         </div>
 
                         {/* Generated Slots Preview */}
                         {slots.length > 0 && (
-                          <div>
-                            <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               {(t('dd_generated_time_slots_total') || 'Generated Time Slots ({count} total)').replace('{count}', toArabicNumerals(slots.length))}
                             </Label>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                            <div className={`mt-2 flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               {slots.slice(0, 8).map((slot, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
+                                <Badge key={index} variant="outline" className="text-xs" dir="ltr">
                                   {slot.time}
                                 </Badge>
                               ))}
                               {slots.length > 8 && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {(t('dd_more_count') || '+{count} more').replace('{count}', toArabicNumerals(slots.length - 8))}
                                 </Badge>
                               )}
@@ -981,8 +1003,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                         )}
 
                         {/* Copy from other days */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('dd_copy_from') || 'Copy from:'}</span>
+                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <span className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_copy_from') || 'Copy from:'}</span>
                           {DAYS_OF_WEEK.filter(d => d.value !== day.value && dayConfigs[d.value]?.isAvailable).map(sourceDay => (
                             <Button
                               key={sourceDay.value}
@@ -990,6 +1012,7 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
                               size="sm"
                               onClick={() => copySchedule(sourceDay.value, day.value)}
                               className="text-xs"
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
                               {t((sourceDay as any).labelKey) || (sourceDay as any).labelKey}
                             </Button>
@@ -1004,30 +1027,30 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           </Card>
 
           {/* Schedule Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 <CheckCircle className="h-5 w-5" />
-                {t('dd_schedule_summary') || 'Schedule Summary'}
+                <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_summary') || 'Schedule Summary'}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_working_days') || 'Working Days'}</Label>
-                  <p className="text-lg font-semibold">{toArabicNumerals(Object.values(dayConfigs).filter(config => config.isAvailable).length)} {t('days') || 'days'}</p>
+            <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_working_days') || 'Working Days'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(Object.values(dayConfigs).filter(config => config.isAvailable).length)} {t('days') || 'days'}</p>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_weekly_slots') || 'Total Weekly Slots'}</Label>
-                  <p className="text-lg font-semibold">{toArabicNumerals(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0))} {t('slots') || 'slots'}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_weekly_slots') || 'Total Weekly Slots'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0))} {t('slots') || 'slots'}</p>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_home_visits') || 'Home Visits'}</Label>
-                  <p className="text-lg font-semibold">{homeVisitsAvailable ? (t('dd_available') || 'Available') : (t('dd_not_available') || 'Not Available')}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_home_visits') || 'Home Visits'}</Label>
+                  <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{homeVisitsAvailable ? (t('dd_available') || 'Available') : (t('dd_not_available') || 'Not Available')}</p>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_default_fee') || 'Default Fee'}</Label>
-                  <p className="text-lg font-semibold">{formatCurrency(defaultConsultationFee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_default_fee') || 'Default Fee'}</Label>
+                  <p className="text-lg font-semibold" dir="ltr">{formatCurrency(defaultConsultationFee, locale, locale === 'ar' ? 'ل.س' : 'SYP')}</p>
                 </div>
               </div>
             </CardContent>
@@ -1037,40 +1060,41 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
       {/* Conflict Alert Dialog */}
       <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
-        <AlertDialogContent className="max-w-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+        <AlertDialogContent className="max-w-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
+          <AlertDialogHeader dir={isRTL ? 'rtl' : 'ltr'}>
+            <AlertDialogTitle className={`text-red-600 dark:text-red-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <span>⚠️</span>
-              <span>{t('schedule_conflict') || 'Schedule Conflict'}</span>
+              <span dir={isRTL ? 'rtl' : 'ltr'}>{t('schedule_conflict') || 'Schedule Conflict'}</span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <p className="text-gray-700 dark:text-gray-300">{conflictMessage}</p>
-              
+            <AlertDialogDescription className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{conflictMessage}</p>
+
               {conflictDetails.length > 0 && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <p className={`font-semibold text-gray-800 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {t('conflict_details') || 'Conflict Details:'}
                   </p>
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
                     {conflictDetails.map((conflict, index) => (
-                      <div key={index} className="flex items-start gap-2 text-sm">
-                        <span className="text-red-500 mt-0.5">•</span>
-                        <span className="text-gray-700 dark:text-gray-300">{conflict}</span>
+                      <div key={index} className={`flex items-start gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <span className={`text-red-500 mt-0.5 ${isRTL ? 'ml-1' : 'mr-1'}`}>•</span>
+                        <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{conflict}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+
+              <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {t('schedule_conflict_instruction') || 'Please adjust your schedule to avoid overlapping time slots on the same day at different centers.'}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction 
+          <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''} dir={isRTL ? 'rtl' : 'ltr'}>
+            <AlertDialogAction
               onClick={() => setShowConflictDialog(false)}
               className="bg-primary hover:bg-primary/90"
+              dir={isRTL ? 'rtl' : 'ltr'}
             >
               {t('understood') || 'Understood'}
             </AlertDialogAction>

@@ -86,14 +86,15 @@ export default function MedicalRecordsPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex items-center gap-3"
+                className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
                 <div className="bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 p-3 rounded-full">
                   <Heart className="w-8 h-8 text-[#4DBCC4]" />
                 </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">{t('medical_records') || 'Medical Records'}</h1>
-                  <p className="text-muted-foreground mt-1">{t('medical_records_subtitle') || 'Manage your health information and medical history'}</p>
+                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <h1 className={`text-3xl md:text-4xl font-bold text-foreground ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('medical_records') || 'Medical Records'}</h1>
+                  <p className={`text-muted-foreground mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('medical_records_subtitle') || 'Manage your health information and medical history'}</p>
                 </div>
               </motion.div>
             </div>

@@ -102,6 +102,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const [minRating, setMinRating] = useState<number>(0);
   const [maxFee, setMaxFee] = useState<string>("");
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [tempSelectedDoctor, setTempSelectedDoctor] = useState<Doctor | null>(null); // Temporary selection before confirm
+  const [tempSelectedCenter, setTempSelectedCenter] = useState<Center | null>(null); // Temporary selection before confirm
   const [doctorCenters, setDoctorCenters] = useState<Center[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
@@ -1011,9 +1013,24 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
   // Step navigation handlers (updated for 4-step flow)
   const handleSpecialtySelect = async (method?: string) => {
-    const searchMethodToUse = method || searchMethod;
+    // Determine the search method to use
+    let searchMethodToUse = method || searchMethod;
+    
+    // For home visits, always use "doctors" search method
+    if (selectedLocation === "home") {
+      searchMethodToUse = "doctors";
+      if (!searchMethod) {
+        setSearchMethod("doctors");
+      }
+    }
+    
     if (selectedSpecialty && selectedLocation && searchMethodToUse) {
       console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod: searchMethodToUse });
+
+      // Ensure searchMethod state is set
+      if (searchMethodToUse !== searchMethod) {
+        setSearchMethod(searchMethodToUse);
+      }
 
       if (searchMethodToUse === "centers") {
         // Fetch centers that have doctors with this specialty
@@ -1023,12 +1040,27 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         await fetchDoctorsBySpecialty(selectedSpecialty, selectedLocation);
       }
 
+      // Clear any temporary selections when moving to step 2
+      setTempSelectedDoctor(null);
+      setTempSelectedCenter(null);
+      
       setCurrentStep(2);
     }
   };
 
-  const handleDoctorSelect = async (doctor: Doctor) => {
+  // Handle doctor selection - now only sets temporary selection
+  const handleDoctorSelect = (doctor: Doctor) => {
+    setTempSelectedDoctor(doctor);
+    setTempSelectedCenter(null); // Clear any temp center selection
+  };
+
+  // Confirm doctor selection and advance
+  const confirmDoctorSelection = async () => {
+    if (!tempSelectedDoctor) return;
+    
+    const doctor = tempSelectedDoctor;
     setSelectedDoctor(doctor);
+    setTempSelectedDoctor(null);
     setSelectedCenter(null); // Reset center selection
     setDoctorCenters([]); // Reset centers
     setSelectedDate(undefined);
@@ -1052,9 +1084,19 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
   };
 
-  // Handle center selection in "Find Centers" flow - moves to step 3 to show doctors
-  const handleCenterSelectForDoctors = async (center: Center) => {
+  // Handle center selection in "Find Centers" flow - now only sets temporary selection
+  const handleCenterSelectForDoctors = (center: Center) => {
+    setTempSelectedCenter(center);
+    setTempSelectedDoctor(null); // Clear any temp doctor selection
+  };
+
+  // Confirm center selection in "Find Centers" flow and advance
+  const confirmCenterSelectionForDoctors = async () => {
+    if (!tempSelectedCenter) return;
+    
+    const center = tempSelectedCenter;
     setSelectedCenter(center);
+    setTempSelectedCenter(null);
     setDoctors([]);
     setSelectedDoctor(null);
     setSelectedDate(undefined);
@@ -1070,9 +1112,18 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setCurrentStep(3);
   };
 
-  // Handle doctor selection in "Find Centers" flow - moves to step 4 (schedule)
-  const handleDoctorSelectFromCenter = async (doctor: Doctor) => {
+  // Handle doctor selection in "Find Centers" flow - now only sets temporary selection
+  const handleDoctorSelectFromCenter = (doctor: Doctor) => {
+    setTempSelectedDoctor(doctor);
+  };
+
+  // Confirm doctor selection in "Find Centers" flow and advance
+  const confirmDoctorSelectionFromCenter = async () => {
+    if (!tempSelectedDoctor) return;
+    
+    const doctor = tempSelectedDoctor;
     setSelectedDoctor(doctor);
+    setTempSelectedDoctor(null);
     setSelectedDate(undefined);
     setSelectedTime("");
     setAvailableSlots([]);
@@ -1091,8 +1142,18 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setCurrentStep(4);
   };
 
-  const handleCenterSelect = async (center: Center) => {
+  // Handle center selection in "Find Doctors" flow - now only sets temporary selection
+  const handleCenterSelect = (center: Center) => {
+    setTempSelectedCenter(center);
+  };
+
+  // Confirm center selection in "Find Doctors" flow and advance
+  const confirmCenterSelection = async () => {
+    if (!tempSelectedCenter) return;
+    
+    const center = tempSelectedCenter;
     setSelectedCenter(center);
+    setTempSelectedCenter(null);
     setSelectedDate(undefined);
     setSelectedTime("");
     setAvailableSlots([]);
@@ -1477,6 +1538,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setCenters([]);
     setDoctors([]);
     setSelectedDoctor(null);
+    setTempSelectedDoctor(null);
+    setTempSelectedCenter(null);
     setDoctorCenters([]);
     setSelectedCenter(null);
     setSelectedDate(undefined);
@@ -1557,8 +1620,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   </div>
                 )}
 
-                {/* Step Indicator */}
-                <div className="flex justify-center mb-8">
+                {/* Step Indicator with Back Button */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex-1"></div>
                   <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''} gap-0`}>
                     {(isLabMode ? [1, 2, 3] : [1, 2, 3, 4]).map((step, index, array) => (
                       <div key={step} className="flex items-center">
@@ -1577,6 +1641,45 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         )}
                       </div>
                     ))}
+                  </div>
+                  <div className="flex-1 flex justify-end">
+                    {currentStep > 1 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          // Clear temporary selections when going back
+                          setTempSelectedDoctor(null);
+                          setTempSelectedCenter(null);
+                          
+                          // Determine which step to go back to
+                          if (isLabMode) {
+                            // Lab mode has 3 steps
+                            if (currentStep === 2) {
+                              setCurrentStep(1);
+                            } else if (currentStep === 3) {
+                              setCurrentStep(2);
+                            }
+                          } else {
+                            // Doctor mode has 4 steps
+                            if (currentStep === 2) {
+                              setCurrentStep(1);
+                              // Reset search method when going back to step 1
+                              setSearchMethod("");
+                              setTempSearchMethod("");
+                            } else if (currentStep === 3) {
+                              setCurrentStep(2);
+                            } else if (currentStep === 4) {
+                              setCurrentStep(3);
+                            }
+                          }
+                        }}
+                        size="sm"
+                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                      >
+                        <ChevronLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {t('booking_back') || 'Back'}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -1757,7 +1860,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               (center.address || '').toLowerCase().includes(filterQuery);
                           })
                           .map((center) => (
-                            <Card key={center.id} className="transition-all duration-200 hover:shadow-2xl hover:scale-[1.01] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]">
+                            <Card 
+                              key={center.id} 
+                              className={`transition-all duration-200 hover:shadow-2xl hover:scale-[1.01] ${
+                                tempSelectedCenter?.id === center.id
+                                  ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                                  : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4]'
+                              }`}
+                            >
                               <CardContent className="p-3 sm:p-6">
                                 <div className="flex flex-col sm:flex-row items-start gap-4">
                                   <div className="flex-1 w-full">
@@ -1777,9 +1887,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       <Button
                                         size="default"
                                         onClick={() => handleCenterSelectForDoctors(center)}
-                                        className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                                        className={`font-semibold shadow-md hover:shadow-lg transition-all ${
+                                          tempSelectedCenter?.id === center.id
+                                            ? 'bg-gradient-to-r from-[#3da8b0] to-[#4DBCC4] text-white ring-4 ring-[#4DBCC4]'
+                                            : 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white'
+                                        }`}
                                       >
-                                        {t('booking_view_doctors')}
+                                        {tempSelectedCenter?.id === center.id 
+                                          ? (t('booking_selected') || 'Selected')
+                                          : (t('booking_select_center') || 'Select Center')
+                                        }
                                       </Button>
                                     </div>
                                   </div>
@@ -1799,12 +1916,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     )}
 
                     <Button
-                      variant="outline"
-                      onClick={() => setCurrentStep(1)}
-                      className="w-full border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold shadow-sm hover:shadow-md transition-all"
+                      onClick={confirmCenterSelectionForDoctors}
+                      disabled={!tempSelectedCenter}
+                      className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
+                      size="lg"
                     >
-                      <ChevronLeft className="w-5 h-5 mr-2" />
-                      {t('booking_back_to_search') || 'Back to Search Method'}
+                      {t('booking_confirm_center') || 'Confirm Center'}
                     </Button>
                   </div>
                 )}
@@ -1861,7 +1978,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             return textMatch && ratingMatch && feeMatch;
                           })
                           .map((doctor) => (
-                            <Card key={doctor.id} className="transition-all hover:shadow-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4]">
+                            <Card 
+                              key={doctor.id} 
+                              className={`transition-all hover:shadow-lg ${
+                                tempSelectedDoctor?.id === doctor.id
+                                  ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                                  : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4]'
+                              }`}
+                            >
                               <CardContent className="p-5 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-4">
                                   <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600">
@@ -1892,9 +2016,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       <Button
                                         size="sm"
                                         onClick={() => handleDoctorSelect(doctor)}
-                                        className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-semibold shadow-md"
+                                        className={`w-full font-semibold shadow-md ${
+                                          tempSelectedDoctor?.id === doctor.id
+                                            ? 'bg-gradient-to-r from-[#3da8b0] to-[#4DBCC4] text-white ring-2 ring-[#4DBCC4]'
+                                            : 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white'
+                                        }`}
                                       >
-                                        {t('booking_select_doctor')}
+                                        {tempSelectedDoctor?.id === doctor.id
+                                          ? (t('booking_selected') || 'Selected')
+                                          : (t('booking_select_doctor') || 'Select Doctor')
+                                        }
                                       </Button>
                                     </div>
                                   </div>
@@ -1910,12 +2041,13 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                       </div>
                     )}
 
-                    <Button variant="outline" onClick={() => {
-                      setCurrentStep(1);
-                      setSearchMethod("");
-                    }}>
-                      <ChevronLeft className="w-4 h-4 mr-2" />
-                      {t('booking_back_to_search') || 'Back to Search Method'}
+                    <Button
+                      onClick={confirmDoctorSelection}
+                      disabled={!tempSelectedDoctor}
+                      className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
+                      size="lg"
+                    >
+                      {t('booking_confirm_doctor') || 'Confirm Doctor'}
                     </Button>
                   </div>
                 )}
@@ -1937,15 +2069,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           </span>
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentStep(2)}
-                        size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
-                      >
-                        <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
-                        {t('booking_back') || 'Back to Centers'}
-                      </Button>
                     </div>
 
                     {/* Filters */}
@@ -1993,7 +2116,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             return textMatch && ratingMatch && feeMatch;
                           })
                           .map((doctor) => (
-                            <Card key={doctor.id} className="transition-all duration-200 hover:shadow-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.01] cursor-pointer group" onClick={() => handleDoctorSelectFromCenter(doctor)}>
+                            <Card 
+                              key={doctor.id} 
+                              className={`transition-all duration-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer group ${
+                                tempSelectedDoctor?.id === doctor.id
+                                  ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                                  : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4]'
+                              }`}
+                              onClick={() => handleDoctorSelectFromCenter(doctor)}
+                            >
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
                                 <div className="flex items-start gap-5">
                                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600 group-hover:ring-[#4DBCC4] transition-all">
@@ -2032,9 +2163,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                         e.stopPropagation();
                                         handleDoctorSelectFromCenter(doctor);
                                       }}
-                                      className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-bold shadow-md text-base py-3"
+                                      className={`w-full font-bold shadow-md text-base py-3 ${
+                                        tempSelectedDoctor?.id === doctor.id
+                                          ? 'bg-gradient-to-r from-[#3da8b0] to-[#4DBCC4] text-white ring-2 ring-[#4DBCC4]'
+                                          : 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white'
+                                      }`}
                                     >
-                                      {t('booking_select_doctor')}
+                                      {tempSelectedDoctor?.id === doctor.id
+                                        ? (t('booking_selected') || 'Selected')
+                                        : (t('booking_select_doctor') || 'Select Doctor')
+                                      }
                                     </Button>
                                   </div>
                                 </div>
@@ -2056,6 +2194,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         )}
                       </div>
                     )}
+
+                    <Button
+                      onClick={confirmDoctorSelectionFromCenter}
+                      disabled={!tempSelectedDoctor}
+                      className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
+                      size="lg"
+                    >
+                      {t('booking_confirm_doctor') || 'Confirm Doctor'}
+                    </Button>
                   </div>
                 )}
 
@@ -2076,15 +2223,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           </span>
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentStep(2)}
-                        size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
-                      >
-                        <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
-                        {t('booking_back') || 'Back to Doctors'}
-                      </Button>
                     </div>
 
                     {loading ? (
@@ -2098,7 +2236,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           doctorCenters.map((center) => (
                             <Card
                               key={center.id}
-                              className="transition-all duration-200 hover:shadow-xl cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4] hover:scale-[1.01] group"
+                              className={`transition-all duration-200 hover:shadow-xl cursor-pointer hover:scale-[1.01] group ${
+                                tempSelectedCenter?.id === center.id
+                                  ? 'ring-4 ring-[#4DBCC4] bg-gradient-to-br from-[#4DBCC4]/10 to-[#4DBCC4]/5 dark:from-[#4DBCC4]/20 dark:to-[#4DBCC4]/10 border-2 border-[#4DBCC4] shadow-lg'
+                                  : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#4DBCC4]'
+                              }`}
                               onClick={() => handleCenterSelect(center)}
                             >
                               <CardContent className="p-6 bg-white dark:bg-gray-800">
@@ -2134,9 +2276,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                         e.stopPropagation();
                                         handleCenterSelect(center);
                                       }}
-                                      className="w-full mt-3 bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white font-bold shadow-md text-base py-3"
+                                      className={`w-full mt-3 font-bold shadow-md text-base py-3 ${
+                                        tempSelectedCenter?.id === center.id
+                                          ? 'bg-gradient-to-r from-[#3da8b0] to-[#4DBCC4] text-white ring-2 ring-[#4DBCC4]'
+                                          : 'bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] text-white'
+                                      }`}
                                     >
-                                      {t('booking_select_center')}
+                                      {tempSelectedCenter?.id === center.id
+                                        ? (t('booking_selected') || 'Selected')
+                                        : (t('booking_select_center') || 'Select Center')
+                                      }
                                     </Button>
                                   </div>
                                 </div>
@@ -2158,6 +2307,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                         )}
                       </div>
                     )}
+
+                    <Button
+                      onClick={confirmCenterSelection}
+                      disabled={!tempSelectedCenter}
+                      className="w-full bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
+                      size="lg"
+                    >
+                      {t('booking_confirm_center') || 'Confirm Center'}
+                    </Button>
                   </div>
                 )}
 
@@ -2424,15 +2582,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                           }
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentStep(isLabMode ? 2 : 3)}
-                        size="default"
-                        className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold"
-                      >
-                        <ChevronLeft className="w-4 h-4 mr-2 text-gray-900 dark:text-gray-100" />
-                        {t('booking_back') || 'Back'}
-                      </Button>
                     </div>
 
                     {/* Show loading message if doctor working days not loaded yet */}

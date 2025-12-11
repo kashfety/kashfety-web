@@ -678,6 +678,9 @@ export const translations = {
     dd_patient_info: "Patient Information",
     dd_date: "Date",
     dd_time: "Time",
+    dd_day_view: "Day",
+    dd_week_view: "Week",
+    dd_view_details: "View Details",
     dd_type: "Type",
     dd_fee: "Consultation Fee",
     dd_phone: "Phone",
@@ -1678,6 +1681,7 @@ export const translations = {
 
     // Reschedule Modal
     reschedule_title: "Reschedule Appointment",
+    reschedule_with: "with",
     reschedule_current_appointment: "Current Appointment",
     reschedule_doctor_label: "Doctor",
     reschedule_date_tbd: "Date TBD",
@@ -1940,6 +1944,10 @@ export const translations = {
     profile_picture_no_image: "No profile picture uploaded",
     profile_picture_upload_hint: "Click to upload a new profile picture",
     profile_picture_supported_formats: "Supported formats: JPEG, PNG, WebP, GIF (Max 5MB)",
+    dp_picture_updated_title: "Profile Picture Updated!",
+    dp_picture_updated_desc: "Your profile picture has been uploaded successfully",
+    dp_profile_updated_title: "Profile Updated!",
+    dp_profile_updated_desc: "Your profile and consultation fee have been updated successfully",
 
     // Center Dashboard specific translations
     cd_center_name_arabic: "Center Name (Arabic)",
@@ -2118,6 +2126,28 @@ export const translations = {
     gender_male: "Male",
     gender_female: "Female",
     gender_other: "Other",
+    age: "Age",
+    
+    // Bulk Schedule Management
+    bulk_schedule_management: "Bulk Schedule Management",
+    select_test_types_bulk: "Select Test Types for Bulk Update",
+    bulk_schedule_desc: "Select multiple test types to apply the same schedule to all of them at once",
+    select_test_types: "Select Test Types",
+    selected_count: "Selected",
+    bulk_action_options: "Bulk Action Options",
+    all_day_every_day: "All Day, Every Day",
+    all_day_some_days: "All Day, Some Days",
+    select_days: "Select Days",
+    select_at_least_one_day: "Please select at least one day",
+    apply_to_selected: "Apply to {count} Test Types",
+    loading_schedule_config: "Loading schedule configuration...",
+    schedule_saved_success: "Schedule saved successfully",
+    failed_save_schedule_config: "Failed to save schedule configuration",
+    please_select_test_types_and_days: "Please select test types and days",
+    bulk_schedule_saved_success: "Bulk schedule saved successfully",
+    bulk_schedule_partial_success: "Bulk schedule partially saved",
+    failed_bulk_save_schedule: "Failed to save bulk schedule",
+    partial_success: "Partial Success",
   },
   ar: {
     // Navigation
@@ -2465,6 +2495,9 @@ export const translations = {
     dd_patient_info: "معلومات المريض",
     dd_date: "التاريخ",
     dd_time: "الوقت",
+    dd_day_view: "يوم",
+    dd_week_view: "أسبوع",
+    dd_view_details: "عرض التفاصيل",
     dd_type: "النوع",
     dd_fee: "رسوم الاستشارة",
     dd_phone: "الهاتف",
@@ -3523,7 +3556,8 @@ export const translations = {
     cd_default_email: "admin@center.com",
 
     // Reschedule Modal
-    reschedule_title: "إعادة جدولة الموعد",
+    reschedule_title: "تغيير الموعد",
+    reschedule_with: "مع",
     reschedule_current_appointment: "الموعد الحالي",
     reschedule_doctor_label: "الطبيب",
     reschedule_date_tbd: "التاريخ سيُحدد لاحقاً",
@@ -3559,7 +3593,7 @@ export const translations = {
     reschedule_error_default: "فشل في إعادة جدولة الموعد. يرجى المحاولة مرة أخرى.",
 
     // Lab-specific translations
-    reschedule_lab_title: "إعادة جدولة فحص المختبر",
+    reschedule_lab_title: "تغيير الموعد",
     cancel_lab_title: "إلغاء فحص المختبر",
     lab_booking_to_cancel: "فحص المختبر المراد إلغاؤه",
     lab_cancel_warning_title: "سياسة الإلغاء",
@@ -3792,6 +3826,10 @@ export const translations = {
     profile_picture_no_image: "لم يتم رفع صورة للملف الشخصي",
     profile_picture_upload_hint: "انقر لرفع صورة جديدة للملف الشخصي",
     profile_picture_supported_formats: "الصيغ المدعومة: JPEG, PNG, WebP, GIF (الحد الأقصى 5 ميجابايت)",
+    dp_picture_updated_title: "تم تحديث صورة الملف!",
+    dp_picture_updated_desc: "تم رفع صورة ملفك بنجاح",
+    dp_profile_updated_title: "تم تحديث الملف الشخصي!",
+    dp_profile_updated_desc: "تم تحديث ملفك ورسوم الاستشارة بنجاح",
 
     // Center Dashboard specific translations
     cd_center_name_arabic: "اسم المركز (بالعربية)",
@@ -3890,6 +3928,27 @@ export const translations = {
     general: "عام",
     failed_load_schedule_config: "فشل تحميل تكوين الجدول",
     please_select_test_type_first: "يرجى اختيار نوع تحليل أولاً",
+    
+    // Bulk Schedule Management (Arabic)
+    bulk_schedule_management: "إدارة الجدول الجماعي",
+    select_test_types_bulk: "اختر أنواع التحاليل للتحديث الجماعي",
+    bulk_schedule_desc: "اختر عدة أنواع تحاليل لتطبيق نفس الجدول عليها جميعاً في وقت واحد",
+    select_test_types: "اختر أنواع التحاليل",
+    selected_count: "محدد",
+    bulk_action_options: "خيارات الإجراء الجماعي",
+    all_day_every_day: "طوال اليوم، كل يوم",
+    all_day_some_days: "طوال اليوم، أيام محددة",
+    select_days: "اختر الأيام",
+    select_at_least_one_day: "يرجى اختيار يوم واحد على الأقل",
+    apply_to_selected: "تطبيق على {count} نوع تحليل",
+    loading_schedule_config: "جاري تحميل تكوين الجدول...",
+    schedule_saved_success: "تم حفظ الجدول بنجاح",
+    failed_save_schedule_config: "فشل حفظ تكوين الجدول",
+    please_select_test_types_and_days: "يرجى اختيار أنواع التحاليل والأيام",
+    bulk_schedule_saved_success: "تم حفظ الجدول الجماعي بنجاح",
+    bulk_schedule_partial_success: "تم حفظ الجدول الجماعي جزئياً",
+    failed_bulk_save_schedule: "فشل حفظ الجدول الجماعي",
+    partial_success: "نجاح جزئي",
   },
 } as const
 

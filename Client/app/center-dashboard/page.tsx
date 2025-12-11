@@ -833,17 +833,17 @@ function CenterAnalytics({
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header with Theme Toggle */}
-      <div className="relative p-6 rounded-2xl glass-effect">
-        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className="p-2 rounded-xl gradient-emerald animate-glow">
+      <div className="relative p-6 rounded-2xl glass-effect" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0">
               <BarChart2 className="h-5 w-5 text-white" />
             </div>
-            <div className={isRTL ? 'text-right' : 'text-left'}>
-              <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+              <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
                 {t('cd_analytics_demographics')}
               </h2>
-              <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className={`text-emerald-700/80 dark:text-emerald-400/80`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
                 {t('cd_center_performance_insights')}
               </p>
             </div>
@@ -852,75 +852,75 @@ function CenterAnalytics({
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-4">
-            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_revenue')}</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" dir="ltr">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Card className="border-0 shadow-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardContent className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_total_revenue')}</p>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>
                   {formatLocalizedNumber(totalRevenue, locale, { style: 'currency', currency: t('currency') })}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayRevenue, locale, { style: 'currency', currency: 'SYP' })}</span></p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-4">
-            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_total_bookings')}</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr">
+        <Card className="border-0 shadow-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardContent className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_total_bookings')}</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>
                   {formatLocalizedNumber(totalBookings, locale)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('today')}: <span dir="ltr">{formatLocalizedNumber(todayBookings, locale)}</span></p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-500" />
+              <Calendar className="h-8 w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-4">
-            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_completion_rate')}</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr">
+        <Card className="border-0 shadow-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardContent className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_completion_rate')}</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>
                   {formatLocalizedNumber(completionRate, locale)}%
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of')} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}><span dir="ltr">{formatLocalizedNumber(completedBookings, locale)}</span> {t('of')} <span dir="ltr">{formatLocalizedNumber(totalBookings, locale)}</span></p>
               </div>
-              <CheckCircle className="h-8 w-8 text-purple-500" />
+              <CheckCircle className="h-8 w-8 text-purple-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-4">
-            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_total_patients')}</p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" dir="ltr">
+        <Card className="border-0 shadow-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardContent className="p-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('dd_total_patients')}</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>
                   {formatLocalizedNumber(totalPatients, locale)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_unique_patients_served')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_unique_patients_served')}</p>
               </div>
-              <Users className="h-8 w-8 text-orange-500" />
+              <Users className="h-8 w-8 text-orange-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Monthly Trends Chart */}
-      <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-        <CardHeader>
-          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <TrendingUp className="h-5 w-5 text-emerald-600" />
+      <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+          <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+            <TrendingUp className="h-5 w-5 text-emerald-600 flex-shrink-0" />
             {t('cd_lab_test_trends_revenue')}
           </CardTitle>
-          <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_monthly_bookings_desc')}</CardDescription>
+          <CardDescription className="w-full" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_monthly_bookings_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -1010,10 +1010,10 @@ function CenterAnalytics({
       {/* Demographics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Age Distribution */}
-        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <User className="h-5 w-5 text-emerald-600" />
+        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+            <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+              <User className="h-5 w-5 text-emerald-600 flex-shrink-0" />
               {t('cd_age_distribution')}
             </CardTitle>
           </CardHeader>
@@ -1053,10 +1053,10 @@ function CenterAnalytics({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-                <div className="text-center">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="text-center" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
                   <User className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_age_data')}</p>
+                  <p className="text-sm" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_no_age_data')}</p>
                 </div>
               </div>
             )}
@@ -1064,10 +1064,10 @@ function CenterAnalytics({
         </Card>
 
         {/* Gender Distribution */}
-        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <Users className="h-5 w-5 text-emerald-600" />
+        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+            <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+              <Users className="h-5 w-5 text-emerald-600 flex-shrink-0" />
               {t('cd_gender_distribution')}
             </CardTitle>
           </CardHeader>
@@ -1142,9 +1142,9 @@ function CenterAnalytics({
                           className="w-4 h-4 rounded-full ring-2 ring-white dark:ring-gray-800 shadow-sm"
                           style={{ backgroundColor: entry.fill }}
                         ></div>
-                        <div className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <div className="text-sm font-semibold text-gray-900 dark:text-white">{entry.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-200 font-medium">
+                        <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{entry.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-200 font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                             <span dir="ltr">{formatLocalizedNumber(entry.value, locale)}</span>
                             <span className="mx-1 opacity-60">•</span>
                             <span dir="ltr">{formatLocalizedNumber(Number(percentage), locale)}%</span>
@@ -1156,11 +1156,11 @@ function CenterAnalytics({
                 </div>
               </div>
             ) : (
-              <div className="h-[280px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-                <div className="text-center">
+              <div className="h-[280px] flex items-center justify-center text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="text-center" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
                   <Users className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p className="text-base font-medium text-gray-600 dark:text-gray-200 mb-1 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_gender_data')}</p>
-                  <p className="text-sm text-gray-400 dark:text-gray-500 text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_data_will_appear_patients')}</p>
+                  <p className="text-base font-medium text-gray-600 dark:text-gray-200 mb-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_no_gender_data')}</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_data_will_appear_patients')}</p>
                 </div>
               </div>
             )}
@@ -1168,10 +1168,10 @@ function CenterAnalytics({
         </Card>
 
         {/* Most Popular Tests */}
-        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <TestTube className="h-5 w-5 text-emerald-600" />
+        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+            <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+              <TestTube className="h-5 w-5 text-emerald-600 flex-shrink-0" />
               {t('cd_popular_tests')}
             </CardTitle>
           </CardHeader>
@@ -1185,17 +1185,17 @@ function CenterAnalytics({
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: test.fill }}
                       ></div>
-                      <span className={`font-medium text-gray-900 dark:text-white text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{test.name}</span>
+                      <span className="font-medium text-gray-900 dark:text-white text-sm flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{test.name}</span>
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-200 font-medium" dir="ltr">{formatLocalizedNumber(test.value, locale)}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-                <div className="text-center">
+              <div className="h-[200px] flex items-center justify-center text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="text-center" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
                   <TestTube className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm text-center" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_no_test_data')}</p>
+                  <p className="text-sm" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_no_test_data')}</p>
                 </div>
               </div>
             )}
@@ -1645,18 +1645,18 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {selectedServices.length === 0 ? (
-        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
+        <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardContent className="pt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
               <TestTube className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
                   {t('no_services_for_schedule')}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-200 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                <p className="text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>
                   {t('no_services_schedule_desc')}
                 </p>
-                <div className="mt-4">
+                <div className="mt-4" dir={isRTL ? 'rtl' : 'ltr'}>
                   <Button
                     onClick={() => {
                       toast({
@@ -1664,9 +1664,10 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         description: t('enable_services_first')
                       });
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className={`bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
-                    <TestTube className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    <TestTube className="w-4 h-4" />
                     <span dir={isRTL ? 'rtl' : 'ltr'}>{t('go_to_services')}</span>
                   </Button>
                 </div>
@@ -1677,45 +1678,49 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       ) : (
         <>
           {/* Header */}
-          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <Clock className="h-5 w-5" />
-              <h2 className={`text-xl font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_schedule_management')}</h2>
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Clock className="h-5 w-5 flex-shrink-0" />
+              <h2 className="text-xl font-semibold flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('center_schedule_management')}</h2>
             </div>
-            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
               <Button
                 onClick={() => selectedTestType && loadScheduleForType(selectedTestType)}
                 variant="outline"
                 size="sm"
                 disabled={loading || !selectedTestType}
+                className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <RotateCcw className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                <RotateCcw className="h-4 w-4" />
                 <span dir={isRTL ? 'rtl' : 'ltr'}>{t('refresh')}</span>
               </Button>
               <Button
                 onClick={saveSchedule}
                 disabled={saving || !selectedTestType}
                 size="sm"
+                className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                <Save className="h-4 w-4" />
                 <span dir={isRTL ? 'rtl' : 'ltr'}>{saving ? (t('saving')) : (t('save_schedule'))}</span>
               </Button>
             </div>
           </div>
 
           {/* Test Type Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <TestTube className="h-5 w-5" />
+          <Card dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+              <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <TestTube className="h-5 w-5 flex-shrink-0" />
                 {t('test_type_selection')}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('select_test_type_manage')}</Label>
-                  <p className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type_selection_desc')}</p>
+            <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                  <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('select_test_type_manage')}</Label>
+                  <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('test_type_selection_desc')}</p>
                 </div>
 
                 <Select value={selectedTestType} onValueChange={handleTypeSelection} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1748,10 +1753,10 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 </Select>
 
                 {selectedTestType && (
-                  <div className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <CheckCircle className="h-5 w-5 text-blue-500" />
-                      <span className={`font-medium text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className="p-4 border border-blue-200 bg-blue-50 dark:bg-blue-900/20 rounded-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                      <span className="font-medium text-blue-700 dark:text-blue-300 flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                         {t('selected')}: {locale === 'ar' && selectedServices.find(t => t.id === selectedTestType)?.name_ar ? selectedServices.find(t => t.id === selectedTestType)?.name_ar : selectedServices.find(t => t.id === selectedTestType)?.name}
                       </span>
                     </div>
@@ -1762,31 +1767,31 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           </Card>
 
           {/* Bulk Selection Card */}
-          <Card className="border-2 border-emerald-200 dark:border-emerald-800">
-            <CardHeader>
-              <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <Grid3X3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <Card className="border-2 border-emerald-200 dark:border-emerald-800" dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+              <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                <Grid3X3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 {t('bulk_schedule_management') || 'Bulk Schedule Management'}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label className={`text-base font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                  <Label className="text-base font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                     {t('select_test_types_bulk') || 'Select Test Types for Bulk Update'}
                   </Label>
-                  <p className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <p className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                     {t('bulk_schedule_desc') || 'Select multiple test types to apply the same schedule to all of them at once'}
                   </p>
                 </div>
 
                 {/* Bulk Selection Checkboxes */}
-                <div className="space-y-3">
-                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <Label className="text-sm font-medium flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                       {t('select_test_types') || 'Select Test Types'}
                     </Label>
-                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -1795,6 +1800,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                           setBulkSelectedTypes(allIds);
                           setShowBulkActions(allIds.size > 0);
                         }}
+                        className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       >
                         {t('select_all') || 'Select All'}
                       </Button>
@@ -1805,6 +1812,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                           setBulkSelectedTypes(new Set());
                           setShowBulkActions(false);
                         }}
+                        className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       >
                         {t('deselect_all') || 'Deselect All'}
                       </Button>
@@ -1840,32 +1849,33 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                 </div>
 
                 {bulkSelectedTypes.size > 0 && (
-                  <div className="space-y-4 p-4 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/20">
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                      <span className={`font-medium text-emerald-700 dark:text-emerald-300 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className="space-y-4 p-4 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/20" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                      <span className="font-medium text-emerald-700 dark:text-emerald-300 flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                         {t('selected_count') || 'Selected'}: {formatLocalizedNumber(bulkSelectedTypes.size, locale)} {t('test_types') || 'test types'}
                       </span>
                     </div>
 
                     {/* Bulk Action Buttons */}
-                    <div className="space-y-3">
-                      <div>
-                        <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                        <Label className="text-sm font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                           {t('bulk_action_options') || 'Bulk Action Options'}
                         </Label>
                       </div>
                       
-                      <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Button
                           onClick={async () => {
                             // All day, every day
                             await handleBulkSave(Array.from(bulkSelectedTypes), DAYS_OF_WEEK.map(d => d.value), '09:00', '17:00');
                           }}
                           disabled={bulkSaving}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          className={`bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
-                          <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          <Calendar className="h-4 w-4" />
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('all_day_every_day') || 'All Day, Every Day'}</span>
                         </Button>
 
@@ -1879,20 +1889,21 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             setShowDaySelection(true);
                           }}
                           variant="outline"
-                          className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20"
+                          className={`border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-900/20 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
-                          <Clock className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          <Clock className="h-4 w-4" />
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('all_day_some_days') || 'All Day, Some Days'}</span>
                         </Button>
                       </div>
 
                       {/* Day Selection for "Some Days" */}
                       {showDaySelection && (
-                        <div className="space-y-3 p-4 border rounded-lg bg-white dark:bg-gray-800">
-                          <Label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div className="space-y-3 p-4 border rounded-lg bg-white dark:bg-gray-800" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <Label className="text-sm font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                             {t('select_days') || 'Select Days'}
                           </Label>
-                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {DAYS_OF_WEEK.map((day) => {
                               const isDaySelected = bulkSelectedDays.has(day.value);
                               return (
@@ -1912,13 +1923,14 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                     });
                                   }}
                                   className={isDaySelected ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   {t(day.labelKey) || day.label}
                                 </Button>
                               );
                             })}
                           </div>
-                          <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <Button
                               onClick={async () => {
                                 if (bulkSelectedDays.size === 0) {
@@ -1932,9 +1944,10 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 await handleBulkSave(Array.from(bulkSelectedTypes), Array.from(bulkSelectedDays), '09:00', '17:00');
                               }}
                               disabled={bulkSaving || bulkSelectedDays.size === 0}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                              className={`bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
-                              <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              <Save className="h-4 w-4" />
                               <span dir={isRTL ? 'rtl' : 'ltr'}>
                                 {bulkSaving ? (t('saving') || 'Saving...') : (t('apply_to_selected')?.replace('{count}', formatLocalizedNumber(bulkSelectedTypes.size, locale)) || `Apply to ${formatLocalizedNumber(bulkSelectedTypes.size, locale)} Test Types`)}
                               </span>
@@ -1946,6 +1959,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                               }}
                               variant="outline"
                               size="sm"
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
                               {t('cancel') || 'Cancel'}
                             </Button>
@@ -1969,23 +1983,23 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               )}
 
               {/* Weekly Schedule */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <Calendar className="h-5 w-5" />
+              <Card dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+                  <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                    <Calendar className="h-5 w-5 flex-shrink-0" />
                     {(t('weekly_schedule_for'))} {selectedServices.find((type: any) => type.id === selectedTestType)?.name}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
                   {DAYS_OF_WEEK.map(day => {
                     const config = getDayConfig(day.value);
                     const slots = generateSlotsForDay(day.value);
 
                     return (
-                      <div key={day.value} className="space-y-4 p-4 border rounded-lg">
+                      <div key={day.value} className="space-y-4 p-4 border rounded-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                         {/* Day Header */}
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <h3 className={`text-lg font-medium ${isRTL ? 'text-right' : 'text-left'}`}>{t(day.labelKey) || day.label}</h3>
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <h3 className="text-lg font-medium flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t(day.labelKey) || day.label}</h3>
                           <Switch
                             checked={config.isAvailable || false}
                             onCheckedChange={(checked) => updateDayConfigWithPersistence(day.value, 'isAvailable', checked)}
@@ -1995,31 +2009,33 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         </div>
 
                         {config.isAvailable && (
-                          <div className={`space-y-4 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                          <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                             {/* Time Range */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('start_time')}</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('start_time')}</Label>
                                 <Input
                                   type="time"
                                   value={config.startTime || '09:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'startTime', e.target.value)}
                                   disabled={loading}
-                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  dir="ltr"
+                                  className="w-full"
                                 />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('end_time')}</Label>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('end_time')}</Label>
                                 <Input
                                   type="time"
                                   value={config.endTime || '17:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'endTime', e.target.value)}
                                   disabled={loading}
-                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  dir="ltr"
+                                  className="w-full"
                                 />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('slot_duration_minutes')}</Label>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('slot_duration_minutes')}</Label>
                                 <Input
                                   type="number"
                                   min="15"
@@ -2029,45 +2045,47 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'duration', parseInt(e.target.value))}
                                   disabled={loading}
                                   dir="ltr"
-                                  className={isRTL ? 'text-right' : 'text-left'}
+                                  className="w-full"
                                   placeholder={formatLocalizedNumber(30, locale)}
                                 />
                               </div>
                             </div>
 
                             {/* Break Time */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_start_optional')}</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('break_start_optional')}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakStart || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakStart', e.target.value)}
                                   disabled={loading}
-                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  dir="ltr"
+                                  className="w-full"
                                 />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('break_end_optional')}</Label>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('break_end_optional')}</Label>
                                 <Input
                                   type="time"
                                   value={config.breakEnd || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakEnd', e.target.value)}
                                   disabled={loading}
-                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  dir="ltr"
+                                  className="w-full"
                                 />
                               </div>
                             </div>
 
                             {/* Generated Slots Preview */}
                             {slots.length > 0 && (
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <Label className="text-sm font-medium text-gray-600 dark:text-gray-200 block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                   {(t('generated_time_slots_total')).replace('{count}', formatLocalizedNumber(slots.length, locale))}
                                 </Label>
-                                <div className="mt-2 flex flex-wrap gap-2">
+                                <div className={`mt-2 flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   {slots.slice(0, 8).map((slot, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <Badge key={index} variant="outline" className="text-xs" dir="ltr">
                                       {formatLocalizedTime(slot.time, locale)}
                                     </Badge>
                                   ))}
@@ -2081,8 +2099,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             )}
 
                             {/* Copy from other days */}
-                            <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                              <span className={`text-sm text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('copy_from')}  </span>
+                            <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <span className="text-sm text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('copy_from')}  </span>
                               {DAYS_OF_WEEK.filter(d => d.value !== day.value && getDayConfig(d.value).isAvailable).map(sourceDay => (
                                 <Button
                                   key={sourceDay.value}
@@ -2091,6 +2109,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                   onClick={() => copySchedule(sourceDay.value, day.value)}
                                   className="text-xs"
                                   disabled={loading}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   {t(sourceDay.labelKey) || sourceDay.label}
                                 </Button>
@@ -2105,26 +2124,26 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
               </Card>
 
               {/* Schedule Summary */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CheckCircle className="h-5 w-5" />
+              <Card dir={isRTL ? 'rtl' : 'ltr'}>
+                <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+                  <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                    <CheckCircle className="h-5 w-5 flex-shrink-0" />
                     {t('schedule_summary')}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('working_days')}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days')}</p>
+                <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-200 block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('working_days')}</Label>
+                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}><span dir="ltr">{formatLocalizedNumber(Object.values(scheduleConfig).filter(config => config.isAvailable).length, locale)}</span> {t('days')}</p>
                     </div>
-                    <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('total_weekly_slots')}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots')}</p>
+                    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-200 block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('total_weekly_slots')}</Label>
+                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}><span dir="ltr">{formatLocalizedNumber(DAYS_OF_WEEK.reduce((total, day) => total + generateSlotsForDay(day.value).length, 0), locale)}</span> {t('slots')}</p>
                     </div>
-                    <div>
-                      <Label className={`text-sm font-medium text-gray-600 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('test_type')}</Label>
-                      <p className={`text-lg font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
+                    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-200 block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('test_type')}</Label>
+                      <p className="text-lg font-semibold" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{selectedServices.find((type: any) => type.id === selectedTestType)?.name}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -3479,37 +3498,39 @@ export default function CenterDashboardPage() {
 
               {/* Appointments Tab */}
               <TabsContent value="appointments" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_appointment_management')}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_manage_appointments_desc')}</p>
+                <div className="relative p-6 rounded-2xl glass-effect" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0">
+                      <Calendar className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_appointment_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_manage_appointments_desc')}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Today's Appointments */}
                 <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <CardHeader>
-                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+                    <CardTitle className="text-2xl font-semibold leading-none tracking-tight w-full" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                       {t('cd_upcoming_appointments')}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                  <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                       {todayStats?.appointments?.length > 0 ? todayStats.appointments.map((appointment: any, index: number) => (
                         <div key={index} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 space-y-3 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800" dir={isRTL ? 'rtl' : 'ltr'}>
-                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <div className={`w-3 h-3 rounded-full ${appointment.status === 'completed' ? 'bg-green-500' :
+                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className={`flex items-center gap-4 flex-1 min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${appointment.status === 'completed' ? 'bg-green-500' :
                                 appointment.status === 'confirmed' ? 'bg-blue-500' :
                                   appointment.status === 'cancelled' ? 'bg-red-500' :
                                     'bg-yellow-500'
                                 }`}></div>
-                              <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <p className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
-                                <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right space-x-reverse' : 'text-left'}`}>
+                              <div className="flex-1 min-w-0" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getLocalizedNameUtil(appointment, locale, 'patient_name')}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                   <span>{getLocalizedNameUtil(appointment, locale, 'test_type_name')}</span>
                                   <span className={isRTL ? 'mr-1' : 'ml-1'}>•</span>
                                   <span dir="ltr" className="inline-block">
@@ -3520,11 +3541,11 @@ export default function CenterDashboardPage() {
                                 </p>
                               </div>
                             </div>
-                            <Badge className={`px-3 py-1 ${appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
+                            <Badge className={`px-3 py-1 flex-shrink-0 ${appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 border-green-300 dark:border-green-700' :
                               appointment.status === 'confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300 dark:border-blue-700' :
                                 appointment.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300 dark:border-red-700' :
                                   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700'
-                              }`}>
+                              }`} dir={isRTL ? 'rtl' : 'ltr'}>
                               {appointment.status === 'completed' ? (t('appointments_status_completed')) :
                                 appointment.status === 'confirmed' ? (t('appointments_status_confirmed')) :
                                   appointment.status === 'cancelled' ? (t('appointments_status_cancelled')) :
@@ -3534,7 +3555,7 @@ export default function CenterDashboardPage() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className={`flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {appointment.status === 'scheduled' && (
                               <>
                                 <Button
@@ -3542,6 +3563,7 @@ export default function CenterDashboardPage() {
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
                                   className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                   <span>{t('cd_confirm')}</span>
@@ -3551,6 +3573,7 @@ export default function CenterDashboardPage() {
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
                                   className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <XCircle className="w-4 h-4" />
                                   <span>{t('cd_cancel')}</span>
@@ -3564,6 +3587,7 @@ export default function CenterDashboardPage() {
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
                                   className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                   <span>{t('cd_complete')}</span>
@@ -3573,6 +3597,7 @@ export default function CenterDashboardPage() {
                                   size="sm"
                                   onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
                                   className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <XCircle className="w-4 h-4" />
                                   <span>{t('cancel')}</span>
@@ -3585,6 +3610,7 @@ export default function CenterDashboardPage() {
                                 size="sm"
                                 onClick={() => handleUploadResult(appointment)}
                                 className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
                                 <Upload className="w-4 h-4" />
                                 <span>{t('cd_upload_result')}</span>
@@ -3595,6 +3621,7 @@ export default function CenterDashboardPage() {
                               size="sm"
                               onClick={() => handleViewPatient(appointment.patient_id, appointment.patient_name)}
                               className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`}
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
                               <User className="w-4 h-4" />
                               <span>{t('cd_view_patient')}</span>
@@ -3602,10 +3629,10 @@ export default function CenterDashboardPage() {
                           </div>
                         </div>
                       )) : (
-                        <div className="text-center py-8">
+                        <div className="text-center py-8" dir={isRTL ? 'rtl' : 'ltr'}>
                           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                          <p className="text-gray-500 dark:text-gray-400 text-center">{t('cd_no_appointments_today')}</p>
-                          <p className="text-sm text-gray-400 mt-1 text-center">{t('cd_appointments_will_appear')}</p>
+                          <p className="text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_no_appointments_today')}</p>
+                          <p className="text-sm text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: 'center' }}>{t('cd_appointments_will_appear')}</p>
                         </div>
                       )}
                     </div>
@@ -3614,7 +3641,7 @@ export default function CenterDashboardPage() {
               </TabsContent>
 
               {/* Schedule Calendar Tab */}
-              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full">
+              <TabsContent value="schedule-calendar" className="h-full w-full max-w-full" dir={isRTL ? 'rtl' : 'ltr'}>
                 <DoctorScheduleCalendar
                   appointments={allAppointments || []}
                   onAppointmentClick={(appointment: any) => {
@@ -3659,12 +3686,14 @@ export default function CenterDashboardPage() {
 
               {/* Schedule Tab */}
               <TabsContent value="schedule" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                      <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_schedule_management')}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_operating_hours')}</p>
+                <div className="relative p-6 rounded-2xl glass-effect" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0">
+                      <Clock className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_schedule_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_configure_operating_hours')}</p>
                     </div>
                   </div>
                 </div>

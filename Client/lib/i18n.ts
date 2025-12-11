@@ -2140,6 +2140,14 @@ export const translations = {
     select_days: "Select Days",
     select_at_least_one_day: "Please select at least one day",
     apply_to_selected: "Apply to {count} Test Types",
+    loading_schedule_config: "Loading schedule configuration...",
+    schedule_saved_success: "Schedule saved successfully",
+    failed_save_schedule_config: "Failed to save schedule configuration",
+    please_select_test_types_and_days: "Please select test types and days",
+    bulk_schedule_saved_success: "Bulk schedule saved successfully",
+    bulk_schedule_partial_success: "Bulk schedule partially saved",
+    failed_bulk_save_schedule: "Failed to save bulk schedule",
+    partial_success: "Partial Success",
   },
   ar: {
     // Navigation
@@ -3933,6 +3941,14 @@ export const translations = {
     select_days: "اختر الأيام",
     select_at_least_one_day: "يرجى اختيار يوم واحد على الأقل",
     apply_to_selected: "تطبيق على {count} نوع تحليل",
+    loading_schedule_config: "جاري تحميل تكوين الجدول...",
+    schedule_saved_success: "تم حفظ الجدول بنجاح",
+    failed_save_schedule_config: "فشل حفظ تكوين الجدول",
+    please_select_test_types_and_days: "يرجى اختيار أنواع التحاليل والأيام",
+    bulk_schedule_saved_success: "تم حفظ الجدول الجماعي بنجاح",
+    bulk_schedule_partial_success: "تم حفظ الجدول الجماعي جزئياً",
+    failed_bulk_save_schedule: "فشل حفظ الجدول الجماعي",
+    partial_success: "نجاح جزئي",
   },
 } as const
 

@@ -34,7 +34,7 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                 >
                     <DialogHeader
                         dir={isRTL ? 'rtl' : 'ltr'}
-                        className={isRTL ? 'items-end' : 'items-start'}
+                        className={`${isRTL ? 'items-end' : 'items-start'} !text-center sm:!text-left`}
                     >
                         <DialogTitle
                             className="text-2xl font-bold"

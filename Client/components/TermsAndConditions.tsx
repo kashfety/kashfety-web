@@ -29,36 +29,41 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
                 dir={isRTL ? 'rtl' : 'ltr'}
                 style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
             >
-                <DialogHeader
+                <div
+                    className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}
                     dir={isRTL ? 'rtl' : 'ltr'}
-                    className={isRTL ? '!text-right !sm:text-right items-end [&>*]:!text-right' : '!text-left !sm:text-left items-start [&>*]:!text-left'}
                     style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
                 >
-                    <DialogTitle
-                        className={`text-2xl font-bold ${isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}`}
+                    <DialogHeader
                         dir={isRTL ? 'rtl' : 'ltr'}
+                        className={isRTL ? '!text-right !sm:text-right items-end [&>*]:!text-right' : '!text-left !sm:text-left items-start [&>*]:!text-left'}
                         style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
                     >
-                        {t('terms_and_conditions') || 'Terms & Conditions'}
-                    </DialogTitle>
-                    <DialogDescription
-                        className={isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}
+                        <DialogTitle
+                            className={`text-2xl font-bold ${isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}`}
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                            style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
+                        >
+                            {t('terms_and_conditions') || 'Terms & Conditions'}
+                        </DialogTitle>
+                        <DialogDescription
+                            className={isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                            style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
+                        >
+                            {lastUpdatedText}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea
+                        className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`}
                         dir={isRTL ? 'rtl' : 'ltr'}
-                        style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
+                        style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
                     >
-                        {lastUpdatedText}
-                    </DialogDescription>
-                </DialogHeader>
-                <ScrollArea
-                    className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`}
-                    dir={isRTL ? 'rtl' : 'ltr'}
-                    style={isRTL ? { direction: 'rtl' } : { direction: 'ltr' }}
-                >
-                    <div
-                        className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`}
-                        dir={isRTL ? 'rtl' : 'ltr'}
-                        style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
-                    >
+                        <div
+                            className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                            style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
+                        >
                         {locale === 'ar' ? (
                             <>
                                 <section
@@ -602,6 +607,7 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
                         )}
                     </div>
                 </ScrollArea>
+                </div>
             </DialogContent>
         </Dialog>
     )

@@ -505,12 +505,12 @@ function CenterPatients({
       </div>
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-          <CardTitle className={`${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className={`flex flex-col ${isRTL ? 'items-end text-right' : 'items-start text-left'} space-y-1.5 p-6`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <CardTitle className={`text-2xl font-semibold leading-none tracking-tight ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             {t('cd_patient_records')}
           </CardTitle>
         </CardHeader>
-        <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
             {patients?.length > 0 ? patients.map((patient: any) => (
               <div key={patient.id} className={`flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -518,8 +518,8 @@ function CenterPatients({
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-white" />
                   </div>
-                  <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
+                  <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getPatientDisplayName(patient)}</p>
                     <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                       {patient.age ? <><span>{t('age')}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
                       {patient.age && patient.last_visit ? ' • ' : ''}

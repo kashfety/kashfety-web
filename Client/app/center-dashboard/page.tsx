@@ -4237,23 +4237,23 @@ export default function CenterDashboardPage() {
 
                 {/* Current Profile Overview */}
                 {centerProfile && (
-                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-                    <CardHeader>
-                      <CardTitle className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <Building2 className="w-5 h-5" />
-                          <span dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_current_profile')}</span>
+                  <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+                      <CardTitle className={`flex items-center justify-between w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <Building2 className="w-5 h-5 flex-shrink-0" />
+                          <span dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_current_profile')}</span>
                         </div>
                         {centerProfile && (
-                          <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {centerProfile.name && centerProfile.email && centerProfile.phone ? (
-                              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                <CheckCircle className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                              <Badge variant="secondary" className={`bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <CheckCircle className="w-3 h-3" />
                                 {t('complete')}
                               </Badge>
                             ) : (
-                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                <AlertCircle className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                              <Badge variant="secondary" className={`bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <AlertCircle className="w-3 h-3" />
                                 {t('incomplete')}
                               </Badge>
                             )}
@@ -4261,7 +4261,7 @@ export default function CenterDashboardPage() {
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
                       {(() => {
                         const localizedName = getProfileField('name');
                         const displayName = localizedName || centerProfile.name || t('cd_no_name_set');
@@ -4275,9 +4275,9 @@ export default function CenterDashboardPage() {
                         const websiteValue = getProfileField('website') || centerProfile.website || '';
 
                         return (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                                 {initials ? (
                                   <span className="text-white font-medium text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
                                     {initials}
@@ -4286,31 +4286,31 @@ export default function CenterDashboardPage() {
                                   <Building2 className="w-5 h-5 text-white" />
                                 )}
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'}>
-                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{displayName}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400" dir="ltr">{centerProfile.email || t('cd_no_email_set')}</p>
+                              <div className="flex-1 min-w-0" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{displayName}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>{centerProfile.email || t('cd_no_email_set')}</p>
                               </div>
                             </div>
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <Phone className="w-3 h-3" />
-                                {t('phone')}
+                            <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <Phone className="w-3 h-3 flex-shrink-0" />
+                                <span style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('phone')}</span>
                               </p>
-                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{centerProfile.phone || t('cd_not_provided')}</p>
+                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{centerProfile.phone || t('cd_not_provided')}</p>
                             </div>
-                            <div className={isRTL ? 'text-right' : 'text-left'}>
-                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <Building2 className="w-3 h-3" />
-                                {t('address')}
+                            <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                              <p className={`text-sm text-gray-500 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <Building2 className="w-3 h-3 flex-shrink-0" />
+                                <span style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('address')}</span>
                               </p>
-                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>{displayAddress}</p>
+                              <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{displayAddress}</p>
                             </div>
                             {(websiteValue || localizedDescription) && (
                               <>
                                 {websiteValue && (
-                                  <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('website')}</p>
-                                    <p className="font-medium text-blue-600 hover:text-blue-800" dir="ltr">
+                                  <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                    <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('website')}</p>
+                                    <p className="font-medium text-blue-600 hover:text-blue-800" dir="ltr" style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                       <a href={websiteValue} target="_blank" rel="noopener noreferrer">
                                         {websiteValue}
                                       </a>
@@ -4318,9 +4318,9 @@ export default function CenterDashboardPage() {
                                   </div>
                                 )}
                                 {localizedDescription && (
-                                  <div className={`col-span-full ${isRTL ? 'text-right' : 'text-left'}`}>
-                                    <p className={`text-sm text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}>{t('description')}</p>
-                                    <p className={`font-medium ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className="col-span-full" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                    <p className="text-sm text-gray-500" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('description')}</p>
+                                    <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                       {localizedDescription}
                                     </p>
                                   </div>
@@ -4334,118 +4334,120 @@ export default function CenterDashboardPage() {
                   </Card>
                 )}
 
-                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-                  <CardHeader>
-                    <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                      <Edit className="w-5 h-5" />
+                <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+                    <CardTitle className={`flex items-center gap-2 w-full ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <Edit className="w-5 h-5 flex-shrink-0" />
                       {t('center_profile')}
                     </CardTitle>
-                    <CardDescription className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardDescription className="w-full" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                       {t('cd_update_profile_desc')}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerName" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('center_name')} *</Label>
+                  <CardContent className="space-y-6 p-6 pt-0" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="centerName" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('center_name')} *</Label>
                           <Input
                             id="centerName"
                             placeholder={centerProfile?.name ? `${t('current_prefix')} ${centerProfile.name}` : (t('enter_center_name'))}
                             value={profileForm.name}
                             onChange={(e) => updateProfileForm('name', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_appears_on')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_name_appears_on')}</p>
                         </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="centerNameAr" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_center_name_arabic')}</Label>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="centerNameAr" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_center_name_arabic')}</Label>
                           <Input
                             id="centerNameAr"
                             placeholder={centerProfile?.name_ar ? `${t('current_prefix')} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
                             value={profileForm.name_ar}
                             onChange={(e) => updateProfileForm('name_ar', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             dir="rtl"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_name_arabic_help')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_name_arabic_help')}</p>
                         </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="email" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('email')} *</Label>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="email" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('email')} *</Label>
                           <Input
                             id="email"
                             type="email"
                             placeholder={centerProfile?.email ? `${t('current_prefix')} ${centerProfile.email}` : (user?.email ? `${t('current_prefix')} ${user.email}` : (t('enter_email')))}
                             value={profileForm.email}
                             onChange={(e) => updateProfileForm('email', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             required
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_primary_contact_email')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_primary_contact_email')}</p>
                         </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="phone" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone')}</Label>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="phone" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('phone')}</Label>
                           <Input
                             id="phone"
                             placeholder={centerProfile?.phone ? `${t('current_prefix')} ${centerProfile.phone}` : (t('enter_phone'))}
                             value={profileForm.phone}
                             onChange={(e) => updateProfileForm('phone', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_contact_number_appointments')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_contact_number_appointments')}</p>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="address" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('address')}</Label>
+                      <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="address" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('address')}</Label>
                           <Input
                             id="address"
                             placeholder={centerProfile?.address ? `${t('current_prefix')} ${centerProfile.address}` : (t('enter_address'))}
                             value={profileForm.address}
                             onChange={(e) => updateProfileForm('address', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_physical_location')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_physical_location')}</p>
                         </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="website" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('website')}</Label>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="website" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('website')}</Label>
                           <Input
                             id="website"
                             placeholder={centerProfile?.website ? `${t('current_prefix')} ${centerProfile.website}` : (t('enter_website'))}
                             value={profileForm.website}
                             onChange={(e) => updateProfileForm('website', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 w-full"
                             dir="ltr"
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_optional_website')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_optional_website')}</p>
                         </div>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
-                          <Label htmlFor="description" className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>{t('description')}</Label>
+                        <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                          <Label htmlFor="description" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('description')}</Label>
                           <textarea
                             id="description"
                             placeholder={centerProfile?.description ? `${t('current_prefix')} ${centerProfile.description}` : (t('enter_description'))}
                             value={profileForm.description}
                             onChange={(e) => updateProfileForm('description', e.target.value)}
-                            className={`mt-1 w-full p-3 border rounded-lg resize-none ${isRTL ? 'text-right' : 'text-left'}`}
+                            className="mt-1 w-full p-3 border rounded-lg resize-none"
                             rows={3}
                             dir={isRTL ? 'rtl' : 'ltr'}
+                            style={{ textAlign: isRTL ? 'right' : 'left' }}
                           />
-                          <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_brief_description')}</p>
+                          <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_brief_description')}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="border-t pt-6">
-                      <div className={`flex gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="border-t pt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Button
                           onClick={saveProfile}
                           className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           disabled={profileSaving}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <Save className="w-4 h-4" />
                           {profileSaving ? (t('updating_profile')) : (t('save_profile'))}
@@ -4466,6 +4468,7 @@ export default function CenterDashboardPage() {
                               });
                             }
                           }}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <RotateCcw className="w-4 h-4" />
                           {t('reset_form')}
@@ -4474,6 +4477,7 @@ export default function CenterDashboardPage() {
                           variant="outline"
                           className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                           onClick={() => setActiveTab('services')}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <TestTube className="w-4 h-4" />
                           {t('manage_services')}

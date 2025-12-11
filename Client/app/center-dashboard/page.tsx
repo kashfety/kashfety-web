@@ -488,16 +488,16 @@ function CenterPatients({
 
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="relative p-6 rounded-2xl glass-effect">
-        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="p-2 rounded-xl gradient-emerald animate-glow">
+      <div className="relative p-6 rounded-2xl glass-effect" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0">
             <Users className="h-5 w-5 text-white" />
           </div>
-          <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-            <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+            <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
               {t('cd_patient_management')}
             </h2>
-            <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <p className={`text-emerald-700/80 dark:text-emerald-400/80`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
               {t('cd_view_patient_records')} (<span dir="ltr">{formatLocalizedNumber(patients?.length || 0, locale)}</span> {t('cd_total_patients')})
             </p>
           </div>
@@ -505,8 +505,8 @@ function CenterPatients({
       </div>
 
       <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left' }}>
-          <CardTitle className="text-2xl font-semibold leading-none tracking-tight" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+        <CardHeader className="flex flex-col space-y-1.5 p-6" dir={isRTL ? 'rtl' : 'ltr'} style={{ alignItems: isRTL ? 'flex-end' : 'flex-start', textAlign: isRTL ? 'right' : 'left', width: '100%' }}>
+          <CardTitle className="text-2xl font-semibold leading-none tracking-tight w-full" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
             {t('cd_patient_records')}
           </CardTitle>
         </CardHeader>
@@ -514,11 +514,11 @@ function CenterPatients({
           <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
             {patients?.length > 0 ? patients.map((patient: any) => (
               <div key={patient.id} className={`flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className={`flex items-center gap-4 flex-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-white" />
                   </div>
-                  <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                  <div className="flex-1 min-w-0" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                     <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{getPatientDisplayName(patient)}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                       {patient.age ? <><span>{t('age')}: </span><span dir="ltr">{formatLocalizedNumber(patient.age, locale)}</span></> : ''}
@@ -531,7 +531,7 @@ function CenterPatients({
                   onClick={() => onViewPatient(patient.id, patient.name)}
                   variant="outline"
                   size="sm"
-                  className={`flex items-center gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 dark:hover:border-emerald-700 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center gap-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 dark:hover:border-emerald-700 transition-colors flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 >
                   {t('cd_view_details')}

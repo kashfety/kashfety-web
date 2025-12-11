@@ -24,11 +24,11 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent
-                className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl [&>button]:left-4 [&>button]:right-auto' : 'ltr'}`}
+            <DialogContent 
+                className={`max-w-4xl max-h-[90vh] ${isRTL ? 'rtl [&>button]:!left-4 [&>button]:!right-auto' : 'ltr'}`} 
                 dir={isRTL ? 'rtl' : 'ltr'}
             >
-                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>
+                <DialogHeader dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right items-end' : 'text-left items-start'}>
                     <DialogTitle className={`text-2xl font-bold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('privacy_policy') || 'Privacy Policy'}
                     </DialogTitle>
@@ -36,8 +36,11 @@ export default function PrivacyPolicy({ isOpen, onClose }: PrivacyPolicyProps) {
                         {lastUpdatedText}
                     </DialogDescription>
                 </DialogHeader>
-                <ScrollArea className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`}>
-                    <div className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <ScrollArea className={`h-[70vh] ${isRTL ? 'pl-4' : 'pr-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div 
+                        className={`space-y-6 text-sm ${isRTL ? 'text-right' : 'text-left'}`} 
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                    >
                         {locale === 'ar' ? (
                             <>
                                 <section dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'text-right' : 'text-left'}>

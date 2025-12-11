@@ -595,6 +595,46 @@
   right: auto;
 }
 
+/* Legal Documents Modal RTL/LTR Override - Higher Specificity */
+.legal-document-modal[dir="rtl"],
+.legal-document-modal[dir="rtl"] *,
+.legal-document-modal[dir="rtl"] h1,
+.legal-document-modal[dir="rtl"] h2,
+.legal-document-modal[dir="rtl"] h3,
+.legal-document-modal[dir="rtl"] p,
+.legal-document-modal[dir="rtl"] ul,
+.legal-document-modal[dir="rtl"] li,
+.legal-document-modal[dir="rtl"] div,
+.legal-document-modal[dir="rtl"] section {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.legal-document-modal[dir="ltr"],
+.legal-document-modal[dir="ltr"] *,
+.legal-document-modal[dir="ltr"] h1,
+.legal-document-modal[dir="ltr"] h2,
+.legal-document-modal[dir="ltr"] h3,
+.legal-document-modal[dir="ltr"] p,
+.legal-document-modal[dir="ltr"] ul,
+.legal-document-modal[dir="ltr"] li,
+.legal-document-modal[dir="ltr"] div,
+.legal-document-modal[dir="ltr"] section {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Override the global RTL text-left/text-right reversal for legal modals */
+.legal-document-modal[dir="rtl"] .text-left,
+.legal-document-modal[dir="rtl"] .text-right {
+  text-align: right !important;
+}
+
+.legal-document-modal[dir="ltr"] .text-left,
+.legal-document-modal[dir="ltr"] .text-right {
+  text-align: left !important;
+}
+
 /* RTL-friendly flex directions */
 [dir="rtl"] .flex-row-reverse {
   flex-direction: row;

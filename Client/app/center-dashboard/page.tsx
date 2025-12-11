@@ -1935,7 +1935,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                             >
                               <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                               <span dir={isRTL ? 'rtl' : 'ltr'}>
-                                {bulkSaving ? (t('saving') || 'Saving...') : (t('apply_to_selected') || `Apply to ${formatLocalizedNumber(bulkSelectedTypes.size, locale)} Test Types`)}
+                                {bulkSaving ? (t('saving') || 'Saving...') : (t('apply_to_selected')?.replace('{count}', formatLocalizedNumber(bulkSelectedTypes.size, locale)) || `Apply to ${formatLocalizedNumber(bulkSelectedTypes.size, locale)} Test Types`)}
                               </span>
                             </Button>
                             <Button
@@ -3661,9 +3661,9 @@ export default function CenterDashboardPage() {
                 <div className="relative p-6 rounded-2xl glass-effect">
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_schedule_management')}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`}>{t('cd_configure_operating_hours')}</p>
+                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_schedule_management')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_configure_operating_hours')}</p>
                     </div>
                   </div>
                 </div>

@@ -2126,6 +2126,19 @@ export const translations = {
     gender_male: "Male",
     gender_female: "Female",
     gender_other: "Other",
+    
+    // Bulk Schedule Management
+    bulk_schedule_management: "Bulk Schedule Management",
+    select_test_types_bulk: "Select Test Types for Bulk Update",
+    bulk_schedule_desc: "Select multiple test types to apply the same schedule to all of them at once",
+    select_test_types: "Select Test Types",
+    selected_count: "Selected",
+    bulk_action_options: "Bulk Action Options",
+    all_day_every_day: "All Day, Every Day",
+    all_day_some_days: "All Day, Some Days",
+    select_days: "Select Days",
+    select_at_least_one_day: "Please select at least one day",
+    apply_to_selected: "Apply to {count} Test Types",
   },
   ar: {
     // Navigation
@@ -3906,6 +3919,19 @@ export const translations = {
     general: "عام",
     failed_load_schedule_config: "فشل تحميل تكوين الجدول",
     please_select_test_type_first: "يرجى اختيار نوع تحليل أولاً",
+    
+    // Bulk Schedule Management (Arabic)
+    bulk_schedule_management: "إدارة الجدول الجماعي",
+    select_test_types_bulk: "اختر أنواع التحاليل للتحديث الجماعي",
+    bulk_schedule_desc: "اختر عدة أنواع تحاليل لتطبيق نفس الجدول عليها جميعاً في وقت واحد",
+    select_test_types: "اختر أنواع التحاليل",
+    selected_count: "محدد",
+    bulk_action_options: "خيارات الإجراء الجماعي",
+    all_day_every_day: "طوال اليوم، كل يوم",
+    all_day_some_days: "طوال اليوم، أيام محددة",
+    select_days: "اختر الأيام",
+    select_at_least_one_day: "يرجى اختيار يوم واحد على الأقل",
+    apply_to_selected: "تطبيق على {count} نوع تحليل",
   },
 } as const
 

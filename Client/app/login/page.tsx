@@ -244,6 +244,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
           className="mt-3 text-center text-xs text-muted-foreground"
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
           {t('terms_by_signing_in') || 'By signing in, you agree to our'}{' '}
           <button

@@ -2148,6 +2148,14 @@ export const translations = {
     bulk_schedule_partial_success: "Bulk schedule partially saved",
     failed_bulk_save_schedule: "Failed to save bulk schedule",
     partial_success: "Partial Success",
+
+    // Terms & Conditions and Privacy Policy
+    terms_and_conditions: "Terms & Conditions",
+    terms_last_updated: "Last updated: {date}",
+    privacy_policy: "Privacy Policy",
+    privacy_last_updated: "Last updated: {date}",
+    terms_acceptance_text: "I agree to the",
+    terms_and: "and",
   },
   ar: {
     // Navigation
@@ -3949,6 +3957,14 @@ export const translations = {
     bulk_schedule_partial_success: "تم حفظ الجدول الجماعي جزئياً",
     failed_bulk_save_schedule: "فشل حفظ الجدول الجماعي",
     partial_success: "نجاح جزئي",
+
+    // Terms & Conditions and Privacy Policy
+    terms_and_conditions: "الشروط والأحكام",
+    terms_last_updated: "آخر تحديث: {date}",
+    privacy_policy: "سياسة الخصوصية",
+    privacy_last_updated: "آخر تحديث: {date}",
+    terms_acceptance_text: "أوافق على",
+    terms_and: "و",
   },
 } as const
 

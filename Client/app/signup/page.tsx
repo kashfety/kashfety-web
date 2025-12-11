@@ -22,7 +22,7 @@ import PrivacyPolicy from '@/components/PrivacyPolicy'
 export default function SignupPage() {
   const router = useRouter()
   const { register, login } = useAuth()
-  const { t, locale } = useLocale()
+  const { t, locale, isRTL } = useLocale()
   const { theme } = useTheme()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -1241,7 +1241,7 @@ export default function SignupPage() {
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
                   className="mt-1 h-4 w-4 text-[#4DBCC4] focus:ring-[#4DBCC4] border-gray-300 rounded"
                 />
-                <label htmlFor="acceptTerms" className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                <label htmlFor="acceptTerms" className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('terms_acceptance_text') || 'I agree to the'}{' '}
                   <button
                     type="button"

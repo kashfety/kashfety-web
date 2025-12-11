@@ -247,21 +247,23 @@ export default function LoginPage() {
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           {t('terms_by_signing_in') || 'By signing in, you agree to our'}{' '}
-          <button
-            type="button"
-            onClick={() => setShowTermsModal(true)}
+          <Link
+            href="/terms-and-conditions"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
           >
             {t('terms_and_conditions') || 'Terms & Conditions'}
-          </button>
+          </Link>
           {' '}{t('terms_and') || 'and'}{' '}
-          <button
-            type="button"
-            onClick={() => setShowPrivacyModal(true)}
+          <Link
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
           >
             {t('privacy_policy') || 'Privacy Policy'}
-          </button>
+          </Link>
         </motion.div>
       </motion.div>
 

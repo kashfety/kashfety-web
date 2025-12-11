@@ -17,9 +17,11 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Microscope
+  Microscope,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -171,6 +173,51 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
               ))}
             </div>
           </nav>
+
+          {/* Legal Links Section - Only for patients */}
+          {user && user.role === 'patient' && (
+            <div className="p-3 sm:p-4 border-t border-border">
+              <motion.div
+                initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : (isRTL ? 20 : -20) }}
+                transition={{ delay: isOpen ? 0.25 : 0 }}
+                className="space-y-1"
+              >
+                <Link
+                  href="/terms-and-conditions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    if (window.innerWidth < 1024) {
+                      onToggle();
+                    }
+                  }}
+                  className={`w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-all duration-200 touch-manipulation ${isRTL ? 'text-right flex-row-reverse' : 'text-left flex-row'}`}
+                >
+                  <FileText size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                  {isOpen && (
+                    <span className="font-medium text-xs sm:text-sm">{t('terms_and_conditions') || 'Terms & Conditions'}</span>
+                  )}
+                </Link>
+                <Link
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    if (window.innerWidth < 1024) {
+                      onToggle();
+                    }
+                  }}
+                  className={`w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-all duration-200 touch-manipulation ${isRTL ? 'text-right flex-row-reverse' : 'text-left flex-row'}`}
+                >
+                  <FileText size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                  {isOpen && (
+                    <span className="font-medium text-xs sm:text-sm">{t('privacy_policy') || 'Privacy Policy'}</span>
+                  )}
+                </Link>
+              </motion.div>
+            </div>
+          )}
 
           {/* User Section */}
           {user && (

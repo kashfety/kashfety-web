@@ -2126,6 +2126,7 @@ export const translations = {
     gender_male: "Male",
     gender_female: "Female",
     gender_other: "Other",
+    age: "Age",
     
     // Bulk Schedule Management
     bulk_schedule_management: "Bulk Schedule Management",

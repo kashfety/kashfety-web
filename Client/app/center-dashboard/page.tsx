@@ -4223,12 +4223,14 @@ export default function CenterDashboardPage() {
 
               {/* Profile Tab */}
               <TabsContent value="profile" className="p-6 space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className="relative p-6 rounded-2xl glass-effect">
-                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_profile_settings')}</h2>
-                      <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_update_center_info')}</p>
+                <div className="relative p-6 rounded-2xl glass-effect" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0">
+                      <Settings className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                      <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_profile_settings')}</h2>
+                      <p className={`text-emerald-700/80 dark:text-emerald-400/80`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left', width: '100%' }}>{t('cd_update_center_info')}</p>
                     </div>
                   </div>
                 </div>

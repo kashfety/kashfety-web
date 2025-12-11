@@ -16,6 +16,8 @@ import { useTheme } from 'next-themes'
 import CountryCodeSelector, { countries, type Country } from '@/components/CountryCodeSelector'
 import OTPVerification from '@/components/OTPVerification'
 import { supabase } from '@/lib/supabase'
+import TermsAndConditions from '@/components/TermsAndConditions'
+import PrivacyPolicy from '@/components/PrivacyPolicy'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -56,6 +58,11 @@ export default function SignupPage() {
   // Password visibility state
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // Terms and Privacy Policy state
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -216,6 +223,12 @@ export default function SignupPage() {
     // Validate confirm password
     if (formData.password !== formData.confirmPassword) {
       setValidationErrors(prev => ({ ...prev, confirmPassword: t('passwords_do_not_match') || 'Passwords do not match' }))
+      hasErrors = true
+    }
+
+    // Validate terms acceptance
+    if (!acceptedTerms) {
+      setError(t('terms_acceptance_required') || 'You must accept the Terms & Conditions and Privacy Policy to create an account')
       hasErrors = true
     }
 
@@ -1217,13 +1230,43 @@ export default function SignupPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.6 }}
+              className="space-y-4"
             >
+              {/* Terms and Privacy Policy Acceptance */}
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="acceptTerms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-[#4DBCC4] focus:ring-[#4DBCC4] border-gray-300 rounded"
+                />
+                <label htmlFor="acceptTerms" className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {t('terms_acceptance_text') || 'I agree to the'}{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
+                  >
+                    {t('terms_and_conditions') || 'Terms & Conditions'}
+                  </button>
+                  {' '}{t('terms_and') || 'and'}{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
+                  >
+                    {t('privacy_policy') || 'Privacy Policy'}
+                  </button>
+                </label>
+              </div>
+
               <motion.button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !acceptedTerms}
                 whileHover={{ scale: 1.02, boxShadow: "0 10px 25px rgba(147, 51, 234, 0.3)" }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-[#4DBCC4] dark:bg-[#2a5f6b] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4DBCC4]/50 dark:focus:ring-[#2a5f6b]/50 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-[#4DBCC4] dark:bg-[#2a5f6b] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4DBCC4]/50 dark:focus:ring-[#2a5f6b]/50 transition-all ${isLoading || !acceptedTerms ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {isLoading ? (
                   <motion.div
@@ -1311,6 +1354,12 @@ export default function SignupPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </div>
   )
 }

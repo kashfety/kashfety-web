@@ -11,15 +11,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Save, Globe } from "lucide-react"
+import { Save, Globe, FileText } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import React from "react";
+import React, { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import LogoutButton from "@/components/LogoutButton";
 import { useLocale } from '@/components/providers/locale-provider';
+import TermsAndConditions from '@/components/TermsAndConditions';
+import PrivacyPolicy from '@/components/PrivacyPolicy';
 
 export default function SettingsPage() {
   const { t, locale, isRTL } = useLocale()
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   useEffect(() => {
     const title = t('settings_page_title') || "Account Settings & Preferences | Healthcare Management System"
@@ -172,8 +176,8 @@ export default function SettingsPage() {
           <TabsContent value="account" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>Manage your account preferences</CardDescription>
+                <CardTitle>{t('account_settings') || 'Account Settings'}</CardTitle>
+                <CardDescription>{t('manage_account_preferences') || 'Manage your account preferences'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -223,21 +227,52 @@ export default function SettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
-                <CardDescription>Irreversible account actions</CardDescription>
+                <CardTitle className="text-red-600 dark:text-red-400">{t('danger_zone') || 'Danger Zone'}</CardTitle>
+                <CardDescription>{t('irreversible_actions') || 'Irreversible account actions'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-medium">Delete Account</h3>
+                    <h3 className="text-sm font-medium">{t('delete_account') || 'Delete Account'}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Permanently delete your account and all data
+                      {t('delete_account_desc') || 'Permanently delete your account and all data'}
                     </p>
                   </div>
                   <Button variant="destructive" size="sm">
-                    Delete Account
+                    {t('delete_account') || 'Delete Account'}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Terms and Privacy Policy Section */}
+            <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  {t('legal_documents') || 'Legal Documents'}
+                </CardTitle>
+                <CardDescription>
+                  {t('review_legal_documents') || 'Review our Terms & Conditions and Privacy Policy'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowTermsModal(true)}
+                >
+                  <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('terms_and_conditions') || 'Terms & Conditions'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowPrivacyModal(true)}
+                >
+                  <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('privacy_policy') || 'Privacy Policy'}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -443,6 +478,12 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </MainLayout>
   )
 }

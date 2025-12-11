@@ -13,6 +13,8 @@ import { useTheme } from 'next-themes'
 import CertificateUploadPromptModal from '@/components/CertificateUploadPromptModal'
 import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
 import { useCustomAlert } from '@/hooks/use-custom-alert'
+import TermsAndConditions from '@/components/TermsAndConditions'
+import PrivacyPolicy from '@/components/PrivacyPolicy'
 
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,6 +34,8 @@ export default function LoginPage() {
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false)
   const [showCertificateUploadModal, setShowCertificateUploadModal] = useState(false)
   const [doctorToken, setDoctorToken] = useState<string>('')
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const { t } = useLocale()
   const { theme } = useTheme()
 
@@ -235,6 +239,29 @@ export default function LoginPage() {
             {t('auth_create_account_link') || 'create a new account'}
           </Link>
         </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mt-3 text-center text-xs text-muted-foreground"
+        >
+          {t('terms_by_signing_in') || 'By signing in, you agree to our'}{' '}
+          <button
+            type="button"
+            onClick={() => setShowTermsModal(true)}
+            className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
+          >
+            {t('terms_and_conditions') || 'Terms & Conditions'}
+          </button>
+          {' '}{t('terms_and') || 'and'}{' '}
+          <button
+            type="button"
+            onClick={() => setShowPrivacyModal(true)}
+            className="text-[#4DBCC4] dark:text-[#2a5f6b] hover:underline font-medium"
+          >
+            {t('privacy_policy') || 'Privacy Policy'}
+          </button>
+        </motion.div>
       </motion.div>
 
       <motion.div
@@ -461,6 +488,12 @@ export default function LoginPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </div>
   )
 }

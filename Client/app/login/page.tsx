@@ -36,7 +36,7 @@ export default function LoginPage() {
   const [doctorToken, setDoctorToken] = useState<string>('')
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
-  const { t } = useLocale()
+  const { t, isRTL } = useLocale()
   const { theme } = useTheme()
 
   // Email validation function

@@ -31,18 +31,18 @@ export default function TermsAndConditions({ isOpen, onClose }: TermsAndConditio
             >
                 <DialogHeader
                     dir={isRTL ? 'rtl' : 'ltr'}
-                    className={isRTL ? 'text-right items-end [&>*]:text-right [&>*]:text-right' : 'text-left items-start [&>*]:text-left'}
+                    className={isRTL ? '!text-right !sm:text-right items-end [&>*]:!text-right' : '!text-left !sm:text-left items-start [&>*]:!text-left'}
                     style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
                 >
                     <DialogTitle
-                        className={`text-2xl font-bold ${isRTL ? 'text-right !text-right' : 'text-left !text-left'}`}
+                        className={`text-2xl font-bold ${isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}`}
                         dir={isRTL ? 'rtl' : 'ltr'}
                         style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
                     >
                         {t('terms_and_conditions') || 'Terms & Conditions'}
                     </DialogTitle>
                     <DialogDescription
-                        className={isRTL ? 'text-right !text-right' : 'text-left !text-left'}
+                        className={isRTL ? '!text-right !sm:text-right' : '!text-left !sm:text-left'}
                         dir={isRTL ? 'rtl' : 'ltr'}
                         style={isRTL ? { direction: 'rtl', textAlign: 'right' } : { direction: 'ltr', textAlign: 'left' }}
                     >

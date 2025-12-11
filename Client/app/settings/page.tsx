@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import MainLayout from "@/components/layout/main-layout"
 import { Button } from "@/components/ui/button"
@@ -17,13 +18,9 @@ import React, { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import LogoutButton from "@/components/LogoutButton";
 import { useLocale } from '@/components/providers/locale-provider';
-import TermsAndConditions from '@/components/TermsAndConditions';
-import PrivacyPolicy from '@/components/PrivacyPolicy';
 
 export default function SettingsPage() {
   const { t, locale, isRTL } = useLocale()
-  const [showTermsModal, setShowTermsModal] = useState(false)
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   useEffect(() => {
     const title = t('settings_page_title') || "Account Settings & Preferences | Healthcare Management System"
@@ -257,22 +254,24 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setShowTermsModal(true)}
-                >
-                  <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {t('terms_and_conditions') || 'Terms & Conditions'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setShowPrivacyModal(true)}
-                >
-                  <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {t('privacy_policy') || 'Privacy Policy'}
-                </Button>
+                <Link href="/terms-and-conditions" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t('terms_and_conditions') || 'Terms & Conditions'}
+                  </Button>
+                </Link>
+                <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <FileText className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t('privacy_policy') || 'Privacy Policy'}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </TabsContent>
@@ -478,12 +477,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Terms and Conditions Modal */}
-      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
-
-      {/* Privacy Policy Modal */}
-      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </MainLayout>
   )
 }

@@ -13,8 +13,6 @@ import { useTheme } from 'next-themes'
 import CertificateUploadPromptModal from '@/components/CertificateUploadPromptModal'
 import DoctorCertificateUpload from '@/components/DoctorCertificateUpload'
 import { useCustomAlert } from '@/hooks/use-custom-alert'
-import TermsAndConditions from '@/components/TermsAndConditions'
-import PrivacyPolicy from '@/components/PrivacyPolicy'
 
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -34,8 +32,6 @@ export default function LoginPage() {
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false)
   const [showCertificateUploadModal, setShowCertificateUploadModal] = useState(false)
   const [doctorToken, setDoctorToken] = useState<string>('')
-  const [showTermsModal, setShowTermsModal] = useState(false)
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const { t, isRTL } = useLocale()
   const { theme } = useTheme()
 
@@ -491,12 +487,6 @@ export default function LoginPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Terms and Conditions Modal */}
-      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
-
-      {/* Privacy Policy Modal */}
-      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </div>
   )
 }

@@ -16,8 +16,6 @@ import { useTheme } from 'next-themes'
 import CountryCodeSelector, { countries, type Country } from '@/components/CountryCodeSelector'
 import OTPVerification from '@/components/OTPVerification'
 import { supabase } from '@/lib/supabase'
-import TermsAndConditions from '@/components/TermsAndConditions'
-import PrivacyPolicy from '@/components/PrivacyPolicy'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -61,8 +59,6 @@ export default function SignupPage() {
 
   // Terms and Privacy Policy state
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [showTermsModal, setShowTermsModal] = useState(false)
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -1356,12 +1352,6 @@ export default function SignupPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Terms and Conditions Modal */}
-      <TermsAndConditions isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
-
-      {/* Privacy Policy Modal */}
-      <PrivacyPolicy isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
     </div>
   )
 }

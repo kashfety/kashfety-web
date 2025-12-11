@@ -278,7 +278,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('day')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'day'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                ? `${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-500 to-teal-600 text-white shadow-md`
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -289,7 +289,7 @@ export default function DoctorScheduleCalendar({
                             size="sm"
                             onClick={() => setViewMode('week')}
                             className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${viewMode === 'week'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                ? `${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-500 to-teal-600 text-white shadow-md`
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
@@ -579,7 +579,7 @@ export default function DoctorScheduleCalendar({
                                 <Calendar className="w-6 h-6 text-white" />
                             </div>
                         </div>
-                        <div className="mt-3 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"></div>
+                        <div className={`mt-3 h-1 ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-400 to-emerald-600 rounded-full`}></div>
                     </CardContent>
                 </Card>
 

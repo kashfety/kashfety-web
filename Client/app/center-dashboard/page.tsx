@@ -2239,8 +2239,8 @@ function Sidebar({
         <div className="h-full flex flex-col">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23] px-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className={`w-8 h-8 ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0`}>
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-semibold text-gray-900 dark:text-white">

@@ -493,8 +493,8 @@ function CenterPatients({
           <div className="p-2 rounded-xl gradient-emerald animate-glow">
             <Users className="h-5 w-5 text-white" />
           </div>
-          <div className={isRTL ? 'text-right' : 'text-left'}>
-            <h2 className={`text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+            <h2 className={`text-2xl font-bold ${isRTL ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               {t('cd_patient_management')}
             </h2>
             <p className={`text-emerald-700/80 dark:text-emerald-400/80 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -4522,7 +4522,7 @@ export default function CenterDashboardPage() {
 
                               {/* Test Result Section */}
                               {visit.result_file_url || visit.result_notes ? (
-                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <div className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   <p className={`text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {t('cd_test_result')}
                                   </p>

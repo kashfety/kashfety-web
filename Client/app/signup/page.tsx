@@ -810,8 +810,6 @@ export default function SignupPage() {
                   <option value="patient" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_patient') || 'Patient'}</option>
                   <option value="doctor" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_doctor') || 'Doctor'}</option>
                   <option value="center" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_center') || 'Medical Center'}</option>
-                  <option value="admin" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_admin') || 'Admin'}</option>
-                  <option value="super_admin" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_super_admin') || 'Super Admin'}</option>
                 </motion.select>
               </div>
             </motion.div>
@@ -852,7 +850,6 @@ export default function SignupPage() {
                         <option value="" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_select_gender') || 'Select Gender'}</option>
                         <option value="male" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_male') || 'Male'}</option>
                         <option value="female" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_female') || 'Female'}</option>
-                        <option value="other" className={`${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>{t('auth_other') || 'Other'}</option>
                       </motion.select>
                     </div>
                   </motion.div>

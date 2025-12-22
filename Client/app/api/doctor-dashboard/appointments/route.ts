@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { markPastAppointmentsAsAbsent } from '@/lib/appointmentHelpers';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -29,6 +30,10 @@ export async function GET(request: NextRequest) {
     const doctorId = searchParams.get('doctor_id');
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
+    
+    // Mark past appointments as absent before fetching
+    await markPastAppointmentsAsAbsent(doctorId, null);
+    
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Join patient user data and center data to get name/phone/email and clinic info

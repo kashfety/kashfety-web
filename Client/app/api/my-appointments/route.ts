@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { markPastAppointmentsAsAbsent } from '@/lib/appointmentHelpers';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -20,6 +21,13 @@ export async function GET(request: NextRequest) {
         success: false,
         message: 'User ID is required as query parameter'
       }, { status: 400 });
+    }
+
+    // Mark past appointments as absent before fetching
+    if (role === 'doctor') {
+      await markPastAppointmentsAsAbsent(userId, null);
+    } else if (role === 'patient') {
+      await markPastAppointmentsAsAbsent(null, userId);
     }
 
     // Build query

@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { hashPassword, comparePassword, generateToken, authenticateToken, authenticateRole, optionalAuth } from '../middleware/auth.js';
 import { authHelpers } from '../utils/supabase.js';
+import { markPastAppointmentsAsAbsent } from '../utils/appointmentHelpers.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -2013,13 +2014,20 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
     const { role } = req.query; // patient or doctor
 
-    // Authorization check: users can only view their own appointments unless they're doctors
-    if (req.user.role === 'patient' && req.user.id !== userId) {
-      return res.status(403).json({ error: 'Patients can only view their own appointments' });
-    }
+  // Authorization check: users can only view their own appointments unless they're doctors
+  if (req.user.role === 'patient' && req.user.id !== userId) {
+    return res.status(403).json({ error: 'Patients can only view their own appointments' });
+  }
 
-    let appointments = [];
-    const userRole = role || req.user.role;
+  // Mark past appointments as absent before fetching
+  const userRole = role || req.user.role;
+  if (userRole === 'doctor') {
+    await markPastAppointmentsAsAbsent(userId, null);
+  } else if (userRole === 'patient') {
+    await markPastAppointmentsAsAbsent(null, userId);
+  }
+
+  let appointments = [];
 
     if (userRole === 'patient') {
       // Get appointments with doctor details using correct foreign key names
@@ -3486,6 +3494,9 @@ router.get('/doctor/appointments', authenticateToken, async (req, res) => {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({ error: 'Only doctors can access this endpoint' });
     }
+
+    // Mark past appointments as absent before fetching
+    await markPastAppointmentsAsAbsent(req.user.id, null);
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;

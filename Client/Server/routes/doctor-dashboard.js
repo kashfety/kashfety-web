@@ -5,6 +5,7 @@ import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { authenticateToken } from '../middleware/auth.js';
+import { markPastAppointmentsAsAbsent } from '../utils/appointmentHelpers.js';
 
 dotenv.config();
 
@@ -541,6 +542,9 @@ router.get('/appointments', authenticateToken, async (req, res) => {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({ error: 'Only doctors can access this endpoint' });
     }
+
+    // Mark past appointments as absent before fetching
+    await markPastAppointmentsAsAbsent(req.user.id, null);
 
     const limit = parseInt(req.query.limit) || 50;
     const status = req.query.status;

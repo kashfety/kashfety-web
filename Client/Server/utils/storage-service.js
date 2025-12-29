@@ -37,7 +37,6 @@ const storageService = {
         .createSignedUrl(filePath, 86400); // 24 hours
 
       if (urlError) {
-        console.warn('Could not generate signed URL:', urlError);
         // Fallback to public URL if signed URL fails
         const { data: publicUrlData } = supabase.storage
           .from('medical-documents')
@@ -58,7 +57,6 @@ const storageService = {
         data
       };
     } catch (error) {
-      console.error('Certificate upload error:', error);
       throw new Error(`Failed to upload certificate: ${error.message}`);
     }
   },
@@ -92,7 +90,6 @@ const storageService = {
         data
       };
     } catch (error) {
-      console.error('Lab result upload error:', error);
       throw new Error(`Failed to upload lab result: ${error.message}`);
     }
   },
@@ -126,7 +123,6 @@ const storageService = {
         data
       };
     } catch (error) {
-      console.error('Profile picture upload error:', error);
       throw new Error(`Failed to upload profile picture: ${error.message}`);
     }
   },
@@ -146,7 +142,6 @@ const storageService = {
         expiresAt: new Date(Date.now() + expiresIn * 1000)
       };
     } catch (error) {
-      console.error('Signed URL error:', error);
       throw new Error(`Failed to get signed URL: ${error.message}`);
     }
   },
@@ -163,7 +158,6 @@ const storageService = {
         publicUrl: data.publicUrl
       };
     } catch (error) {
-      console.error('Public URL error:', error);
       throw new Error(`Failed to get public URL: ${error.message}`);
     }
   },
@@ -179,7 +173,6 @@ const storageService = {
 
       return { success: true };
     } catch (error) {
-      console.error('File deletion error:', error);
       throw new Error(`Failed to delete file: ${error.message}`);
     }
   },
@@ -202,7 +195,6 @@ const storageService = {
         files: data || []
       };
     } catch (error) {
-      console.error('List files error:', error);
       throw new Error(`Failed to list files: ${error.message}`);
     }
   },
@@ -227,7 +219,6 @@ const storageService = {
         fileInfo: fileInfo || null
       };
     } catch (error) {
-      console.error('Get file info error:', error);
       throw new Error(`Failed to get file info: ${error.message}`);
     }
   },
@@ -246,7 +237,6 @@ const storageService = {
         blob: data
       };
     } catch (error) {
-      console.error('File download error:', error);
       throw new Error(`Failed to download file: ${error.message}`);
     }
   }
@@ -258,7 +248,6 @@ export const validateFile = {
     const allowedTypes = ['application/pdf'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
-    console.log('🔍 Certificate validation - Type:', file.mimetype || file.type, 'Size:', file.size);
 
     const fileType = file.mimetype || file.type;
     if (!allowedTypes.includes(fileType)) {
@@ -276,8 +265,7 @@ export const validateFile = {
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
-    console.log('🔍 Lab result validation - Type:', file.mimetype || file.type, 'Size:', file.size);
-    console.log('🔍 File object properties:', Object.keys(file));
+    );
 
     const fileType = file.mimetype || file.type;
     if (!allowedTypes.includes(fileType)) {
@@ -295,7 +283,6 @@ export const validateFile = {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     const maxSize = 2 * 1024 * 1024; // 2MB
 
-    console.log('🔍 Profile picture validation - Type:', file.mimetype || file.type, 'Size:', file.size);
 
     const fileType = file.mimetype || file.type;
     if (!allowedTypes.includes(fileType)) {

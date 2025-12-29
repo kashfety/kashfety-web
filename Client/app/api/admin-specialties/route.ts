@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🏥 [Admin Specialties] Request received');
 
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -15,7 +14,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -29,7 +27,6 @@ export async function GET(request: NextRequest) {
       .order('name', { ascending: true });
 
     if (error) {
-      console.error('❌ Failed to fetch specialties:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch specialties',
@@ -37,7 +34,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Admin Specialties] Fetched', specialties.length, 'specialties');
 
     return NextResponse.json({
       success: true,
@@ -47,7 +43,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin specialties API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

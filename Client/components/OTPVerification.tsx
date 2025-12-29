@@ -31,7 +31,6 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
     setError('')
 
     try {
-      console.log('Verifying OTP for email:', email, 'with code:', otp)
       
       const { data, error } = await supabase.auth.verifyOtp({
         email,
@@ -39,10 +38,8 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
         type: 'email' // Use email type for OTP verification (as per docs)
       })
 
-      console.log('OTP verification response:', { data, error })
 
       if (error) {
-        console.error('OTP verification error:', error)
         if (error.message.includes('expired')) {
           setError(t('otp_expired') || 'Verification code has expired. Please request a new one.')
         } else if (error.message.includes('invalid')) {
@@ -56,7 +53,6 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
       // Check if we have session or user data
       if (data.session || data.user) {
         setSuccess(t('otp_verification_success') || 'Email verified successfully!')
-        console.log('✅ Passing verification data:', data);
         // Pass the complete data object which contains session/user info
         onVerificationSuccess(data)
       } else {
@@ -64,7 +60,6 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
       }
 
     } catch (err: any) {
-      console.error('OTP verification error:', err)
       setError(err.message || t('otp_verification_failed') || 'Invalid verification code')
     } finally {
       setIsLoading(false)
@@ -90,7 +85,6 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
 
       setSuccess(t('otp_resent') || 'Verification code resent to your email')
     } catch (err: any) {
-      console.error('Resend OTP error:', err)
       setError(err.message || t('otp_resend_failed') || 'Failed to resend verification code')
     } finally {
       setIsResending(false)

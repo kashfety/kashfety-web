@@ -8,38 +8,31 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
     }
 
     // Fetch ALL test types (both lab and imaging) from database
-    console.log('🔍 [Lab Test Types API] Fetching all lab test types from database...');
     const { data: allTestTypes, error } = await supabase
       .from('lab_test_types')
       .select('*')
       .order('name');
 
     if (error) {
-      console.error('❌ [Lab Test Types API] Failed to fetch test types:', error);
       return NextResponse.json({
         error: 'Failed to fetch test types',
         details: error.message
       }, { status: 500 });
     }
 
-    console.log('✅ [Lab Test Types API] Fetched', allTestTypes?.length || 0, 'test types from database');
-    console.log('📋 [Lab Test Types API] Test types:', allTestTypes?.map(t => ({ id: t.id, name: t.name, code: t.code, category: t.category })));
+    ));
 
     // Get center's current services
     const centerId = user.center_id || user.id;
-    console.log('🏥 [Lab Test Types API] Fetching services for center:', centerId);
     const { data: centerServices, error: servicesError } = await supabase
       .from('center_lab_services')
       .select('lab_test_type_id, base_fee, is_active')
       .eq('center_id', centerId);
 
     if (servicesError) {
-      console.error('❌ [Lab Test Types API] Failed to fetch center services:', servicesError);
       // Don't fail the request, just return empty services
     }
 
-    console.log('✅ [Lab Test Types API] Found', centerServices?.length || 0, 'center services');
-    console.log('📋 [Lab Test Types API] Services:', centerServices);
 
     // Map services by lab_test_type_id for easy lookup
     const servicesMap: Record<string, { base_fee: number; is_active: boolean }> = {};
@@ -65,8 +58,7 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
       is_active: servicesMap[testType.id]?.is_active || false
     }));
 
-    console.log('📦 [Lab Test Types API] Returning', testTypesWithServices.length, 'test types with services');
-    console.log('📋 [Lab Test Types API] Final data:', testTypesWithServices.map(t => ({ id: t.id, name: t.name, code: t.code, is_active: t.is_active })));
+    ));
 
     return NextResponse.json({
       success: true,
@@ -76,7 +68,6 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
     });
 
   } catch (error) {
-    console.error('Lab test types API error:', error);
     return NextResponse.json({
       error: 'Internal server error'
     }, { status: 500 });
@@ -137,7 +128,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Failed to create lab test type:', insertError);
       return NextResponse.json({
         error: 'Failed to create lab test type',
         details: insertError.message
@@ -151,7 +141,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('Create lab test type API error:', error);
     return NextResponse.json({
       error: 'Internal server error',
       details: error.message

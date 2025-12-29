@@ -127,7 +127,6 @@ export default function PatientLabsPage() {
 
             // If fallback fails, try the original dynamic route
             if (!response.ok) {
-                console.log('Fallback route failed, trying original route')
                 response = await fetch(`/api/patient-dashboard/labs?${queryParams}`)
             }
 
@@ -141,7 +140,6 @@ export default function PatientLabsPage() {
                 toast.error(data.message || 'Failed to load centers')
             }
         } catch (error) {
-            console.error('Error fetching centers:', error)
             toast.error('Failed to load centers')
         } finally {
             setLoading(false)
@@ -158,7 +156,6 @@ export default function PatientLabsPage() {
 
             // If fallback fails, try the original dynamic route
             if (!response.ok) {
-                console.log('Fallback route failed, trying original route')
                 response = await fetch(`/api/patient-dashboard/labs/${centerId}`)
             }
 
@@ -171,7 +168,6 @@ export default function PatientLabsPage() {
                 setShowDetailsModal(false)
             }
         } catch (error) {
-            console.error('Error fetching center details:', error)
             toast.error('Failed to load center details')
         } finally {
             setLoadingDetails(false)

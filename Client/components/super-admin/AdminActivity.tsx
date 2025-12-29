@@ -219,7 +219,6 @@ export default function AdminActivity() {
                 throw new Error('Invalid response format');
             }
         } catch (error) {
-            console.error('Error fetching admin activities:', error);
             setActivities([]);
             setTotalPages(1);
 
@@ -270,7 +269,6 @@ export default function AdminActivity() {
                 throw new Error('Invalid response format');
             }
         } catch (error) {
-            console.error('Error fetching activity stats:', error);
             setStats(null);
             
             toast({
@@ -319,7 +317,6 @@ export default function AdminActivity() {
                 description: "Admin activity exported successfully",
             });
         } catch (error) {
-            console.error('Error exporting activities:', error);
             toast({
                 title: "Error",
                 description: "Failed to export admin activity",

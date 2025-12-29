@@ -20,7 +20,6 @@ function verifyToken(token: string) {
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  console.log('📊 Super Admin activity stats endpoint hit!');
   
   try {
     // Get authorization token
@@ -51,7 +50,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('📊 Calculating activity stats...');
 
     // Use aggregation approach - fetch all admin/super_admin actions from various tables
     let allActivities: any[] = [];
@@ -185,7 +183,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Super admin activity stats error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to fetch activity stats',

@@ -54,7 +54,6 @@ export default function AdminAnalytics() {
             let result;
             
             try {
-                console.log('📊 Trying admin-analytics fallback route');
                 response = await fetch('/api/admin-analytics', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -65,7 +64,6 @@ export default function AdminAnalytics() {
                 if (response.ok) {
                     result = await response.json();
                     if (result.success && result.data) {
-                        console.log('✅ Fallback route worked for analytics');
                         
                         const data = result.data;
                         // Transform the API response to match our AnalyticsData interface
@@ -88,7 +86,6 @@ export default function AdminAnalytics() {
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -126,7 +123,6 @@ export default function AdminAnalytics() {
 
             setAnalytics(analyticsData);
         } catch (error) {
-            console.error('Error fetching analytics:', error)
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_load_analytics') || "Failed to load analytics data",

@@ -24,7 +24,6 @@ export default async function handler(req, res) {
       .order('name');
 
     if (error) {
-      console.error('Error fetching centers:', error);
       return res.status(500).json({
         success: false,
         error: 'Failed to fetch medical centers'
@@ -68,7 +67,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching centers:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

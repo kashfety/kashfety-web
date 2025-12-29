@@ -10,7 +10,6 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
     try {
-        console.log('POST /api/appointments/book - Request received');
         
         // Require authentication
         const authResult = requireAuth(req);
@@ -20,7 +19,6 @@ export async function POST(req: NextRequest) {
         const { user: authenticatedUser } = authResult;
         
         const body = await req.json();
-        console.log('Request body:', body);
         
         const { 
             patient_id, 
@@ -34,7 +32,6 @@ export async function POST(req: NextRequest) {
 
         // Validate required fields
         if (!patient_id || !doctor_id || !appointment_date || !appointment_time) {
-            console.log('Missing required fields:', { patient_id, doctor_id, appointment_date, appointment_time });
             return NextResponse.json({
                 success: false,
                 message: "Missing required fields"
@@ -51,7 +48,6 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        console.log('Checking for existing appointment...');
         // Block slot if already scheduled or confirmed
         const { data: existing } = await supabaseAdmin
             .from('appointments')
@@ -66,7 +62,7 @@ export async function POST(req: NextRequest) {
             // If center_id is provided on the request, enforce center-aware conflict.
             // If existing.center_id is null (legacy), still treat as conflict to avoid double booking.
             if (!center_id || !existing.center_id || existing.center_id === center_id) {
-                console.log('Time slot already taken (center-aware):', existing);
+                :', existing);
                 return NextResponse.json({
                     success: false,
                     message: "This time slot is already booked"
@@ -94,7 +90,6 @@ export async function POST(req: NextRequest) {
 
         if (error) throw error;
 
-        console.log('Appointment created:', data);
         return NextResponse.json({
             success: true,
             message: 'Appointment booked successfully',
@@ -102,7 +97,6 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Error booking appointment:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to book appointment'
@@ -149,7 +143,6 @@ export async function GET(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Error fetching appointments:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to fetch appointments'

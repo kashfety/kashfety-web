@@ -455,7 +455,6 @@ export function AdminDashboard({
             let data;
 
             try {
-                console.log('📊 Trying admin-dashboard-stats fallback route');
                 response = await fetch('/api/admin-dashboard-stats', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -466,13 +465,11 @@ export function AdminDashboard({
                 if (response.ok) {
                     data = await response.json();
                     if (data.success) {
-                        console.log('✅ Fallback route worked');
                         setDashboardStats(data.data);
                         return;
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -493,7 +490,6 @@ export function AdminDashboard({
             data = await response.json();
             setDashboardStats(data.data);
         } catch (error) {
-            console.error('Error fetching dashboard stats:', error);
 
             // Show error toast instead of using mock data
             toast({

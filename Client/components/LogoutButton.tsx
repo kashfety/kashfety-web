@@ -16,14 +16,11 @@ export default function LogoutButton({ className = "", onClick, variant = 'defau
     const handleLogout = async () => {
         try {
             // Call logout endpoint if you have one
-            console.log("Attempting to call logout endpoint")
             await authService.logout?.()
             if (onClick) {
-                console.log("Executing additional onClick callback")
                 onClick()
             }
         } catch (error) {
-            console.error("Logout error:", error)
         } finally {
             // Clear auth token regardless of API result
             if (authService.clearAuthToken) {

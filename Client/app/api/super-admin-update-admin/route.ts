@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('👑 [Super Admin Update Admin] Request received');
 
     const body = await request.json();
     const { adminId, name, email, phone, role } = body;
@@ -15,12 +14,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Admin ID is required' }, { status: 400 });
     }
 
-    console.log('👑 [Super Admin Update Admin] Updating admin:', adminId, 'with data:', { name, email, phone, role });
 
     // Get the authorization token
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
-      console.error('❌ Missing authorization header');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -36,7 +33,6 @@ export async function POST(request: NextRequest) {
     for (const baseUrl of backendUrls) {
       try {
         const apiUrl = `${baseUrl}/${adminId}`;
-        console.log('🔄 [Super Admin Update Admin] Trying backend endpoint:', apiUrl);
 
         const backendResponse = await fetch(apiUrl, {
           method: 'PUT',
@@ -49,26 +45,21 @@ export async function POST(request: NextRequest) {
 
         if (backendResponse.ok) {
           const responseData = await backendResponse.json().catch(() => ({}));
-          console.log('✅ [Super Admin Update Admin] Success with backend endpoint:', apiUrl);
           return NextResponse.json(responseData || {
             success: true,
             message: 'Admin updated successfully'
           });
         }
 
-        console.log('⚠️ [Super Admin Update Admin] Backend failed:', apiUrl, 'Status:', backendResponse.status);
 
       } catch (error: any) {
-        console.log('⚠️ [Super Admin Update Admin] Network error with backend:', baseUrl, error.message);
         continue;
       }
     }
 
     // Fallback to Supabase if backend fails
-    console.log('🔄 [Super Admin Update Admin] Falling back to Supabase');
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials for fallback');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -83,7 +74,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (fetchError || !existingAdmin) {
-      console.error('❌ Admin not found:', fetchError);
       return NextResponse.json({ success: false, error: 'Admin not found' }, { status: 404 });
     }
 
@@ -116,7 +106,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Log what we're updating
-    console.log('📝 [Super Admin Update Admin] Update data:', updateData);
 
     // Update admin
     const { data: updatedAdmin, error: updateError } = await supabase
@@ -127,7 +116,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Failed to update admin:', updateError);
       return NextResponse.json({
         success: false,
         error: 'Failed to update admin',
@@ -135,7 +123,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Super Admin Update Admin] Updated admin:', adminId);
     console.log('✅ [Super Admin Update Admin] Updated admin data:', {
       id: updatedAdmin.id,
       name: updatedAdmin.name,
@@ -161,7 +148,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Super admin update admin API error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

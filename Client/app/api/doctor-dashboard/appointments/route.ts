@@ -117,7 +117,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, appointments });
   } catch (e: any) {
-    console.error('appointments fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to fetch appointments' }, { status: 500 });
   }
 }

@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🔬 [My Lab Bookings] Fetching bookings for patient:', patientId);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -52,7 +51,6 @@ export async function GET(request: NextRequest) {
       .order('booking_time', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching lab bookings:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch lab bookings',
@@ -60,7 +58,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [My Lab Bookings] Found', bookings?.length || 0, 'bookings');
 
     // Enrich bookings with proper field names for frontend
     const enrichedBookings = (bookings || []).map(booking => ({
@@ -76,7 +73,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ My lab bookings API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

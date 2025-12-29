@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       .order('lab_test_types(name)');
 
     if (error) {
-      console.error('Failed to fetch center lab services:', error);
       return NextResponse.json({ success: false, error: 'Failed to fetch services' }, { status: 500 });
     }
 
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Lab center services API error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

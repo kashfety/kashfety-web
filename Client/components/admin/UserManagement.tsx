@@ -167,19 +167,16 @@ export default function UserManagement() {
                 _t: Date.now()
             };
 
-            console.log('🔄 Fetching users with params:', params);
 
             // Use adminService which handles authentication automatically
             const data = await adminService.getAllUsers(params);
-            console.log('✅ Users API response:', data);
-            console.log('📊 Raw users data:', data.data?.users || data.users);
 
             // Handle the response structure
             const usersData = data.data?.users || data.users || [];
             const paginationData = data.data?.pagination || data.pagination || {};
 
             // Transform users data to match our interface and filter out other admins
-            console.log('🔄 Raw users data received:', usersData.slice(0, 3).map((u: any) => ({ id: u.id, first_name: u.first_name, last_name: u.last_name, name: u.name, email: u.email })));
+            .map((u: any) => ({ id: u.id, first_name: u.first_name, last_name: u.last_name, name: u.name, email: u.email })));
 
             const transformedUsers = usersData
                 .filter((user: any) => {
@@ -224,13 +221,11 @@ export default function UserManagement() {
                     return transformedUser;
                 });
 
-            console.log('📊 Transformed users:', transformedUsers.slice(0, 3).map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
+            .map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
             setUsers(transformedUsers);
-            console.log('✅ Users state updated with', transformedUsers.length, 'users');
             setTotalPages(paginationData.totalPages || Math.ceil(transformedUsers.length / 20));
 
         } catch (error) {
-            console.error('Error fetching users:', error);
             setUsers([]);
             setTotalPages(1);
 
@@ -246,11 +241,9 @@ export default function UserManagement() {
 
     const fetchUserDetails = async (userId: string) => {
         try {
-            console.log('🔄 Fetching user details for:', userId);
 
             // Use adminService to get user details
             const response = await adminService.getUserById(userId);
-            console.log('✅ User details API response:', response);
 
             // Handle different response formats
             const apiData = response.data?.data || response.data || response;
@@ -271,7 +264,6 @@ export default function UserManagement() {
             setSelectedUser(userDetails);
             setShowUserDetails(true);
         } catch (error) {
-            console.error('❌ Error fetching user details:', error);
 
             toast({
                 title: t('admin_error') || "Error",
@@ -283,7 +275,6 @@ export default function UserManagement() {
 
     const updateUserStatus = async (userId: string, updates: any) => {
         try {
-            console.log('🔄 Updating user:', userId, 'with updates:', updates);
 
             // Optimistically update the local user state immediately
             setUsers(prevUsers =>
@@ -300,7 +291,6 @@ export default function UserManagement() {
                             ...(updates.phone !== undefined) && { phone: updates.phone },
                             ...(updates.approval_status !== undefined) && { approval_status: updates.approval_status },
                         };
-                        console.log('🔄 Optimistically updated user:', updatedUser);
                         return updatedUser;
                     }
                     return user;
@@ -309,7 +299,6 @@ export default function UserManagement() {
 
             // Use adminService for user updates
             const result = await adminService.updateUser(userId, updates);
-            console.log('✅ User update API response:', result);
 
             let successMessage = t('admin_user_updated_successfully') || "User updated successfully";
             if (result.passwordUpdated) {
@@ -322,18 +311,14 @@ export default function UserManagement() {
             });
 
             // Immediately refresh the user list to get the latest data
-            console.log('🔄 Refreshing user list after update...');
-            console.log('👤 Current users before refresh:', users.map(u => ({ id: u.id, name: u.name, email: u.email })));
+            ));
 
             // Track refresh completion
-            console.log('📊 Starting fetchUsers after successful update...');
             await fetchUsers();
-            console.log('✅ fetchUsers completed after update');
 
             setShowEditDialog(false);
             setEditingUser(null);
         } catch (error) {
-            console.error('❌ Error updating user:', error);
 
             // Revert the optimistic update on error by refetching
             await fetchUsers();
@@ -348,7 +333,6 @@ export default function UserManagement() {
 
     const deleteUser = async (userId: string) => {
         try {
-            console.log('🔄 Deleting user:', userId);
 
             // Use adminService for user deletion
             await adminService.deleteUser(userId);
@@ -360,7 +344,6 @@ export default function UserManagement() {
 
             fetchUsers();
         } catch (error) {
-            console.error('❌ Error deleting user:', error);
 
             toast({
                 title: t('admin_error') || "Error",

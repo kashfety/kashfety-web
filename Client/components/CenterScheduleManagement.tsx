@@ -81,21 +81,17 @@ export default function CenterScheduleManagement() {
       }
       
       try {
-        console.log('📅 [Fetch Schedule] Starting fetch for test type:', selectedType);
-        console.log('� [Fetch Schedule] Initialized test types:', Array.from(initializedTestTypes));
+        );
         
         setLoadingSchedule(true);
         
         const res = await centerService.getLabSchedule(selectedType);
         const scheduleRows = res?.schedule || [];
-        console.log('� [Fetch Schedule] Schedule rows from DB:', scheduleRows.length);
         
         // Always fetch from DB, but only update form state if not initialized
         const shouldUpdateFromDB = !initializedTestTypes.has(selectedType);
-        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
         
         if (shouldUpdateFromDB) {
-          console.log('📅 [Fetch Schedule] Building configs from schedule...');
           const cfg: Record<number, any> = {};
           
           for (const s of scheduleRows) {
@@ -133,7 +129,6 @@ export default function CenterScheduleManagement() {
             };
           }
           
-          console.log('📅 [Fetch Schedule] Built configs:', cfg);
           
           // Store config for this test type
           setTestTypeFormStates(prev => ({
@@ -144,13 +139,9 @@ export default function CenterScheduleManagement() {
           // Mark as initialized
           setInitializedTestTypes(prev => new Set([...prev, selectedType]));
           
-          console.log('✅ [Fetch Schedule] Test type initialized:', selectedType);
         } else {
-          console.log('✅ [Fetch Schedule] Test type already initialized, using existing form state');
-          console.log('📅 [Fetch Schedule] Existing config:', testTypeFormStates[selectedType]);
         }
       } catch (error) {
-        console.error('❌ [Fetch Schedule] Failed to load schedule:', error);
       } finally {
         setLoadingSchedule(false);
       }
@@ -225,13 +216,9 @@ export default function CenterScheduleManagement() {
       await centerService.saveLabSchedule(selectedType, schedule as any);
       toast({ title: t('success') || 'Success', description: t('dd_schedule_updated') || 'Schedule updated successfully' });
     } catch (error: any) {
-      console.error('Save schedule error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       
       // Handle schedule conflict (409) with detailed message
       if (error.response?.status === 409) {
-        console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
         const conflictData = error.response.data;
         
         // Set conflict message and details
@@ -299,7 +286,6 @@ export default function CenterScheduleManagement() {
                       variant={isSelected ? "default" : "outline"}
                       className="h-auto py-4 px-4 flex flex-col items-start gap-2 relative"
                       onClick={() => {
-                        console.log('🔀 Test type button clicked:', { current: selectedType, clicked: testTypeId });
                         setSelectedType(testTypeId);
                       }}
                     >

@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: response.status });
 
   } catch (error) {
-    console.error('Frontend API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -45,7 +45,7 @@ export async function GET(
   .eq('center_id', centerId);
 
     if (error) {
-      console.error('Supabase fallback error (center-schedule doctors):', error);
+      :', error);
       return NextResponse.json({ success: false, message: 'Failed to fetch center doctors' }, { status: 500 });
     }
 
@@ -71,7 +71,6 @@ export async function GET(
 
     return NextResponse.json({ success: true, doctors }, { status: 200 });
   } catch (error) {
-    console.error('Center-schedule doctors final error:', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch center doctors' }, { status: 500 });
   }
 }

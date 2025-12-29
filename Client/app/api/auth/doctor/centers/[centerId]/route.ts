@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { centerId
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/centers/[centerId] PUT):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { cente
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/centers/[centerId] DELETE):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

@@ -39,7 +39,6 @@ export default function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
         try {
             await logout()
         } catch (error) {
-            console.error('Logout error:', error)
             // Fallback logout
             localStorage.removeItem('auth_token')
             sessionStorage.removeItem('auth_token')

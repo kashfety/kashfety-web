@@ -38,7 +38,6 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Failed to update appointment status:', error);
       return NextResponse.json({ error: 'Failed to update appointment status' }, { status: 500 });
     }
 
@@ -53,7 +52,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Status update API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

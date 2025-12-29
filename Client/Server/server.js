@@ -81,7 +81,6 @@ const corsOptions = {
     if (isAllowed || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('CORS request from origin:', origin);
       callback(null, true); // Allow all for now to prevent blocking
     }
   },
@@ -391,7 +390,6 @@ app.get("/api", (req, res) => {
 // Only start the server if not in Vercel serverless environment
 if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
   });
 }
 

@@ -43,14 +43,12 @@ apiClient.interceptors.request.use((config) => {
 // Simple login function
 export const simpleLogin = async (email: string, password: string) => {
   try {
-    console.log('Attempting simple login for:', email);
     
     const response = await apiClient.post('/appointment-management/simple-login', {
       email,
       password
     });
 
-    console.log('Simple login response:', response.data);
 
     if (response.data.success) {
       setAuthToken(response.data.token);
@@ -63,7 +61,6 @@ export const simpleLogin = async (email: string, password: string) => {
       throw new Error(response.data.message || 'Login failed');
     }
   } catch (error: any) {
-    console.error('Simple login error:', error);
     throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
@@ -96,14 +93,11 @@ export const getCurrentUser = () => {
 // Create appointment (simplified)
 export const createAppointment = async (appointmentData: any) => {
   try {
-    console.log('Creating appointment with simplified API:', appointmentData);
     
     const response = await apiClient.post('/appointment-management/booking/create', appointmentData);
     
-    console.log('Appointment creation response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Create appointment error:', error);
     throw new Error(error.response?.data?.message || 'Failed to create appointment');
   }
 };
@@ -117,7 +111,6 @@ export const getPatientAppointments = async () => {
     const response = await apiClient.get(`/appointment-management/patient/${user.id}`);
     return response.data;
   } catch (error: any) {
-    console.error('Get appointments error:', error);
     throw new Error(error.response?.data?.message || 'Failed to get appointments');
   }
 };
@@ -128,7 +121,6 @@ export const getDoctors = async () => {
     const response = await apiClient.get('/doctors');
     return response.data;
   } catch (error) {
-    console.error('Get doctors error:', error);
     throw new Error('Failed to get doctors');
   }
 };

@@ -67,7 +67,6 @@ export default function DoctorCenterManagement() {
       // Try fallback route first for Vercel compatibility
       let response;
       try {
-        console.log('🏥 Trying doctor-centers fallback route');
         response = await axios.get(
           `/api/doctor-centers`,
           {
@@ -75,7 +74,6 @@ export default function DoctorCenterManagement() {
           }
         );
       } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
         response = await axios.get(
           `/api/doctor-dashboard/centers`,
           {
@@ -104,8 +102,7 @@ export default function DoctorCenterManagement() {
           return approved;
         });
 
-        console.log('[Centers][client] doctorId=', currentDoctorId, 'received=', rawCenters.length, 'filtered=', filtered.length);
-        filtered.forEach((c) => console.log('[Centers][client] kept:', c.id, c.name, c.center_type, c.owner_doctor_id));
+        filtered.forEach((c) => );
         setCenters(filtered);
 
         // Set current assignments
@@ -125,7 +122,6 @@ export default function DoctorCenterManagement() {
         }
       }
     } catch (error) {
-      console.error('Fetch centers error:', error);
       toast({
         title: t('error') || 'Error',
         description: t('dd_load_centers_failed') || 'Failed to load centers',
@@ -145,10 +141,8 @@ export default function DoctorCenterManagement() {
       // Try fallback route first for Vercel compatibility
       let res;
       try {
-        console.log('🏥 Trying doctor-create-center fallback route');
         res = await axios.post('/api/doctor-create-center', newCenter, { headers: { Authorization: `Bearer ${token}` } });
       } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
         res = await axios.post('/api/doctor-dashboard/centers', newCenter, { headers: { Authorization: `Bearer ${token}` } });
       }
       if (res.data?.success) {
@@ -221,7 +215,6 @@ export default function DoctorCenterManagement() {
       // Try fallback route first for Vercel compatibility
       let response;
       try {
-        console.log('🏥 Trying doctor-centers-assignments fallback route');
         response = await axios.put(
           `/api/doctor-centers-assignments`,
           {
@@ -234,7 +227,6 @@ export default function DoctorCenterManagement() {
           }
         );
       } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
         response = await axios.put(
           `/api/doctor-dashboard/centers`,
           {
@@ -249,7 +241,6 @@ export default function DoctorCenterManagement() {
       }
 
       if (response.data.success) {
-        console.log('✅ [Centers] Assignments saved successfully. Selected centers should now appear in Schedule tab.');
         toast({
           title: t('success') || 'Success',
           description: (t('dd_assignments_updated') || 'Center assignments updated successfully') + ' - ' + (t('check_schedule_tab') || 'Check the Schedule tab to set your hours.'),
@@ -261,7 +252,6 @@ export default function DoctorCenterManagement() {
         setInitialPrimaryCenter(finalPrimary);
       }
     } catch (error: any) {
-      console.error('Save assignments error:', error);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_save_assignments_failed') || 'Failed to save assignments'),

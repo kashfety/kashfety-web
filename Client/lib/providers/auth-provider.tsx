@@ -46,12 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedToken = localStorage.getItem('auth_token')
         const storedUser = localStorage.getItem('auth_user')
 
-        console.log('🔍 Initializing auth - stored token:', storedToken ? 'present' : 'missing')
-        console.log('🔍 Initializing auth - stored user:', storedUser)
 
         if (storedToken && storedUser) {
           const userData = JSON.parse(storedUser)
-          console.log('🔍 Parsed stored user data:', userData)
 
           setToken(storedToken)
           setUser(userData)
@@ -60,10 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Verify token is still valid
           await verifyToken(storedToken)
         } else {
-          console.log('🔍 No stored auth data found')
         }
       } catch (err) {
-        console.error('Error initializing auth:', err)
         // Clear invalid data
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
@@ -78,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Verify token validity
   const verifyToken = async (authToken: string) => {
     try {
-      console.log('Verifying token...')
 
       // Use Next.js API route (relative path) instead of backend server
       // This ensures we use the Next.js API route handler
@@ -91,7 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: 'include', // Important for CORS with credentials
       })
 
-      console.log('Token verification response status:', response.status)
 
       if (!response.ok) {
         // If we get a 403, the token is invalid - clear it
@@ -100,20 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem('auth_user')
           setUser(null)
           setIsAuthenticated(false)
-          console.log('Invalid token detected and cleared')
           return
         }
         throw new Error('Token verification failed')
       }
 
       const result = await response.json()
-      console.log('Token verification result:', result)
 
       if (result.message === 'Token is valid') {
-        console.log('Token is valid, user authenticated')
         // Token is valid, update user data from the verification response
         if (result.user) {
-          console.log('Updating user data from token verification:', result.user)
 
           // Construct full name properly - prioritize 'name' field, fallback to first/last names
           let fullName = result.user.name;
@@ -135,7 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             center_id: result.user.center_id
           }
 
-          console.log('🔄 Setting updated user data:', updatedUser)
           setUser(updatedUser)
           localStorage.setItem('auth_user', JSON.stringify(updatedUser))
         }
@@ -143,11 +131,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Token invalid')
       }
     } catch (err) {
-      console.error('Token verification failed:', err)
 
       // For development, don't logout if token verification fails
       // This allows the app to continue working even if the backend verify endpoint isn't implemented
-      console.log('Token verification failed, but continuing with stored user for development')
 
       // Continue with stored user data instead of logging out
     }
@@ -158,7 +144,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      console.log('Starting login process...')
       
       // Normalize API URL to avoid double slashes or missing /api  
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -174,8 +159,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       const loginUrl = `${baseUrl}/auth/login`
-      console.log('🌐 Login URL:', loginUrl)
-      console.log('🌐 API URL env:', apiUrl)
       
       const response = await fetch(loginUrl, {
         method: 'POST',
@@ -191,18 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         result = await response.json()
       } catch (parseError) {
-        console.error('Failed to parse response as JSON:', parseError)
         const text = await response.text()
-        console.error('Response text:', text)
         throw new Error(`Server returned invalid response (${response.status}): ${text.substring(0, 200)}`)
       }
 
-      console.log('Login response status:', response.status)
-      console.log('Login response data:', result)
 
       if (!response.ok) {
         const errorMessage = result.error || result.message || `Login failed with status ${response.status}`
-        console.error('Login failed:', errorMessage)
         
         // If doctor needs to upload certificate, store temporary token for upload
         if (result.requires_certificate_upload && result.certificate_status === 'not_uploaded') {
@@ -210,7 +188,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Store temporary token for certificate upload
           if (result.temp_token) {
             localStorage.setItem('temp_doctor_token', result.temp_token)
-            console.log('Stored temporary token for certificate upload')
           }
         }
         
@@ -231,22 +208,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(result.user)
         setIsAuthenticated(true)
 
-        console.log('Login successful, user role:', result.user.role)
         if (result.user.role === 'doctor') {
-          console.log('Doctor certificate status:', result.certificate_status)
         }
 
         // Redirect based on user role
         const dashboardPath = getDashboardPath(result.user.role)
-        console.log('Redirecting to:', dashboardPath)
         router.push(dashboardPath)
       } else {
-        console.error('Unexpected response structure:', result)
         throw new Error('Invalid response from server')
       }
 
     } catch (err) {
-      console.error('❌ Login error:', err)
       const error = err instanceof Error ? err : new Error('Login failed')
       console.error('Login error details:', {
         message: error.message,
@@ -306,7 +278,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      console.log('Starting registration process...')
 
       // Robust name handling: support either name or first/last coming from caller
       const fallbackFullName = [userData.first_name, userData.last_name].filter(Boolean).join(' ').trim()
@@ -322,11 +293,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         last_name: computedLast,
       }
 
-      console.log('=== AUTH PROVIDER REGISTRATION DEBUG ===');
-      console.log('Original userData:', userData);
-      console.log('Computed first_name:', computedFirst);
-      console.log('Computed last_name:', computedLast);
-      console.log('Final registrationData:', registrationData);
 
       // Normalize API URL to avoid double slashes or missing /api
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -338,8 +304,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       const registerUrl = `${baseUrl}/auth/register`
-      console.log('🌐 Register URL:', registerUrl)
-      console.log('🌐 API URL env:', apiUrl)
       
       const response = await fetch(registerUrl, {
         method: 'POST',
@@ -351,16 +315,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       const result = await response.json()
-      console.log('Response status:', response.status);
-      console.log('Response result:', result);
 
       if (!response.ok) {
-        console.error('Registration failed:', result);
         throw new Error(result.error || result.message || 'Registration failed')
       }
 
       if ((result.message && result.message.includes('registered successfully')) || result.success) {
-        console.log('Registration successful, logging in...')
         // After successful registration, log in the user
         await login(userData.phone, userData.password)
       } else {

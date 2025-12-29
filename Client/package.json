@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "vercel-build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cleanup-logs": "node cleanup-logs.js --dry-run",
+    "cleanup-logs:remove": "node cleanup-logs.js --remove"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

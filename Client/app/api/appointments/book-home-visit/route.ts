@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
-        console.error('Proxy error (book-home-visit):', error);
+        :', error);
         return NextResponse.json({ success: false, message: 'Failed to book home visit' }, { status: 500 });
     }
 }

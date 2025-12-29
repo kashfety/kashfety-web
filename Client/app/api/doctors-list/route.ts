@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
         const { data: doctors, error, count } = await query;
 
         if (error) {
-            console.error('Error fetching doctors:', error);
             return NextResponse.json(
                 { success: false, message: 'Failed to fetch doctors', error: error.message },
                 { status: 500 }
@@ -109,7 +108,6 @@ export async function GET(request: NextRequest) {
             totalPages: search ? Math.ceil(filteredDoctors.length / limit) : Math.ceil((count || 0) / limit)
         });
     } catch (error: any) {
-        console.error('Unexpected error in doctors list endpoint:', error);
         return NextResponse.json(
             { success: false, message: 'Internal server error', error: error.message },
             { status: 500 }

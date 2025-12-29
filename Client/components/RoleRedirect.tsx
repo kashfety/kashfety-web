@@ -31,7 +31,7 @@ export default function RoleRedirect() {
             !currentPath.startsWith('/signup') &&
             currentPath !== '/') {
 
-            console.log(`🔄 RoleRedirect: ${user.name} (${role}) redirected from ${currentPath} to ${expectedPath}`)
+             redirected from ${currentPath} to ${expectedPath}`)
             router.replace(expectedPath)
         }
     }, [user, isAuthenticated, loading, pathname, router])

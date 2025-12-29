@@ -12,7 +12,6 @@ export async function GET(
   context: { params: Promise<{ userId: string }> }
 ) {
   try {
-    console.log('📋 [User Appointments API] Request received');
     
     // Require authentication
     const authResult = requireAuth(request);
@@ -35,7 +34,6 @@ export async function GET(
       }
     }
 
-    console.log('📋 [User Appointments API] User ID:', userId, 'Role:', role);
 
     if (!userId) {
       return NextResponse.json({ success: false, message: 'User ID is required' }, { status: 400 });
@@ -53,7 +51,6 @@ export async function GET(
 
     // Filter by role
     if (role === 'super_admin' || role === 'admin') {
-      console.log('Admin/Super Admin - fetching all appointments');
     } else if (role === 'doctor') {
       appointmentsQuery = appointmentsQuery.eq('doctor_id', userId);
     } else {
@@ -64,11 +61,9 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching appointments:', error);
       return NextResponse.json({ success: false, message: 'Failed to fetch appointments', error: error.message }, { status: 500 });
     }
 
-    console.log(`Found ${appointments?.length || 0} appointments`);
 
     // Enrich with center info
     const enriched = [] as any[];
@@ -90,7 +85,6 @@ export async function GET(
 
     return NextResponse.json({ success: true, appointments: enriched });
   } catch (err: any) {
-    console.error('Error:', err);
     return NextResponse.json({ success: false, message: 'Internal server error', error: err.message }, { status: 500 });
   }
 }

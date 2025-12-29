@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 [Admin Dashboard Stats] Request received');
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -111,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     // Filter to only patients for patient demographics
     const patients = (users || []).filter((u: any) => u.role === 'patient');
-    console.log('📊 [Admin Dashboard Stats] Total users fetched:', (users || []).length, 'Patients:', patients.length);
+    .length, 'Patients:', patients.length);
 
     patients.forEach((user: any) => {
       // Gender - normalize to lowercase to avoid duplicates
@@ -139,7 +138,6 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log('📊 [Admin Dashboard Stats] Demographics:', { gender, ageGroups, patientsCount: patients.length });
 
     // Specialties (for doctors) - count all doctors
     (users || []).forEach((user: any) => {
@@ -196,7 +194,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin dashboard stats error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

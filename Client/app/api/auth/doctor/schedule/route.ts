@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/schedule GET):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -59,7 +59,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/schedule PUT):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

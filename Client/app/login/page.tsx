@@ -102,7 +102,6 @@ export default function LoginPage() {
         const tempToken = localStorage.getItem('temp_doctor_token')
         if (tempToken) {
           setDoctorToken(tempToken)
-          console.log('Using temporary token for certificate upload')
         }
         // Show certificate prompt modal for upload
         setShowCertificatePrompt(true)

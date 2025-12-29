@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
       debug: true,
     });
     const preview = raw.slice(0, 400);
-    console.log('[PrepAI] raw preview:', preview);
 
     let data = extractJson(raw);
 
@@ -84,7 +83,6 @@ export async function POST(request: NextRequest) {
     if (!data || !Array.isArray(data.prep_sections)) {
       const fallbackModel = '@hf/nousresearch/hermes-2-pro-mistral-7b';
       if (model !== fallbackModel) {
-        console.warn('[PrepAI] invalid JSON, retrying with fallback model:', fallbackModel);
         const raw2 = await runWorkersAI('', {
           model: fallbackModel,
           messages,
@@ -95,7 +93,6 @@ export async function POST(request: NextRequest) {
           debug: true,
         });
         const preview2 = raw2.slice(0, 400);
-        console.log('[PrepAI] retry raw preview:', preview2);
         data = extractJson(raw2);
       }
     }
@@ -106,7 +103,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, plan: data });
   } catch (e: any) {
-    console.error('prep route error:', e);
     const msg = String(e?.message || 'prep generation failed');
     return NextResponse.json({ success: false, message: msg }, { status: 502 });
   }

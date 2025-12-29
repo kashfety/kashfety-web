@@ -29,7 +29,6 @@ export async function GET(
             .single();
 
         if (doctorError || !doctor) {
-            console.error('Error fetching doctor:', doctorError);
             return NextResponse.json(
                 { success: false, message: 'Doctor not found' },
                 { status: 404 }
@@ -51,7 +50,6 @@ export async function GET(
             .eq('doctor_id', doctorId);
 
         if (centersError) {
-            console.error('Error fetching doctor centers:', centersError);
             // Continue without centers data
         }
 
@@ -76,7 +74,6 @@ export async function GET(
             }
         });
     } catch (error: any) {
-        console.error('Unexpected error in doctor details endpoint:', error);
         return NextResponse.json(
             { success: false, message: 'Internal server error', error: error.message },
             { status: 500 }

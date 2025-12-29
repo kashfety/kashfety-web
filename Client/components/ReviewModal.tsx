@@ -37,7 +37,6 @@ export default function ReviewModal({ isOpen, onClose, appointmentId, doctorId, 
       onSuccess?.(rating);
       onClose();
     } catch (e) {
-      console.error('Submit review error', e);
     } finally {
       setSaving(false);
     }

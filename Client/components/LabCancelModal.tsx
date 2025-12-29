@@ -104,7 +104,6 @@ export default function LabCancelModal({ isOpen, onClose, booking, onSuccess }: 
         }
       );
     } catch (error: any) {
-      console.error('Error cancelling lab booking:', error);
       showError(
         t('lab_cancel_error_title') || "Cancellation Failed",
         error.message || t('lab_cancel_error_message') || "Unable to cancel your lab test. Please try again."

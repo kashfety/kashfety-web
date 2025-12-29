@@ -20,15 +20,12 @@ function verifyToken(token: string) {
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  console.log('📋 Super Admin activity endpoint hit!');
   
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');
-    console.log('🔑 Auth header present:', !!authHeader);
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ No valid authorization header');
       return NextResponse.json(
         { error: 'Unauthorized - No token provided' },
         { status: 401 }
@@ -37,10 +34,8 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
-    console.log('🔓 Token decoded:', !!decoded, 'Role:', decoded?.role);
 
     if (!decoded) {
-      console.log('❌ Invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
@@ -49,7 +44,6 @@ export async function GET(request: NextRequest) {
 
     // Check if user is super_admin
     if (decoded.role !== 'super_admin') {
-      console.log('❌ User is not super_admin, role:', decoded.role);
       return NextResponse.json(
         { error: 'Forbidden - Super Admin access required' },
         { status: 403 }
@@ -67,7 +61,6 @@ export async function GET(request: NextRequest) {
     const end_date = searchParams.get('end_date');
     const offset = (page - 1) * limit;
 
-    console.log('📝 Fetching admin activities - Page:', page, 'Limit:', limit, 'Filters:', { search, action_type, admin_id, start_date, end_date });
 
     // Use aggregation approach - fetch all admin/super_admin actions from various tables
     let allActivities: any[] = [];
@@ -213,7 +206,7 @@ export async function GET(request: NextRequest) {
     const total = filteredActivities.length;
     const activities = filteredActivities.slice(offset, offset + limit);
 
-    console.log(`✅ Super Admin: Retrieved ${activities.length} admin activities (${total} total)`);
+    `);
 
     return NextResponse.json({
       success: true,
@@ -227,8 +220,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Super admin activity endpoint error:', error);
-    console.error('❌ Error stack:', error.stack);
     return NextResponse.json(
       { 
         error: 'Failed to fetch admin activities',

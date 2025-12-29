@@ -15,7 +15,6 @@ export const getAllCenters = async (req, res) => {
       data: centers
     });
   } catch (error) {
-    console.error('Error fetching centers:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch centers',
@@ -42,7 +41,6 @@ export const getCentersByType = async (req, res) => {
       data: centers
     });
   } catch (error) {
-    console.error('Error fetching centers by type:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch centers by type',
@@ -89,7 +87,6 @@ export const getCenterServices = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching center services:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch center services',
@@ -123,7 +120,6 @@ export const getNearbyCenters = async (req, res) => {
       message: lat && lng ? 'Location-based search will be implemented with geolocation' : 'Showing all centers'
     });
   } catch (error) {
-    console.error('Error fetching nearby centers:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch nearby centers',
@@ -191,7 +187,6 @@ export const createCenter = async (req, res) => {
       data: center
     });
   } catch (error) {
-    console.error('Error creating center:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create center',
@@ -221,7 +216,6 @@ export const updateCenter = async (req, res) => {
       data: center
     });
   } catch (error) {
-    console.error('Error updating center:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update center',
@@ -247,7 +241,6 @@ export const deleteCenter = async (req, res) => {
       message: 'Center deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting center:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete center',
@@ -306,7 +299,6 @@ export const assignDoctorToCenter = async (req, res) => {
       data: assignment
     });
   } catch (error) {
-    console.error('Error assigning doctor to center:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to assign doctor to center',
@@ -333,7 +325,6 @@ export const unassignDoctorFromCenter = async (req, res) => {
       message: 'Doctor unassigned from center successfully'
     });
   } catch (error) {
-    console.error('Error unassigning doctor from center:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to unassign doctor from center',
@@ -366,7 +357,6 @@ export const getDoctorCenters = async (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Error fetching doctor centers:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch doctor centers',
@@ -435,7 +425,6 @@ export const getAvailableSlots = async (req, res) => {
       data: availableSlots
     });
   } catch (error) {
-    console.error('Error fetching available slots:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch available slots',
@@ -485,7 +474,6 @@ export const addCenterService = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error adding center service:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to add service',
@@ -527,7 +515,6 @@ export const removeCenterService = async (req, res) => {
       data: updatedCenter
     });
   } catch (error) {
-    console.error('Error removing center service:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to remove service',

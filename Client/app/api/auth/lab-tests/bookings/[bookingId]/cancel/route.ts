@@ -79,7 +79,6 @@ export async function PUT(
       .single();
 
     if (updateError) {
-      console.error('Failed to cancel booking:', updateError);
       return NextResponse.json({ error: 'Failed to cancel booking' }, { status: 500 });
     }
 
@@ -89,7 +88,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Error cancelling booking:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

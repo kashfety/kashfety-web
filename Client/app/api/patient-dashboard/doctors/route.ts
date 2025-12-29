@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
         const { data: doctors, error, count } = await query;
 
         if (error) {
-            console.error('Error fetching doctors:', error);
             return NextResponse.json(
                 { success: false, message: 'Failed to fetch doctors', error: error.message },
                 { status: 500 }
@@ -78,7 +77,6 @@ export async function GET(request: NextRequest) {
             totalPages: Math.ceil((count || 0) / limit)
         });
     } catch (error: any) {
-        console.error('Unexpected error in patient-dashboard doctors endpoint:', error);
         return NextResponse.json(
             { success: false, message: 'Internal server error', error: error.message },
             { status: 500 }

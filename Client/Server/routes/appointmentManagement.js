@@ -7,10 +7,6 @@ const router = express.Router();
 // Appointment Booking & Creation
 router.post("/booking/create", authenticateToken, async (req, res) => {
   try {
-    console.log('=== APPOINTMENT BOOKING DEBUG ===');
-    console.log('Raw request body:', req.body);
-    console.log('User from token:', req.user);
-    console.log('Request headers:', req.headers.authorization ? 'Has auth header' : 'No auth header');
     
     // Use the authenticated user's patient ID from the token, not from the request body
     const appointmentData = {
@@ -50,7 +46,6 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
       });
     }
 
-    console.log('Prepared appointment data:', appointmentData);
 
     // Validate that the doctor exists before creating the appointment
     const { data: doctorExists, error: doctorCheckError } = await supabaseAdmin
@@ -60,14 +55,12 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
       .single();
 
     if (doctorCheckError || !doctorExists) {
-      console.error('Doctor validation failed:', doctorCheckError);
       return res.status(400).json({
         success: false,
         message: "Selected doctor not found or unavailable"
       });
     }
 
-    console.log('Doctor validation passed:', doctorExists);
 
     // Ensure patient record exists for the authenticated user
     // First check by uid (frontend compatibility)
@@ -95,7 +88,6 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
 
     if (patientCheckError && patientCheckError.code === 'PGRST116') {
       // Patient doesn't exist, create one with proper uid field
-      console.log('Creating patient record for user:', req.user.id);
       const { data: newPatient, error: createPatientError } = await supabaseAdmin
         .from('patients')
         .insert([{
@@ -112,22 +104,18 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
         .single();
 
       if (createPatientError) {
-        console.error('Failed to create patient record:', createPatientError);
         return res.status(500).json({
           success: false,
           message: "Failed to create patient profile"
         });
       }
-      console.log('Patient record created:', newPatient);
       patientId = newPatient.id;
     } else if (patientCheckError) {
-      console.error('Patient check failed:', patientCheckError);
       return res.status(500).json({
         success: false,
         message: "Patient validation failed"
       });
     } else {
-      console.log('Patient exists:', existingPatient);
       patientId = existingPatient.id;
     }
 
@@ -144,25 +132,17 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
       `)
       .single();
 
-    console.log('Supabase insert result:', { data, error });
 
     if (error) {
-      console.error('Supabase error details:', error);
       throw error;
     }
 
-    console.log('Success! Appointment created:', data);
     res.status(201).json({
       success: true,
       message: "Appointment booked successfully",
       appointment: data
     });
   } catch (error) {
-    console.error('=== APPOINTMENT BOOKING ERROR ===');
-    console.error('Error type:', typeof error);
-    console.error('Error message:', error.message);
-    console.error('Full error:', error);
-    console.error('Error stack:', error.stack);
     
     res.status(500).json({
       success: false,
@@ -199,7 +179,6 @@ router.post("/booking/emergency", authenticateToken, async (req, res) => {
 
     if (patientCheckError && patientCheckError.code === 'PGRST116') {
       // Patient doesn't exist, create one with proper uid field
-      console.log('Creating patient record for emergency user:', req.user.id);
       const { data: newPatient, error: createPatientError } = await supabaseAdmin
         .from('patients')
         .insert([{
@@ -216,16 +195,13 @@ router.post("/booking/emergency", authenticateToken, async (req, res) => {
         .single();
 
       if (createPatientError) {
-        console.error('Failed to create patient record:', createPatientError);
         return res.status(500).json({
           success: false,
           message: "Failed to create patient profile"
         });
       }
-      console.log('Emergency patient record created:', newPatient);
       patientId = newPatient.id;
     } else if (patientCheckError) {
-      console.error('Patient check failed:', patientCheckError);
       return res.status(500).json({
         success: false,
         message: "Patient validation failed"
@@ -288,7 +264,6 @@ router.get("/test-db", async (req, res) => {
       .limit(1);
     
     if (error) {
-      console.error('Database test error:', error);
       return res.status(500).json({
         success: false,
         message: `Database error: ${error.message}`
@@ -301,7 +276,6 @@ router.get("/test-db", async (req, res) => {
       data: data
     });
   } catch (error) {
-    console.error('Database test exception:', error);
     res.status(500).json({
       success: false,
       message: `Exception: ${error.message}`
@@ -324,7 +298,6 @@ router.get("/list-appointments", async (req, res) => {
       .order('appointment_date', { ascending: true });
     
     if (error) {
-      console.error('List appointments error:', error);
       return res.status(500).json({
         success: false,
         message: `Database error: ${error.message}`
@@ -337,7 +310,6 @@ router.get("/list-appointments", async (req, res) => {
       data: data
     });
   } catch (error) {
-    console.error('List appointments exception:', error);
     res.status(500).json({
       success: false,
       message: `Exception: ${error.message}`
@@ -349,7 +321,6 @@ router.get("/list-appointments", async (req, res) => {
 router.put("/test-reschedule/:appointmentId", async (req, res) => {
   try {
     const appointmentId = req.params.appointmentId;
-    console.log('Test reschedule for appointment:', appointmentId);
     
     // Try to fetch the appointment first
     const { data: existingAppointment, error: fetchError } = await supabaseAdmin
@@ -358,7 +329,6 @@ router.put("/test-reschedule/:appointmentId", async (req, res) => {
       .eq('id', appointmentId)
       .single();
     
-    console.log('Test fetch result:', { existingAppointment: !!existingAppointment, fetchError });
     
     if (fetchError) {
       return res.status(500).json({
@@ -384,7 +354,6 @@ router.put("/test-reschedule/:appointmentId", async (req, res) => {
       .select('id, notes')
       .single();
     
-    console.log('Test update result:', { data, error });
     
     if (error) {
       return res.status(500).json({
@@ -400,7 +369,6 @@ router.put("/test-reschedule/:appointmentId", async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Test reschedule error:', error);
     res.status(500).json({
       success: false,
       message: `Test error: ${error.message}`
@@ -473,7 +441,6 @@ router.put("/status/:appointmentId/update", authenticateToken, async (req, res) 
       appointment: data
     });
   } catch (error) {
-    console.error('Error updating appointment status:', error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update appointment status"
@@ -558,10 +525,8 @@ router.put("/reschedule/:appointmentId", authenticateToken, async (req, res) => 
       `)
       .single();
 
-    console.log('Update result:', { data, error });
 
     if (error) {
-      console.error('Error updating appointment:', error);
       throw error;
     }
 
@@ -571,7 +536,6 @@ router.put("/reschedule/:appointmentId", authenticateToken, async (req, res) => 
       appointment: data
     });
   } catch (error) {
-    console.error('Error rescheduling appointment:', error);
     console.error('Error details:', {
       name: error.name,
       message: error.message,
@@ -873,7 +837,7 @@ router.put("/complete/:appointmentId", authenticateToken, isDoctor, async (req, 
           description: notes
         }]);
 
-      if (recordError) console.error("Medical record creation error:", recordError);
+      if (recordError) 
     }
 
     res.json({

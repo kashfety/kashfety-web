@@ -64,7 +64,6 @@ export default function LabTestTypesManagement() {
       const data = await response.json();
       setLabTestTypes(data.labTestTypes || []);
     } catch (error: any) {
-      console.error('Error fetching lab test types:', error);
       showError(
         t('error') || 'Error',
         error.message || 'Failed to load lab test types'
@@ -130,7 +129,6 @@ export default function LabTestTypesManagement() {
         }
       );
     } catch (error: any) {
-      console.error('Error adding lab test type:', error);
       showError(
         t('error') || 'Error',
         error.message || 'Failed to add lab test type'
@@ -163,7 +161,6 @@ export default function LabTestTypesManagement() {
             'Lab test type deleted successfully'
           );
         } catch (error: any) {
-          console.error('Error deleting lab test type:', error);
           showError(
             t('error') || 'Error',
             error.message || 'Failed to delete lab test type'

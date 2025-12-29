@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { tokenHash, newPassword } = body;
 
-    console.log('📥 [Reset-Password] Request received with token hash');
 
     // Validate required fields
     if (!tokenHash || !newPassword) {
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (verifyError || !verifyData.user) {
-      console.error('❌ [Reset-Password] Invalid or expired token:', verifyError);
       return NextResponse.json(
         { success: false, error: 'Invalid or expired reset token' },
         { status: 400 }
@@ -45,13 +43,11 @@ export async function POST(request: NextRequest) {
     }
 
     const userEmail = verifyData.user.email;
-    console.log('✅ [Reset-Password] Token verified for user:', userEmail);
 
     // Hash new password for our custom users table
     const saltRounds = 12;
     const password_hash = await bcrypt.hash(newPassword, saltRounds);
 
-    console.log('🔐 [Reset-Password] Password hashed, updating database...');
 
     // Update password in our custom users table
     const { error: updateError } = await supabase
@@ -65,7 +61,6 @@ export async function POST(request: NextRequest) {
       .eq('email', userEmail);
 
     if (updateError) {
-      console.error('❌ [Reset-Password] Error updating password in users table:', updateError);
     }
 
     // Also update the password in Supabase Auth for consistency
@@ -74,14 +69,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (authUpdateError) {
-      console.error('❌ [Reset-Password] Error updating Supabase Auth password:', authUpdateError);
       return NextResponse.json(
         { success: false, error: 'Failed to update password' },
         { status: 500 }
       );
     }
 
-    console.log('✅ [Reset-Password] Password updated successfully for:', userEmail);
 
     return NextResponse.json({
       success: true,
@@ -89,7 +82,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Reset-Password] Unexpected error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }

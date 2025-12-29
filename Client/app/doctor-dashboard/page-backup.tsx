@@ -354,7 +354,6 @@ export default function DoctorDashboard() {
   }, []);
 
   useEffect(() => {
-    console.log('Current user role:', user?.role);
     if (!user) {
       router.push('/login');
       return;
@@ -369,12 +368,10 @@ export default function DoctorDashboard() {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
       if (!token) {
-        console.error('No token found in localStorage');
         router.push('/login');
         return;
       }
 
-      console.log('Fetching doctor data with token:', token ? 'present' : 'missing');
 
       // Fetch doctor profile
       const profileResponse = await fetch('http://localhost:5000/api/auth/doctor/profile', {
@@ -384,11 +381,9 @@ export default function DoctorDashboard() {
         }
       });
 
-      console.log('Profile response status:', profileResponse.status);
 
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
-        console.log('Profile data received:', profileData);
         setDoctorProfile(profileData.doctor);
 
         // Check if this is first time setup (no specialty set)
@@ -399,7 +394,6 @@ export default function DoctorDashboard() {
         }
       } else {
         const errorText = await profileResponse.text();
-        console.error('Profile fetch error:', profileResponse.status, errorText);
         if (profileResponse.status === 401) {
           router.push('/login');
           return;
@@ -428,7 +422,6 @@ export default function DoctorDashboard() {
         const todayData = await todayResponse.json();
         setTodayStats(todayData);
       } else {
-        console.warn('Today stats fetch failed:', 'error' in todayResponse ? todayResponse.error : 'Unknown error');
         // Set default values
         setTodayStats({
           total_appointments: 0,
@@ -444,7 +437,6 @@ export default function DoctorDashboard() {
         const patientsData = await patientsResponse.json();
         setPatients(patientsData.patients || []);
       } else {
-        console.warn('Patients fetch failed:', 'error' in patientsResponse ? patientsResponse.error : 'Unknown error');
         setPatients([]);
       }
 
@@ -453,7 +445,6 @@ export default function DoctorDashboard() {
         const analyticsData = await analyticsResponse.json();
         setAnalytics(analyticsData);
       } else {
-        console.warn('Analytics fetch failed:', 'error' in analyticsResponse ? analyticsResponse.error : 'Unknown error');
         setAnalytics({
           monthly_revenue: 0,
           monthly_patients: 0,
@@ -481,7 +472,6 @@ export default function DoctorDashboard() {
       ]);
 
     } catch (error) {
-      console.error('Failed to fetch doctor data:', error);
       toast({
         title: t('error'),
         description: "Failed to load dashboard data. Please try again.",

@@ -148,7 +148,6 @@ export default function DoctorDashboard() {
       }
 
     } catch (error) {
-      console.error('Failed to fetch doctor data:', error);
       toast({
         title: t('error'),
         description: "Failed to load dashboard data. Please refresh the page.",

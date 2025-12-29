@@ -21,14 +21,12 @@ export async function GET(request: NextRequest) {
   // Try backend first if JWT provided
   if (authHeader) {
     try {
-      console.log('🔄 Attempting backend request to:', `${BACKEND_URL}/api/center-dashboard/lab-tests/today`);
       const response = await fetch(`${BACKEND_URL}/api/center-dashboard/lab-tests/today`, {
         method: 'GET',
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
       });
-      console.log('📊 Backend response status:', response.status, response.statusText);
       const responseText = await response.text();
-      console.log('📊 Backend response preview:', responseText.slice(0, 200));
+      );
 
       if (response.ok) {
         const data = JSON.parse(responseText);
@@ -36,7 +34,6 @@ export async function GET(request: NextRequest) {
       }
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -51,7 +48,6 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Get ALL upcoming bookings for this center (no date filter)
-    console.log('Fetching ALL bookings for center:', centerId);
 
     const { data: bookings, error } = await supabase
       .from('lab_bookings')
@@ -76,10 +72,8 @@ export async function GET(request: NextRequest) {
       .order('booking_date', { ascending: true })
       .order('booking_time', { ascending: true });
 
-    console.log('Supabase query result:', { error, bookingsCount: bookings?.length, centerId });
 
     if (error) {
-      console.error('Failed to fetch upcoming bookings:', error);
       return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
     }
 
@@ -104,7 +98,6 @@ export async function GET(request: NextRequest) {
       consultation_fee: booking.total_amount || booking.amount || booking.fee || 0
     }));
 
-    console.log('Transformed bookings:', transformedBookings.length, 'bookings');
 
     return NextResponse.json({
       success: true,
@@ -113,7 +106,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Center lab tests fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch lab tests' }, { status: 500 });
   }
 }

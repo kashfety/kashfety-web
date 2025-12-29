@@ -18,16 +18,13 @@ export default function DoctorDashboardLayout({
         const checkAuth = async () => {
             try {
                 if (!isAuthenticated) {
-                    console.log("Not authenticated, redirecting to login")
                     router.push('/login')
                     return
                 }
 
-                console.log("Current user role:", user?.role)
 
                 if (user?.role !== 'doctor') {
                     // User is authenticated but wrong role
-                    console.log("Wrong role, redirecting to appropriate dashboard")
                     const dashboardPath = user?.role === 'patient' ? '/' : '/doctor-dashboard' // Redirect patients to doctor dashboard
                     router.push(dashboardPath)
                     return
@@ -35,7 +32,6 @@ export default function DoctorDashboardLayout({
 
                 setIsAuthorized(true)
             } catch (error) {
-                console.error("Auth check failed:", error)
                 router.push('/login')
             }
         }

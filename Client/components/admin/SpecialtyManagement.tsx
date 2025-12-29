@@ -99,7 +99,6 @@ export default function SpecialtyManagement() {
             const data = await response.json()
             setSpecialties(data.data?.specialties || data.specialties || [])
         } catch (error) {
-            console.error('Error fetching specialties:', error)
             toast({
                 title: t('admin_error') || 'Error',
                 description: t('admin_failed_to_fetch_specialties') || 'Failed to fetch specialties',
@@ -203,7 +202,6 @@ export default function SpecialtyManagement() {
 
             fetchSpecialties()
         } catch (error: any) {
-            console.error('Error saving specialty:', error)
             toast({
                 title: t('admin_error') || 'Error',
                 description: error.message || t('admin_failed_to_save_specialty') || 'Failed to save specialty',
@@ -244,7 +242,6 @@ export default function SpecialtyManagement() {
             setDeletingSpecialty(null)
             fetchSpecialties()
         } catch (error: any) {
-            console.error('Error deleting specialty:', error)
             toast({
                 title: t('admin_error') || 'Error',
                 description: error.message || t('admin_failed_to_delete_specialty') || 'Failed to delete specialty',

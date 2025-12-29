@@ -5,8 +5,7 @@ import { supabaseAdmin, TABLES } from "../utils/supabase.js";
 
 // Book a regular appointment
 export const bookAppointment = async (req, res) => {
-  console.log('🎯 BOOKING APPOINTMENT ENDPOINT HIT');
-  console.log('🎯 Timestamp:', new Date().toISOString());
+  .toISOString());
 
   try {
     const {
@@ -31,8 +30,7 @@ export const bookAppointment = async (req, res) => {
     });
 
     // Enhanced logging for debugging
-    console.log('🔍 Request body received:', JSON.stringify(req.body, null, 2));
-    console.log('🔍 Request headers auth:', req.headers.authorization ? 'Present' : 'Missing');
+    );
 
     // Validate required fields
     if (!patient_id || !doctor_id || !appointment_date || !appointment_time) {
@@ -51,7 +49,6 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (patientError || !patient) {
-      console.error('❌ Patient not found:', patientError);
       return res.status(404).json({
         success: false,
         error: 'Patient not found in unified users table'
@@ -67,7 +64,6 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (doctorError || !doctor) {
-      console.error('❌ Doctor not found:', doctorError);
       return res.status(404).json({
         success: false,
         error: 'Doctor not found in unified users table'
@@ -135,12 +131,9 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (insertError) {
-      console.error('❌ Error creating appointment:', insertError);
       throw insertError;
     }
 
-    console.log('✅ Appointment created successfully:', newAppointment.id);
-    console.log('✅ BOOKING COMPLETED SUCCESSFULLY');
 
     res.status(201).json({
       success: true,
@@ -151,10 +144,6 @@ export const bookAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ APPOINTMENT BOOKING FAILED');
-    console.error('❌ Error details:', error);
-    console.error('❌ Error message:', error.message);
-    console.error('❌ Error code:', error.code);
     res.status(500).json({
       success: false,
       error: 'Failed to book appointment',
@@ -177,7 +166,6 @@ export const bookHomeVisit = async (req, res) => {
     return await bookAppointment(req, res);
 
   } catch (error) {
-    console.error('❌ Home visit booking error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to book home visit',
@@ -243,7 +231,6 @@ export const getPatientAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get patient appointments error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointments',
@@ -312,7 +299,6 @@ export const getDoctorAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get doctor appointments error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointments',
@@ -378,7 +364,6 @@ export const updateAppointmentStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Update appointment status error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to update appointment status',
@@ -472,7 +457,6 @@ export const rescheduleAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Reschedule appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to reschedule appointment',
@@ -576,7 +560,6 @@ export const cancelAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Cancel appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to cancel appointment',
@@ -630,7 +613,6 @@ export const getAppointmentById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get appointment by ID error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointment',
@@ -653,7 +635,6 @@ export const bookMedicalTest = async (req, res) => {
     return await bookAppointment(req, res);
 
   } catch (error) {
-    console.error('❌ Medical test booking error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to book medical test',
@@ -753,7 +734,6 @@ export const getAppointmentStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get appointment stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointment statistics',
@@ -768,7 +748,6 @@ export const confirmAppointment = async (req, res) => {
     const { appointmentId } = req.params;
     const doctorUid = req.user?.uid;
 
-    console.log('🔔 Confirming appointment:', appointmentId, 'for doctor:', doctorUid);
 
     // Verify appointment exists and belongs to this doctor
     const { data: appointment, error: fetchError } = await supabaseAdmin
@@ -793,7 +772,6 @@ export const confirmAppointment = async (req, res) => {
       .single();
 
     if (fetchError || !appointment) {
-      console.log('❌ Appointment not found or access denied');
       return res.status(404).json({
         success: false,
         error: 'Appointment not found or you do not have permission to confirm it'
@@ -834,7 +812,6 @@ export const confirmAppointment = async (req, res) => {
       throw updateError;
     }
 
-    console.log('✅ Appointment confirmed successfully');
 
     res.status(200).json({
       success: true,
@@ -843,7 +820,6 @@ export const confirmAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Confirm appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to confirm appointment',
@@ -859,7 +835,6 @@ export const completeAppointment = async (req, res) => {
     const { notes, diagnosis, prescription } = req.body;
     const doctorUid = req.user?.uid;
 
-    console.log('🔔 Completing appointment:', appointmentId, 'for doctor:', doctorUid);
 
     // Verify appointment exists and belongs to this doctor
     const { data: appointment, error: fetchError } = await supabaseAdmin
@@ -884,7 +859,6 @@ export const completeAppointment = async (req, res) => {
       .single();
 
     if (fetchError || !appointment) {
-      console.log('❌ Appointment not found or access denied');
       return res.status(404).json({
         success: false,
         error: 'Appointment not found or you do not have permission to complete it'
@@ -941,12 +915,10 @@ export const completeAppointment = async (req, res) => {
         });
 
       if (medicalRecordError) {
-        console.error('❌ Failed to create medical record:', medicalRecordError);
         // Don't fail the completion, just log the error
       }
     }
 
-    console.log('✅ Appointment completed successfully');
 
     res.status(200).json({
       success: true,
@@ -955,7 +927,6 @@ export const completeAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Complete appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to complete appointment',
@@ -970,7 +941,6 @@ export const getPatientMedicalTests = async (req, res) => {
     const { patientId } = req.params;
     const userUid = req.user?.uid;
 
-    console.log('🔔 Getting medical tests for patient:', patientId, 'by user:', userUid);
 
     // Verify the user has access to this patient's data
     // Either the user is the patient themselves, or a doctor who has seen this patient
@@ -1037,7 +1007,6 @@ export const getPatientMedicalTests = async (req, res) => {
       throw testsError;
     }
 
-    console.log('✅ Retrieved medical tests successfully:', medicalTests?.length || 0);
 
     res.status(200).json({
       success: true,
@@ -1045,7 +1014,6 @@ export const getPatientMedicalTests = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get patient medical tests error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get patient medical tests',
@@ -1060,7 +1028,6 @@ export const getAppointmentDetails = async (req, res) => {
     const { appointmentId } = req.params;
     const userUid = req.user?.uid;
 
-    console.log('🔔 Getting appointment details:', appointmentId, 'for user:', userUid);
 
     // Get user info to determine access rights
     const { data: userData, error: userError } = await supabaseAdmin
@@ -1128,7 +1095,6 @@ export const getAppointmentDetails = async (req, res) => {
       });
     }
 
-    console.log('✅ Retrieved appointment details successfully');
 
     res.status(200).json({
       success: true,
@@ -1136,7 +1102,6 @@ export const getAppointmentDetails = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get appointment details error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointment details',
@@ -1151,7 +1116,6 @@ export const getAvailableSlots = async (req, res) => {
     const { doctorId } = req.params;
     const { date } = req.query;
 
-    console.log('🔔 Getting available slots for doctor:', doctorId, 'on date:', date);
 
     if (!date) {
       return res.status(400).json({
@@ -1251,7 +1215,6 @@ export const getAvailableSlots = async (req, res) => {
     const bookedTimes = existingAppointments.map(apt => apt.appointment_time);
     const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
 
-    console.log('✅ Generated available slots successfully:', availableSlots.length);
 
     res.status(200).json({
       success: true,
@@ -1266,7 +1229,6 @@ export const getAvailableSlots = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get available slots error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get available slots',
@@ -1280,7 +1242,7 @@ export const getAllAppointments = async (req, res) => {
   try {
     const { page = 1, limit = 20, status, doctorId, patientId, dateFrom, dateTo } = req.query;
 
-    console.log('🔔 Getting all appointments (Admin)');
+    ');
 
     let query = supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -1355,7 +1317,6 @@ export const getAllAppointments = async (req, res) => {
       throw countError;
     }
 
-    console.log('✅ Retrieved all appointments successfully:', appointments?.length || 0);
 
     res.status(200).json({
       success: true,
@@ -1378,7 +1339,6 @@ export const getAllAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get all appointments error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get all appointments',

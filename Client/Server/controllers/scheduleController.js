@@ -43,7 +43,6 @@ export const getDoctorSchedule = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching doctor schedule:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch schedule',
@@ -86,7 +85,6 @@ export const updateWorkHours = async (req, res) => {
       message: 'Work hours updated successfully'
     });
   } catch (error) {
-    console.error('Error updating work hours:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update work hours',
@@ -127,7 +125,6 @@ export const addVacation = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error('Error adding vacation:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to add vacation period',
@@ -233,7 +230,6 @@ export const checkAvailability = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error checking availability:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to check availability',
@@ -307,8 +303,6 @@ export const getAvailableSlots = async (req, res) => {
 
     if (appointmentsError) throw appointmentsError;
 
-    console.log(`🔍 SCHEDULE CONTROLLER DEBUG - Doctor: ${doctorId}, Date: ${date}`);
-    console.log(`🔍 Found ${appointments.length} existing appointments:`, appointments);
 
     // Generate booked slots list for frontend compatibility
     const bookedSlots = appointments.map(apt => {
@@ -320,7 +314,6 @@ export const getAvailableSlots = async (req, res) => {
       return timeStr; // Already in HH:MM format
     });
 
-    console.log(`🔍 Processed booked slots:`, bookedSlots);
 
     // Generate time slots
     const slots = [];
@@ -359,7 +352,7 @@ export const getAvailableSlots = async (req, res) => {
       current = new Date(current.getTime() + (slotDuration * 60000));
     }
 
-    console.log(`🔍 Generated ${slots.length} available slots:`, slots.map(s => s.startTime));
+    );
 
     res.json({
       success: true,
@@ -371,7 +364,6 @@ export const getAvailableSlots = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting available slots:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get available slots',

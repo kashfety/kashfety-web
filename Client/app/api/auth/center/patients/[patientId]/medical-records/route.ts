@@ -66,7 +66,6 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error('Failed to fetch medical records:', error);
       return NextResponse.json({ error: 'Failed to fetch medical records' }, { status: 500 });
     }
 
@@ -76,7 +75,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Medical records API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

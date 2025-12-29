@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
         const { data: centers, error: centersError, count } = await centersQuery;
 
         if (centersError) {
-            console.error('Error fetching centers:', centersError);
             return NextResponse.json(
                 { success: false, message: 'Failed to fetch centers', error: centersError.message },
                 { status: 500 }
@@ -95,7 +94,6 @@ export async function GET(request: NextRequest) {
             totalPages: Math.ceil((category ? filteredCenters.length : (count || 0)) / limit)
         });
     } catch (error: any) {
-        console.error('Unexpected error in labs list endpoint:', error);
         return NextResponse.json(
             { success: false, message: 'Internal server error', error: error.message },
             { status: 500 }

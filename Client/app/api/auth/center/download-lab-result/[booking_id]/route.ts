@@ -34,7 +34,6 @@ export async function GET(
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('Download lab result error:', error);
     return NextResponse.json(
       { error: 'Failed to generate download link' }, 
       { status: 500 }

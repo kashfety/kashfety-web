@@ -18,26 +18,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        console.log('🗑️ [Super Admin Delete Proxy] Request received');
 
         // Get adminId from request body
         const body = await request.json();
         const { adminId } = body;
 
         if (!adminId) {
-            console.error('❌ Missing adminId in request body');
             return NextResponse.json({
                 success: false,
                 error: 'Admin ID is required'
             }, { status: 400 });
         }
 
-        console.log('🗑️ [Super Admin Delete Proxy] Forwarding delete request for admin:', adminId);
 
         // Get the authorization token from the request
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
-            console.error('❌ Missing authorization header');
             return NextResponse.json({
                 success: false,
                 error: 'Unauthorized'
@@ -57,7 +53,6 @@ export async function POST(request: NextRequest) {
         for (const baseUrl of backendUrls) {
             try {
                 const apiUrl = `${baseUrl}/${adminId}`;
-                console.log('🔄 [Super Admin Delete Proxy] Trying endpoint:', apiUrl);
 
                 const backendResponse = await fetch(apiUrl, {
                     method: 'DELETE',
@@ -69,7 +64,6 @@ export async function POST(request: NextRequest) {
 
                 if (backendResponse.ok) {
                     const responseData = await backendResponse.json().catch(() => ({}));
-                    console.log('✅ [Super Admin Delete Proxy] Success with endpoint:', apiUrl);
                     return NextResponse.json(responseData || {
                         success: true,
                         message: 'Admin deleted successfully'
@@ -77,20 +71,16 @@ export async function POST(request: NextRequest) {
                 }
 
                 lastError = await backendResponse.json().catch(() => ({ error: `HTTP ${backendResponse.status}` }));
-                console.log('⚠️ [Super Admin Delete Proxy] Failed with endpoint:', apiUrl, 'Status:', backendResponse.status, 'Error:', lastError);
 
             } catch (error: any) {
-                console.log('⚠️ [Super Admin Delete Proxy] Network error with endpoint:', baseUrl, error.message);
                 lastError = { error: error.message };
                 continue;
             }
         }
 
         // All backend endpoints failed, try Supabase fallback
-        console.log('🔄 [Super Admin Delete Proxy] Backend endpoints failed, trying Supabase fallback');
 
         if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-            console.error('❌ Missing Supabase credentials for fallback');
             return NextResponse.json(
                 lastError || { success: false, error: 'Failed to delete admin - no fallback available' },
                 { status: 500 }
@@ -109,7 +99,6 @@ export async function POST(request: NextRequest) {
                 .single();
 
             if (fetchError || !existingAdmin) {
-                console.error('❌ Admin not found in Supabase:', fetchError);
                 return NextResponse.json({
                     success: false,
                     error: 'Admin not found'
@@ -129,7 +118,6 @@ export async function POST(request: NextRequest) {
                 .eq('id', adminId);
 
             if (deleteError) {
-                console.error('❌ Failed to delete admin from Supabase:', deleteError);
                 return NextResponse.json({
                     success: false,
                     error: 'Failed to delete admin',
@@ -137,7 +125,6 @@ export async function POST(request: NextRequest) {
                 }, { status: 500 });
             }
 
-            console.log('✅ [Super Admin Delete Proxy] Admin deleted successfully from Supabase');
             return NextResponse.json({
                 success: true,
                 message: 'Admin deleted successfully',
@@ -145,7 +132,6 @@ export async function POST(request: NextRequest) {
             });
 
         } catch (supabaseError: any) {
-            console.error('❌ Supabase fallback error:', supabaseError);
             return NextResponse.json(
                 lastError || { success: false, error: 'Failed to delete admin', details: supabaseError.message },
                 { status: 500 }
@@ -153,8 +139,6 @@ export async function POST(request: NextRequest) {
         }
 
     } catch (error: any) {
-        console.error('❌ Super admin delete proxy error:', error);
-        console.error('❌ Error stack:', error.stack);
         return NextResponse.json({
             success: false,
             error: 'Failed to delete admin',

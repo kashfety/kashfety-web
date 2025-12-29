@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
-        console.error('Proxy error (book-medical-test):', error);
+        :', error);
         return NextResponse.json({ success: false, message: 'Failed to book medical test' }, { status: 500 });
     }
 }

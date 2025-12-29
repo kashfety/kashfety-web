@@ -130,7 +130,6 @@ router.get('/dashboard/stats', isSuperAdmin, async (req, res) => {
             data: dashboardStats
         });
     } catch (error) {
-        console.error('Error fetching super admin dashboard stats:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch dashboard statistics'
@@ -189,7 +188,6 @@ router.get('/admins', canManageAdmins, logAdminAction('admins_viewed', 'admin'),
             }
         });
     } catch (error) {
-        console.error('Error fetching admins:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch admins'
@@ -199,23 +197,18 @@ router.get('/admins', canManageAdmins, logAdminAction('admins_viewed', 'admin'),
 
 router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin'), async (req, res) => {
     try {
-        console.log('📝 Super Admin: Creating new admin user');
-        console.log('📝 Request body:', req.body);
         
         const { name, email, phone, role, adminNotes, password } = req.body;
 
         // Validation
         if (!name || !email || !phone || !role || !password) {
-            console.log('❌ Validation failed: Missing required fields');
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields: name, email, phone, role, and password are required'
             });
         }
 
-        console.log('✅ Validation passed, checking for existing users...');
 
-        console.log('✅ Validation passed, checking for existing users...');
 
         // Check if email already exists
         const { data: existingUser } = await supabaseAdmin
@@ -225,7 +218,6 @@ router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin')
             .single();
 
         if (existingUser) {
-            console.log('❌ Email already exists:', email);
             return res.status(400).json({
                 success: false,
                 message: 'Email already exists'
@@ -240,21 +232,17 @@ router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin')
             .single();
 
         if (existingPhone) {
-            console.log('❌ Phone already exists:', phone);
             return res.status(400).json({
                 success: false,
                 message: 'Phone number already exists'
             });
         }
 
-        console.log('✅ No duplicate users found, hashing password...');
 
-        console.log('✅ No duplicate users found, hashing password...');
 
         // Hash password
         const password_hash = await bcrypt.hash(password, 10);
         
-        console.log('✅ Password hashed, creating admin data...');
 
         // Create admin user - only use fields that exist in the users table
         const adminData = {
@@ -271,7 +259,6 @@ router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin')
             default_dashboard: role === 'super_admin' ? '/super-admin-dashboard' : '/admin-dashboard'
         };
 
-        console.log('📝 Admin data prepared:', { ...adminData, password_hash: '[HIDDEN]' });
 
         const { data: newAdmin, error } = await supabaseAdmin
             .from('users')
@@ -280,11 +267,9 @@ router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin')
             .single();
 
         if (error) {
-            console.error('❌ Database error:', error);
             throw error;
         }
 
-        console.log('✅ Admin created successfully:', newAdmin.id);
 
         // Log the creation
         await logAdminActivity(
@@ -302,7 +287,6 @@ router.post('/admins', canManageAdmins, logAdminAction('admin_created', 'admin')
             message: 'Admin created successfully'
         });
     } catch (error) {
-        console.error('Error creating admin:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create admin'
@@ -315,8 +299,6 @@ router.put('/admins/:adminId', canManageAdmins, logAdminAction('admin_updated', 
         const { adminId } = req.params;
         const { name, email, phone, role } = req.body;
 
-        console.log('📝 Super Admin: Updating admin user:', adminId);
-        console.log('📝 Update data:', { name, email, phone, role });
 
         // Prevent self-modification of critical fields
         if (adminId === req.user.id && role && role !== req.user.role) {
@@ -387,7 +369,6 @@ router.put('/admins/:adminId', canManageAdmins, logAdminAction('admin_updated', 
         if (phone) updateData.phone = phone;
         if (role) updateData.role = role;
 
-        console.log('📝 Final update data:', updateData);
 
         const { data: updatedAdmin, error } = await supabaseAdmin
             .from('users')
@@ -397,11 +378,9 @@ router.put('/admins/:adminId', canManageAdmins, logAdminAction('admin_updated', 
             .single();
 
         if (error) {
-            console.error('❌ Update error:', error);
             throw error;
         }
 
-        console.log('✅ Admin updated successfully:', updatedAdmin.id);
 
         // Log the update
         await logAdminActivity(
@@ -419,7 +398,6 @@ router.put('/admins/:adminId', canManageAdmins, logAdminAction('admin_updated', 
             message: 'Admin updated successfully'
         });
     } catch (error) {
-        console.error('Error updating admin:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to update admin'
@@ -483,7 +461,6 @@ router.delete('/admins/:adminId', canManageAdmins, logAdminAction('admin_deleted
             message: 'Admin deleted successfully'
         });
     } catch (error) {
-        console.error('Error deleting admin:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to delete admin'
@@ -506,7 +483,6 @@ router.get('/activity', canViewAuditLogs, async (req, res) => {
         } = req.query;
         const offset = (page - 1) * limit;
 
-        console.log('🔄 Super Admin: Fetching activity logs by aggregating existing tables');
 
         // Create audit logs by aggregating data from existing tables
         let auditLogs = [];
@@ -711,7 +687,6 @@ router.get('/activity', canViewAuditLogs, async (req, res) => {
             createdAt: activity.created_at
         }));
 
-        console.log(`✅ Super Admin: Generated ${transformedActivities.length} activity logs from system data`);
 
         res.json({
             success: true,
@@ -724,7 +699,6 @@ router.get('/activity', canViewAuditLogs, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Super Admin activity endpoint error:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch admin activities',
@@ -735,7 +709,6 @@ router.get('/activity', canViewAuditLogs, async (req, res) => {
 
 router.get('/activity/stats', canViewAuditLogs, async (req, res) => {
     try {
-        console.log('🔄 Super Admin: Fetching activity statistics by aggregating existing tables');
 
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -862,14 +835,12 @@ router.get('/activity/stats', canViewAuditLogs, async (req, res) => {
             recentActions: actionsToday
         };
 
-        console.log(`✅ Super Admin: Generated activity statistics from ${activities.length} aggregated activities`);
 
         res.json({
             success: true,
             data: stats
         });
     } catch (error) {
-        console.error('❌ Super Admin activity stats endpoint error:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch activity statistics',

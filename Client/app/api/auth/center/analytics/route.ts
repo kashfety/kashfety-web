@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       if (response.ok) return NextResponse.json(data);
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -54,7 +53,6 @@ export async function GET(request: NextRequest) {
       .eq('center_id', centerId);
 
     if (error) {
-      console.error('Error fetching center analytics:', error);
       return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
     }
 
@@ -182,7 +180,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Center analytics fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch analytics' }, { status: 500 });
   }
 }

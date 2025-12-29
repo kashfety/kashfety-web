@@ -166,7 +166,6 @@ export default function MedicalRecordsSection() {
         setSpecialtiesMap(map);
       }
     } catch (error) {
-      console.error('Error fetching specialties:', error);
     }
   };
 
@@ -196,7 +195,6 @@ export default function MedicalRecordsSection() {
         setMedicationsList(result.medical_info.medications ? result.medical_info.medications.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
       }
     } catch (error) {
-      console.error('Error fetching medical info:', error);
       toast({
         title: "Error",
         description: "Failed to fetch medical information",
@@ -239,7 +237,6 @@ export default function MedicalRecordsSection() {
         throw new Error(result.message);
       }
     } catch (error) {
-      console.error('Error updating medical info:', error);
       toast({
         title: "Error",
         description: "Failed to update medical information",
@@ -306,7 +303,6 @@ export default function MedicalRecordsSection() {
         throw new Error(result.error || 'Failed to fetch medical records');
       }
     } catch (error) {
-      console.error('Error fetching medical records:', error);
       toast({
         title: "Error",
         description: "Failed to fetch medical records",
@@ -374,7 +370,6 @@ export default function MedicalRecordsSection() {
         throw new Error(result.error || (t('mr_failed_save') || 'Failed to save medical record'));
       }
     } catch (error: any) {
-      console.error('Error saving medical record:', error);
       toast({
         title: t('error') || "Error",
         description: error.message || (t('mr_failed_save') || "Failed to save medical record"),
@@ -409,7 +404,6 @@ export default function MedicalRecordsSection() {
         throw new Error(result.error || (t('mr_failed_delete') || 'Failed to delete medical record'));
       }
     } catch (error: any) {
-      console.error('Error deleting medical record:', error);
       toast({
         title: t('error') || "Error",
         description: error.message || (t('mr_failed_delete') || "Failed to delete medical record"),

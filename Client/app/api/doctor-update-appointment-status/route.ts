@@ -9,7 +9,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function PUT(request: NextRequest) {
   try {
-    console.log('🔄 [Doctor Update Appointment Status] PUT request received');
     
     // Require doctor authentication
     const authResult = requireDoctor(request);
@@ -54,12 +53,10 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !appointment) {
-      console.error('❌ [Doctor Update Appointment Status] Appointment not found:', fetchError);
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
     }
 
     if (appointment.doctor_id !== finalDoctorId) {
-      console.error('❌ [Doctor Update Appointment Status] Access denied - doctor_id mismatch');
       return NextResponse.json({ error: 'Forbidden - You can only update your own appointments' }, { status: 403 });
     }
 
@@ -73,7 +70,6 @@ export async function PUT(request: NextRequest) {
       updateData.notes = notes;
     }
 
-    console.log('💾 [Doctor Update Appointment Status] Updating appointment with data:', updateData);
 
     // Update appointment
     const { data: updated, error: updateError } = await supabase
@@ -84,14 +80,12 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ [Doctor Update Appointment Status] Update error:', updateError);
       return NextResponse.json({ 
         error: 'Failed to update appointment status',
         details: updateError.message 
       }, { status: 500 });
     }
 
-    console.log('✅ [Doctor Update Appointment Status] Appointment updated successfully:', updated.id);
 
     return NextResponse.json({ 
       success: true, 
@@ -100,7 +94,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Doctor Update Appointment Status] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

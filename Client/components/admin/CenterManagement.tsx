@@ -137,7 +137,6 @@ export default function CenterManagement() {
             let data;
             
             try {
-                console.log('🏥 Trying admin-centers fallback route');
                 response = await fetch(`/api/admin-centers?${params}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -148,14 +147,12 @@ export default function CenterManagement() {
                 if (response.ok) {
                     data = await response.json();
                     if (data.success) {
-                        console.log('✅ Fallback route worked for centers');
                         setCenters(data.data.centers);
                         setTotalPages(data.data.pagination.totalPages);
                         return;
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -176,7 +173,6 @@ export default function CenterManagement() {
             setCenters(data.data.centers);
             setTotalPages(data.data.pagination.totalPages);
         } catch (error) {
-            console.error('Error fetching centers:', error);
 
             toast({
                 title: t('admin_error') || "Error",
@@ -195,7 +191,6 @@ export default function CenterManagement() {
             let data;
             
             try {
-                console.log('🏥 Trying admin-center-details fallback route');
                 response = await fetch(`/api/admin-center-details?centerId=${centerId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -206,14 +201,12 @@ export default function CenterManagement() {
                 if (response.ok) {
                     data = await response.json();
                     if (data.success && data.data) {
-                        console.log('✅ Fallback route worked for center details');
                         setSelectedCenter(data.data);
                         setShowCenterDetails(true);
                         return;
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -234,7 +227,6 @@ export default function CenterManagement() {
             setSelectedCenter(data.data);
             setShowCenterDetails(true);
         } catch (error) {
-            console.error('Error fetching center details:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_load_center_details') || "Failed to load center details",
@@ -306,7 +298,6 @@ export default function CenterManagement() {
             });
             fetchCenters();
         } catch (error) {
-            console.error('Error creating center:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_create_center') || "Failed to create center",
@@ -316,7 +307,6 @@ export default function CenterManagement() {
     };
 
     const updateCenter = async (centerId: string, updates: any) => {
-        console.log('updateCenter called with centerId:', centerId, 'updates:', updates);
         try {
             // Use static Next.js API route (Vercel compatible)
             // See VERCEL_DYNAMIC_ROUTE_FIX.md for why we use static routes
@@ -332,12 +322,9 @@ export default function CenterManagement() {
                 })
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('Error response:', errorData);
                 throw new Error(errorData.error || 'Failed to update center');
             }
 
@@ -357,7 +344,6 @@ export default function CenterManagement() {
             setShowEditDialog(false);
             setEditingCenter(null);
         } catch (error) {
-            console.error('Error updating center:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_update_center') || "Failed to update center",
@@ -375,7 +361,6 @@ export default function CenterManagement() {
         if (!deletingCenter) return;
 
         try {
-            console.log('🔄 Deleting center:', deletingCenter.id);
 
             // Use adminService for center deletion
             await adminService.deleteCenter(deletingCenter.id);
@@ -389,7 +374,6 @@ export default function CenterManagement() {
             setDeletingCenter(null);
             fetchCenters();
         } catch (error) {
-            console.error('❌ Error deleting center:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_delete_center') || "Failed to delete center",
@@ -422,7 +406,6 @@ export default function CenterManagement() {
 
             fetchCenters();
         } catch (error) {
-            console.error('Error updating center status:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_update_center_status') || "Failed to update center status",
@@ -496,20 +479,12 @@ export default function CenterManagement() {
     };
 
     const handleSaveCenter = () => {
-        console.log('handleSaveCenter called with editingCenter:', editingCenter);
-        console.log('formData:', formData);
 
         try {
-            console.log('Starting password validation...');
             // If editing and password fields are filled, validate them
             if (editingCenter && (formData.password || formData.confirmPassword)) {
-                console.log('Password validation needed');
-                console.log('formData.password:', `"${formData.password}"`);
-                console.log('formData.confirmPassword:', `"${formData.confirmPassword}"`);
-                console.log('Passwords equal?:', formData.password === formData.confirmPassword);
 
                 if (formData.password !== formData.confirmPassword) {
-                    console.log('Password mismatch');
                     toast({
                         title: t('admin_error') || "Error",
                         description: t('admin_passwords_do_not_match') || "Passwords do not match",
@@ -520,20 +495,14 @@ export default function CenterManagement() {
                 // Removed password length restriction for now
             }
 
-            console.log('Password validation passed');
-            console.log('editingCenter exists?', !!editingCenter);
 
             if (editingCenter) {
-                console.log('Calling updateCenter with:', editingCenter.id, formData);
                 updateCenter(editingCenter.id, formData);
             } else {
-                console.log('Calling createCenter');
                 createCenter();
             }
 
-            console.log('handleSaveCenter completed');
         } catch (error) {
-            console.error('Error in handleSaveCenter:', error);
         }
     };
 
@@ -955,7 +924,6 @@ export default function CenterManagement() {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Button clicked!');
                                     handleSaveCenter();
                                 }}
                                 disabled={!formData.name || !formData.email || !formData.phone || !formData.address}

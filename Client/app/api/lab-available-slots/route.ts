@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
     const requestedDate = new Date(date);
     const dayOfWeek = requestedDate.getDay();
 
-    console.log('🔍 [Lab Available Slots] Fetching slots for:', { centerId, typeId, date, dayOfWeek });
 
     // Get lab schedule for this center, test type, and day of week
     const { data: schedule, error: scheduleError } = await supabase
@@ -38,7 +37,6 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (scheduleError) {
-      console.error('❌ Failed to fetch lab schedule:', scheduleError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch lab schedule' 
@@ -48,7 +46,7 @@ export async function GET(request: NextRequest) {
     let timeSlots = [];
     
     if (!schedule) {
-      console.log('⚠️ No schedule found, using default time slots (8 AM - 4 PM)');
+      ');
       
       // Generate default time slots: 8:00 AM to 4:00 PM, every 30 minutes
       const defaultSlots = [];
@@ -64,7 +62,6 @@ export async function GET(request: NextRequest) {
         try {
           timeSlots = JSON.parse(timeSlots);
         } catch (e) {
-          console.error('Failed to parse time_slots JSON:', e);
           // Use default slots as fallback
           const defaultSlots = [];
           for (let hour = 8; hour < 16; hour++) {
@@ -80,7 +77,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('📅 Time slots to use:', timeSlots);
 
     // Get booked slots for this date
     let bookingsQuery = supabase
@@ -99,7 +95,6 @@ export async function GET(request: NextRequest) {
     const { data: bookings, error: bookingsError } = await bookingsQuery;
 
     if (bookingsError) {
-      console.error('❌ Failed to fetch bookings:', bookingsError);
     }
 
     const bookedTimes = new Set((bookings || []).map(b => {
@@ -111,7 +106,7 @@ export async function GET(request: NextRequest) {
       }
       return time;
     }));
-    console.log('🔒 Booked times:', Array.from(bookedTimes));
+    );
 
     // Map slots to include availability
     // Handle both string slots and object slots
@@ -124,7 +119,6 @@ export async function GET(request: NextRequest) {
       } else if (slot.start_time) {
         time = slot.start_time;
       } else {
-        console.warn('⚠️ Unknown slot format:', slot);
         return null;
       }
       
@@ -141,8 +135,7 @@ export async function GET(request: NextRequest) {
       };
     }).filter((slot: any) => slot !== null); // Remove any null slots
 
-    console.log('✅ [Lab Available Slots] Returning', availableSlots.length, 'slots');
-    console.log('📋 [Lab Available Slots] Sample slots:', availableSlots.slice(0, 3));
+    );
 
     return NextResponse.json({
       success: true,
@@ -155,7 +148,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Lab available slots API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

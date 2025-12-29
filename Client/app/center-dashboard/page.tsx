@@ -594,7 +594,6 @@ function CenterAnalytics({
 
   // Prepare chart data with proper fallbacks and real data from allAppointments
   const monthlyTrendData = useMemo(() => {
-    console.log('🔄 Calculating monthly trend data, allAppointments:', allAppointments?.length || 0);
 
     // Generate last 7 months data
     const months = [];
@@ -612,13 +611,12 @@ function CenterAnalytics({
       const monthStart = new Date(year, month, 1).toISOString().slice(0, 10);
       const monthEnd = new Date(year, month + 1, 0).toISOString().slice(0, 10);
 
-      console.log(`📅 Processing ${monthName} (${monthStart} to ${monthEnd})`);
+      `);
 
       const monthBookings = (allAppointments || []).filter((b: any) => {
         // Handle both booking_date and appointment_date fields
         const appointmentDate = b.booking_date || b.appointment_date;
         if (!appointmentDate) {
-          console.log(`❌ No date found for appointment:`, b);
           return false;
         }
         const isInRange = appointmentDate >= monthStart && appointmentDate <= monthEnd;
@@ -664,7 +662,6 @@ function CenterAnalytics({
   const demographicsData = useMemo(() => {
     // Use analytics data if available (it has proper patient demographics)
     if (analytics?.analytics?.patientDemographics) {
-      console.log('📊 Using analytics demographics data:', analytics.analytics.patientDemographics);
       return {
         ageGroups: analytics.analytics.patientDemographics.ageGroups || {},
         genderDistribution: analytics.analytics.patientDemographics.genderDistribution || {},
@@ -679,7 +676,6 @@ function CenterAnalytics({
       const genderDistribution: Record<string, number> = { male: 0, female: 0, other: 0 };
       const testTypes: Record<string, number> = {};
 
-      console.log('📊 Using patients array for demographics, count:', patients.length);
 
       // Calculate demographics from patients data
       patients.forEach((patient: any) => {
@@ -726,7 +722,6 @@ function CenterAnalytics({
       const testTypes: Record<string, number> = {};
       const uniquePatients = new Set<string>();
 
-      console.log('📊 Using appointments data for demographics, count:', allAppointments.length);
 
       (allAppointments || []).forEach((booking: any) => {
         if (booking.patient_id) {
@@ -770,7 +765,6 @@ function CenterAnalytics({
     }
 
     // Final fallback: empty data
-    console.warn('📊 No demographics data available - neither analytics, patients, nor appointments data found');
     return {
       ageGroups: {},
       genderDistribution: {},
@@ -1281,7 +1275,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
   // Update day config function
   const updateDayConfig = (dayIndex: number, field: keyof DayConfig, value: any) => {
-    console.log('� [CenterSchedule] Updating day config:', { dayIndex, field, value });
     setScheduleConfig(prev => ({
       ...prev,
       [dayIndex]: {
@@ -1295,7 +1288,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
   const updateDayConfigWithPersistence = (dayIndex: number, field: keyof DayConfig, value: any) => {
     if (!selectedTestType) return;
 
-    console.log('🔧 [CenterSchedule] Updating day config:', { dayIndex, field, value, selectedTestType });
 
     const newConfig = { ...getDayConfig(dayIndex), [field]: value };
 
@@ -1319,7 +1311,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       try {
         localStorage.setItem(`centerScheduleStates_${user?.id}`, JSON.stringify(updated));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
       }
 
       return updated;
@@ -1385,7 +1376,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           setTypeFormStates(parsed);
         }
       } catch (error) {
-        console.error('Failed to load from localStorage:', error);
       }
     }
   }, [user?.id]);
@@ -1401,7 +1391,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           await saveSchedule();
         }
       } catch (error) {
-        console.error('Auto-save failed:', error);
         // Continue with type selection even if auto-save fails
       }
     }
@@ -1410,40 +1399,33 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
     // Always load from server (like refresh button) to get latest data
     if (newTypeId) {
-      console.log('🔄 [CenterSchedule] Loading schedule from server for test type:', newTypeId);
       await loadScheduleForType(newTypeId);
 
       // Mark as initialized after loading
       if (!initializedTypes.has(newTypeId)) {
-        console.log('✅ [CenterSchedule] Marking test type as initialized:', newTypeId);
         setInitializedTypes(prev => new Set([...prev, newTypeId]));
       }
     } else {
       // Clear current config
-      console.log('🧹 [CenterSchedule] Clearing schedule config (no test type selected)');
+      ');
       setScheduleConfig({});
     }
   };
 
   const loadScheduleForType = async (testTypeId: string) => {
     if (!user?.id) {
-      console.log('⚠️ [CenterSchedule] Cannot load schedule - no user ID');
       return;
     }
 
-    console.log('🔍 [CenterSchedule] Loading schedule for test type:', testTypeId, 'center:', user.id);
     setLoading(true);
     try {
       const response = await centerService.getLabSchedule(testTypeId);
-      console.log('📅 [CenterSchedule] Schedule response:', response);
 
       if (response?.schedule) {
-        console.log('✅ [CenterSchedule] Found', response.schedule.length, 'day schedules');
         // Convert server schedule format to component format
         const newConfig: ScheduleConfig = {};
 
         response.schedule.forEach((daySchedule: any) => {
-          console.log('📆 [CenterSchedule] Processing day', daySchedule.day_of_week, ':', daySchedule);
           const hasSlots = Array.isArray(daySchedule?.time_slots) && daySchedule.time_slots.length > 0;
           newConfig[daySchedule.day_of_week] = {
             isAvailable: daySchedule.is_available ?? (hasSlots ? true : false),
@@ -1463,8 +1445,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           };
         });
 
-        console.log('✅ [CenterSchedule] Converted schedule config:', newConfig);
-        console.log('✅ [CenterSchedule] Setting schedule config state for test type:', testTypeId);
         setScheduleConfig(newConfig);
 
         // Also update typeFormStates to persist the loaded config
@@ -1472,12 +1452,9 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
           ...prev,
           [testTypeId]: newConfig
         }));
-        console.log('✅ [CenterSchedule] Updated typeFormStates for test type:', testTypeId);
       } else {
-        console.log('⚠️ [CenterSchedule] No schedule data in response');
       }
     } catch (error) {
-      console.error('❌ [CenterSchedule] Failed to load schedule:', error);
       toast({
         title: t('error'),
         description: t('failed_load_schedule_config'),
@@ -1500,8 +1477,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
     setSaving(true);
     try {
-      console.log('💾 [CenterSchedule] Saving schedule for test type:', selectedTestType);
-      console.log('💾 [CenterSchedule] Schedule config:', scheduleConfig);
 
       // Convert component format to server format
       const schedule = DAYS_OF_WEEK.map((day) => {
@@ -1518,10 +1493,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         };
       });
 
-      console.log('💾 [CenterSchedule] Converted schedule for API:', schedule);
 
       const response = await centerService.saveLabSchedule(selectedTestType, schedule);
-      console.log('✅ [CenterSchedule] Save response:', response);
 
       toast({
         title: t('success'),
@@ -1529,7 +1502,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         variant: "default"
       });
     } catch (error) {
-      console.error('❌ [CenterSchedule] Failed to save schedule:', error);
       toast({
         title: t('error'),
         description: t('failed_save_schedule_config'),
@@ -1553,8 +1525,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
 
     setBulkSaving(true);
     try {
-      console.log('💾 [BulkSave] Saving schedule for', testTypeIds.length, 'test types');
-      console.log('💾 [BulkSave] Days:', days, 'Time:', startTime, '-', endTime);
 
       // Generate time slots for the given time range
       const generateBulkSlots = (start: string, end: string, duration: number = 30) => {
@@ -1591,10 +1561,8 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       const savePromises = testTypeIds.map(async (testTypeId) => {
         try {
           await centerService.saveLabSchedule(testTypeId, schedule);
-          console.log(`✅ [BulkSave] Saved schedule for test type: ${testTypeId}`);
           return { success: true, testTypeId };
         } catch (error) {
-          console.error(`❌ [BulkSave] Failed to save schedule for test type: ${testTypeId}`, error);
           return { success: false, testTypeId, error };
         }
       });
@@ -1621,7 +1589,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
         });
       }
     } catch (error) {
-      console.error('❌ [BulkSave] Failed to save bulk schedule:', error);
       toast({
         title: t('error'),
         description: t('failed_bulk_save_schedule') || 'Failed to save bulk schedule',
@@ -2426,7 +2393,6 @@ export default function CenterDashboardPage() {
           setTypeFormStates(parsed);
         }
       } catch (error) {
-        console.error('Failed to load from localStorage:', error);
       }
     }
   }, [user?.id]);
@@ -2454,7 +2420,6 @@ export default function CenterDashboardPage() {
 
           // Check if the API response indicates success
           if (!statusData.success) {
-            console.warn('Setup API returned unsuccessful response:', statusData);
             toast({
               title: "Setup Warning",
               description: statusData.error || "Unable to verify center setup status.",
@@ -2464,7 +2429,6 @@ export default function CenterDashboardPage() {
           }
 
           if (statusData.needsSetup) {
-            console.log('Center record needs setup, creating...');
 
             // Create center record
             const setupResponse = await fetch('/api/auth/center/setup', {
@@ -2486,13 +2450,11 @@ export default function CenterDashboardPage() {
             if (setupResponse.ok) {
               const setupData = await setupResponse.json();
               if (setupData.success) {
-                console.log('✅ Center record created successfully:', setupData.center?.id);
                 toast({
                   title: "Center Setup Complete",
                   description: "Your center record has been created successfully.",
                 });
               } else {
-                console.error('Center setup failed:', setupData.error);
                 toast({
                   title: "Center Setup Warning",
                   description: setupData.error || "There was an issue setting up your center record.",
@@ -2501,7 +2463,6 @@ export default function CenterDashboardPage() {
               }
             } else {
               const errorData = await setupResponse.json();
-              console.error('Center setup failed:', errorData.error);
               toast({
                 title: "Center Setup Warning",
                 description: "There was an issue setting up your center record. Some features may not work properly.",
@@ -2509,11 +2470,10 @@ export default function CenterDashboardPage() {
               });
             }
           } else {
-            console.log('✅ Center record exists:', statusData.center?.id, '(', statusData.center?.name, ')');
+            ');
           }
         } else {
           const errorData = await statusResponse.json();
-          console.error('Setup status check failed:', errorData);
           toast({
             title: "Setup Error",
             description: errorData.error || "Unable to check center setup status.",
@@ -2521,7 +2481,6 @@ export default function CenterDashboardPage() {
           });
         }
       } catch (error) {
-        console.error('Center setup error:', error);
         toast({
           title: "Setup Error",
           description: "Unable to verify center setup. Please refresh the page.",
@@ -2544,12 +2503,9 @@ export default function CenterDashboardPage() {
 
     // Only load if we have a complete user object and it's a center
     if (user?.role === 'center' && user?.id) {
-      console.log('Calling loadCenterData...');
       loadCenterData();
     } else if (user && user.role !== 'center') {
-      console.log('User is not a center, role:', user.role);
     } else if (!loading && !user) {
-      console.log('No user found and not loading, might need redirect');
     }
   }, [user]);
 
@@ -2579,9 +2535,7 @@ export default function CenterDashboardPage() {
 
   // Update profile form when center profile loads
   useEffect(() => {
-    console.log('Profile form useEffect triggered:', { centerProfile, userEmail: user?.email });
     if (centerProfile) {
-      console.log('Setting profile form with:', centerProfile);
       setProfileForm({
         name: centerProfile.name || '',
         name_ar: centerProfile.name_ar || '',
@@ -2592,7 +2546,6 @@ export default function CenterDashboardPage() {
         description: centerProfile.description || ''
       });
     } else {
-      console.log('No centerProfile, using default form');
       setProfileForm({
         name: '',
         name_ar: '',
@@ -2606,7 +2559,6 @@ export default function CenterDashboardPage() {
   }, [centerProfile, user?.email]);
 
   const loadCenterData = async () => {
-    console.log('loadCenterData called, user:', { id: user?.id, role: user?.role });
     try {
       setServicesLoading(true);
       const [todayRes, labTestTypesRes, patientsRes, analyticsRes, profileRes] = await Promise.all([
@@ -2632,7 +2584,7 @@ export default function CenterDashboardPage() {
 
       // Set lab test types with their current service settings
       if (labTestTypesRes?.success && Array.isArray(labTestTypesRes.labTestTypes)) {
-        console.log('📋 [Frontend] Received lab test types:', labTestTypesRes.labTestTypes.map((t: any) => ({ id: t.id, name: t.name, code: t.code, category: t.category, is_active: t.is_active })));
+         => ({ id: t.id, name: t.name, code: t.code, category: t.category, is_active: t.is_active })));
         setAllTestTypes(labTestTypesRes.labTestTypes);
 
         // Initialize service states from the loaded data
@@ -2651,7 +2603,6 @@ export default function CenterDashboardPage() {
           testTypes: labTestTypesRes.labTestTypes.map((t: any) => t.name)
         });
       } else {
-        console.warn('❌ [Frontend] Failed to load lab test types:', labTestTypesRes);
         setAllTestTypes([]);
       }
 
@@ -2659,13 +2610,9 @@ export default function CenterDashboardPage() {
       setAnalytics(analyticsRes);
 
       // Debug profile data structure
-      console.log('Profile API response:', profileRes);
-      console.log('Profile data:', profileRes?.profile);
-      console.log('Center data:', profileRes?.center);
 
       // Handle the correct API response structure
       const profileData = profileRes?.center || profileRes?.profile || profileRes || null;
-      console.log('Final profile data:', profileData);
 
       setCenterProfile(profileData);
 
@@ -2740,7 +2687,6 @@ export default function CenterDashboardPage() {
       }
 
     } catch (error) {
-      console.error('Failed to load center data:', error);
       toast({
         title: t('error'),
         description: t('failed_to_load_data'),
@@ -2775,7 +2721,6 @@ export default function CenterDashboardPage() {
       setLastFetchedTypeId(typeId);
 
     } catch (error) {
-      console.error('Failed to load schedule:', error);
       setSchedule([]);
     } finally {
       setScheduleLoading(false);
@@ -2859,7 +2804,6 @@ export default function CenterDashboardPage() {
       try {
         localStorage.setItem(`centerScheduleStates_${user?.id}`, JSON.stringify(updated));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
       }
 
       return updated;
@@ -2910,7 +2854,6 @@ export default function CenterDashboardPage() {
 
       if (activeServices.length === 0) {
         // If no services are active, just save empty array
-        console.log('Saving empty services array');
       } else {
         // Validate that all active services have valid lab test type IDs
         const validTypeIds = allTestTypes.map(type => type.id);
@@ -2927,7 +2870,6 @@ export default function CenterDashboardPage() {
         is_active: true
       }));
 
-      console.log('Saving services payload:', payload);
 
       const response = await fetch('/api/auth/center/lab-services', {
         method: 'PUT',
@@ -2941,16 +2883,13 @@ export default function CenterDashboardPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Services save failed:', { status: response.status, result });
         throw new Error(result.error || `Failed to save services (${response.status})`);
       }
 
       if (!result.success) {
-        console.error('Services save unsuccessful:', result);
         throw new Error(result.error || (t('services_save_failed')));
       }
 
-      console.log('✅ Services saved successfully');
 
       toast({
         title: t('success'),
@@ -2988,12 +2927,10 @@ export default function CenterDashboardPage() {
           }
         }
       } catch (error) {
-        console.warn('Failed to reload services after save:', error);
         // Don't throw error here, the save was successful
       }
 
     } catch (error: any) {
-      console.error('Save services error:', error);
       toast({
         title: t('error'),
         description: error?.message || 'Failed to save services',
@@ -3026,7 +2963,6 @@ export default function CenterDashboardPage() {
   };
 
   const handleBatchEnable = () => {
-    console.log('📦 [Batch] Enabling', selectedTestTypes.size, 'test types');
     setServiceStates(prev => {
       const updated = { ...prev };
       selectedTestTypes.forEach(typeId => {
@@ -3045,7 +2981,6 @@ export default function CenterDashboardPage() {
   };
 
   const handleBatchDisable = () => {
-    console.log('📦 [Batch] Disabling', selectedTestTypes.size, 'test types');
     setServiceStates(prev => {
       const updated = { ...prev };
       selectedTestTypes.forEach(typeId => {
@@ -3067,7 +3002,6 @@ export default function CenterDashboardPage() {
       toast({ title: t('error'), description: t('please_enter_fee'), variant: 'destructive' });
       return;
     }
-    console.log('📦 [Batch] Setting fee', batchFee, 'for', selectedTestTypes.size, 'test types');
     setServiceStates(prev => {
       const updated = { ...prev };
       selectedTestTypes.forEach(typeId => {
@@ -3101,7 +3035,6 @@ export default function CenterDashboardPage() {
       });
 
       const newType = response.data;
-      console.log('✅ [Frontend] Created new lab test type:', newType);
 
       toast({ title: t('success'), description: t('lab_test_type_created') });
 
@@ -3110,10 +3043,8 @@ export default function CenterDashboardPage() {
       setShowCreateDialog(false);
 
       // Reload all data from server to get the fresh list with the new test type
-      console.log('🔄 [Frontend] Reloading data to fetch new test type from server...');
       await loadCenterData();
     } catch (error: any) {
-      console.error('Failed to create lab test type:', error);
       toast({
         title: t('error'),
         description: error.response?.data?.error || t('failed_create_lab_test_type'),
@@ -3152,7 +3083,6 @@ export default function CenterDashboardPage() {
           await saveSchedule();
         }
       } catch (error) {
-        console.error('Auto-save failed:', error);
         // Continue with type selection even if auto-save fails
       }
     }
@@ -3223,7 +3153,6 @@ export default function CenterDashboardPage() {
   const handleUpdateAppointmentStatus = async (appointmentId: string, status: string) => {
     try {
       const endpoint = `/api/auth/center/update-booking-status`;
-      console.log('🔄 Updating booking status:', { appointmentId, status, endpoint });
 
       const response = await fetch(endpoint, {
         method: 'PUT',
@@ -3234,7 +3163,6 @@ export default function CenterDashboardPage() {
         body: JSON.stringify({ bookingId: appointmentId, status })
       });
 
-      console.log('📡 Status update response:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -3247,7 +3175,6 @@ export default function CenterDashboardPage() {
       });
       loadCenterData(); // Refresh data
     } catch (error) {
-      console.error('Error updating appointment status:', error);
       toast({
         title: t('error'),
         description: error instanceof Error ? error.message : 'Failed to update appointment',
@@ -3291,7 +3218,6 @@ export default function CenterDashboardPage() {
         loadCenterData(); // Refresh data
       }
     } catch (error) {
-      console.error('Error uploading result:', error);
       toast({
         title: t('error'),
         description: 'Failed to upload lab result',
@@ -3310,8 +3236,6 @@ export default function CenterDashboardPage() {
         centerService.getPatientLabHistory(patientId)
       ]);
 
-      console.log('🔍 [View Patient] Patient Response:', patientResponse);
-      console.log('🔍 [View Patient] Lab History Response:', labHistoryResponse);
 
       let patientData: any = {
         id: patientId,
@@ -3325,8 +3249,6 @@ export default function CenterDashboardPage() {
 
       // Get all lab history - API returns 'bookings' not 'labHistory'
       const allLabHistory = labHistoryResponse?.bookings || labHistoryResponse?.labHistory || [];
-      console.log('📋 [View Patient] All Lab History:', allLabHistory);
-      console.log('📋 [View Patient] Total appointments:', allLabHistory.length);
 
       // Log each appointment status for debugging
       allLabHistory.forEach((apt: any, idx: number) => {
@@ -3342,7 +3264,6 @@ export default function CenterDashboardPage() {
       const completedAppointments = allLabHistory
         .filter((appointment: any) => {
           const isCompleted = appointment.status === 'completed';
-          console.log(`  ✅ Checking appointment ${appointment.id}: status="${appointment.status}", isCompleted=${isCompleted}`);
           return isCompleted;
         })
         .sort((a: any, b: any) => {
@@ -3353,15 +3274,12 @@ export default function CenterDashboardPage() {
         })
         .slice(0, 3); // Take only the 3 most recent
 
-      console.log('✅ [View Patient] Completed Appointments:', completedAppointments);
-      console.log('✅ [View Patient] Number of completed appointments:', completedAppointments.length);
 
       patientData.recentVisits = completedAppointments;
 
       setSelectedPatient(patientData);
       setShowPatientModal(true);
     } catch (error) {
-      console.error('❌ [View Patient] Error loading patient:', error);
       // Fallback to basic patient info
       setSelectedPatient({
         id: patientId,
@@ -3396,9 +3314,7 @@ export default function CenterDashboardPage() {
 
     setProfileSaving(true);
     try {
-      console.log('Saving profile with data:', profileForm);
       const response = await centerService.updateProfile(profileForm);
-      console.log('Profile update response:', response);
 
       // Handle the correct API response structure
       const updatedProfile = response?.center || response?.profile || response;
@@ -3412,8 +3328,6 @@ export default function CenterDashboardPage() {
       // Reload data to refresh the display
       await loadCenterData();
     } catch (error: any) {
-      console.error('Profile update error:', error);
-      console.error('Error response:', error.response?.data);
 
       const errorMessage = error.response?.data?.error || error.message || t('profile_update_failed');
       toast({
@@ -3441,7 +3355,6 @@ export default function CenterDashboardPage() {
       // Redirect to login page
       router.push('/login');
     } catch (error) {
-      console.error('Sign out error:', error);
       toast({
         title: t('error'),
         description: t('sign_out_failed'),
@@ -4556,7 +4469,6 @@ export default function CenterDashboardPage() {
                                       || visit.test_type?.name
                                       || visit.test_name
                                       || t('cd_unknown_test');
-                                    console.log('🔍 Test name for visit:', { visit, testName });
                                     return testName;
                                   })()}
                                 </p>

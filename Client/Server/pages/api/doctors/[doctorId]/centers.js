@@ -36,7 +36,6 @@ export default async function handler(req, res) {
       .eq('doctor_id', doctorId);
 
     if (error) {
-      console.error('Error fetching doctor centers:', error);
       return res.status(500).json({
         success: false,
         error: 'Failed to fetch doctor centers'
@@ -93,7 +92,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching doctor centers:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

@@ -67,7 +67,6 @@ export default function LabResultModal({ isOpen, onClose, booking }: LabResultMo
         throw new Error(result.error || 'Failed to get download link');
       }
     } catch (error) {
-      console.error('Download error:', error);
       // Fallback to direct URL if available
       if (booking.result_file_url) {
         const link = document.createElement('a');
@@ -101,7 +100,6 @@ export default function LabResultModal({ isOpen, onClose, booking }: LabResultMo
         throw new Error(result.error || 'Failed to get view link');
       }
     } catch (error) {
-      console.error('View error:', error);
       // Fallback to direct URL if available
       if (booking.result_file_url) {
         window.open(booking.result_file_url, '_blank');

@@ -18,7 +18,6 @@ export async function GET(
     const resolvedParams = params instanceof Promise ? await params : params;
     const { doctorId } = resolvedParams;
 
-    console.log('📅 [Doctor Schedule Working Days] Request - Doctor:', doctorId, 'Center:', centerId);
 
     // Try backend first
     try {
@@ -30,11 +29,9 @@ export async function GET(
       
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ [Doctor Schedule Working Days] Backend response successful');
         return NextResponse.json(data, { status: response.status });
       }
     } catch (backendError) {
-      console.log('⚠️ [Doctor Schedule Working Days] Backend failed, using fallback');
     }
 
     // FALLBACK: Query Supabase directly
@@ -53,7 +50,6 @@ export async function GET(
     const { data, error } = await query;
 
     if (error) {
-      console.error('❌ [Doctor Schedule Working Days] Error fetching working days:', error);
       return NextResponse.json({ 
         success: false, 
         message: 'Failed to fetch doctor working days',
@@ -64,7 +60,6 @@ export async function GET(
     // Get unique working days and sort them
     const workingDays = [...new Set((data || []).map((r: any) => Number(r.day_of_week)))].sort((a, b) => a - b);
     
-    console.log(`✅ [Doctor Schedule Working Days] Found ${workingDays.length} working days for doctor ${doctorId}`);
 
     return NextResponse.json({ 
       success: true, 
@@ -72,7 +67,6 @@ export async function GET(
       workingDays: workingDays // Support both formats for backward compatibility
     });
   } catch (error: any) {
-    console.error('❌ [Doctor Schedule Working Days] Error:', error);
     return NextResponse.json({ 
       success: false, 
       message: error.message || 'Internal server error' 

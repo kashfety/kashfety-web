@@ -134,10 +134,8 @@ export default function SignupPage() {
         const data = await response.json()
         setSpecialties(data.specialties)
       } else {
-        console.error('Failed to fetch specialties')
       }
     } catch (error) {
-      console.error('Error fetching specialties:', error)
     } finally {
       setLoadingSpecialties(false)
     }
@@ -298,7 +296,6 @@ export default function SignupPage() {
       setSuccess(t('otp_sent_success') || 'Verification code sent to your email!');
 
     } catch (error: any) {
-      console.error('❌ Registration error:', error);
       setError(error.message || t('registration_failed') || 'Registration failed');
     } finally {
       setIsLoading(false)
@@ -310,7 +307,7 @@ export default function SignupPage() {
     try {
       setIsLoading(true);
 
-      console.log('🔍 Full verification data received:', JSON.stringify(verificationData, null, 2));
+      );
 
       if (!pendingUserData) {
         throw new Error('No pending user data found');
@@ -321,10 +318,8 @@ export default function SignupPage() {
         verificationData?.user?.id ||
         verificationData?.id;
 
-      console.log('🆔 Extracted user ID:', supabaseUserId);
 
       if (!supabaseUserId) {
-        console.error('❌ Verification data structure:', verificationData);
         throw new Error('Failed to get user ID from verification data');
       }
 
@@ -334,7 +329,6 @@ export default function SignupPage() {
       let result: any;
 
       try {
-        console.log('🔄 Trying register-verified fallback route');
         response = await fetch('/api/auth/register-verified', {
           method: 'POST',
           headers: {
@@ -350,12 +344,10 @@ export default function SignupPage() {
         result = await response.json();
 
         if (response.ok && (result.success || result.user)) {
-          console.log('✅ Fallback route worked for register-verified');
         } else {
           throw new Error(result.error || 'Fallback route failed');
         }
       } catch (fallbackError: any) {
-        console.log('❌ Fallback failed, trying backend route:', fallbackError);
 
         // Fallback to original backend route
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -416,7 +408,6 @@ export default function SignupPage() {
       }
 
     } catch (error: any) {
-      console.error('❌ Post-verification error:', error);
       setError(error.message || t('registration_failed') || 'Registration failed');
     } finally {
       setIsLoading(false);
@@ -449,14 +440,12 @@ export default function SignupPage() {
         // If login succeeds, the auth provider will handle redirect
       } catch (loginErr: any) {
         // If auto-login fails, redirect to login page so user can login manually
-        console.log('Auto-login failed, redirecting to login page:', loginErr);
         setSuccess(t('medical_records_saved') || 'Medical records saved successfully! Please login to continue.');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       }
     } catch (err: any) {
-      console.error('Error completing medical records:', err);
       setError(t('medical_records_error') || 'An error occurred. Please try logging in manually.');
       // Still redirect to login page even if there's an error
       setTimeout(() => {
@@ -521,7 +510,6 @@ export default function SignupPage() {
         });
       }
     } catch (error) {
-      console.error('Error marking certificate as skipped:', error);
       // Continue anyway - user can still upload later
     }
 

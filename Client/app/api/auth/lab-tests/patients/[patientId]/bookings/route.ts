@@ -45,7 +45,6 @@ export async function GET(
       .order('booking_date', { ascending: false });
 
     if (error) {
-      console.error('Failed to fetch patient bookings:', error);
       return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
     }
 
@@ -83,7 +82,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Patient bookings API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

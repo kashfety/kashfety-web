@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, doctor: user });
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/profile GET):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -120,13 +120,12 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Profile fallback update error:', error);
       return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, doctor: updated });
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/profile PUT):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

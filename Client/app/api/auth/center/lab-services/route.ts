@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
     // Validate that center exists before proceeding
     const centerValidation = await validateCenterExists(centerId);
     if (!centerValidation.exists) {
-      console.error('Center validation failed:', centerValidation.error);
       return NextResponse.json({ 
         error: centerValidation.error || 'Center not found. Please ensure the center is properly registered.',
         services: []
@@ -39,13 +38,11 @@ export async function GET(request: NextRequest) {
       .eq('is_active', true);
 
     if (error) {
-      console.error('Failed to fetch center services:', error);
       return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 });
     }
 
     return NextResponse.json({ services: services || [] });
   } catch (error) {
-    console.error('Center services error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -68,7 +65,6 @@ export async function PUT(request: NextRequest) {
     // Validate that center exists before proceeding
     const centerValidation = await validateCenterExists(centerId);
     if (!centerValidation.exists) {
-      console.error('Center validation failed:', centerValidation.error);
       return NextResponse.json({ 
         error: centerValidation.error || 'Center not found. Please ensure the center is properly registered.' 
       }, { status: 404 });
@@ -97,14 +93,12 @@ export async function PUT(request: NextRequest) {
         });
 
       if (error) {
-        console.error('Failed to save center services:', error);
         return NextResponse.json({ error: 'Failed to save services' }, { status: 500 });
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Center services save error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

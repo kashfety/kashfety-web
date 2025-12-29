@@ -10,7 +10,6 @@ export async function PUT(request: NextRequest) {
     const bookingId = searchParams.get('bookingId');
     const { newDate, newTime, reason } = await request.json();
 
-    console.log('🔬 [Lab Reschedule] Request:', { bookingId, newDate, newTime });
 
     if (!bookingId) {
       return NextResponse.json({ 
@@ -36,7 +35,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !booking) {
-      console.error('❌ Booking not found:', fetchError);
       return NextResponse.json({ 
         success: false, 
         error: 'Booking not found' 
@@ -59,7 +57,6 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if the new time slot is available
-    console.log('🔍 Checking slot availability...');
     const { data: conflictingBookings, error: conflictError } = await supabase
       .from('lab_bookings')
       .select('id')
@@ -71,7 +68,6 @@ export async function PUT(request: NextRequest) {
       .neq('id', bookingId);
 
     if (conflictError) {
-      console.error('❌ Error checking conflicts:', conflictError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to check availability' 
@@ -79,7 +75,6 @@ export async function PUT(request: NextRequest) {
     }
 
     if (conflictingBookings && conflictingBookings.length > 0) {
-      console.log('❌ Time slot already taken');
       return NextResponse.json({ 
         success: false, 
         error: 'The selected time slot is not available' 
@@ -87,7 +82,6 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update the booking with new date and time
-    console.log('💾 Rescheduling booking...');
     const { data: updatedBooking, error: updateError } = await supabase
       .from('lab_bookings')
       .update({
@@ -105,7 +99,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Failed to reschedule booking:', updateError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to reschedule booking',
@@ -119,7 +112,6 @@ export async function PUT(request: NextRequest) {
       type: updatedBooking.lab_test_type
     };
 
-    console.log('✅ [Lab Reschedule] Booking rescheduled successfully');
     return NextResponse.json({
       success: true,
       message: 'Lab booking rescheduled successfully',
@@ -127,7 +119,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Lab reschedule error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

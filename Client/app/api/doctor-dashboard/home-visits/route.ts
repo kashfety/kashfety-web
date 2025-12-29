@@ -68,7 +68,6 @@ export async function PUT(request: NextRequest) {
         .eq('id', userId);
 
       if (updateError) {
-        console.error('Error updating user:', updateError);
         return NextResponse.json({ error: 'Failed to update home visits setting' }, { status: 500 });
       }
 
@@ -83,7 +82,6 @@ export async function PUT(request: NextRequest) {
         .maybeSingle();
 
       if (centerCheckError) {
-        console.error('Error checking for existing center:', centerCheckError);
         return NextResponse.json({ error: 'Failed to check existing center' }, { status: 500 });
       }
 
@@ -116,7 +114,6 @@ export async function PUT(request: NextRequest) {
           .single();
 
         if (centerError) {
-          console.error('Error creating center:', centerError);
           return NextResponse.json({ error: 'Failed to create home visit center' }, { status: 500 });
         }
 
@@ -130,11 +127,9 @@ export async function PUT(request: NextRequest) {
           });
 
         if (dcError) {
-          console.error('Error creating doctor-center relationship:', dcError);
           return NextResponse.json({ error: 'Failed to link doctor to center' }, { status: 500 });
         }
 
-        console.log(`✅ Created home visit center for doctor ${userId}: ${newCenter.id}`);
       }
 
     } else {
@@ -150,7 +145,6 @@ export async function PUT(request: NextRequest) {
         .eq('id', userId);
 
       if (updateError) {
-        console.error('Error updating user:', updateError);
         return NextResponse.json({ error: 'Failed to update home visits setting' }, { status: 500 });
       }
 
@@ -165,7 +159,6 @@ export async function PUT(request: NextRequest) {
         .maybeSingle();
 
       if (findError) {
-        console.error('Error finding home center:', findError);
         // Continue anyway - main update succeeded
       }
 
@@ -178,7 +171,6 @@ export async function PUT(request: NextRequest) {
           .eq('center_id', homeCenter.id);
 
         if (dcDeleteError) {
-          console.error('Error deleting doctor-center relationship:', dcDeleteError);
         }
 
         // Delete schedules for this center
@@ -189,7 +181,6 @@ export async function PUT(request: NextRequest) {
           .eq('center_id', homeCenter.id);
 
         if (schedDeleteError) {
-          console.error('Error deleting schedules:', schedDeleteError);
         }
 
         // Delete the center itself
@@ -199,10 +190,8 @@ export async function PUT(request: NextRequest) {
           .eq('id', homeCenter.id);
 
         if (centerDeleteError) {
-          console.error('Error deleting center:', centerDeleteError);
         }
 
-        console.log(`✅ Deleted home visit center for doctor ${userId}: ${homeCenter.id}`);
       }
     }
 
@@ -215,7 +204,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Toggle home visits error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' }, 
       { status: 500 }

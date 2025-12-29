@@ -8,7 +8,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Admin Update Specialty] Starting specialty update');
     
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -17,7 +16,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('📝 [Admin Update Specialty] Request data received');
 
     const { specialtyId, ...updates } = body;
     
@@ -67,7 +65,6 @@ export async function POST(request: NextRequest) {
       updateData.order_index = updates.display_order;
     }
 
-    console.log('📝 [Admin Update Specialty] Updating specialty:', updateData);
 
     // Update specialty record
     const { data: specialty, error: specialtyError } = await supabase
@@ -78,14 +75,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (specialtyError) {
-      console.error('❌ [Admin Update Specialty] Update error:', specialtyError);
       return NextResponse.json({ 
         error: 'Failed to update specialty',
         details: specialtyError.message 
       }, { status: 500 });
     }
 
-    console.log('✅ [Admin Update Specialty] Specialty updated successfully');
     
     return NextResponse.json({
       success: true,
@@ -93,7 +88,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Admin Update Specialty] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

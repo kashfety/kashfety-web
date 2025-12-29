@@ -59,25 +59,20 @@ export const verifyToken = (token) => {
 
 // Middleware to authenticate JWT token
 export const authenticateToken = (req, res, next) => {
-  console.log('🔑 AUTH MIDDLEWARE - Path:', req.path, 'Method:', req.method);
   const authHeader = req.headers['authorization'];
-  console.log('🔑 AUTH MIDDLEWARE - Auth header:', authHeader ? authHeader.substring(0, 20) + '...' : 'NONE');
+   + '...' : 'NONE');
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-  console.log('🔑 AUTH MIDDLEWARE - Token extracted:', token ? token.substring(0, 20) + '...' : 'NONE');
+   + '...' : 'NONE');
 
   if (!token) {
-    console.log('❌ AUTH MIDDLEWARE - No token provided');
     return res.status(401).json({ error: 'Access token required' });
   }
 
   try {
     const user = verifyToken(token);
     req.user = user;
-    console.log('✅ AUTH MIDDLEWARE - Token valid, user:', user.email, 'role:', user.role);
     next();
   } catch (error) {
-    console.log('❌ AUTH MIDDLEWARE - Token verification failed:', error.message);
-    console.log('❌ AUTH MIDDLEWARE - Error details:', error);
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };

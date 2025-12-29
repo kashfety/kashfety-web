@@ -71,7 +71,6 @@ router.get('/appointments/availability', async (req, res) => {
       return res.status(400).json({ error: 'doctor_id and date parameters required' });
     }
 
-    console.log('🔍 Checking availability for doctor:', doctor_id, 'on date:', date);
 
     // Get all booked appointments for this doctor on this date (excluding cancelled)
     const { data: bookedAppointments, error } = await supabase
@@ -82,13 +81,11 @@ router.get('/appointments/availability', async (req, res) => {
       .neq('status', 'cancelled');
 
     if (error) {
-      console.error('Error fetching booked appointments:', error);
       return res.status(500).json({ error: 'Failed to fetch availability' });
     }
 
     const bookedTimes = bookedAppointments?.map(apt => apt.appointment_time) || [];
 
-    console.log('📅 Found booked times:', bookedTimes);
 
     res.json({
       success: true,
@@ -98,7 +95,6 @@ router.get('/appointments/availability', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get availability error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -110,9 +106,7 @@ router.get('/appointments/availability', async (req, res) => {
 // Create new user (patient or doctor) - Works with unified users table + supplementary tables
 router.post('/register', async (req, res) => {
   try {
-    console.log('=== REGISTRATION REQUEST DEBUG ===');
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-    console.log('Request headers:', req.headers);
+    );
 
     const {
       phone, password, role, first_name, last_name, email, gender, date_of_birth,
@@ -125,12 +119,11 @@ router.post('/register', async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    console.log('Field validation:');
-    console.log('- phone:', phone, '(type:', typeof phone, ')');
-    console.log('- password:', password ? '[PROVIDED]' : '[MISSING]', '(type:', typeof password, ')');
-    console.log('- role:', role, '(type:', typeof role, ')');
-    console.log('- first_name:', first_name, '(type:', typeof first_name, ')');
-    console.log('- last_name:', last_name, '(type:', typeof last_name, ')');
+    ');
+    ');
+    ');
+    ');
+    ');
 
     if (!phone || !password || !role || !first_name || !last_name) {
       const missingFields = [];
@@ -140,7 +133,6 @@ router.post('/register', async (req, res) => {
       if (!first_name) missingFields.push('first_name');
       if (!last_name) missingFields.push('last_name');
 
-      console.log('Missing fields:', missingFields);
       return res.status(400).json({
         error: `Missing required fields: ${missingFields.join(', ')}`,
         received: { phone, password, role, first_name, last_name }
@@ -152,22 +144,18 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if phone already exists in users table
-    console.log('Checking if phone number exists:', phone);
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('id')
       .eq('phone', phone)
       .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors when no record found
 
-    console.log('Phone check result:', { existingUser, checkError });
 
     if (checkError) {
-      console.error('Error checking phone existence:', checkError);
       return res.status(500).json({ error: 'Database error while checking phone number' });
     }
 
     if (existingUser) {
-      console.log('Phone number already exists:', existingUser);
       return res.status(400).json({ error: 'Phone number already registered' });
     }
 
@@ -226,17 +214,14 @@ router.post('/register', async (req, res) => {
       userData.approval_status = 'approved'; // Other roles are auto-approved
     }
 
-    console.log('Creating user with data:', userData);
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert(userData)
       .select()
       .single();
 
-    console.log('User creation result:', { newUser, userError });
 
     if (userError) {
-      console.error('User creation error:', userError);
       return res.status(500).json({ error: 'Failed to create user account', details: userError.message });
     }
 
@@ -260,7 +245,6 @@ router.post('/register', async (req, res) => {
         .single();
 
       if (centerError) {
-        console.error('Center creation error:', centerError);
         // Delete the user if center creation fails
         await supabase.from('users').delete().eq('id', newUser.id);
         return res.status(500).json({ error: 'Failed to create center record' });
@@ -273,7 +257,6 @@ router.post('/register', async (req, res) => {
         .eq('id', newUser.id);
 
       if (updateError) {
-        console.error('Failed to link user to center:', updateError);
         // Clean up both records if linking fails
         await supabase.from('centers').delete().eq('id', newCenter.id);
         await supabase.from('users').delete().eq('id', newUser.id);
@@ -283,12 +266,10 @@ router.post('/register', async (req, res) => {
       // Update the newUser object to include center_id for the response
       newUser.center_id = newCenter.id;
 
-      console.log('✅ Center created successfully:', newCenter.id);
     }
 
     // No separate tables for patients or doctors - everything is in users table
     // All user data (patients and doctors) is stored in the unified users table only
-    console.log('✅ User created in unified users table - no supplementary tables needed');
 
     // Remove password from response and generate JWT token
     const { password_hash, ...userWithoutPassword } = newUser;
@@ -303,7 +284,6 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
     res.status(500).json({
       error: error.message || 'Internal server error',
       success: false
@@ -374,7 +354,6 @@ router.post('/doctor/upload-certificate', authenticateToken, certificateUpload.s
     }
 
     // Upload file to Supabase Storage
-    console.log('📤 Uploading certificate to Supabase Storage...');
     const uploadResult = await storageService.uploadCertificate(
       req.user.id,
       req.file.buffer,
@@ -406,12 +385,10 @@ router.post('/doctor/upload-certificate', authenticateToken, certificateUpload.s
       try {
         await storageService.deleteFile('medical-documents', uploadResult.path);
       } catch (cleanupError) {
-        console.error('Failed to cleanup uploaded file:', cleanupError);
       }
       throw error;
     }
 
-    console.log('✅ Doctor certificate uploaded successfully:', certificate.id);
 
     res.status(201).json({
       success: true,
@@ -425,7 +402,6 @@ router.post('/doctor/upload-certificate', authenticateToken, certificateUpload.s
     });
 
   } catch (error) {
-    console.error('Certificate upload error:', error);
 
     res.status(500).json({
       error: error.message || 'Failed to upload certificate',
@@ -457,7 +433,6 @@ router.post('/doctor/skip-certificate', authenticateToken, async (req, res) => {
       throw updateError;
     }
 
-    console.log('✅ Doctor skipped certificate upload:', req.user.id);
 
     res.status(200).json({
       success: true,
@@ -466,7 +441,6 @@ router.post('/doctor/skip-certificate', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Skip certificate error:', error);
 
     res.status(500).json({
       error: error.message || 'Failed to skip certificate upload',
@@ -589,7 +563,6 @@ router.post('/login', async (req, res) => {
     res.json(response);
 
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({
       error: error.message || 'Internal server error',
       success: false
@@ -600,7 +573,6 @@ router.post('/login', async (req, res) => {
 // Register verified user (after Supabase OTP verification)
 router.post('/register-verified', async (req, res) => {
   try {
-    console.log('📥 Register-verified request body:', req.body);
 
     const {
       first_name,
@@ -624,7 +596,6 @@ router.post('/register-verified', async (req, res) => {
       supabase_user_id
     } = req.body;
 
-    console.log('🆔 Extracted supabase_user_id:', supabase_user_id);
 
     // Validate required fields
     if (!email || !password || !name || !role) {
@@ -639,7 +610,6 @@ router.post('/register-verified', async (req, res) => {
       .single();
 
     if (existingUserByEmail) {
-      console.log('User already exists by email, returning existing user');
       // Generate JWT token for existing user
       const token = generateToken(existingUserByEmail);
       const { password_hash: _, ...userResponse } = existingUserByEmail;
@@ -662,7 +632,6 @@ router.post('/register-verified', async (req, res) => {
         .single();
 
       if (existingUserById) {
-        console.log('User already exists by Supabase ID, updating with new signup data');
 
         // Update existing user with new signup information
         const updateData = {
@@ -693,7 +662,6 @@ router.post('/register-verified', async (req, res) => {
           .single();
 
         if (updateError) {
-          console.error('Error updating existing user:', updateError);
           throw new Error('Failed to update user information');
         }
 
@@ -726,7 +694,6 @@ router.post('/register-verified', async (req, res) => {
     } else {
       // Generate a proper UUID v4 if Supabase ID is not available
       userId = generateUserId(role);
-      console.log('Generated fallback UUID:', userId);
     }
 
     // Prepare user data for insertion
@@ -765,11 +732,9 @@ router.post('/register-verified', async (req, res) => {
       .single();
 
     if (insertError) {
-      console.error('User creation error:', insertError);
 
       // Handle duplicate key error (user already exists)
       if (insertError.code === '23505' && insertError.message.includes('users_pkey')) {
-        console.log('Duplicate user detected, attempting to fetch existing user');
 
         // Try to fetch the existing user by email
         const { data: existingUser } = await supabase
@@ -779,7 +744,6 @@ router.post('/register-verified', async (req, res) => {
           .single();
 
         if (existingUser) {
-          console.log('Found existing user, returning with token');
           const token = generateToken(existingUser);
           const { password_hash: _, ...userResponse } = existingUser;
 
@@ -819,7 +783,6 @@ router.post('/register-verified', async (req, res) => {
           .single();
 
         if (centerError) {
-          console.error('Center creation error:', centerError);
           // Don't fail the user creation if center creation fails
         } else {
           // Update user with center_id
@@ -829,7 +792,6 @@ router.post('/register-verified', async (req, res) => {
             .eq('id', newUser.id);
         }
       } catch (centerErr) {
-        console.error('Center creation failed:', centerErr);
         // Continue with user creation even if center creation fails
       }
     }
@@ -849,7 +811,6 @@ router.post('/register-verified', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
     res.status(500).json({
       error: error.message || 'Internal server error',
       success: false
@@ -868,18 +829,15 @@ router.get('/verify', authenticateToken, async (req, res) => {
       .single();
 
     if (error || !userData) {
-      console.error('Error fetching fresh user data:', error);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    console.log('✅ Token verified, returning fresh user data:', userData);
 
     res.json({
       message: 'Token is valid',
       user: userData
     });
   } catch (error) {
-    console.error('Error in verify endpoint:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -890,10 +848,8 @@ router.get('/verify', authenticateToken, async (req, res) => {
 
 // Book appointment - Requires authentication (UPDATED FOR UNIFIED SCHEMA)
 router.post('/appointments', authenticateToken, async (req, res) => {
-  console.log('🎯 UNIFIED AUTH APPOINTMENT BOOKING HIT - UNIFIED SCHEMA VERSION');
-  console.log('🎯 Timestamp:', new Date().toISOString());
-  console.log('🎯 Request body:', JSON.stringify(req.body, null, 2));
-  console.log('🎯 User:', req.user);
+  .toISOString());
+  );
 
   try {
     const {
@@ -904,13 +860,12 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     let { doctor_id } = req.body;
 
     // Enhanced validation with detailed logging
-    console.log('🔍 VALIDATION - Required fields check:');
-    console.log('🔍 patient_id:', patient_id, '(type:', typeof patient_id, ')');
-    console.log('🔍 doctor_id:', doctor_id, '(type:', typeof doctor_id, ')');
-    console.log('🔍 appointment_date:', appointment_date, '(type:', typeof appointment_date, ')');
-    console.log('🔍 appointment_time:', appointment_time, '(type:', typeof appointment_time, ')');
-    console.log('🔍 center_id:', center_id, '(type:', typeof center_id, ')');
-    console.log('🔍 consultation_fee:', consultation_fee, '(type:', typeof consultation_fee, ')');
+    ');
+    ');
+    ');
+    ');
+    ');
+    ');
 
     // Validate required fields
     if (!patient_id || !doctor_id || !appointment_date || !appointment_time) {
@@ -920,7 +875,6 @@ router.post('/appointments', authenticateToken, async (req, res) => {
       if (!appointment_date) missingFields.push('appointment_date');
       if (!appointment_time) missingFields.push('appointment_time');
 
-      console.log('🚨 VALIDATION FAILED - Missing fields:', missingFields);
       return res.status(400).json({
         error: `Missing required fields: ${missingFields.join(', ')}`,
         received: { patient_id, doctor_id, appointment_date, appointment_time }
@@ -928,14 +882,10 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     }
 
     // Enhanced authorization check with detailed logging
-    console.log('🔍 AUTHORIZATION - User context:');
-    console.log('🔍 req.user.id:', req.user.id, '(type:', typeof req.user.id, ')');
-    console.log('🔍 req.user.role:', req.user.role);
-    console.log('🔍 patient_id from request:', patient_id, '(type:', typeof patient_id, ')');
+    ');
+    ');
 
     if (req.user.role === 'patient' && req.user.id !== patient_id) {
-      console.log('🚨 AUTHORIZATION FAILED - Patient ID mismatch');
-      console.log('🚨 Expected:', req.user.id, 'Received:', patient_id);
       return res.status(403).json({
         error: 'Patients can only book appointments for themselves',
         user_id: req.user.id,
@@ -944,7 +894,6 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     }
 
     // Verify patient exists in users table with role 'patient'
-    console.log('🔍 PATIENT LOOKUP - Searching for patient:', patient_id);
     const { data: patientUser, error: patientError } = await supabase
       .from('users')
       .select('id, first_name, last_name, name, email, role, phone')
@@ -965,10 +914,8 @@ router.post('/appointments', authenticateToken, async (req, res) => {
       });
     }
 
-    console.log('✅ PATIENT FOUND:', patientUser);
 
     // Verify doctor exists in users table with role 'doctor'
-    console.log('🔍 DOCTOR LOOKUP - Searching for doctor:', doctor_id);
     const { data: doctorUser, error: doctorError } = await supabase
       .from('users')
       .select('id, first_name, last_name, name, email, role, specialty, consultation_fee, experience_years, bio, phone')
@@ -989,14 +936,12 @@ router.post('/appointments', authenticateToken, async (req, res) => {
       });
     }
 
-    console.log('✅ DOCTOR FOUND:', doctorUser);
 
     // Normalize time format to ensure consistency (HH:MM:SS)
     const normalizedTime = appointment_time.includes(':') && appointment_time.split(':').length === 2
       ? `${appointment_time}:00`
       : appointment_time;
 
-    console.log('🔍 TIME FORMAT DEBUG - Original:', appointment_time, 'Normalized:', normalizedTime);
 
     // Check if time slot is already booked (using users.id directly)
     // We need to check both HH:MM and HH:MM:SS formats for existing appointments
@@ -1023,15 +968,12 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     const bookingRef = `A${Date.now().toString().slice(-8)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
 
     // DEBUG: Log the received date
-    console.log('🔍 DATE DEBUG - Received appointment_date:', appointment_date);
-    console.log('🔍 DATE DEBUG - Type of appointment_date:', typeof appointment_date);
-    console.log('🔍 DATE DEBUG - Current timestamp:', new Date().toISOString());
+    .toISOString());
 
     // Create appointment using users table IDs directly (unified schema)
     const finalConsultationFee = consultation_fee || doctorUser.consultation_fee || 0;
 
-    console.log('🔍 APPOINTMENT CREATION - Final data being inserted:');
-    console.log('🔍 center_id:', center_id, '(will be saved to appointment)');
+    ');
 
     const { data: appointment, error } = await supabase
       .from('appointments')
@@ -1067,10 +1009,7 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     }
 
     // DEBUG: Log what was actually saved
-    console.log('✅ APPOINTMENT CREATED - Saved appointment_date:', appointment.appointment_date);
-    console.log('✅ APPOINTMENT CREATED - Full appointment data:', appointment);
 
-    console.log('✅ Appointment created successfully:', appointment.id);
 
     // Create billing record for the appointment
     if (finalConsultationFee > 0) {
@@ -1088,13 +1027,10 @@ router.post('/appointments', authenticateToken, async (req, res) => {
           .single();
 
         if (billingError) {
-          console.error('⚠️ Failed to create billing record:', billingError);
           // Don't fail the whole request if billing creation fails
         } else {
-          console.log('💰 Billing record created:', billingRecord.id);
         }
       } catch (billingErr) {
-        console.error('⚠️ Billing creation error:', billingErr);
       }
     }
 
@@ -1108,7 +1044,6 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('🚨 Appointment booking error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1619,7 +1554,6 @@ router.get('/admin/profile', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Only admins can access this endpoint' });
     }
 
-    console.log('🔍 Getting admin profile for user:', req.user.id);
 
     const { data, error } = await supabase
       .from('users')
@@ -1627,17 +1561,13 @@ router.get('/admin/profile', authenticateToken, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    console.log('📊 Profile fetch result:', { data, error });
 
     if (error || !data) {
-      console.error('❌ Profile fetch error:', error);
       return res.status(404).json({ error: 'Admin profile not found' });
     }
 
-    console.log('✅ Admin profile retrieved:', data);
     res.json({ success: true, admin: data });
   } catch (e) {
-    console.error('Get admin profile error:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1651,7 +1581,6 @@ router.put('/admin/profile', authenticateToken, async (req, res) => {
     });
 
     if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
-      console.log('❌ Access denied - not admin:', req.user.role);
       return res.status(403).json({ error: 'Only admins can access this endpoint' });
     }
 
@@ -1659,12 +1588,10 @@ router.put('/admin/profile', authenticateToken, async (req, res) => {
 
     // Validation
     if (!name || !email || !phone) {
-      console.log('❌ Validation failed - missing fields:', { name: !!name, email: !!email, phone: !!phone });
       return res.status(400).json({ error: 'Name, email, and phone are required' });
     }
 
     if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      console.log('❌ Validation failed - invalid email format:', email);
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
@@ -1682,8 +1609,6 @@ router.put('/admin/profile', authenticateToken, async (req, res) => {
       updates.last_name = nameParts.slice(1).join(' ') || nameParts[0]; // If no last name, use first name
     }
 
-    console.log('🔄 Updating user with data:', updates);
-    console.log('🔄 User ID being updated:', req.user.id);
 
     const { data, error } = await supabase
       .from('users')
@@ -1692,17 +1617,13 @@ router.put('/admin/profile', authenticateToken, async (req, res) => {
       .select('id, name, first_name, last_name, email, phone, role, created_at, updated_at')
       .single();
 
-    console.log('📊 Supabase update result:', { data, error });
 
     if (error) {
-      console.error('❌ Supabase update error:', error);
       return res.status(500).json({ error: 'Failed to update admin profile', details: error.message });
     }
 
-    console.log('✅ Admin profile updated successfully:', data);
     res.json({ success: true, admin: data, message: 'Admin profile updated successfully' });
   } catch (e) {
-    console.error('❌ Update admin profile error:', e);
     res.status(500).json({ error: 'Internal server error', details: e.message });
   }
 });
@@ -1714,7 +1635,6 @@ router.get('/admin/test-user-data', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Only admins can access this endpoint' });
     }
 
-    console.log('🧪 Testing user data for:', req.user.id);
 
     // First, let's see what columns exist in the users table
     const { data: allData, error: allError } = await supabase
@@ -1723,7 +1643,6 @@ router.get('/admin/test-user-data', authenticateToken, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    console.log('🧪 Full user data:', { allData, allError });
 
     // Test a simple update to see if it works
     const testUpdate = {
@@ -1737,7 +1656,6 @@ router.get('/admin/test-user-data', authenticateToken, async (req, res) => {
       .select('*')
       .single();
 
-    console.log('🧪 Test update result:', { updateData, updateError });
 
     res.json({
       success: true,
@@ -1746,7 +1664,6 @@ router.get('/admin/test-user-data', authenticateToken, async (req, res) => {
       errors: { allError, updateError }
     });
   } catch (e) {
-    console.error('🧪 Test endpoint error:', e);
     res.status(500).json({ error: 'Test endpoint error', details: e.message });
   }
 });
@@ -1802,13 +1719,11 @@ router.put('/admin/change-password', authenticateToken, async (req, res) => {
       .eq('id', req.user.id);
 
     if (updateError) {
-      console.error('Update admin password error:', updateError);
       return res.status(500).json({ error: 'Failed to update password' });
     }
 
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (e) {
-    console.error('Change admin password error:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2046,7 +1961,6 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
         .order('appointment_date', { ascending: true });
 
       if (error) {
-        console.error('Patient appointments fetch error:', error);
         // Fallback to simple query without joins
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('appointments')
@@ -2078,7 +1992,6 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
         .order('appointment_date', { ascending: true });
 
       if (error) {
-        console.error('Doctor appointments fetch error:', error);
         // Fallback to simple query without joins
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('appointments')
@@ -2133,14 +2046,12 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
       }
     }
 
-    console.log(`✅ Found ${appointments.length} appointments for ${userRole}: ${userId}`);
 
     const withFlat = (appointments || []).map((a) => {
       if (a && a.center) {
         a.center_name = a.center.name;
         a.center_address = a.center.address;
       } else if (a && a.center_id) {
-        console.warn('⚠️ Center join missing; have center_id only', { id: a.id, center_id: a.center_id });
       }
       return a;
     });
@@ -2151,7 +2062,6 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get user appointments error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2205,7 +2115,6 @@ router.put('/appointments/:appointmentId/reschedule', authenticateToken, async (
       .single();
 
     if (error) {
-      console.error('Appointment reschedule error:', error);
       return res.status(500).json({ error: 'Failed to reschedule appointment' });
     }
 
@@ -2215,7 +2124,6 @@ router.put('/appointments/:appointmentId/reschedule', authenticateToken, async (
     });
 
   } catch (error) {
-    console.error('Reschedule appointment error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2277,7 +2185,6 @@ router.put('/appointments/:appointmentId/cancel', authenticateToken, async (req,
       .single();
 
     if (error) {
-      console.error('Appointment cancellation error:', error);
       return res.status(500).json({ error: 'Failed to cancel appointment' });
     }
 
@@ -2291,7 +2198,6 @@ router.put('/appointments/:appointmentId/cancel', authenticateToken, async (req,
     });
 
   } catch (error) {
-    console.error('Cancel appointment error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2302,7 +2208,6 @@ router.get('/doctors/:doctorId/available-slots', async (req, res) => {
     const { doctorId } = req.params;
     const { date, center_id } = req.query;
 
-    console.log(`🔍 UNIFIED-AUTH AVAILABLE SLOTS DEBUG - Doctor: ${doctorId}, Date: ${date}, Center: ${center_id}`);
 
     if (!date) {
       return res.status(400).json({ error: 'Date parameter required' });
@@ -2326,7 +2231,6 @@ router.get('/doctors/:doctorId/available-slots', async (req, res) => {
     const { data: schedules, error: scheduleError } = await scheduleQuery;
 
     if (scheduleError) {
-      console.error('Error fetching schedule:', scheduleError);
       return res.status(500).json({ error: 'Failed to fetch doctor schedule' });
     }
 
@@ -2366,33 +2270,25 @@ router.get('/doctors/:doctorId/available-slots', async (req, res) => {
     const { data: bookedAppointments, error } = await appointmentQuery;
 
     if (error) {
-      console.error('Error fetching booked slots:', error);
       return res.status(500).json({ error: 'Failed to fetch available slots' });
     }
 
-    console.log(`🔍 AVAILABLE SLOTS DEBUG - Found ${bookedAppointments?.length || 0} booked appointments for doctor ${doctorId} on ${date}:`);
-    console.log(`🔍 AVAILABLE SLOTS DEBUG - Raw booked appointments:`, bookedAppointments);
-    console.log(`🔍 AVAILABLE SLOTS DEBUG - Center filter applied:`, center_id ? `center_id=${center_id}` : 'no center filter');
 
     // Filter out booked slots - normalize time format to HH:MM for comparison
     const bookedTimes = bookedAppointments?.map(apt => {
       const timeStr = apt.appointment_time;
       // Convert HH:MM:SS to HH:MM for comparison
       const normalizedTime = timeStr.length === 8 ? timeStr.substring(0, 5) : timeStr;
-      console.log(`🔍 AVAILABLE SLOTS DEBUG - Normalizing time: ${timeStr} -> ${normalizedTime}`);
       return normalizedTime;
     }) || [];
 
-    console.log(`🔍 AVAILABLE SLOTS DEBUG - Normalized booked times for filtering:`, bookedTimes);
-    console.log(`🔍 AVAILABLE SLOTS DEBUG - Available slots before filtering:`, availableSlots);
 
     const finalAvailableSlots = availableSlots.filter(slot => {
       const isBooked = bookedTimes.includes(slot);
-      console.log(`🔍 AVAILABLE SLOTS DEBUG - Checking slot ${slot}: ${isBooked ? 'BOOKED (filtering out)' : 'AVAILABLE (keeping)'}`);
+      ' : 'AVAILABLE (keeping)'}`);
       return !isBooked;
     });
 
-    console.log(`🔍 Available slots after filtering:`, finalAvailableSlots);
 
     res.json({
       date,
@@ -2404,7 +2300,6 @@ router.get('/doctors/:doctorId/available-slots', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get available slots error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2415,7 +2310,6 @@ router.get('/centers/:centerId/doctors', async (req, res) => {
     const { centerId } = req.params;
     const { specialty } = req.query;
 
-    console.log(`🔍 Getting doctors for center: ${centerId}, specialty: ${specialty}`);
 
     let query = supabase
       .from('doctor_centers')
@@ -2439,7 +2333,6 @@ router.get('/centers/:centerId/doctors', async (req, res) => {
     const { data: doctorCenters, error } = await query;
 
     if (error) {
-      console.error('Error fetching doctors by center:', error);
       return res.status(500).json({ error: 'Failed to fetch doctors' });
     }
 
@@ -2475,7 +2368,6 @@ router.get('/centers/:centerId/doctors', async (req, res) => {
       doctor.has_schedule = schedules && schedules.length > 0;
     }
 
-    console.log(`✅ Found ${doctors.length} doctors for center ${centerId}`);
 
     res.json({
       success: true,
@@ -2485,7 +2377,6 @@ router.get('/centers/:centerId/doctors', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctors by center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2495,7 +2386,6 @@ router.get('/centers', async (req, res) => {
   try {
     const { specialty } = req.query;
 
-    console.log(`🔍 Getting centers, specialty filter: ${specialty}`);
 
     const { data: centers, error } = await supabase
       .from('centers')
@@ -2503,7 +2393,6 @@ router.get('/centers', async (req, res) => {
       .order('name');
 
     if (error) {
-      console.error('Error fetching centers:', error);
       return res.status(500).json({ error: 'Failed to fetch centers' });
     }
 
@@ -2533,7 +2422,6 @@ router.get('/centers', async (req, res) => {
       filteredCenters = centersWithSpecialty;
     }
 
-    console.log(`✅ Found ${filteredCenters.length} centers`);
 
     res.json({
       success: true,
@@ -2542,7 +2430,6 @@ router.get('/centers', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get centers error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2556,7 +2443,6 @@ router.get('/appointments', async (req, res) => {
       .order('appointment_date', { ascending: true });
 
     if (error) {
-      console.error('All appointments fetch error:', error);
       return res.status(500).json({ error: 'Failed to fetch appointments' });
     }
 
@@ -2566,7 +2452,6 @@ router.get('/appointments', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get all appointments error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2582,7 +2467,6 @@ router.get('/doctors', async (req, res) => {
       .order('first_name', { ascending: true });
 
     if (error) {
-      console.error('Doctors fetch error:', error);
       return res.status(500).json({ error: 'Failed to fetch doctors' });
     }
 
@@ -2605,7 +2489,6 @@ router.get('/doctors', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctors error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2626,7 +2509,6 @@ router.get('/doctor/profile', authenticateToken, async (req, res) => {
       .single();
 
     if (error || !doctor) {
-      console.error('Doctor fetch error:', error);
       return res.status(404).json({ error: 'Doctor profile not found' });
     }
 
@@ -2652,7 +2534,6 @@ router.get('/doctor/profile', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2694,7 +2575,6 @@ router.put('/doctor/profile', authenticateToken, async (req, res) => {
     if (consultation_fee !== undefined) updateData.consultation_fee = consultation_fee;
     if (qualifications !== undefined) updateData.qualifications = qualifications;
 
-    console.log('🔄 Updating doctor profile:', req.user.id, updateData);
 
     const { data: updatedDoctor, error } = await supabase
       .from('users')
@@ -2705,14 +2585,12 @@ router.put('/doctor/profile', authenticateToken, async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Doctor update error:', error);
       return res.status(500).json({ error: 'Failed to update doctor profile' });
     }
 
     // Remove password from response
     const { password, ...doctorWithoutPassword } = updatedDoctor;
 
-    console.log('✅ Doctor profile updated successfully:', doctorWithoutPassword.id);
 
     res.json({
       success: true,
@@ -2721,7 +2599,6 @@ router.put('/doctor/profile', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update doctor profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2755,7 +2632,6 @@ router.get('/doctor/today-stats', authenticateToken, async (req, res) => {
       .order('appointment_time', { ascending: true });
 
     if (appointmentsError) {
-      console.error('Today appointments error:', appointmentsError);
       return res.status(500).json({ error: 'Failed to fetch today appointments' });
     }
 
@@ -2799,7 +2675,6 @@ router.get('/doctor/today-stats', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get today stats error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2835,7 +2710,6 @@ router.get('/doctor/patients', authenticateToken, async (req, res) => {
       .order('appointment_date', { ascending: false });
 
     if (appointmentsError) {
-      console.error('Patient appointments error:', appointmentsError);
       return res.status(500).json({ error: 'Failed to fetch patients' });
     }
 
@@ -2878,7 +2752,6 @@ router.get('/doctor/patients', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor patients error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2908,7 +2781,6 @@ router.get('/doctor/analytics', authenticateToken, async (req, res) => {
       .eq('doctor_id', req.user.id);
 
     if (appointmentsError) {
-      console.error('Analytics appointments error:', appointmentsError);
       return res.status(500).json({ error: 'Failed to fetch analytics data' });
     }
 
@@ -2979,7 +2851,6 @@ router.get('/doctor/analytics', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor analytics error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2995,7 +2866,6 @@ router.get('/patients', async (req, res) => {
       .order('first_name', { ascending: true });
 
     if (error) {
-      console.error('Patients fetch error:', error);
       return res.status(500).json({ error: 'Failed to fetch patients' });
     }
 
@@ -3005,7 +2875,6 @@ router.get('/patients', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get patients error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3019,7 +2888,6 @@ router.get('/users', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Users fetch error:', error);
       return res.status(500).json({ error: 'Failed to fetch users' });
     }
 
@@ -3034,7 +2902,6 @@ router.get('/users', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get users error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3069,7 +2936,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
       .single();
 
     if (patientError || !patientUser) {
-      console.log('🚨 Patient not found:', patientError);
       return res.status(404).json({ error: 'Patient not found' });
     }
 
@@ -3089,7 +2955,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
         .eq('id', patient_id);
 
       if (updateError) {
-        console.error('Error updating patient medical info:', updateError);
         return res.status(500).json({ error: 'Failed to update patient medical information' });
       }
     }
@@ -3105,8 +2970,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
         .eq('id', patient_id);
 
       if (emergencyError) {
-        console.error('Error updating emergency contact in users table:', emergencyError);
-        console.log('💡 To fix this, run the add-emergency-contact-column.sql script to add emergency_contact to users table');
       }
     }
 
@@ -3132,7 +2995,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
           .single();
 
         if (recordError) {
-          console.error('Error creating medical record:', recordError);
           // Continue with other records even if one fails
         } else {
           createdRecords.push(medicalRecord);
@@ -3140,7 +3002,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
       }
     }
 
-    console.log('✅ Medical records created successfully for patient:', patient_id);
 
     res.status(201).json({
       message: 'Medical records saved successfully',
@@ -3149,7 +3010,6 @@ router.post('/medical-records', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('🚨 Medical records creation error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3179,7 +3039,6 @@ router.get('/doctor/schedule', authenticateToken, async (req, res) => {
     const { data: schedules, error } = await query.order('day_of_week');
 
     if (error) {
-      console.error('Get schedule error:', error);
       return res.status(500).json({ error: 'Failed to fetch schedule' });
     }
 
@@ -3189,7 +3048,6 @@ router.get('/doctor/schedule', authenticateToken, async (req, res) => {
       center_id: center_id || null
     });
   } catch (error) {
-    console.error('Get doctor schedule error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3211,7 +3069,6 @@ router.put('/doctor/schedule', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid schedule data' });
     }
 
-    console.log('💾 Saving schedule for doctor:', req.user.id, 'center:', center_id);
 
     // Verify doctor is assigned to this center
     const { data: doctorCenter, error: centerError } = await supabase
@@ -3233,7 +3090,6 @@ router.put('/doctor/schedule', authenticateToken, async (req, res) => {
       .eq('center_id', center_id);
 
     if (deleteError) {
-      console.error('Delete schedule error:', deleteError);
       return res.status(500).json({ error: 'Failed to update schedule' });
     }
 
@@ -3261,11 +3117,9 @@ router.put('/doctor/schedule', authenticateToken, async (req, res) => {
         .select();
 
       if (insertError) {
-        console.error('Insert schedule error:', insertError);
         return res.status(500).json({ error: 'Failed to save schedule' });
       }
 
-      console.log('✅ Schedule saved successfully:', insertedSchedules.length, 'days');
     }
 
     res.json({
@@ -3275,7 +3129,6 @@ router.put('/doctor/schedule', authenticateToken, async (req, res) => {
       schedules_saved: schedulesToInsert.length
     });
   } catch (error) {
-    console.error('Save doctor schedule error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3307,7 +3160,6 @@ router.get('/doctor/centers', authenticateToken, async (req, res) => {
       .order('is_primary', { ascending: false });
 
     if (error) {
-      console.error('Get centers error:', error);
       return res.status(500).json({ error: 'Failed to fetch medical centers' });
     }
 
@@ -3329,7 +3181,6 @@ router.get('/doctor/centers', authenticateToken, async (req, res) => {
       centers: centers
     });
   } catch (error) {
-    console.error('Get doctor centers error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3373,13 +3224,11 @@ router.post('/doctor/centers', authenticateToken, async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Add center error:', error);
       return res.status(500).json({ error: 'Failed to add medical center' });
     }
 
     res.status(201).json({ center: newCenter });
   } catch (error) {
-    console.error('Add doctor center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3412,7 +3261,6 @@ router.put('/doctor/centers/:centerId', authenticateToken, async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Update center error:', error);
       return res.status(500).json({ error: 'Failed to update medical center' });
     }
 
@@ -3422,7 +3270,6 @@ router.put('/doctor/centers/:centerId', authenticateToken, async (req, res) => {
 
     res.json({ center: updatedCenter });
   } catch (error) {
-    console.error('Update doctor center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3443,13 +3290,11 @@ router.delete('/doctor/centers/:centerId', authenticateToken, async (req, res) =
       .eq('doctor_id', req.user.id);
 
     if (error) {
-      console.error('Delete center error:', error);
       return res.status(500).json({ error: 'Failed to delete medical center' });
     }
 
     res.json({ success: true, message: 'Medical center deleted successfully' });
   } catch (error) {
-    console.error('Delete doctor center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3477,13 +3322,11 @@ router.post('/doctor/centers/:centerId/primary', authenticateToken, async (req, 
       .eq('doctor_id', req.user.id);
 
     if (error) {
-      console.error('Set primary center error:', error);
       return res.status(500).json({ error: 'Failed to set primary center' });
     }
 
     res.json({ success: true, message: 'Primary center updated successfully' });
   } catch (error) {
-    console.error('Set primary center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3539,7 +3382,6 @@ router.get('/doctor/appointments', authenticateToken, async (req, res) => {
     const { data: appointments, error } = await query;
 
     if (error) {
-      console.error('Doctor appointments error:', error);
       return res.status(500).json({ error: 'Failed to fetch appointments' });
     }
 
@@ -3556,7 +3398,6 @@ router.get('/doctor/appointments', authenticateToken, async (req, res) => {
     const { count, error: countError } = await countQuery;
 
     if (countError) {
-      console.error('Count error:', countError);
     }
 
     // Format appointments
@@ -3595,7 +3436,6 @@ router.get('/doctor/appointments', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor appointments error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3629,7 +3469,6 @@ router.put('/doctor/appointments/:appointmentId/status', authenticateToken, asyn
       .single();
 
     if (error) {
-      console.error('Update appointment status error:', error);
       return res.status(500).json({ error: 'Failed to update appointment status' });
     }
 
@@ -3644,7 +3483,6 @@ router.put('/doctor/appointments/:appointmentId/status', authenticateToken, asyn
     });
 
   } catch (error) {
-    console.error('Update appointment status error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3686,7 +3524,6 @@ router.get('/doctor/upcoming-appointments', authenticateToken, async (req, res) 
       .order('appointment_time', { ascending: true });
 
     if (error) {
-      console.error('Upcoming appointments error:', error);
       return res.status(500).json({ error: 'Failed to fetch upcoming appointments' });
     }
 
@@ -3696,7 +3533,6 @@ router.get('/doctor/upcoming-appointments', authenticateToken, async (req, res) 
     });
 
   } catch (error) {
-    console.error('Get upcoming appointments error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3744,7 +3580,6 @@ router.get('/doctor/patients/:patientId', authenticateToken, async (req, res) =>
       .order('appointment_time', { ascending: false });
 
     if (appointmentsError) {
-      console.error('Patient appointments error:', appointmentsError);
       return res.status(500).json({ error: 'Failed to fetch patient appointments' });
     }
 
@@ -3757,7 +3592,6 @@ router.get('/doctor/patients/:patientId', authenticateToken, async (req, res) =>
       .order('created_at', { ascending: false });
 
     if (recordsError) {
-      console.error('Medical records error:', recordsError);
     }
 
     // Calculate patient stats
@@ -3786,7 +3620,6 @@ router.get('/doctor/patients/:patientId', authenticateToken, async (req, res) =>
     });
 
   } catch (error) {
-    console.error('Get patient details error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

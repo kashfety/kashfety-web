@@ -137,8 +137,6 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
         throw new Error('Authentication required');
       }
 
-      console.log('Completing setup with token:', token ? 'present' : 'missing');
-      console.log('Setup data:', setupData);
 
   const response = await fetch('/api/auth/doctor/profile', {
         method: 'PUT',
@@ -149,11 +147,9 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
         body: JSON.stringify(setupData)
       });
 
-      console.log('Setup response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Setup completed successfully:', result);
         toast({
           title: "Setup Complete!",
           description: "Your doctor profile has been set up successfully.",
@@ -164,7 +160,6 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
         throw new Error(errorData.message || 'Failed to complete setup');
       }
     } catch (error: any) {
-      console.error('Setup error:', error);
       toast({
         title: "Setup Failed",
         description: error.message || "Failed to complete setup. Please try again.",

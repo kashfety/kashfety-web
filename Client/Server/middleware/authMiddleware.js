@@ -37,27 +37,19 @@ export const verifyToken = async (req, res, next) => {
     
     // Get the user from database to get role and other info for other endpoints
     try {
-      console.log('=== AUTH MIDDLEWARE DEBUG ===');
-      console.log('Looking for user in database:', user.id);
       
       // Try to find user in doctors table first
       let userData = await dbHelpers.getDoctorByUid(user.id);
       let userRole = 'doctor';
       
-      console.log('Doctor lookup result:', userData ? 'Found' : 'Not found');
       
       // If not found in doctors, try patients table
       if (!userData) {
         userData = await dbHelpers.getPatientByUid(user.id);
         userRole = 'patient';
-        console.log('Patient lookup result:', userData ? 'Found' : 'Not found');
       }
       
       if (!userData) {
-        console.log('=== USER NOT FOUND IN DATABASE ===');
-        console.log('User ID:', user.id);
-        console.log('User email:', user.email);
-        console.log('User metadata:', user.user_metadata);
         return res.status(403).json({
           success: false,
           message: "User not found in database",
@@ -74,14 +66,12 @@ export const verifyToken = async (req, res, next) => {
       
       next();
     } catch (dbError) {
-      console.error("Database error in auth middleware:", dbError);
       return res.status(403).json({
         success: false,
         message: "Database error",
       });
     }
   } catch (error) {
-    console.error("Auth middleware error:", error);
     res.status(401).json({
       success: false,
       message: "Invalid or expired token",
@@ -294,13 +284,11 @@ export const optionalAuth = async (req, res, next) => {
         req.user = null;
       }
     } catch (dbError) {
-      console.error("Database error in optional auth:", dbError);
       req.user = null;
     }
     
     next();
   } catch (error) {
-    console.error("Optional auth middleware error:", error);
     req.user = null;
     next();
   }

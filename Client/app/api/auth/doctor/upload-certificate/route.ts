@@ -122,7 +122,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload file to Supabase Storage
-    console.log('📤 Uploading certificate to Supabase Storage...');
     const uploadResult = await uploadToStorage(certificate, userId);
 
     // Save certificate to database
@@ -154,7 +153,6 @@ export async function POST(request: NextRequest) {
           .from('medical-documents')
           .remove([uploadResult.path]);
       } catch (cleanupError) {
-        console.error('Failed to cleanup uploaded file:', cleanupError);
       }
       throw insertError;
     }
@@ -165,7 +163,6 @@ export async function POST(request: NextRequest) {
       .update({ approval_status: 'pending' })
       .eq('id', userId);
 
-    console.log('✅ Doctor certificate uploaded successfully:', certRecord.id);
 
     return NextResponse.json({
       success: true,
@@ -179,7 +176,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('Certificate upload error:', error);
 
     return NextResponse.json(
       { error: error.message || 'Failed to upload certificate' },

@@ -96,24 +96,17 @@ export const clientDbHelpers = {
 
   // Get user profile with existing session (avoids getSession() call)
   async getUserProfileWithSession(uid: string, session: any) {
-    console.log('getUserProfileWithSession called for uid:', uid)
     
     try {
-      console.log('Fetching user profile from server API...')
       
       // Use provided session or try to get current session
       if (!session) {
         try {
-          console.log('No session provided, getting current session...')
           const sessionResult = await supabase.auth.getSession()
           session = sessionResult.data?.session
-          console.log('Session retrieved:', session ? 'Available' : 'Not available')
         } catch (sessionError) {
-          console.error('Error getting session:', sessionError)
-          console.log('Continuing without session...')
         }
       } else {
-        console.log('Using provided session')
       }
       
       const headers: Record<string, string> = {
@@ -123,40 +116,31 @@ export const clientDbHelpers = {
       // Add authorization header if we have a session
       if (session?.access_token) {
         headers.Authorization = `Bearer ${session.access_token}`
-        console.log('Added Authorization header to API call')
       } else {
-        console.log('No access token available for API call')
       }
       
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
-      console.log('Making API request to:', `${apiUrl}/user-management/profile/${uid}/data`)
       
       const response = await fetch(`${apiUrl}/user-management/profile/${uid}/data`, {
         method: 'GET',
         headers
       })
       
-      console.log('API response received with status:', response.status)
       
       if (!response.ok) {
-        console.log('Server API response not ok:', response.status, response.statusText)
         const errorText = await response.text()
-        console.log('Error response body:', errorText)
         throw new Error(`Failed to fetch user profile: ${response.status}`)
       }
       
       const result = await response.json()
-      console.log('Server API result:', result)
       
       if (!result.success) {
         throw new Error(result.message || 'Failed to fetch user profile')
       }
       
-      console.log('User profile fetched successfully:', result.user)
       return result.user
       
     } catch (error) {
-      console.error('Error fetching user profile from server:', error)
       throw new Error('Failed to load user profile')
     }
   },

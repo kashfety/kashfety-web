@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function PUT(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    console.log('🏥 [Doctor Centers Assignments] Request received');
 
     // Extract doctor ID from token
     let doctorId = '';
@@ -16,9 +15,7 @@ export async function PUT(request: NextRequest) {
         const token = authHeader.replace(/^Bearer\s+/i, '');
         const payload = JSON.parse(Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
         doctorId = payload.id || payload.userId || payload.uid || '';
-        console.log('🏥 [Doctor Centers Assignments] Doctor ID:', doctorId);
       } catch (e) {
-        console.error('Failed to decode token:', e);
       }
     }
 
@@ -57,7 +54,6 @@ export async function PUT(request: NextRequest) {
       .eq('doctor_id', finalDoctorId);
 
     if (deleteError) {
-      console.error('❌ Error deleting existing assignments:', deleteError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to update assignments',
@@ -78,7 +74,6 @@ export async function PUT(request: NextRequest) {
       .insert(assignments);
 
     if (insertError) {
-      console.error('❌ Error inserting assignments:', insertError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to save assignments',
@@ -86,14 +81,12 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Doctor Centers Assignments] Assignments saved successfully');
     return NextResponse.json({
       success: true,
       message: 'Center assignments updated successfully'
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor centers assignments error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

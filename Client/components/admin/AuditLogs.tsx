@@ -83,7 +83,6 @@ export default function AuditLogs() {
             let response = null;
             for (let i = 0; i < routes.length; i++) {
                 try {
-                    console.log(`🎨 Trying audit-logs route ${i + 1}/${routes.length}: ${routes[i]}`);
                     response = await fetch(routes[i], {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -91,12 +90,9 @@ export default function AuditLogs() {
                         }
                     });
                     if (response.ok) {
-                        console.log('✅ Route worked for audit-logs:', routes[i]);
                         break;
                     }
-                    console.log(`❌ Route failed: ${routes[i]} - Status: ${response.status}`);
                 } catch (error) {
-                    console.log(`❌ Route error: ${routes[i]}`, error);
                     if (i === routes.length - 1) {
                         throw error; // Rethrow on last attempt
                     }
@@ -132,11 +128,9 @@ export default function AuditLogs() {
                 setLogs(transformedLogs);
             } else {
                 // No audit logs - set empty array
-                console.log('ℹ️ No audit logs available yet');
                 setLogs([]);
             }
         } catch (error) {
-            console.error('Error fetching audit logs:', error)
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_load_audit_logs') || "Failed to load audit logs",

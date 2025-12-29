@@ -30,7 +30,6 @@ export async function GET(
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching working days:', error);
       throw error;
     }
 
@@ -43,7 +42,6 @@ export async function GET(
       workingDays: workingDays // Support both formats for backward compatibility
     });
   } catch (error: any) {
-    console.error('working-days error:', error);
     return NextResponse.json({ 
       success: false, 
       message: error.message || 'Failed to fetch doctor working days' 

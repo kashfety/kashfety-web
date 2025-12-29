@@ -15,7 +15,6 @@ function generateUserId(role: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Admin Create Center] Starting center creation');
     
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -24,7 +23,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('📝 [Admin Create Center] Request data received');
 
     // Validate required fields for center creation
     const { name, name_ar, address, phone, email, password, center_type, offers_labs, offers_imaging } = body;
@@ -58,7 +56,6 @@ export async function POST(request: NextRequest) {
       approval_status: 'approved'
     };
 
-    console.log('📝 [Admin Create Center] Creating user account for center');
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert(userData)
@@ -66,7 +63,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError) {
-      console.error('❌ [Admin Create Center] User creation error:', userError);
       return NextResponse.json({ error: 'Failed to create user account for center' }, { status: 500 });
     }
 
@@ -87,7 +83,6 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
-    console.log('📝 [Admin Create Center] Creating center record');
     const { data: center, error: centerError } = await supabase
       .from('centers')
       .insert(centerData)
@@ -95,7 +90,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (centerError) {
-      console.error('❌ [Admin Create Center] Center creation error:', centerError);
       // Clean up user if center creation fails
       await supabase.from('users').delete().eq('id', newUser.id);
       return NextResponse.json({ error: 'Failed to create center record' }, { status: 500 });
@@ -108,14 +102,12 @@ export async function POST(request: NextRequest) {
       .eq('id', newUser.id);
 
     if (updateError) {
-      console.error('❌ [Admin Create Center] Failed to link user to center:', updateError);
       // Clean up both records if linking fails
       await supabase.from('centers').delete().eq('id', center.id);
       await supabase.from('users').delete().eq('id', newUser.id);
       return NextResponse.json({ error: 'Failed to link user to center' }, { status: 500 });
     }
 
-    console.log('✅ [Admin Create Center] Center and user account created successfully');
     
     return NextResponse.json({
       success: true,
@@ -132,7 +124,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Admin Create Center] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

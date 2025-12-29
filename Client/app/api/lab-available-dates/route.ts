@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
     const end = endDate ? new Date(endDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     // Get lab schedule for this center and test type
-    console.log('🔍 [Lab Available Dates] Fetching schedule for:', { centerId, typeId });
     const { data: schedule, error: scheduleError } = await supabase
       .from('center_lab_schedules')
       .select('*')
@@ -35,14 +34,12 @@ export async function GET(request: NextRequest) {
       .eq('is_available', true);
 
     if (scheduleError) {
-      console.error('❌ Failed to fetch lab schedule:', scheduleError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch lab schedule' 
       }, { status: 500 });
     }
 
-    console.log('📅 Found schedule data:', { count: schedule?.length || 0 });
 
     const availableDates = [];
     const current = new Date(start);
@@ -51,7 +48,7 @@ export async function GET(request: NextRequest) {
     const hasSchedule = schedule && schedule.length > 0;
     
     if (!hasSchedule) {
-      console.log('⚠️ No schedule found, using default working days (Monday-Friday)');
+      ');
     }
 
     while (current <= end) {
@@ -72,7 +69,6 @@ export async function GET(request: NextRequest) {
             try {
               timeSlots = JSON.parse(timeSlots);
             } catch (e) {
-              console.error('Failed to parse time_slots JSON:', e);
               timeSlots = [];
             }
           }
@@ -97,7 +93,6 @@ export async function GET(request: NextRequest) {
       current.setDate(current.getDate() + 1);
     }
 
-    console.log('✅ [Lab Available Dates] Found', availableDates.length, 'available dates');
 
     return NextResponse.json({
       success: true,
@@ -109,7 +104,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Lab available dates API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

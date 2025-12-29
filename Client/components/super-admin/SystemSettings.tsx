@@ -111,7 +111,6 @@ export default function SystemSettings() {
             });
             setSettings(settingsMap);
         } catch (error) {
-            console.error('Error fetching settings:', error);
             setSettings({});
 
             toast({
@@ -166,7 +165,6 @@ export default function SystemSettings() {
             setModifiedSettings({});
             fetchSettings(); // Refresh to get updated timestamps
         } catch (error) {
-            console.error('Error saving settings:', error);
             toast({
                 title: "Error",
                 description: "Failed to save system settings",
@@ -211,7 +209,6 @@ export default function SystemSettings() {
                 description: "Settings exported successfully",
             });
         } catch (error) {
-            console.error('Error exporting settings:', error);
             toast({
                 title: "Error",
                 description: "Failed to export settings",

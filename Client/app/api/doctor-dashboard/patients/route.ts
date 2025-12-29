@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log('👥 Fallback: Fetching patients list with medical information');
 
     // Get patients who have appointments, with all their medical information
     const { data: patientAppointments, error: appointmentsError } = await supabase
@@ -67,7 +66,6 @@ export async function GET(request: NextRequest) {
       .order('appointment_date', { ascending: false });
 
     if (appointmentsError) {
-      console.error('❌ Patient appointments error:', appointmentsError);
 
       // Fallback approach: Get all patients with role='patient'
       const { data: patients, error: patientsError } = await supabase
@@ -95,7 +93,6 @@ export async function GET(request: NextRequest) {
         .limit(limit);
 
       if (patientsError) {
-        console.error('❌ Fallback patients fetch error:', patientsError);
         return NextResponse.json(
           { error: 'Failed to fetch patients' },
           { status: 500 }
@@ -114,7 +111,6 @@ export async function GET(request: NextRequest) {
         };
       }) || [];
 
-      console.log('✅ Fetched patients via fallback:', patientsWithAge.length);
 
       return NextResponse.json({
         success: true,
@@ -151,7 +147,6 @@ export async function GET(request: NextRequest) {
 
     const patients = Array.from(patientMap.values()).slice(0, limit);
 
-    console.log('✅ Fetched patients with medical info:', patients.length);
 
     return NextResponse.json({
       success: true,
@@ -160,7 +155,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

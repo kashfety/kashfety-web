@@ -30,7 +30,6 @@ export const verifyToken = async (req, res, next) => {
       role = decoded.role;
     } catch (jwtError) {
       // Token verification failed - reject the request
-      console.error('JWT verification failed:', jwtError);
       return res.status(401).json({
         success: false,
         message: "Invalid or expired token",
@@ -38,11 +37,6 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    console.log('=== SIMPLIFIED AUTH DEBUG ===');
-    console.log('Token received:', token);
-    console.log('Extracted userId:', userId);
-    console.log('Extracted email:', email);
-    console.log('Extracted role:', role);
 
     // Look up user in database
     const { data: user, error: userError } = await supabaseAdmin
@@ -52,7 +46,6 @@ export const verifyToken = async (req, res, next) => {
       .single();
 
     if (userError && userError.code !== 'PGRST116') {
-      console.error('Database user lookup error:', userError);
       return res.status(500).json({
         success: false,
         message: "Database error during authentication"
@@ -70,9 +63,7 @@ export const verifyToken = async (req, res, next) => {
 
       if (!patientError && patient) {
         patientId = patient.id;
-        console.log('Patient found:', patient);
       } else {
-        console.log('Patient lookup error or not found:', patientError);
       }
     }
 
@@ -88,10 +79,8 @@ export const verifyToken = async (req, res, next) => {
       }
     };
 
-    console.log('Final user object:', req.user);
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
     res.status(401).json({
       success: false,
       message: "Authentication failed"

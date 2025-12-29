@@ -12,9 +12,6 @@ const router = express.Router();
 // Create Appointment - Requires authentication
 router.post("/booking/create", authenticateToken, authenticateRole(['patient']), async (req, res) => {
   try {
-    console.log('=== ULTRA SIMPLE APPOINTMENT BOOKING ===');
-    console.log('Request body:', req.body);
-    console.log('Authenticated user:', req.user);
     
     // Role check is handled by authenticateRole(['patient']) middleware
 
@@ -33,7 +30,6 @@ router.post("/booking/create", authenticateToken, authenticateRole(['patient']),
       });
     }
 
-    console.log('Doctor validated:', doctor);
 
     // Prepare appointment data
     const appointmentData = {
@@ -60,7 +56,6 @@ router.post("/booking/create", authenticateToken, authenticateRole(['patient']),
       });
     }
 
-    console.log('Prepared appointment data:', appointmentData);
 
     // Create appointment (no RLS blocking!)
     const { data: appointment, error: createError } = await supabaseAdmin
@@ -73,17 +68,14 @@ router.post("/booking/create", authenticateToken, authenticateRole(['patient']),
       `)
       .single();
 
-    console.log('Appointment creation result:', { appointment, createError });
 
     if (createError) {
-      console.error('Appointment creation failed:', createError);
       return res.status(500).json({
         success: false,
         message: `Failed to create appointment: ${createError.message}`
       });
     }
 
-    console.log('✅ SUCCESS! Appointment created:', appointment);
 
     res.status(201).json({
       success: true,
@@ -92,8 +84,6 @@ router.post("/booking/create", authenticateToken, authenticateRole(['patient']),
     });
 
   } catch (error) {
-    console.error('=== APPOINTMENT BOOKING ERROR ===');
-    console.error('Error:', error);
     
     res.status(500).json({
       success: false,
@@ -105,8 +95,6 @@ router.post("/booking/create", authenticateToken, authenticateRole(['patient']),
 // Get Patient Appointments
 router.get("/patient/appointments", authenticateToken, authenticateRole(['patient']), async (req, res) => {
   try {
-    console.log('=== GET PATIENT APPOINTMENTS ===');
-    console.log('Patient user ID:', req.user.id);
 
     const { data: appointments, error } = await supabaseAdmin
       .from('appointments')
@@ -119,14 +107,12 @@ router.get("/patient/appointments", authenticateToken, authenticateRole(['patien
       .order('appointment_date', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch appointments:', error);
       return res.status(500).json({
         success: false,
         message: "Failed to fetch appointments"
       });
     }
 
-    console.log('Appointments found:', appointments?.length || 0);
 
     res.json({
       success: true,
@@ -134,7 +120,6 @@ router.get("/patient/appointments", authenticateToken, authenticateRole(['patien
     });
 
   } catch (error) {
-    console.error('Get patient appointments error:', error);
     res.status(500).json({
       success: false,
       message: "Failed to retrieve appointments"
@@ -145,7 +130,6 @@ router.get("/patient/appointments", authenticateToken, authenticateRole(['patien
 // Get All Doctors (for booking interface)
 router.get("/doctors", async (req, res) => {
   try {
-    console.log('=== GET ALL DOCTORS ===');
 
     const { data: doctors, error } = await supabaseAdmin
       .from('users')
@@ -155,14 +139,12 @@ router.get("/doctors", async (req, res) => {
       .order('first_name', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch doctors:', error);
       return res.status(500).json({
         success: false,
         message: "Failed to fetch doctors"
       });
     }
 
-    console.log('Doctors found:', doctors?.length || 0);
 
     res.json({
       success: true,
@@ -170,7 +152,6 @@ router.get("/doctors", async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctors error:', error);
     res.status(500).json({
       success: false,
       message: "Failed to retrieve doctors"
@@ -181,8 +162,6 @@ router.get("/doctors", async (req, res) => {
 // Get Doctor Appointments (for doctor dashboard)
 router.get("/doctor/appointments", authenticateToken, authenticateRole(['doctor']), async (req, res) => {
   try {
-    console.log('=== GET DOCTOR APPOINTMENTS ===');
-    console.log('Doctor user ID:', req.user.id);
 
     const { data: appointments, error } = await supabaseAdmin
       .from('appointments')
@@ -195,14 +174,12 @@ router.get("/doctor/appointments", authenticateToken, authenticateRole(['doctor'
       .order('appointment_date', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch doctor appointments:', error);
       return res.status(500).json({
         success: false,
         message: "Failed to fetch appointments"
       });
     }
 
-    console.log('Doctor appointments found:', appointments?.length || 0);
 
     res.json({
       success: true,
@@ -210,7 +187,6 @@ router.get("/doctor/appointments", authenticateToken, authenticateRole(['doctor'
     });
 
   } catch (error) {
-    console.error('Get doctor appointments error:', error);
     res.status(500).json({
       success: false,
       message: "Failed to retrieve doctor appointments"

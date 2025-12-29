@@ -21,7 +21,6 @@ export const createUserAccount = async (req, res) => {
   try {
     const { email, password, name, firstName, lastName, phone, role } = req.body;
 
-    console.log("Server received user account creation request with role:", role);
 
     // Validate that role is provided
     if (!role) {
@@ -104,7 +103,6 @@ export const createUserAccount = async (req, res) => {
       });
     }
 
-    console.log(`Successfully created ${normalizedRole} account for: ${email}`);
 
     res.status(201).json({
       success: true,
@@ -115,7 +113,6 @@ export const createUserAccount = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Account creation error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to create account",
@@ -177,7 +174,6 @@ export const authenticateUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Login error:", error);
     res.status(401).json({
       success: false,
       message: error.message || "Authentication failed",
@@ -204,7 +200,6 @@ export const resetUserPassword = async (req, res) => {
       message: "Password reset email sent",
     });
   } catch (error) {
-    console.error("Password reset error:", error);
     res.status(400).json({
       success: false,
       message: error.message || "Failed to send password reset email",
@@ -216,29 +211,23 @@ export const resetUserPassword = async (req, res) => {
 export const getUserProfileData = async (req, res) => {
   try {
     const userId = req.params.uid;
-    console.log("=== getUserProfileData called for userId:", userId);
 
     // Get comprehensive user data
     let userData = await User.getUserDashboardData(userId);
-    console.log("=== Initial getUserDashboardData result:", userData ? "User found" : "User not found");
 
     if (!userData) {
-      console.log("=== User not found in database, attempting to create from auth data");
       // User exists in Supabase Auth but not in our database
       // Try to get user info from Supabase Auth and create profile
       try {
         const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
-        console.log("=== Supabase Auth query result:", authError ? `Error: ${authError.message}` : "Success");
 
         if (authError || !authUser?.user) {
-          console.log("=== Could not find user in Supabase Auth");
           return res.status(404).json({
             success: false,
             message: "User not found in database",
           });
         }
 
-        console.log("=== Found user in Supabase Auth, creating database profile");
         // Create user profile from auth data
         const newUserData = {
           uid: authUser.user.id,
@@ -251,14 +240,12 @@ export const getUserProfileData = async (req, res) => {
           default_dashboard: getRoleDefaultDashboard(authUser.user.user_metadata?.role || 'patient')
         };
 
-        console.log("=== Creating user with data:", JSON.stringify(newUserData, null, 2));
+        );
         // Create user in database
         const createdUser = await User.createUser(newUserData);
-        console.log("=== User created successfully:", createdUser.id);
 
         // Create role-specific profile if needed
         if (newUserData.role === 'doctor') {
-          console.log("=== Creating doctor profile");
           await Doctor.createDoctorProfile({
             user_id: createdUser.id,
             uid: userId,
@@ -270,7 +257,6 @@ export const getUserProfileData = async (req, res) => {
             consultation_fee: 0
           });
         } else if (newUserData.role === 'patient') {
-          console.log("=== Creating patient profile");
           await Patient.createPatientProfile({
             user_id: createdUser.id,
             uid: userId,
@@ -284,10 +270,8 @@ export const getUserProfileData = async (req, res) => {
 
         // Get the newly created user data
         userData = await User.getUserDashboardData(userId);
-        console.log("=== Retrieved newly created user data:", userData ? "Success" : "Failed");
 
       } catch (createError) {
-        console.error("=== Error creating user from auth data:", createError);
         return res.status(404).json({
           success: false,
           message: "User not found in database",
@@ -295,13 +279,11 @@ export const getUserProfileData = async (req, res) => {
       }
     }
 
-    console.log("=== Returning user data successfully");
     res.status(200).json({
       success: true,
       user: userData,
     });
   } catch (error) {
-    console.error("=== Get user profile error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to retrieve user profile",
@@ -328,7 +310,6 @@ export const updateUserProfileData = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Update user profile error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update profile",
@@ -346,7 +327,6 @@ export const getAllUsersData = async (req, res) => {
       users,
     });
   } catch (error) {
-    console.error("Get all users error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to retrieve users",
@@ -381,7 +361,6 @@ export const updateUserRole = async (req, res) => {
       user: updatedUser
     });
   } catch (error) {
-    console.error("Update user role error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to update user role",
@@ -402,7 +381,6 @@ export const deleteUserAccount = async (req, res) => {
       user: deletedUser
     });
   } catch (error) {
-    console.error("Delete user error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Failed to delete user account",

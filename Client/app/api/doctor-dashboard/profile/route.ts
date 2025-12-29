@@ -53,7 +53,6 @@ export async function GET(request: NextRequest) {
         .eq('name', user.specialty)
         .single();
       
-      console.log('🔍 Specialty data from Supabase:', specialtyData);
       
       if (specialtyData) {
         user.specialty_name_ar = specialtyData.name_ar;
@@ -64,7 +63,6 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ success: true, doctor: user });
   } catch (e: any) {
-    console.error('profile fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to load profile' }, { status: 500 });
   }
 }

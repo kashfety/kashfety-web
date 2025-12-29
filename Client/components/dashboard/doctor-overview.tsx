@@ -46,14 +46,12 @@ export default function DoctorOverview() {
             setDoctors([]);
             setLoading(false);
           } catch (err) {
-            console.error("Error fetching doctors:", err);
             setError("Failed to load doctors");
             setLoading(false);
           }
         }, 150); // Reduced from 1000ms to 150ms for much faster loading
 
       } catch (err) {
-        console.error("Error in progressive loading:", err);
         setError("Failed to load doctors");
         setLoading(false);
       }

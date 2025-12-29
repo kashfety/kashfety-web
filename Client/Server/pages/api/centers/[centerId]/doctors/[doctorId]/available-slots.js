@@ -88,7 +88,6 @@ export default async function handler(req, res) {
       .eq('status', 'scheduled');
 
     if (appointmentError) {
-      console.error('Error fetching booked appointments:', appointmentError);
     }
 
     const bookedSlots = bookedAppointments ? bookedAppointments.map(apt => apt.appointment_time) : [];
@@ -121,7 +120,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching available slots:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

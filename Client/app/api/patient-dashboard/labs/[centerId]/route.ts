@@ -29,7 +29,6 @@ export async function GET(
             .single();
 
         if (centerError || !center) {
-            console.error('Error fetching center:', centerError);
             return NextResponse.json(
                 { success: false, message: 'Center not found' },
                 { status: 404 }
@@ -56,7 +55,6 @@ export async function GET(
             .eq('is_active', true);
 
         if (servicesError) {
-            console.error('Error fetching services:', servicesError);
         }
 
         // Extract tests with fees
@@ -76,7 +74,6 @@ export async function GET(
             center: centerWithTests
         });
     } catch (error: any) {
-        console.error('Unexpected error in lab details endpoint:', error);
         return NextResponse.json(
             { success: false, message: 'Internal server error', error: error.message },
             { status: 500 }

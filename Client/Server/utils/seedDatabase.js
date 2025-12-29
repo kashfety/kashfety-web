@@ -142,7 +142,6 @@ const doctors = [
 // Function to seed patient data in unified users table
 export const seedPatients = async () => {
   try {
-    console.log("Checking if patients need to be seeded...");
     
     // Check if patients already exist in users table
     const { data: existingPatients, error } = await supabaseAdmin
@@ -152,12 +151,10 @@ export const seedPatients = async () => {
       .limit(1);
     
     if (error) {
-      console.error("Error checking existing patients:", error);
       return;
     }
     
     if (!existingPatients || existingPatients.length === 0) {
-      console.log("Seeding patient data in users table...");
       
       // Hash password for all patients
       const saltRounds = 10;
@@ -175,23 +172,18 @@ export const seedPatients = async () => {
         .insert(patientsWithPassword);
       
       if (patientError) {
-        console.error("Error inserting patients:", patientError);
         return;
       }
       
-      console.log("Patient data seeded successfully in users table!");
     } else {
-      console.log("Patient data already exists. Skipping seed.");
     }
   } catch (error) {
-    console.error("Error seeding patient data:", error);
   }
 };
 
 // Function to seed doctor data in unified users table
 export const seedDoctors = async () => {
   try {
-    console.log("Checking if doctors need to be seeded...");
     
     // Check if doctors already exist in users table
     const { data: existingDoctors, error } = await supabaseAdmin
@@ -201,12 +193,10 @@ export const seedDoctors = async () => {
       .limit(1);
     
     if (error) {
-      console.error("Error checking existing doctors:", error);
       return;
     }
     
     if (!existingDoctors || existingDoctors.length === 0) {
-      console.log("Seeding doctor data in users table...");
       
       // Hash password for all doctors
       const saltRounds = 10;
@@ -224,23 +214,18 @@ export const seedDoctors = async () => {
         .insert(doctorsWithPassword);
       
       if (doctorError) {
-        console.error("Error inserting doctors:", doctorError);
         return;
       }
       
-      console.log("Doctor data seeded successfully in users table!");
     } else {
-      console.log("Doctor data already exists. Skipping seed.");
     }
   } catch (error) {
-    console.error("Error seeding doctor data:", error);
   }
 };
 
 // Function to seed sample appointments
 export const seedAppointments = async () => {
   try {
-    console.log("Checking if appointments need to be seeded...");
     
     // Check if appointments already exist
     const { data: existingAppointments, error } = await supabaseAdmin
@@ -249,12 +234,10 @@ export const seedAppointments = async () => {
       .limit(1);
     
     if (error) {
-      console.error("Error checking existing appointments:", error);
       return;
     }
     
     if (!existingAppointments || existingAppointments.length === 0) {
-      console.log("Seeding appointment data...");
       
       // Get some doctors and patients for appointments from users table
       const { data: doctorData } = await supabaseAdmin
@@ -296,23 +279,18 @@ export const seedAppointments = async () => {
           .insert(sampleAppointments);
         
         if (appointmentError) {
-          console.error("Error inserting appointments:", appointmentError);
         } else {
-          console.log("Appointment data seeded successfully!");
         }
       }
     } else {
-      console.log("Appointment data already exists. Skipping seed.");
     }
   } catch (error) {
-    console.error("Error seeding appointment data:", error);
   }
 };
 
 // Function to seed medical centers
 export const seedCenters = async () => {
   try {
-    console.log("Checking if centers need to be seeded...");
     
     // Check if centers already exist
     const { data: existingCenters, error } = await supabaseAdmin
@@ -321,12 +299,10 @@ export const seedCenters = async () => {
       .limit(1);
     
     if (error) {
-      console.error("Error checking existing centers:", error);
       return;
     }
     
     if (!existingCenters || existingCenters.length === 0) {
-      console.log("Seeding centers data...");
       
       const centers = [
         {
@@ -416,23 +392,18 @@ export const seedCenters = async () => {
         .insert(centers);
       
       if (centerError) {
-        console.error("Error inserting centers:", centerError);
         return;
       }
       
-      console.log("Centers data seeded successfully!");
     } else {
-      console.log("Centers data already exists. Skipping seed.");
     }
   } catch (error) {
-    console.error("Error seeding centers data:", error);
   }
 };
 
 // Function to seed doctor work hours (now stored as JSONB in users table)
 export const seedDoctorWorkHours = async () => {
   try {
-    console.log("Checking if doctor work hours need to be seeded...");
     
     // Check if doctors have work_hours data in users table
     const { data: doctorsWithoutWorkHours, error } = await supabaseAdmin
@@ -442,12 +413,10 @@ export const seedDoctorWorkHours = async () => {
       .is('work_hours', null);
     
     if (error) {
-      console.error("Error checking existing work hours:", error);
       return;
     }
     
     if (doctorsWithoutWorkHours && doctorsWithoutWorkHours.length > 0) {
-      console.log(`Seeding work hours for ${doctorsWithoutWorkHours.length} doctors...`);
       
       // Generate work hours for each doctor without work hours
       const workHoursUpdates = doctorsWithoutWorkHours.map(doctor => {
@@ -475,16 +444,12 @@ export const seedDoctorWorkHours = async () => {
           .eq('id', update.id);
         
         if (updateError) {
-          console.error(`Error updating work hours for doctor ${update.id}:`, updateError);
         }
       }
       
-      console.log("Doctor work hours seeded successfully!");
     } else {
-      console.log("Doctor work hours already exist. Skipping seed.");
     }
   } catch (error) {
-    console.error("Error seeding doctor work hours:", error);
   }
 };
 
@@ -496,8 +461,6 @@ export const seedDatabase = async () => {
     await seedCenters();
     await seedDoctorWorkHours();
     await seedAppointments();
-  console.log("Database seeding completed");
   } catch (error) {
-    console.error("Error during database seeding:", error);
   }
 };

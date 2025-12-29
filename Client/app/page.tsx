@@ -49,7 +49,6 @@ export default function HomePage() {
   };
 
   // Debug: Log RTL state
-  console.log('RTL state:', isRTL, 'Sidebar open:', sidebarOpen, 'Language:', typeof window !== 'undefined' ? document.documentElement.dir : 'unknown');
 
   // Create scroll-based transforms
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);

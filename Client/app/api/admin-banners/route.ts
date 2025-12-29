@@ -6,10 +6,8 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🎨 [Admin Banners] Request received');
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -23,7 +21,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Failed to fetch banners:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch banners',
@@ -53,7 +50,6 @@ export async function GET(request: NextRequest) {
       updated_at: banner.updated_at
     }));
 
-    console.log('✅ [Admin Banners] Fetched', transformedBanners.length, 'banners');
 
     return NextResponse.json({
       success: true,
@@ -61,7 +57,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin banners API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',
@@ -72,7 +67,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📤 [Admin Banners] Upload request received');
 
     // Parse multipart form data
     const formData = await request.formData();
@@ -86,7 +80,7 @@ export async function POST(request: NextRequest) {
     const startDate = formData.get('start_date') as string;
     const endDate = formData.get('end_date') as string;
 
-    console.log('📋 FormData entries:', Array.from(formData.keys()));
+    ));
 
     if (!file) {
       return NextResponse.json({ 
@@ -120,7 +114,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('❌ Upload error:', uploadError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to upload file',
@@ -160,7 +153,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('❌ Database error:', dbError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to save banner',
@@ -168,7 +160,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ Banner uploaded successfully:', banner.id);
 
     return NextResponse.json({
       success: true,
@@ -176,7 +167,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Banner upload error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',
@@ -207,7 +197,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('❌ Failed to update banner:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to update banner',
@@ -221,7 +210,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Banner update error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',
@@ -258,7 +246,6 @@ export async function DELETE(request: NextRequest) {
       .eq('id', bannerId);
 
     if (deleteError) {
-      console.error('❌ Failed to delete banner:', deleteError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to delete banner',
@@ -280,7 +267,6 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Banner delete error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

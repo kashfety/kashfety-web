@@ -20,7 +20,6 @@ export async function GET(
     const end = endDate ? new Date(endDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     // Get lab schedule for this center and test type
-    console.log('🔍 Fetching lab schedule for:', { centerId, typeId });
     const { data: schedule, error: scheduleError } = await supabase
       .from('center_lab_schedules')
       .select('*')
@@ -29,11 +28,9 @@ export async function GET(
       .eq('is_available', true);
 
     if (scheduleError) {
-      console.error('Failed to fetch lab schedule:', scheduleError);
       return NextResponse.json({ error: 'Failed to fetch lab schedule' }, { status: 500 });
     }
 
-    console.log('📅 Found schedule data:', { count: schedule?.length || 0, schedule });
 
     const availableDates = [];
     const current = new Date(start);
@@ -44,7 +41,7 @@ export async function GET(
 
       // Check if this day has available schedule
       const daySchedule = schedule?.find((s: any) => s.day_of_week === dayOfWeek);
-      console.log(`📅 Checking day ${dayOfWeek} (${dateStr}):`, { found: !!daySchedule, isAvailable: daySchedule?.is_available });
+      :`, { found: !!daySchedule, isAvailable: daySchedule?.is_available });
       
       if (daySchedule && daySchedule.is_available) {
         // Parse time_slots if it's a JSON string
@@ -53,13 +50,11 @@ export async function GET(
           try {
             timeSlots = JSON.parse(timeSlots);
           } catch (e) {
-            console.error('Failed to parse time_slots JSON:', e);
             timeSlots = [];
           }
         }
         
         const slotsCount = Array.isArray(timeSlots) ? timeSlots.length : 0;
-        console.log(`✅ Day ${dayOfWeek} has ${slotsCount} slots`);
         
         availableDates.push({
           date: dateStr,
@@ -71,7 +66,6 @@ export async function GET(
       current.setDate(current.getDate() + 1);
     }
 
-    console.log('📊 Final available dates:', { totalDates: availableDates.length, dates: availableDates });
 
     return NextResponse.json({
       success: true,
@@ -83,7 +77,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Lab available dates API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -60,7 +60,6 @@ export default function CenterApprovals() {
                     url += `?status=${status}`
                 }
                 
-                console.log('🏥 Trying admin-center-requests fallback route:', url);
                 
                 response = await fetch(url, {
                     headers: {
@@ -70,28 +69,22 @@ export default function CenterApprovals() {
 
                 if (response.ok) {
                     result = await response.json();
-                    console.log('🏥 [Center Approvals] Response data:', result);
                     
                     if (result.success) {
                         const requests = result.data || [];
-                        console.log('✅ Fallback route worked for center requests, found:', requests.length, 'requests');
                         
                         // Filter by status if needed (in case API didn't filter)
                         const filteredRequests = status && status !== 'all' 
                             ? requests.filter((r: any) => r.approval_status === status)
                             : requests;
                         
-                        console.log('🏥 [Center Approvals] Filtered requests:', filteredRequests.length, 'with status:', status);
                         setRequests(filteredRequests);
                         return;
                     } else {
-                        console.warn('⚠️ [Center Approvals] Response not successful:', result);
                     }
                 } else {
-                    console.warn('⚠️ [Center Approvals] Response not OK:', response.status, response.statusText);
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying original route');
             }
 
             // Fallback to original route
@@ -100,7 +93,6 @@ export default function CenterApprovals() {
                 url += `?status=${status}`
             }
             
-            console.log('🔄 Trying original route:', url);
             
             response = await fetch(url, {
                 headers: {
@@ -110,21 +102,17 @@ export default function CenterApprovals() {
 
             if (!response.ok) {
                 const errorText = await response.text()
-                console.error('❌ Response error:', errorText)
                 throw new Error(`Failed to fetch center requests: ${response.status} ${errorText}`)
             }
 
             result = await response.json()
-            console.log('✅ Response data:', result)
             
             if (result.success) {
-                console.log('✅ Setting requests:', result.data?.length || 0, 'items')
                 setRequests(result.data || [])
             } else {
                 throw new Error(result.error || 'Failed to load center requests')
             }
         } catch (error: any) {
-            console.error('Fetch center requests error:', error)
             toast({
                 title: t('error') || 'Error',
                 description: error.message || t('admin_load_center_requests_failed') || 'Failed to load center requests',
@@ -168,7 +156,6 @@ export default function CenterApprovals() {
                 throw new Error(result.error || `Failed to ${action} center`)
             }
         } catch (error: any) {
-            console.error(`${action} center error:`, error)
             toast({
                 title: t('error') || 'Error',
                 description: error.message || (action === 'approve' 

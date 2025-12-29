@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Center setup error:', error);
     return NextResponse.json({
       error: 'Internal server error during center setup'
     }, { status: 500 });
@@ -70,13 +69,11 @@ export async function GET(request: NextRequest) {
           .single();
 
         if (centerError) {
-          console.warn('Center record not found for center_id:', userData.center_id, centerError);
           needsSetup = true;
         } else {
           centerRecord = center;
         }
       } catch (error) {
-        console.error('Error checking center record:', error);
         needsSetup = true;
       }
     } else {
@@ -92,7 +89,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Center status check error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error during center status check'

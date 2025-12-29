@@ -37,7 +37,6 @@ export default function DoctorApprovals() {
         try {
             setLoading(true)
 
-            console.log(' Fetching doctor approvals with status:', status);
 
             // Build URL with status filter
             let url = '/api/admin-doctor-certificates';
@@ -57,7 +56,6 @@ export default function DoctorApprovals() {
             }
 
             const data = await response.json();
-            console.log(' [Doctor Approvals] Response:', data);
 
             if (data.success && data.data?.certificates) {
                 const approvals: DoctorApproval[] = data.data.certificates
@@ -74,7 +72,6 @@ export default function DoctorApprovals() {
                 setApprovals(approvals);
             }
         } catch (error) {
-            console.error('Error fetching doctor approvals:', error)
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_load_doctor_approvals') || "Failed to load doctor approvals",
@@ -87,7 +84,6 @@ export default function DoctorApprovals() {
 
     const handleApproval = async (certificateId: string, action: 'approve' | 'reject') => {
         try {
-            console.log(` [Doctor Approvals] ${action} certificate:`, certificateId);
 
             const requestBody = {
                 status: action === 'approve' ? 'approved' : 'rejected',
@@ -96,7 +92,6 @@ export default function DoctorApprovals() {
 
             // Use dedicated action endpoint (no dynamic routes - Vercel compatible)
             const endpoint = `/api/admin-review-certificate-action`;
-            console.log(` [Doctor Approvals] Calling:`, endpoint);
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -110,16 +105,13 @@ export default function DoctorApprovals() {
                 })
             });
 
-            console.log(` [Doctor Approvals] Response:`, response.status);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error(` [Doctor Approvals] Error:`, errorData);
                 throw new Error(`Failed to ${action} doctor`);
             }
 
             const responseData = await response.json();
-            console.log(` [Doctor Approvals] Success:`, responseData);
 
             fetchDoctorApprovals(activeTab);
 
@@ -130,7 +122,6 @@ export default function DoctorApprovals() {
             });
 
         } catch (error) {
-            console.error(`Error ${action}ing doctor:`, error);
             toast({
                 title: t('admin_error') || "Error",
                 description: `${t('admin_failed_to') || 'Failed to'} ${action} ${t('admin_doctor') || 'doctor'}`,

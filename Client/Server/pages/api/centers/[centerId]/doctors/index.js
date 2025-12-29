@@ -40,7 +40,6 @@ export default async function handler(req, res) {
     const { data: doctorCenters, error } = await query;
 
     if (error) {
-      console.error('Error fetching center doctors:', error);
       return res.status(500).json({
         success: false,
         error: 'Failed to fetch doctors'
@@ -111,7 +110,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching center doctors:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

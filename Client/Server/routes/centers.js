@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
   try {
     const { specialty } = req.query;
 
-    console.log(`🔍 Getting centers, specialty filter: ${specialty}`);
 
     const { data: centers, error } = await supabase
       .from('centers')
@@ -26,7 +25,6 @@ router.get('/', async (req, res) => {
       .order('name');
 
     if (error) {
-      console.error('Error fetching centers:', error);
       return res.status(500).json({ error: 'Failed to fetch centers' });
     }
 
@@ -50,7 +48,6 @@ router.get('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get centers error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -61,7 +58,6 @@ router.get('/:centerId/doctors', async (req, res) => {
     const { centerId } = req.params;
     const { specialty, home_visit } = req.query;
 
-    console.log(`🔍 Getting doctors for center: ${centerId}, specialty: ${specialty}, home_visit: ${home_visit}`);
 
     let query = supabase
       .from('doctor_centers')
@@ -91,7 +87,6 @@ router.get('/:centerId/doctors', async (req, res) => {
     const { data: doctorCenters, error } = await query;
 
     if (error) {
-      console.error('Error fetching doctors by center:', error);
       return res.status(500).json({ error: 'Failed to fetch doctors' });
     }
 
@@ -128,7 +123,6 @@ router.get('/:centerId/doctors', async (req, res) => {
       doctor.has_schedule = schedules && schedules.length > 0;
     }
 
-    console.log(`✅ Found ${doctors.length} doctors for center ${centerId}`);
 
     res.json({
       success: true,
@@ -138,7 +132,6 @@ router.get('/:centerId/doctors', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctors by center error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -155,7 +148,6 @@ router.get('/:centerId', async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Error fetching center:', error);
       return res.status(404).json({ error: 'Center not found' });
     }
 
@@ -173,7 +165,6 @@ router.get('/:centerId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get center details error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -191,7 +182,6 @@ router.get('/:centerId/specialties', async (req, res) => {
       .eq('center_id', centerId);
 
     if (error) {
-      console.error('Error fetching specialties:', error);
       return res.status(500).json({ error: 'Failed to fetch specialties' });
     }
 
@@ -209,7 +199,6 @@ router.get('/:centerId/specialties', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get center specialties error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

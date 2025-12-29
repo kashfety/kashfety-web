@@ -130,7 +130,7 @@ export async function GET(
       consultation_fee: schedule.consultation_fee || 0
     }, { status: 200 });
   } catch (error) {
-    console.error('Proxy error (center available slots):', error);
+    :', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch available slots' }, { status: 500 });
   }
 }

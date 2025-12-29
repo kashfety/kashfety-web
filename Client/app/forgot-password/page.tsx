@@ -39,12 +39,10 @@ export default function ForgotPasswordPage() {
 
       // Log reset URL in development
       if (data.resetUrl) {
-        console.log('🔗 Password Reset URL:', data.resetUrl)
       }
 
       setSuccess(true)
     } catch (err: any) {
-      console.error("Password reset error:", err)
       setError(err.message || "An error occurred. Please try again.")
     } finally {
       setIsLoading(false)

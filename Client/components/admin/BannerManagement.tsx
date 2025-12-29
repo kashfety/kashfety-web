@@ -95,7 +95,6 @@ export default function BannerManagement() {
             const token = localStorage.getItem('auth_token');
             
             if (!token) {
-                console.error('No token found in localStorage');
                 toast({
                     title: t('error') || 'Error',
                     description: 'Please log in to continue',
@@ -110,7 +109,6 @@ export default function BannerManagement() {
             let result;
             
             try {
-                console.log('🎨 Trying admin-banners fallback route');
                 response = await fetch('/api/admin-banners', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -120,13 +118,11 @@ export default function BannerManagement() {
                 if (response.ok) {
                     result = await response.json();
                     if (result.success) {
-                        console.log('✅ Fallback route worked for banners');
                         setBanners(result.data || []);
                         return;
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -143,7 +139,6 @@ export default function BannerManagement() {
             result = await response.json();
             setBanners(result.data || []);
         } catch (error) {
-            console.error('Error fetching banners:', error);
             toast({
                 title: t('error') || 'Error',
                 description: t('failed_to_fetch_banners') || 'Failed to fetch banners',
@@ -191,17 +186,13 @@ export default function BannerManagement() {
     };
 
     const handleUpload = async () => {
-        console.log('🎯 Upload button clicked!', { selectedFile });
         if (!selectedFile) {
-            console.log('❌ No file selected');
             return;
         }
 
         try {
             setUploading(true);
-            console.log('📤 Starting upload...');
             const token = localStorage.getItem('auth_token');
-            console.log('🔑 Token:', token ? 'Found' : 'Not found');
 
             if (!token) {
                 toast({
@@ -221,9 +212,7 @@ export default function BannerManagement() {
             uploadFormData.append('target_audience', formData.target_audience);
             uploadFormData.append('click_url', formData.click_url);
             uploadFormData.append('display_order', formData.display_order.toString());
-            console.log('📦 FormData created with file:', selectedFile.name);
 
-            console.log('🌐 Sending request to: /api/admin-banners');
             const response = await fetch('/api/admin-banners', {
                 method: 'POST',
                 headers: {
@@ -232,10 +221,8 @@ export default function BannerManagement() {
                 body: uploadFormData
             });
 
-            console.log('📬 Response status:', response.status);
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('❌ Upload failed:', errorData);
                 throw new Error(errorData.error || 'Failed to upload banner');
             }
 
@@ -261,7 +248,6 @@ export default function BannerManagement() {
             await fetchBanners();
 
         } catch (error) {
-            console.error('Error uploading banner:', error);
             toast({
                 title: t('error') || 'Error',
                 description: t('failed_to_upload_banner') || 'Failed to upload banner',
@@ -322,7 +308,6 @@ export default function BannerManagement() {
             // Refresh banners list
             await fetchBanners();
         } catch (error) {
-            console.error('Error deleting banner:', error);
             toast({
                 title: t('error') || 'Error',
                 description: t('failed_to_delete_banner') || 'Failed to delete banner',

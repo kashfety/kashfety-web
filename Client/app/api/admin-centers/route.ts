@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🏥 [Admin Centers] Request received');
     const { searchParams } = new URL(request.url);
     
     const page = parseInt(searchParams.get('page') || '1');
@@ -14,10 +13,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
 
-    console.log('🏥 [Admin Centers] Params:', { page, limit, search, status });
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -64,7 +61,6 @@ export async function GET(request: NextRequest) {
     const { data: centers, error } = await dataQuery;
 
     if (error) {
-      console.error('❌ Failed to fetch centers:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch centers',
@@ -91,7 +87,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    console.log('✅ [Admin Centers] Fetched', transformedCenters.length, 'centers (page', page, 'of', totalPages, ')');
+    ');
 
     return NextResponse.json({
       success: true,
@@ -109,7 +105,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin centers API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

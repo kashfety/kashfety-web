@@ -47,7 +47,6 @@ export async function getUserFromAuth(request: NextRequest, includeProfile: bool
           .single();
 
         if (error || !user) {
-          console.error('Failed to fetch user:', error);
           return null;
         }
         
@@ -61,12 +60,10 @@ export async function getUserFromAuth(request: NextRequest, includeProfile: bool
         };
       }
       
-      console.error('Invalid token format:', jwtError);
       return null;
     }
     
     if (!decoded.id) {
-      console.error('Token missing user ID');
       return null;
     }
 
@@ -79,7 +76,6 @@ export async function getUserFromAuth(request: NextRequest, includeProfile: bool
       .single();
 
     if (error || !user) {
-      console.error('Failed to fetch user:', error);
       return null;
     }
     
@@ -92,7 +88,6 @@ export async function getUserFromAuth(request: NextRequest, includeProfile: bool
       email: user.email
     };
   } catch (error) {
-    console.error('Exception in getUserFromAuth:', error);
     return null;
   }
 }

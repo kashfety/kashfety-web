@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🩺 [Center Patient Medical Records] Request received');
     
     // Require center authentication
     const authResult = requireCenter(request);
@@ -52,7 +51,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Failed to fetch medical records:', error);
       return NextResponse.json({ success: false, error: 'Failed to fetch medical records', details: error.message }, { status: 500 });
     }
 
@@ -75,11 +73,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log('✅ [Center Patient Medical Records] Fetched', enrichedRecords.length, 'records for patient:', patientId);
     return NextResponse.json({ success: true, records: enrichedRecords });
 
   } catch (error: any) {
-    console.error('❌ Center patient medical records API error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error', details: error.message }, { status: 500 });
   }
 }

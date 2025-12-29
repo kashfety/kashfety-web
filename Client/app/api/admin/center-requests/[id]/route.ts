@@ -42,7 +42,6 @@ export async function PUT(
     const body = await request.json().catch(() => ({}));
     const { action } = body;
 
-    console.log('🚨 NEXT.JS API: Processing center approval', { centerId, action });
 
     if (!action) {
       return NextResponse.json({ error: 'action is required' }, { status: 400 });
@@ -67,7 +66,6 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Error updating center approval status:', error);
       return NextResponse.json({ error: 'Failed to update center status' }, { status: 500 });
     }
 
@@ -75,7 +73,6 @@ export async function PUT(
       return NextResponse.json({ error: 'Center not found' }, { status: 404 });
     }
 
-    console.log('🚨 NEXT.JS API: Center', action + 'd', 'successfully');
 
     return NextResponse.json({ 
       success: true, 
@@ -84,7 +81,6 @@ export async function PUT(
     });
 
   } catch (e: any) {
-    console.error('Admin center approval PUT error:', e);
     return NextResponse.json({ error: e.message || 'Failed to update center status' }, { status: 500 });
   }
 }

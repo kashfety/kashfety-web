@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    console.log('🏥 [Doctor Centers] Request received');
 
     // Extract doctor ID from token
     let doctorId = '';
@@ -16,9 +15,7 @@ export async function GET(request: NextRequest) {
         const token = authHeader.replace(/^Bearer\s+/i, '');
         const payload = JSON.parse(Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
         doctorId = payload.id || payload.userId || payload.uid || '';
-        console.log('🏥 [Doctor Centers] Doctor ID:', doctorId);
       } catch (e) {
-        console.error('Failed to decode token:', e);
       }
     }
 
@@ -38,10 +35,8 @@ export async function GET(request: NextRequest) {
       .eq('doctor_id', doctorId);
 
     if (assignmentsError) {
-      console.error('❌ Error fetching assignments:', assignmentsError);
     }
 
-    console.log('🏥 [Doctor Centers] Doctor assignments:', assignments?.length || 0);
 
     const assignmentMap = new Map((assignments || []).map((a: any) => [a.center_id, a]));
 
@@ -52,7 +47,6 @@ export async function GET(request: NextRequest) {
       .eq('approval_status', 'approved');
 
     if (centersError) {
-      console.error('❌ Error fetching centers:', centersError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch centers',
@@ -60,7 +54,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('🏥 [Doctor Centers] Total centers from DB:', allCenters?.length || 0);
 
     // Filter out personal clinics that don't belong to this doctor
     const visibleCenters = (allCenters || []).filter((c: any) => {
@@ -68,14 +61,12 @@ export async function GET(request: NextRequest) {
       if (type === 'personal') {
         const belongs = c.owner_doctor_id === doctorId;
         if (!belongs) {
-          console.log('🚫 [Doctor Centers] Filtering out personal clinic:', c.name, 'owned by:', c.owner_doctor_id);
         }
         return belongs;
       }
       return true; // Show all generic centers
     });
 
-    console.log('🏥 [Doctor Centers] Visible centers after filtering:', visibleCenters.length);
 
     // Mark assigned centers and primary center
     const centersWithAssignment = visibleCenters.map((center: any) => {
@@ -84,7 +75,6 @@ export async function GET(request: NextRequest) {
       const isPrimary = assignment?.is_primary || false;
       
       if (isAssigned) {
-        console.log('✅ [Doctor Centers] Assigned center:', center.name, 'primary:', isPrimary);
       }
       
       return {
@@ -97,7 +87,6 @@ export async function GET(request: NextRequest) {
     // Separate assigned and unassigned centers
     const assignedCenters = centersWithAssignment.filter((c: any) => c.is_assigned);
     
-    console.log('✅ [Doctor Centers] Assigned:', assignedCenters.length, 'Total visible:', centersWithAssignment.length);
 
     return NextResponse.json({
       success: true,
@@ -106,7 +95,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor centers error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
       .eq('center_id', centerId);
 
     if (error) {
-      console.error('Failed to fetch center services:', error);
       return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 });
     }
 
@@ -56,7 +55,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, services: transformedServices });
   } catch (error) {
-    console.error('Center services error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

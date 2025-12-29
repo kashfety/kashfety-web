@@ -43,7 +43,6 @@ export default async function handler(req, res) {
       .eq('is_available', true);
 
     if (scheduleError) {
-      console.error('Error fetching doctor schedule:', scheduleError);
       return res.status(500).json({
         success: false,
         error: 'Failed to fetch doctor schedule'
@@ -88,7 +87,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error fetching doctor availability:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

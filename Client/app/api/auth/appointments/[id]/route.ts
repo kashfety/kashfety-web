@@ -21,7 +21,6 @@ export async function GET(
         const { searchParams } = new URL(request.url);
         const role = searchParams.get('role') || 'patient';
 
-        console.log('GET /api/auth/appointments - Fetching appointments for user:', id, 'role:', role);
 
         if (!id) {
             return NextResponse.json({
@@ -57,7 +56,6 @@ export async function GET(
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching appointments:', error);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to fetch appointments',
@@ -73,7 +71,6 @@ export async function GET(
             doctor_specialty: a.doctor?.specialty || a.doctor_specialty || a.specialty || null
         }));
 
-        console.log('Found appointments:', enriched.length || 0);
 
         return NextResponse.json({
             success: true,
@@ -82,7 +79,6 @@ export async function GET(
         });
 
     } catch (error: any) {
-        console.error('Error in /api/auth/appointments:', error);
         return NextResponse.json({
             success: false,
             message: 'Internal server error',

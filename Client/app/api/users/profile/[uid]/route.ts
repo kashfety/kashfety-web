@@ -44,7 +44,6 @@ export async function GET(request: NextRequest, { params }: { params: { uid: str
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('User profile API route error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -96,7 +95,6 @@ export async function PUT(request: NextRequest, { params }: { params: { uid: str
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('User profile update API route error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -146,7 +144,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { uid: 
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('User delete API route error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

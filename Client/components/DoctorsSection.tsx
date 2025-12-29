@@ -123,7 +123,6 @@ const DoctorsSection = () => {
         setSpecialtiesMap(map);
       }
     } catch (error) {
-      console.error('Error fetching specialties:', error);
     }
   };
 
@@ -136,7 +135,6 @@ const DoctorsSection = () => {
         setDoctors(result.doctors.slice(0, 6)); // Show only first 6 doctors
       }
     } catch (error) {
-      console.error('Error fetching doctors:', error);
     } finally {
       setLoading(false);
     }

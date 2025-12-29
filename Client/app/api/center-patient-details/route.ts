@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🏥 [Center Patient Details] Request received');
     
     // Require center authentication
     const authResult = requireCenter(request);
@@ -69,16 +68,13 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('❌ Failed to fetch patient details:', error);
       return NextResponse.json({ success: false, error: 'Patient not found', details: error.message }, { status: 404 });
     }
 
 
-    console.log('✅ [Center Patient Details] Fetched patient:', patient.id);
     return NextResponse.json({ success: true, patient });
 
   } catch (error: any) {
-    console.error('❌ Center patient details API error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error', details: error.message }, { status: 500 });
   }
 }

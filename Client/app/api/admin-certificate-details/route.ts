@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📜 [Admin Certificate Details] Request received');
     const { searchParams } = new URL(request.url);
     const certificateId = searchParams.get('certificateId');
 
@@ -14,10 +13,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Certificate ID is required' }, { status: 400 });
     }
 
-    console.log('📜 [Admin Certificate Details] Fetching certificate:', certificateId);
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -31,7 +28,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (certError || !certificate) {
-      console.error('❌ Failed to fetch certificate:', certError);
       return NextResponse.json({ success: false, error: 'Certificate not found', details: certError?.message }, { status: 404 });
     }
 
@@ -45,7 +41,6 @@ export async function GET(request: NextRequest) {
         .single();
       
       if (doctorError) {
-        console.warn('⚠️ [Admin Certificate Details] Could not fetch doctor info:', doctorError.message);
       } else {
         doctorInfo = doctor;
       }
@@ -97,7 +92,6 @@ export async function GET(request: NextRequest) {
       certificate_status: certificate.status || 'pending'
     };
 
-    console.log('✅ [Admin Certificate Details] Fetched certificate:', certificateId);
 
     return NextResponse.json({
       success: true,
@@ -105,7 +99,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin certificate details API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

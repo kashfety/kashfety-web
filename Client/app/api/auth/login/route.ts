@@ -180,7 +180,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
 
   } catch (error: any) {
-    console.error('Login error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

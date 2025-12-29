@@ -45,7 +45,6 @@ export async function GET(
     if (doctorId) query = query.eq('doctor_id', doctorId);
     const { data: appointments, error: appointmentsError } = await query.order('appointment_date', { ascending: false });
     if (appointmentsError) {
-      console.error('❌ Fetch appointments error:', appointmentsError);
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 });
     }
 
@@ -64,11 +63,9 @@ export async function GET(
       })
     );
 
-    console.log(`✅ Found ${enrichedAppointments?.length || 0} appointments for patient`);
     return NextResponse.json({ success: true, appointments: enrichedAppointments || [], count: enrichedAppointments?.length || 0 });
 
   } catch (error) {
-    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

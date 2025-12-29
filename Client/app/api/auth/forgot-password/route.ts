@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email } = body;
 
-    console.log('📥 [Forgot-Password] Request received for email:', email);
 
     if (!email) {
       return NextResponse.json(
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
 
     // Always return success to prevent email enumeration
     if (userError || !user) {
-      console.log('⚠️ [Forgot-Password] User not found, but returning success');
       return NextResponse.json({
         success: true,
         message: 'If an account with that email exists, a password reset link has been sent.'
@@ -50,11 +48,9 @@ export async function POST(request: NextRequest) {
       .eq('email', email);
 
     if (updateError) {
-      console.error('❌ [Forgot-Password] Error storing token:', updateError);
       throw new Error('Failed to generate reset token');
     }
 
-    console.log('✅ [Forgot-Password] Reset token generated for:', email);
 
     // Send password reset email using Supabase Auth
     // The email template in Supabase Dashboard should contain:
@@ -65,13 +61,10 @@ export async function POST(request: NextRequest) {
       });
 
       if (emailError) {
-        console.error('❌ [Forgot-Password] Error sending email:', emailError);
         // Don't throw - we still want to return success to prevent email enumeration
       } else {
-        console.log('✅ [Forgot-Password] Email sent successfully to:', email);
       }
     } catch (emailException: any) {
-      console.error('❌ [Forgot-Password] Exception sending email:', emailException);
       // Continue anyway to prevent email enumeration
     }
 
@@ -81,7 +74,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Forgot-Password] Unexpected error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
@@ -130,7 +122,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Forgot-Password] Token verification error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }

@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔬 [Center Patient Lab History] Request received');
     
     // Require center authentication
     const authResult = requireCenter(request);
@@ -75,7 +74,6 @@ export async function GET(request: NextRequest) {
     const { data: labHistory, error } = await query;
 
     if (error) {
-      console.error('❌ Failed to fetch lab history:', error);
       return NextResponse.json({ success: false, error: 'Failed to fetch lab history', details: error.message }, { status: 500 });
     }
 
@@ -97,11 +95,9 @@ export async function GET(request: NextRequest) {
       test_type: booking.test_type
     }));
 
-    console.log('✅ [Center Patient Lab History] Fetched', transformedHistory.length, 'bookings for patient:', patientId);
     return NextResponse.json({ success: true, bookings: transformedHistory });
 
   } catch (error: any) {
-    console.error('❌ Center patient lab history API error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error', details: error.message }, { status: 500 });
   }
 }

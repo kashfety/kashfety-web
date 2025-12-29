@@ -48,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = clientAuthHelpers.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session)
         setSession(session)
 
         if (session?.user) {
@@ -70,10 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadUserProfile = async (authUser: SupabaseUser, shouldRedirect: boolean = false, currentSession: any = null) => {
     try {
       setLoading(true)
-      console.log('Loading user profile for:', authUser.id, 'shouldRedirect:', shouldRedirect)
 
       const userProfile = await clientDbHelpers.getUserProfileWithSession(authUser.id, currentSession)
-      console.log('User profile loaded:', userProfile)
 
       if (userProfile) {
         const userData = {
@@ -83,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: userProfile.role || 'patient'
         }
 
-        console.log('Setting user data:', userData)
         setUser(userData)
         setIsAuthenticated(true)
 
@@ -95,7 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Check if there's a booking redirect
           if (redirectParam === 'booking') {
-            console.log('Redirecting back to home for booking completion')
             // The booking modal will be opened by the stored booking data
             router.push('/')
             return
@@ -103,25 +98,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           const dashboardPath = getDashboardPath(userProfile.role || 'patient')
 
-          console.log(`Current path: ${currentPath}, Dashboard path: ${dashboardPath}`)
 
           // Only redirect if not already on the correct dashboard
           if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/') {
-            console.log(`Auto-redirecting ${userProfile.role} from ${currentPath} to ${dashboardPath}`)
             router.push(dashboardPath)
           } else {
-            console.log('Not redirecting - already on appropriate page')
           }
         } else {
-          console.log('Not redirecting - shouldRedirect:', shouldRedirect, 'window available:', typeof window !== 'undefined')
         }
       } else {
-        console.error('User profile not found for:', authUser.id)
         setUser(null)
         setIsAuthenticated(false)
       }
     } catch (err) {
-      console.error('Error loading user profile:', err)
       setError(err instanceof Error ? err : new Error('Failed to load user profile'))
       setUser(null)
       setIsAuthenticated(false)
@@ -135,14 +124,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      console.log('Starting login process...')
       const { user: authUser, session } = await clientAuthHelpers.signIn(email, password)
 
       if (!authUser) {
         throw new Error('Login failed - no user returned')
       }
 
-      console.log('Auth successful, loading user profile...')
       setSession(session)
 
       // The auth state change listener will handle the redirect automatically
@@ -150,7 +137,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Login failed')
-      console.error('Login error:', error)
       setError(error)
       setIsAuthenticated(false)
       setUser(null)

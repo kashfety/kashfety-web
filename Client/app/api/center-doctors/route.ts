@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
     const specialty = searchParams.get('specialty') || undefined;
     const homeVisit = searchParams.get('home_visit') || undefined;
 
-    console.log('🏥 [Center Doctors API] Request - Center:', centerId, 'Specialty:', specialty);
 
     if (!centerId) {
       return NextResponse.json({ 
@@ -33,7 +32,6 @@ export async function GET(request: NextRequest) {
       .eq('center_id', centerId);
 
     if (error) {
-      console.error('🏥 Error fetching doctors:', error);
       return NextResponse.json({ 
         success: false, 
         message: 'Failed to fetch center doctors' 
@@ -70,11 +68,9 @@ export async function GET(request: NextRequest) {
       doctors = doctors.filter(d => d.home_available === true);
     }
 
-    console.log(`🏥 Found ${doctors.length} doctors for center ${centerId}`);
 
     return NextResponse.json({ success: true, doctors }, { status: 200 });
   } catch (error: any) {
-    console.error('🏥 Error:', error);
     return NextResponse.json({ 
       success: false, 
       message: 'Internal server error' 

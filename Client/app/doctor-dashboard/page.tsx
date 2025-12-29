@@ -605,18 +605,15 @@ export default function DoctorDashboard() {
               });
             });
             setSpecialtiesMap(map);
-            console.log('✅ Loaded specialties map:', map.size, 'entries');
           }
         }
       } catch (error) {
-        console.error('Error fetching specialties:', error);
       }
     };
     fetchSpecialties();
   }, []);
 
   useEffect(() => {
-    console.log('Current user role:', user?.role);
     if (!user) {
       router.push('/login');
       return;
@@ -655,7 +652,6 @@ export default function DoctorDashboard() {
         const doctorId = user?.id || storedUser?.id;
 
         if (!doctorId) {
-          console.error('Doctor ID not found');
           setReviewsLoading(false);
           return;
         }
@@ -664,14 +660,11 @@ export default function DoctorDashboard() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Reviews fetched:', data.reviews?.length || 0);
           setReviews(data.reviews || []);
         } else {
-          console.error('Failed to fetch reviews:', response.status);
           setReviews([]);
         }
       } catch (error) {
-        console.error('Error fetching reviews:', error);
         setReviews([]);
       } finally {
         setReviewsLoading(false);
@@ -687,7 +680,6 @@ export default function DoctorDashboard() {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
       if (!token) {
-        console.error('No token found in localStorage');
         router.push('/login');
         return;
       }
@@ -699,7 +691,6 @@ export default function DoctorDashboard() {
       const doctorIdQuery = doctorId ? `doctor_id=${encodeURIComponent(doctorId)}` : '';
       const withDoctorId = (base: string) => doctorIdQuery ? `${base}?${doctorIdQuery}` : base;
 
-      console.log('Fetching doctor data with token:', token ? 'present' : 'missing');
 
       // Fetch doctor profile
       const profileResponse = await fetch(withDoctorId('/api/doctor-dashboard/profile'), {
@@ -709,11 +700,9 @@ export default function DoctorDashboard() {
         }
       });
 
-      console.log('Profile response status:', profileResponse.status);
 
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
-        console.log('Profile data received:', profileData);
         console.log('Doctor specialty fields:', {
           specialty: profileData.doctor?.specialty,
           specialty_name_ar: profileData.doctor?.specialty_name_ar,
@@ -731,7 +720,6 @@ export default function DoctorDashboard() {
         }
       } else {
         const errorText = await profileResponse.text();
-        console.error('Profile fetch error:', profileResponse.status, errorText);
         if (profileResponse.status === 401) {
           router.push('/login');
           return;
@@ -764,7 +752,6 @@ export default function DoctorDashboard() {
         const todayData = await todayResponse.json();
         setTodayStats(todayData);
       } else {
-        console.warn('Today stats fetch failed');
         setTodayStats({
           stats: {
             todayAppointments: 0,
@@ -780,7 +767,6 @@ export default function DoctorDashboard() {
         const patientsData = await patientsResponse.json();
         setPatients(patientsData.patients || []);
       } else {
-        console.warn('Patients fetch failed');
         setPatients([]);
       }
 
@@ -789,7 +775,6 @@ export default function DoctorDashboard() {
         const analyticsData = await analyticsResponse.json();
         setAnalytics(analyticsData);
       } else {
-        console.warn('Analytics fetch failed');
         setAnalytics({
           analytics: {
             totalPatients: 0,
@@ -811,12 +796,10 @@ export default function DoctorDashboard() {
         const appointmentsData = await appointmentsResponse.json();
         setAllAppointments(appointmentsData.appointments || []);
       } else {
-        console.warn('Appointments fetch failed');
         setAllAppointments([]);
       }
 
     } catch (error) {
-      console.error('Failed to fetch doctor data:', error);
       toast({
         title: t('error') || 'Error',
         description: t('dd_error_load_dashboard') || 'Failed to load dashboard data. Please try again.',
@@ -830,7 +813,6 @@ export default function DoctorDashboard() {
   // Enhanced patient view handler
   const handleViewPatient = async (patientId: string) => {
     try {
-      console.log('👤 Fetching patient details for:', patientId);
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
@@ -903,7 +885,6 @@ export default function DoctorDashboard() {
     if (!selectedAppointment) return;
 
     try {
-      console.log('💾 Saving medical record for appointment:', selectedAppointment.id);
 
       // Save medical record using Next.js API route
       const response = await fetch('/api/doctor-dashboard/medical-records', {
@@ -923,7 +904,6 @@ export default function DoctorDashboard() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Medical record saved successfully:', result);
 
         // Update appointment status to completed
         await handleUpdateAppointmentStatus(selectedAppointment.id, 'completed');
@@ -939,7 +919,6 @@ export default function DoctorDashboard() {
         fetchDoctorData();
       } else {
         const errorData = await response.json();
-        console.error('❌ Failed to save medical record:', errorData);
 
         toast({
           title: t('error') || "Error",
@@ -972,7 +951,6 @@ export default function DoctorDashboard() {
       // Try fallback route first for Vercel compatibility
       let response;
       try {
-        console.log('📅 Trying appointment-cancel fallback route');
         response = await fetch(`/api/appointment-cancel?appointmentId=${selectedAppointment.id}`, {
           method: 'PUT',
           headers: {
@@ -984,7 +962,6 @@ export default function DoctorDashboard() {
           })
         });
       } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
         response = await fetch(`/api/auth/appointments/${selectedAppointment.id}/cancel`, {
           method: 'PUT',
           headers: {
@@ -1017,7 +994,6 @@ export default function DoctorDashboard() {
 
         // Log debug info if available
         if (errorData.debug) {
-          console.log('🔍 [Cancel Appointment] Debug info:', errorData.debug);
         }
 
         toast({
@@ -1027,7 +1003,6 @@ export default function DoctorDashboard() {
         });
       }
     } catch (error) {
-      console.error('Error cancelling appointment:', error);
       toast({
         title: t('error') || "Error",
         description: t('dd_error_cancel_appointment') || "Failed to cancel appointment",
@@ -1052,7 +1027,6 @@ export default function DoctorDashboard() {
       }
 
       // Use the fallback route directly (works on Vercel)
-      console.log('🔄 Updating appointment status via fallback route:', { appointmentId, doctorId, status });
       const response = await fetch(`/api/doctor-update-appointment-status?appointmentId=${encodeURIComponent(appointmentId)}&doctor_id=${encodeURIComponent(doctorId)}`, {
         method: 'PUT',
         headers: {
@@ -1064,7 +1038,6 @@ export default function DoctorDashboard() {
       const result = await response.json();
 
       if (response.ok) {
-        console.log('✅ Appointment status updated successfully');
         toast({
           title: t('success') || "Success",
           description: `${t('dd_success_status_updated') || 'Appointment status updated'} ${status}`,
@@ -1072,7 +1045,6 @@ export default function DoctorDashboard() {
         // Refresh data to show updated status on both doctor and patient sides
         fetchDoctorData();
       } else {
-        console.error('❌ Failed to update appointment status:', result);
         toast({
           title: t('error') || "Error",
           description: result.message || result.error || t('dd_error_update_status') || "Failed to update appointment status",
@@ -1080,7 +1052,6 @@ export default function DoctorDashboard() {
         });
       }
     } catch (error) {
-      console.error('Error updating appointment status:', error);
       toast({
         title: t('error') || "Error",
         description: t('dd_error_update_status') || "Failed to update appointment status",

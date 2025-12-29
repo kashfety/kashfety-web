@@ -73,7 +73,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(transformedData);
 
   } catch (error) {
-    console.error('Users directory API route error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

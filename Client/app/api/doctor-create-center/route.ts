@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    console.log('🏥 [Doctor Create Center] Request received');
 
     // Extract doctor ID from token
     let doctorId = '';
@@ -16,9 +15,7 @@ export async function POST(request: NextRequest) {
         const token = authHeader.replace(/^Bearer\s+/i, '');
         const payload = JSON.parse(Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
         doctorId = payload.id || payload.userId || payload.uid || '';
-        console.log('🏥 [Doctor Create Center] Doctor ID:', doctorId);
       } catch (e) {
-        console.error('Failed to decode token:', e);
       }
     }
 
@@ -39,7 +36,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🏥 [Doctor Create Center] Creating center:', { name, center_type });
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -67,7 +63,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error('❌ Error creating center:', createError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to create center',
@@ -75,7 +70,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Doctor Create Center] Center created:', newCenter.id);
 
     // Auto-assign the doctor to the center if set_as_primary or if it's their first center
     if (set_as_primary || center_type === 'personal') {
@@ -98,10 +92,8 @@ export async function POST(request: NextRequest) {
         });
 
       if (assignError) {
-        console.error('⚠️ Error auto-assigning center:', assignError);
         // Don't fail the request, just log the error
       } else {
-        console.log('✅ [Doctor Create Center] Auto-assigned center to doctor');
       }
     }
 
@@ -113,7 +105,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor create center error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

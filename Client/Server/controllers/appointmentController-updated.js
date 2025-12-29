@@ -44,7 +44,6 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (patientError || !patient) {
-      console.error('❌ Patient not found:', patientError);
       return res.status(404).json({
         success: false,
         error: 'Patient not found in unified users table'
@@ -60,7 +59,6 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (doctorError || !doctor) {
-      console.error('❌ Doctor not found:', doctorError);
       return res.status(404).json({
         success: false,
         error: 'Doctor not found in unified users table'
@@ -128,11 +126,9 @@ export const bookAppointment = async (req, res) => {
       .single();
 
     if (insertError) {
-      console.error('❌ Error creating appointment:', insertError);
       throw insertError;
     }
 
-    console.log('✅ Appointment created successfully:', newAppointment.id);
 
     res.status(201).json({
       success: true,
@@ -143,7 +139,6 @@ export const bookAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Appointment booking error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to book appointment',
@@ -166,7 +161,6 @@ export const bookHomeVisit = async (req, res) => {
     return await bookAppointment(req, res);
 
   } catch (error) {
-    console.error('❌ Home visit booking error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to book home visit',
@@ -232,7 +226,6 @@ export const getPatientAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get patient appointments error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointments',
@@ -301,7 +294,6 @@ export const getDoctorAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get doctor appointments error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointments',
@@ -367,7 +359,6 @@ export const updateAppointmentStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Update appointment status error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to update appointment status',
@@ -461,7 +452,6 @@ export const rescheduleAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Reschedule appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to reschedule appointment',
@@ -518,7 +508,6 @@ export const cancelAppointment = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Cancel appointment error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to cancel appointment',
@@ -572,7 +561,6 @@ export const getAppointmentById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get appointment by ID error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointment',
@@ -595,7 +583,6 @@ export const bookMedicalTest = async (req, res) => {
     return await bookAppointment(req, res);
 
   } catch (error) {
-    console.error('❌ Medical test booking error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to book medical test',
@@ -695,7 +682,6 @@ export const getAppointmentStats = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Get appointment stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get appointment statistics',

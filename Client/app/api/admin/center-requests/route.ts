@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     
-    console.log('🚨 NEXT.JS API: Fetching center requests with status:', status);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -65,7 +64,6 @@ export async function GET(request: NextRequest) {
     const { data: centerRequests, error } = await query;
 
     if (error) {
-      console.error('Error fetching center requests:', error);
       return NextResponse.json({ error: 'Failed to fetch center requests' }, { status: 500 });
     }
 
@@ -93,7 +91,6 @@ export async function GET(request: NextRequest) {
       };
     }) || [];
 
-    console.log('🚨 NEXT.JS API: Returning', formattedRequests.length, 'center requests');
 
     return NextResponse.json({ 
       success: true, 
@@ -101,7 +98,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (e: any) {
-    console.error('Admin center requests GET error:', e);
     return NextResponse.json({ error: e.message || 'Failed to fetch center requests' }, { status: 500 });
   }
 }

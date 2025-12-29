@@ -84,7 +84,6 @@ export async function GET(
       available_slots: enriched
     });
   } catch (error: any) {
-    console.error('API route error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal server error', error: error.message },
       { status: 500 }

@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
       }, { status: 403 });
     }
 
-    console.log('📋 [Patient Medical Records] Fetching for patient:', patientId);
 
     // Get medical records for this patient with doctor information
     const { data: records, error } = await supabase
@@ -90,7 +89,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching medical records:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch medical records',
@@ -98,14 +96,12 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Patient Medical Records] Found', records?.length || 0, 'records');
     return NextResponse.json({
       success: true,
       records: records || []
     });
 
   } catch (error: any) {
-    console.error('❌ Patient medical records error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',
@@ -228,7 +224,6 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    console.log('📝 [Patient Medical Records] Creating record for patient:', patient_id);
 
     // Create medical record
     const { data: record, error } = await supabase
@@ -276,7 +271,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('❌ Error creating medical record:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to create medical record',
@@ -284,7 +278,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Patient Medical Records] Record created successfully:', record.id);
     return NextResponse.json({
       success: true,
       message: 'Medical record created successfully',
@@ -292,7 +285,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Patient medical records POST error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',
@@ -384,7 +376,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 403 });
     }
 
-    console.log('📝 [Patient Medical Records] Updating record:', record_id);
 
     // Build update data
     const updateData: any = {
@@ -433,7 +424,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('❌ Error updating medical record:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to update medical record',
@@ -441,7 +431,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Patient Medical Records] Record updated successfully:', record.id);
     return NextResponse.json({
       success: true,
       message: 'Medical record updated successfully',
@@ -449,7 +438,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Patient medical records PUT error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',
@@ -527,7 +515,6 @@ export async function DELETE(request: NextRequest) {
       }, { status: 403 });
     }
 
-    console.log('🗑️ [Patient Medical Records] Deleting record:', recordId);
 
     // Delete medical record
     const { error } = await supabase
@@ -536,7 +523,6 @@ export async function DELETE(request: NextRequest) {
       .eq('id', recordId);
 
     if (error) {
-      console.error('❌ Error deleting medical record:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to delete medical record',
@@ -544,14 +530,12 @@ export async function DELETE(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Patient Medical Records] Record deleted successfully:', recordId);
     return NextResponse.json({
       success: true,
       message: 'Medical record deleted successfully'
     });
 
   } catch (error: any) {
-    console.error('❌ Patient medical records DELETE error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

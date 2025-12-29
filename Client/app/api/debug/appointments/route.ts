@@ -7,7 +7,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 DEBUG: Fetching all appointments...');
     
     // Get all appointments
     const { data: allAppointments, error } = await supabase
@@ -17,7 +16,6 @@ export async function GET(request: NextRequest) {
       .limit(10);
     
     if (error) {
-      console.error('❌ Error fetching appointments:', error);
       return NextResponse.json({ 
         success: false, 
         error: error.message,
@@ -25,7 +23,6 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    console.log('✅ Found appointments:', allAppointments);
     
     // Get appointments for our specific doctor and date
     const { data: specificAppointments, error: specificError } = await supabase
@@ -34,7 +31,6 @@ export async function GET(request: NextRequest) {
       .eq('doctor_id', 'f0fb2d13-6149-47f4-bcb0-958d1f5bc2b5')
       .eq('appointment_date', '2025-08-08');
     
-    console.log('🎯 Specific appointments for doctor and date:', specificAppointments);
     
     return NextResponse.json({
       success: true,
@@ -44,7 +40,6 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('💥 DEBUG ERROR:', error);
     return NextResponse.json({
       success: false,
       error: error.message,

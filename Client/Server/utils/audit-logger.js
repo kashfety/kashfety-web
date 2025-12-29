@@ -55,15 +55,12 @@ export const AuditLogger = {
                 .single();
 
             if (error) {
-                console.error('❌ Failed to create audit log:', error);
                 return null;
             }
 
-            console.log(`📝 Audit log created: ${action} on ${resourceType} by user ${userId}`);
             return data;
 
         } catch (error) {
-            console.error('❌ Audit logger error:', error);
             return null;
         }
     },

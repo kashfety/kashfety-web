@@ -56,7 +56,6 @@ export async function PUT(
     const body = await request.json();
     const { status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = body;
 
-    console.log('📝 Admin: Reviewing certificate ID:', id, 'Status:', status);
 
     // Validate status
     const validStatuses = ['pending', 'approved', 'rejected', 'resubmission_required'];
@@ -85,7 +84,6 @@ export async function PUT(
       .single();
 
     if (certError) {
-      console.error('❌ Error updating certificate:', certError);
       throw certError;
     }
 
@@ -100,7 +98,6 @@ export async function PUT(
         .eq('id', certificate.doctor_id);
 
       if (userError) {
-        console.error('❌ Error updating user approval status:', userError);
         throw userError;
       }
     } else if (status === 'rejected') {
@@ -113,12 +110,10 @@ export async function PUT(
         .eq('id', certificate.doctor_id);
 
       if (userError) {
-        console.error('❌ Error updating user approval status:', userError);
         throw userError;
       }
     }
 
-    console.log('✅ Admin: Certificate reviewed successfully');
     
     return NextResponse.json({
       success: true,
@@ -127,7 +122,6 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error('❌ Admin certificate review endpoint error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to review certificate',

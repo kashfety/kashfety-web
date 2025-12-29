@@ -10,22 +10,18 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Lab Schedule GET request received');
     const { searchParams } = new URL(request.url);
     const labTestTypeId = searchParams.get('lab_test_type_id');
     const centerId = searchParams.get('center_id');
     
-    console.log('📋 Lab Schedule params:', { labTestTypeId, centerId });
 
     const user = await getUserFromAuth(request);
     
     if (!user || user.role !== 'center') {
-      console.log('❌ Lab Schedule - Unauthorized user:', user);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const activeCenterId = centerId || user.center_id || user.id;
-    console.log('🏢 Lab Schedule - Using center ID:', activeCenterId);
 
     let query = supabase
       .from('center_lab_schedules')
@@ -36,11 +32,9 @@ export async function GET(request: NextRequest) {
       query = query.eq('lab_test_type_id', labTestTypeId);
     }
 
-    console.log('🔍 Lab Schedule - Querying schedules...');
     const { data: schedule, error } = await query;
 
     if (error) {
-      console.error('❌ Failed to fetch lab schedule:', error);
       return NextResponse.json({ error: 'Failed to fetch schedule' }, { status: 500 });
     }
 
@@ -52,17 +46,14 @@ export async function GET(request: NextRequest) {
         : daySchedule.time_slots || []
     }));
 
-    console.log('✅ Lab Schedule found:', { count: parsedSchedule?.length || 0 });
     return NextResponse.json({ schedule: parsedSchedule });
   } catch (error) {
-    console.error('💥 Lab Schedule fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    console.log('📝 [Lab Schedule PUT] Request received');
     
     const user = await getUserFromAuth(request);
     console.log('👤 [Lab Schedule PUT] User from auth:', { 
@@ -72,7 +63,6 @@ export async function PUT(request: NextRequest) {
     });
     
     if (!user || user.role !== 'center') {
-      console.error('❌ [Lab Schedule PUT] Unauthorized - user:', user);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -95,7 +85,6 @@ export async function PUT(request: NextRequest) {
     }
 
     const centerId = user.center_id || user.id;
-    console.log('🏢 [Lab Schedule PUT] Using center_id:', centerId);
 
     // ============================================
     // NOTE: Conflict validation removed for lab schedules
@@ -103,7 +92,6 @@ export async function PUT(request: NextRequest) {
     // Different lab test types are allowed to have overlapping schedules on the same day.
     // This allows centers to offer multiple test types simultaneously, which is common
     // in medical centers where different tests can be performed in parallel.
-    console.log('📅 [Lab Schedule PUT] Allowing overlapping schedules for different test types');
     // ============================================
 
     // First, delete existing schedule for this test type
@@ -114,7 +102,6 @@ export async function PUT(request: NextRequest) {
       .eq('lab_test_type_id', lab_test_type_id);
 
     if (deleteError) {
-      console.error('❌ Failed to delete existing schedule:', deleteError);
       return NextResponse.json({ error: 'Failed to delete existing schedule', details: deleteError.message }, { status: 500 });
     }
 
@@ -162,23 +149,17 @@ export async function PUT(request: NextRequest) {
         };
       });
 
-    console.log('💾 [Lab Schedule PUT] Preparing to insert', scheduleInserts.length, 'schedule entries');
-    console.log('💾 [Lab Schedule PUT] Schedule inserts data:', JSON.stringify(scheduleInserts, null, 2));
+    );
 
     // Insert the new schedule if there are any entries
     if (scheduleInserts.length > 0) {
-      console.log('📤 [Lab Schedule PUT] Inserting into center_lab_schedules table...');
       const { data, error } = await supabase
         .from('center_lab_schedules')
         .insert(scheduleInserts)
         .select();
 
       if (error) {
-        console.error('❌ [Lab Schedule PUT] Failed to save schedule:', error);
-        console.error('❌ [Lab Schedule PUT] Error details:', JSON.stringify(error, null, 2));
-        console.error('❌ [Lab Schedule PUT] Error code:', error.code);
-        console.error('❌ [Lab Schedule PUT] Error message:', error.message);
-        console.error('❌ [Lab Schedule PUT] Error hint:', error.hint);
+        );
         return NextResponse.json({ 
           error: 'Failed to save schedule', 
           details: error.message,
@@ -187,12 +168,10 @@ export async function PUT(request: NextRequest) {
         }, { status: 500 });
       }
 
-      console.log('✅ [Lab Schedule PUT] Successfully saved', data?.length || 0, 'schedule entries');
-      console.log('✅ [Lab Schedule PUT] Inserted data:', JSON.stringify(data, null, 2));
+      );
     } else {
-      console.warn('⚠️ [Lab Schedule PUT] No schedule entries to insert (all days are unavailable or have no slots)');
-      console.warn('⚠️ [Lab Schedule PUT] Original schedule array length:', schedule.length);
-      console.warn('⚠️ [Lab Schedule PUT] Filtered schedule:', schedule.map((d: any) => ({
+      ');
+       => ({
         day_of_week: d.day_of_week,
         is_available: d.is_available,
         slots_count: d.slots?.length || 0,
@@ -206,8 +185,6 @@ export async function PUT(request: NextRequest) {
       entries_saved: scheduleInserts.length
     });
   } catch (error: any) {
-    console.error('💥 [Lab Schedule PUT] Schedule save error:', error);
-    console.error('💥 [Lab Schedule PUT] Error stack:', error.stack);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message,

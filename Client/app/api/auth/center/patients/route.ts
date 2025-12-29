@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
       if (response.ok) return NextResponse.json(data);
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -51,7 +50,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching center patients:', error);
       return NextResponse.json({ error: 'Failed to fetch patients' }, { status: 500 });
     }
 
@@ -77,7 +75,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Center patients fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch patients' }, { status: 500 });
   }
 }

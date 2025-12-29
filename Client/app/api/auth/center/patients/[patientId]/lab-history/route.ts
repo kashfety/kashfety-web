@@ -30,7 +30,6 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Failed to fetch lab history:', error);
       return NextResponse.json({ error: 'Failed to fetch lab history' }, { status: 500 });
     }
 
@@ -40,7 +39,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Lab history API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

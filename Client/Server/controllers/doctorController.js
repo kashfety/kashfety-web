@@ -32,7 +32,6 @@ export const setSchedule = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error("Schedule update error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -69,7 +68,6 @@ export const setVacationDays = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error("Vacation days update error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -106,7 +104,6 @@ export const getDoctorProfile = async (req, res) => {
       doctor
     });
   } catch (error) {
-    console.error("Get doctor profile error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -148,7 +145,6 @@ export const updateDoctorProfile = async (req, res) => {
       doctor: data
     });
   } catch (error) {
-    console.error("Update doctor profile error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -160,7 +156,6 @@ export const updateDoctorProfile = async (req, res) => {
 export const getAllDoctors = async (req, res) => {
   try {
     const { specialty, search } = req.query;
-    console.log('📋 Fetching all doctors from unified users table...');
     
     // Use the unified users table for doctors
     let query = supabaseAdmin
@@ -201,7 +196,6 @@ export const getAllDoctors = async (req, res) => {
     const { data: doctors, error } = await query;
     
     if (error) {
-      console.error('❌ Error fetching doctors:', error);
       return res.status(500).json({ 
         success: false, 
         error: 'Failed to fetch doctors',
@@ -209,7 +203,6 @@ export const getAllDoctors = async (req, res) => {
       });
     }
 
-    console.log(`✅ Successfully fetched ${doctors?.length || 0} doctors from unified table`);
     
     res.status(200).json({
       success: true,
@@ -218,7 +211,6 @@ export const getAllDoctors = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error in getAllDoctors:', error);
     res.status(500).json({ 
       success: false, 
       error: 'Internal server error',
@@ -271,7 +263,6 @@ export const getDoctorById = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Get doctor by ID error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -317,7 +308,6 @@ export const getDoctorAvailability = async (req, res) => {
       doctor: doctor
     });
   } catch (error) {
-    console.error("Get doctor availability error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -382,7 +372,6 @@ export const setDoctorAvailability = async (req, res) => {
       availability: data
     });
   } catch (error) {
-    console.error("Set doctor availability error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -450,7 +439,6 @@ export const getDoctorAppointments = async (req, res) => {
       count: appointments?.length || 0
     });
   } catch (error) {
-    console.error("Get doctor appointments error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -510,7 +498,6 @@ export const updateAppointmentStatus = async (req, res) => {
       appointment: data
     });
   } catch (error) {
-    console.error("Update appointment status error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -572,7 +559,6 @@ export const uploadProfilePicture = async (req, res) => {
       doctor: data
     });
   } catch (error) {
-    console.error("Upload profile picture error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -631,7 +617,6 @@ export const getDoctorStats = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Get doctor stats error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -663,7 +648,6 @@ export const getSchedule = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Get schedule error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -700,7 +684,6 @@ export const updateSchedule = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error("Update schedule error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -761,7 +744,6 @@ export const getPatientsList = async (req, res) => {
       data: uniquePatients
     });
   } catch (error) {
-    console.error("Get patients list error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -812,7 +794,6 @@ export const getDoctorAnalytics = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Get doctor analytics error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -878,7 +859,6 @@ export const getPatientDemographics = async (req, res) => {
       data: demographics
     });
   } catch (error) {
-    console.error("Get patient demographics error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -891,7 +871,6 @@ export const getAppointmentStats = async (req, res) => {
   try {
     return getDoctorAnalytics(req, res); // Reuse the analytics function
   } catch (error) {
-    console.error("Get appointment stats error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -950,7 +929,6 @@ export const getFinancialAnalytics = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Get financial analytics error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -1025,7 +1003,6 @@ export const getPatientDetails = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    console.error("Get patient details error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -1097,7 +1074,6 @@ export const createMedicalRecord = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error("Create medical record error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -1111,7 +1087,6 @@ export const getDoctorWorkingDays = async (req, res) => {
     const { doctorId } = req.params;
     const { center_id } = req.query;
 
-    console.log(`🔍 Getting working days - Doctor: ${doctorId}, Center: ${center_id || 'ALL'}`);
 
     let query = supabaseAdmin
       .from('doctor_schedules')
@@ -1126,14 +1101,13 @@ export const getDoctorWorkingDays = async (req, res) => {
     const { data: schedules, error } = await query;
 
     if (error) {
-      console.error('Working days query error:', error);
       return res.status(500).json({ error: 'Failed to fetch working days' });
     }
 
     const workingDays = [...new Set(schedules?.map(s => s.day_of_week) || [])];
     workingDays.sort();
 
-    console.log(`✅ Doctor ${doctorId} working days ${center_id ? `at center ${center_id}` : '(all centers)'}: [${workingDays.join(', ')}]`);
+    '}: [${workingDays.join(', ')}]`);
 
     res.json({
       success: true,
@@ -1143,7 +1117,6 @@ export const getDoctorWorkingDays = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Working days error:', error);
     res.status(500).json({
       success: false,
       message: error.message,

@@ -7,7 +7,6 @@ const logout = async () => {
     // const response = await api.post('/auth/logout')
     return true
   } catch (error) {
-    console.error("Logout error:", error)
     throw error
   }
 }

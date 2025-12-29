@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
       .eq('id', userId);
 
     if (updateError) {
-      console.error('Error updating doctor status:', updateError);
       return NextResponse.json(
         { error: 'Failed to update status' },
         { status: 500 }
@@ -43,7 +42,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Skip certificate error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

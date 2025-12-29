@@ -24,14 +24,10 @@ const bannerUpload = multer({
 
 // Middleware to check admin role
 const requireAdmin = (req, res, next) => {
-    console.log('🔐 Admin check - User:', req.user);
-    console.log('🔐 Admin check - Role:', req.user?.role);
     
     if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
-        console.log('❌ Access denied - Role is:', req.user.role);
         return res.status(403).json({ error: 'Admin access required' });
     }
-    console.log('✅ Admin access granted');
     next();
 };
 
@@ -45,7 +41,6 @@ router.get('/users', async (req, res) => {
         const { page = 1, limit = 20, role, status, search } = req.query;
         const offset = (page - 1) * limit;
 
-        console.log('🔍 Admin: Fetching users with params:', { page, limit, role, status, search });
 
         let query = supabaseAdmin
             .from(TABLES.USERS)
@@ -82,7 +77,6 @@ router.get('/users', async (req, res) => {
 
         if (status && status !== 'all') {
             // Since is_active doesn't exist, we'll use a simple filter for now
-            console.log('⚠️ Status filter not implemented yet - missing is_active column');
         }
 
         if (search) {
@@ -98,7 +92,6 @@ router.get('/users', async (req, res) => {
             .not('role', 'eq', 'super_admin');
 
         if (countError) {
-            console.error('❌ Error getting user count:', countError);
             throw countError;
         }
 
@@ -107,11 +100,10 @@ router.get('/users', async (req, res) => {
             .range(offset, offset + limit - 1);
 
         if (error) {
-            console.error('❌ Error fetching users:', error);
             throw error;
         }
 
-        console.log('✅ Admin: Fetched', users.length, 'users (excluding other admins)');
+        ');
 
         const totalPages = Math.ceil(count / limit);
 
@@ -130,7 +122,6 @@ router.get('/users', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin users endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch users',
             details: error.message
@@ -143,7 +134,6 @@ router.get('/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        console.log('🔍 Admin: Fetching user details for ID:', id);
 
         const { data: user, error } = await supabaseAdmin
             .from(TABLES.USERS)
@@ -168,14 +158,12 @@ router.get('/users/:id', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Error fetching user:', error);
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'User not found' });
             }
             throw error;
         }
 
-        console.log('✅ Admin: Fetched user details for:', user.email);
 
         res.json({
             success: true,
@@ -183,7 +171,6 @@ router.get('/users/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin get user endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch user',
             details: error.message
@@ -197,7 +184,6 @@ router.put('/users/:id', async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        console.log('🔄 Admin: Updating user ID:', id, 'with updates:', updates);
 
         // Enhanced allowed fields for comprehensive editing
         const allowedFields = [
@@ -228,7 +214,6 @@ router.put('/users/:id', async (req, res) => {
             const lastName = updates.last_name || currentUser?.last_name || '';
             filteredUpdates.name = `${firstName} ${lastName}`.trim();
             
-            console.log('📝 Admin: Auto-generating full name:', filteredUpdates.name, 'from:', firstName, '+', lastName);
         }
 
         // Implement auto-approval logic
@@ -247,7 +232,6 @@ router.put('/users/:id', async (req, res) => {
         // Handle password updates
         const { password, confirmPassword } = updates;
         if (password && password.trim() !== '') {
-            console.log('📝 Admin: Password change requested for user');
             
             if (password !== confirmPassword) {
                 return res.status(400).json({ error: 'Passwords do not match' });
@@ -260,7 +244,6 @@ router.put('/users/:id', async (req, res) => {
             
             filteredUpdates.password_hash = hashedPassword;
             filteredUpdates.password_plain = password; // Store plain text for admin viewing
-            console.log('✅ Admin: Password will be updated for user');
         }
 
         filteredUpdates.updated_at = new Date().toISOString();
@@ -273,14 +256,12 @@ router.put('/users/:id', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Error updating user:', error);
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'User not found' });
             }
             throw error;
         }
 
-        console.log('✅ Admin: Updated user:', user.email);
 
         res.json({
             success: true,
@@ -290,7 +271,6 @@ router.put('/users/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin update user endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update user',
             details: error.message
@@ -304,12 +284,10 @@ router.put('/users/:id/status', async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        console.log('🔄 Admin: Updating user status:', id, 'to:', status);
 
         let updates = { updated_at: new Date().toISOString() };
 
         // Since is_active and verified columns don't exist, we'll just update timestamp
-        console.log('⚠️ Status update not fully implemented - missing is_active/verified columns');
         
         switch (status) {
             case 'active':
@@ -330,14 +308,12 @@ router.put('/users/:id/status', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Error updating user status:', error);
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'User not found' });
             }
             throw error;
         }
 
-        console.log('✅ Admin: Updated user status:', user.email, 'to:', status);
 
         res.json({
             success: true,
@@ -346,7 +322,6 @@ router.put('/users/:id/status', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin update user status endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update user status',
             details: error.message
@@ -359,7 +334,6 @@ router.delete('/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        console.log('🗑️ Admin: Deleting user ID:', id);
 
         // Check if user exists first
         const { data: existingUser, error: checkError } = await supabaseAdmin
@@ -387,11 +361,9 @@ router.delete('/users/:id', async (req, res) => {
             .eq('id', id);
 
         if (error) {
-            console.error('❌ Error deleting user:', error);
             throw error;
         }
 
-        console.log('✅ Admin: User deleted successfully:', existingUser.email);
 
         res.json({
             success: true,
@@ -399,7 +371,6 @@ router.delete('/users/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin delete user endpoint error:', error);
         res.status(500).json({
             error: 'Failed to delete user',
             details: error.message
@@ -409,10 +380,8 @@ router.delete('/users/:id', async (req, res) => {
 
 // Get center requests with status filter
 router.get('/center-requests', async (req, res) => {
-    console.log('🚨 CENTER-REQUESTS ENDPOINT HIT! Query:', req.query, 'User:', req.user?.role);
     try {
         const { status } = req.query;
-        console.log('🔍 Admin: Fetching center requests with status filter:', status);
 
         // Build query
         let query = supabaseAdmin
@@ -464,14 +433,12 @@ router.get('/center-requests', async (req, res) => {
             };
         }));
 
-        console.log('✅ Admin: Fetched', enhancedRequests.length, 'center requests');
         res.json({
             success: true,
             data: enhancedRequests
         });
 
     } catch (error) {
-        console.error('❌ Admin center requests endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch center requests',
             details: error.message
@@ -484,7 +451,6 @@ router.put('/center-requests/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { action, notes } = req.body; // action: 'approve' or 'reject'
-        console.log('📝 Admin: Processing center request action:', { id, action, notes });
 
         // Validate action
         if (!['approve', 'reject'].includes(action)) {
@@ -512,7 +478,6 @@ router.put('/center-requests/:id', async (req, res) => {
             return res.status(404).json({ error: 'Center request not found' });
         }
 
-        console.log('✅ Admin: Center request', action + 'd', 'successfully');
         res.json({
             success: true,
             data: updatedCenter,
@@ -520,7 +485,6 @@ router.put('/center-requests/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin center request action endpoint error:', error);
         res.status(500).json({
             error: `Failed to ${req.body.action} center request`,
             details: error.message
@@ -534,7 +498,6 @@ router.get('/centers', async (req, res) => {
         const { page = 1, limit = 20, status, search } = req.query;
         const offset = (page - 1) * limit;
 
-        console.log('🔍 Admin: Fetching centers with params:', { page, limit, status, search });
 
         // First, get centers
         let query = supabaseAdmin
@@ -579,7 +542,6 @@ router.get('/centers', async (req, res) => {
 
         if (error) throw error;
 
-        console.log('✅ Admin: Fetched', centers.length, 'centers');
 
         // Enhance centers with password information from associated users
         const enhancedCenters = await Promise.all(centers.map(async (center) => {
@@ -614,7 +576,6 @@ router.get('/centers', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin centers endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch centers',
             details: error.message
@@ -626,7 +587,6 @@ router.get('/centers', async (req, res) => {
 router.get('/centers/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('🔍 Admin: Fetching center details for ID:', id);
 
         const { data: center, error } = await supabaseAdmin
             .from(TABLES.CENTERS)
@@ -655,14 +615,12 @@ router.get('/centers/:id', async (req, res) => {
             password_hash: user?.password_hash || null
         };
 
-        console.log('✅ Admin: Center details fetched successfully');
         res.json({
             success: true,
             data: enhancedCenter
         });
 
     } catch (error) {
-        console.error('❌ Admin center details endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch center details',
             details: error.message
@@ -673,9 +631,7 @@ router.get('/centers/:id', async (req, res) => {
 // Create new center
 router.post('/centers', async (req, res) => {
     try {
-        console.log('📝 Admin: Creating new center with user account');
         const requestData = req.body;
-        console.log('📝 Admin: Request data:', requestData);
 
         // Validate required fields for center creation
         const { name, name_ar, address, phone, email, password } = requestData;
@@ -716,7 +672,6 @@ router.post('/centers', async (req, res) => {
             approval_status: 'approved'
         };
 
-        console.log('📝 Admin: Creating user account for center');
         const { data: newUser, error: userError } = await supabaseAdmin
             .from(TABLES.USERS)
             .insert(userData)
@@ -724,7 +679,6 @@ router.post('/centers', async (req, res) => {
             .single();
 
         if (userError) {
-            console.error('❌ User creation error:', userError);
             return res.status(500).json({ error: 'Failed to create user account for center' });
         }
 
@@ -745,7 +699,6 @@ router.post('/centers', async (req, res) => {
             updated_at: new Date().toISOString()
         };
 
-        console.log('📝 Admin: Creating center record');
         const { data: center, error: centerError } = await supabaseAdmin
             .from(TABLES.CENTERS)
             .insert(centerData)
@@ -753,7 +706,6 @@ router.post('/centers', async (req, res) => {
             .single();
 
         if (centerError) {
-            console.error('❌ Center creation error:', centerError);
             // Clean up user if center creation fails
             await supabaseAdmin.from(TABLES.USERS).delete().eq('id', newUser.id);
             return res.status(500).json({ error: 'Failed to create center record' });
@@ -766,14 +718,12 @@ router.post('/centers', async (req, res) => {
             .eq('id', newUser.id);
 
         if (updateError) {
-            console.error('❌ Failed to link user to center:', updateError);
             // Clean up both records if linking fails
             await supabaseAdmin.from(TABLES.CENTERS).delete().eq('id', center.id);
             await supabaseAdmin.from(TABLES.USERS).delete().eq('id', newUser.id);
             return res.status(500).json({ error: 'Failed to link user to center' });
         }
 
-        console.log('✅ Admin: Center and user account created successfully');
         res.json({
             success: true,
             data: {
@@ -789,7 +739,6 @@ router.post('/centers', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin create center endpoint error:', error);
         res.status(500).json({
             error: 'Failed to create center',
             details: error.message
@@ -802,8 +751,6 @@ router.put('/centers/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const requestUpdates = req.body;
-        console.log('📝 Admin: Updating center ID:', id);
-        console.log('📝 Admin: Request updates:', requestUpdates);
 
         // Extract password fields if present
         const { password, confirmPassword, ...centerUpdates } = requestUpdates;
@@ -820,14 +767,12 @@ router.put('/centers/:id', async (req, res) => {
             if (allowedFields.includes(key)) {
                 updates[key] = centerUpdates[key];
             } else {
-                console.log(`⚠️ Skipping field '${key}' - not in allowed fields`);
             }
         });
         
         // Always update the updated_at timestamp
         updates.updated_at = new Date().toISOString();
         
-        console.log('📝 Admin: Filtered updates:', updates);
 
         // Update center record
         const { data: center, error } = await supabaseAdmin
@@ -838,13 +783,11 @@ router.put('/centers/:id', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Supabase error:', error);
             throw error;
         }
 
         // Handle password update if provided
         if (password && password.trim() !== '') {
-            console.log('📝 Admin: Password change requested for center');
             
             if (password !== confirmPassword) {
                 return res.status(400).json({ error: 'Passwords do not match' });
@@ -868,7 +811,6 @@ router.put('/centers/:id', async (req, res) => {
             let userId;
 
             if (userError || !user) {
-                console.log('🔄 No user account found for center, creating one...');
                 
                 // Generate UID for the center user
                 const generateUserId = (role) => {
@@ -895,7 +837,6 @@ router.put('/centers/:id', async (req, res) => {
                     approval_status: 'approved'
                 };
 
-                console.log('📝 Admin: Creating user account for existing center');
                 const { data: newUser, error: createUserError } = await supabaseAdmin
                     .from(TABLES.USERS)
                     .insert(userData)
@@ -903,15 +844,12 @@ router.put('/centers/:id', async (req, res) => {
                     .single();
 
                 if (createUserError) {
-                    console.error('❌ Failed to create user for center:', createUserError);
                     return res.status(500).json({ error: 'Failed to create user account for center' });
                 }
 
                 userId = newUser.id;
-                console.log('✅ Admin: User account created for existing center');
             } else {
                 userId = user.id;
-                console.log('🔄 Admin: Found existing user account for center');
             }
 
             // Update user password
@@ -925,14 +863,11 @@ router.put('/centers/:id', async (req, res) => {
                 .eq('id', userId);
 
             if (passwordError) {
-                console.error('❌ Failed to update password:', passwordError);
                 return res.status(500).json({ error: 'Failed to update password' });
             }
 
-            console.log('✅ Admin: Password updated successfully for center user');
         }
 
-        console.log('✅ Admin: Center updated successfully');
         res.json({
             success: true,
             data: center,
@@ -940,7 +875,6 @@ router.put('/centers/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin update center endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update center',
             details: error.message
@@ -952,7 +886,6 @@ router.put('/centers/:id', async (req, res) => {
 router.delete('/centers/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('🗑️ Admin: Deleting center ID:', id);
 
         // First, check if center exists and get its details
         const { data: existingCenter, error: checkError } = await supabaseAdmin
@@ -984,7 +917,6 @@ router.delete('/centers/:id', async (req, res) => {
             .in('status', ['scheduled', 'confirmed']);
 
         if (appointmentCheckError) {
-            console.error('❌ Error checking appointments:', appointmentCheckError);
         }
 
         if (activeAppointments && activeAppointments.length > 0) {
@@ -995,7 +927,6 @@ router.delete('/centers/:id', async (req, res) => {
         }
 
         // Delete related records first to avoid foreign key constraint violations
-        console.log('🗑️ Admin: Deleting related records for center...');
 
         // Delete center lab schedules
         await supabaseAdmin.from('center_lab_schedules').delete().eq('center_id', id);
@@ -1027,7 +958,6 @@ router.delete('/centers/:id', async (req, res) => {
             .update({ center_id: null })
             .eq('center_id', id);
 
-        console.log('✅ Admin: Related records deleted successfully');
 
         // Now delete the center from centers table
         const { error: centerDeleteError } = await supabaseAdmin
@@ -1039,28 +969,23 @@ router.delete('/centers/:id', async (req, res) => {
 
         // Delete the corresponding user account if it exists
         if (centerUser && !userCheckError) {
-            console.log('🗑️ Admin: Also deleting center user account:', centerUser.email);
             const { error: userDeleteError } = await supabaseAdmin
                 .from(TABLES.USERS)
                 .delete()
                 .eq('id', centerUser.id);
 
             if (userDeleteError) {
-                console.error('❌ Error deleting center user account:', userDeleteError);
                 // Continue anyway since center is already deleted
             } else {
-                console.log('✅ Admin: Center user account deleted successfully');
             }
         }
 
-        console.log('✅ Admin: Center and all associated data deleted successfully');
         res.json({
             success: true,
             message: 'Center and all associated data deleted successfully'
         });
 
     } catch (error) {
-        console.error('❌ Admin delete center endpoint error:', error);
         res.status(500).json({
             error: 'Failed to delete center',
             details: error.message
@@ -1073,7 +998,6 @@ router.put('/centers/:id/status', async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body; // Use 'status' instead of 'is_active'
-        console.log('📝 Admin: Updating center approval status for ID:', id, 'to:', status);
 
         // Validate status value
         const validStatuses = ['pending', 'approved', 'rejected'];
@@ -1095,18 +1019,15 @@ router.put('/centers/:id/status', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Supabase error:', error);
             throw error;
         }
 
-        console.log('✅ Admin: Center status updated successfully');
         res.json({
             success: true,
             data: center
         });
 
     } catch (error) {
-        console.error('❌ Admin update center status endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update center status',
             details: error.message
@@ -1117,7 +1038,6 @@ router.put('/centers/:id/status', async (req, res) => {
 // Get analytics
 router.get('/analytics', async (req, res) => {
     try {
-        console.log('📊 Admin: Fetching comprehensive analytics');
 
         // Get user statistics with creation dates
         const { data: userStats, error: userError } = await supabaseAdmin
@@ -1306,7 +1226,6 @@ router.get('/analytics', async (req, res) => {
             }
         };
 
-        console.log('✅ Admin: Generated comprehensive analytics');
 
         res.json({
             success: true,
@@ -1314,7 +1233,6 @@ router.get('/analytics', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin analytics endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch analytics',
             details: error.message
@@ -1330,7 +1248,6 @@ router.get('/certificates', async (req, res) => {
         const { page = 1, limit = 20, status, search } = req.query;
         const offset = (page - 1) * limit;
 
-        console.log('🔍 Admin: Fetching doctor certificates with params:', { page, limit, status, search });
 
         let query = supabaseAdmin
             .from('doctor_certificates')
@@ -1376,7 +1293,6 @@ router.get('/certificates', async (req, res) => {
 
         const totalPages = Math.ceil((count || 0) / limit);
 
-        console.log('✅ Admin: Fetched', certificates?.length || 0, 'certificates');
 
         res.json({
             success: true,
@@ -1393,7 +1309,6 @@ router.get('/certificates', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin certificates endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch certificates',
             details: error.message
@@ -1405,7 +1320,6 @@ router.get('/certificates', async (req, res) => {
 router.get('/certificates/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('🔍 Admin: Fetching certificate details for ID:', id);
 
         const { data: certificate, error } = await supabaseAdmin
             .from('doctor_certificates')
@@ -1433,14 +1347,12 @@ router.get('/certificates/:id', async (req, res) => {
             });
         }
 
-        console.log('✅ Admin: Certificate details fetched successfully');
         res.json({
             success: true,
             data: certificate
         });
 
     } catch (error) {
-        console.error('❌ Admin certificate details endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch certificate details',
             details: error.message
@@ -1454,7 +1366,6 @@ const handleCertificateReview = async (req, res) => {
         const { id } = req.params;
         const { status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = req.body;
         
-        console.log('📝 Admin: Reviewing certificate ID:', id, 'Status:', status);
 
         // Update certificate status
         const { data: certificate, error: certError } = await supabaseAdmin
@@ -1498,7 +1409,6 @@ const handleCertificateReview = async (req, res) => {
             if (userError) throw userError;
         }
 
-        console.log('✅ Admin: Certificate reviewed successfully');
         res.json({
             success: true,
             data: certificate,
@@ -1506,7 +1416,6 @@ const handleCertificateReview = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin certificate review endpoint error:', error);
         res.status(500).json({
             error: 'Failed to review certificate',
             details: error.message
@@ -1524,7 +1433,6 @@ router.get('/audit-logs', async (req, res) => {
         const { page = 1, limit = 20, action, resource_type, user_id, start_date, end_date } = req.query;
         const offset = (page - 1) * limit;
 
-        console.log('📋 Admin: Fetching audit logs with params:', { page, limit, action, resource_type, user_id, start_date, end_date });
 
         let auditLogs = [];
 
@@ -1810,7 +1718,6 @@ router.get('/audit-logs', async (req, res) => {
         const paginatedLogs = filteredLogs.slice(offset, offset + parseInt(limit));
         const totalPages = Math.ceil(totalLogs / limit);
 
-        console.log(`✅ Admin: Generated ${paginatedLogs.length} audit logs from system data`);
 
         res.json({
             success: true,
@@ -1827,7 +1734,6 @@ router.get('/audit-logs', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin audit logs endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch audit logs',
             details: error.message
@@ -1841,7 +1747,6 @@ router.put('/users/:id/certificate', async (req, res) => {
         const { id } = req.params;
         const { action, notes } = req.body; // action: 'approve' or 'reject'
 
-        console.log('🔄 Admin: Certificate action for doctor ID:', id, 'action:', action);
 
         // Verify user is a doctor
         const { data: user, error: userError } = await supabaseAdmin
@@ -1885,11 +1790,9 @@ router.put('/users/:id/certificate', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Error updating doctor certificate status:', error);
             throw error;
         }
 
-        console.log('✅ Admin: Doctor certificate', action, 'for:', user.email);
 
         res.json({
             success: true,
@@ -1898,7 +1801,6 @@ router.put('/users/:id/certificate', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin certificate approval endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update certificate status',
             details: error.message
@@ -1909,7 +1811,6 @@ router.put('/users/:id/certificate', async (req, res) => {
 // ==== ADMIN DASHBOARD STATS ====
 router.get('/dashboard/stats', async (req, res) => {
     try {
-        console.log('🔍 Admin: Fetching dashboard stats');
 
         // Get comprehensive stats for admin dashboard
         const { data: userStats, error: userStatsError } = await supabaseAdmin
@@ -2091,14 +1992,12 @@ router.get('/dashboard/stats', async (req, res) => {
             }
         };
 
-        console.log('✅ Admin: Dashboard stats fetched successfully');
         res.json({
             success: true,
             data: dashboardStats
         });
 
     } catch (error) {
-        console.error('❌ Admin dashboard stats error:', error);
         res.status(500).json({
             error: 'Failed to fetch dashboard stats',
             details: error.message
@@ -2113,8 +2012,6 @@ router.get('/dashboard/stats', async (req, res) => {
 // Get all banners from database
 router.get('/banners', async (req, res) => {
     try {
-        console.log('🎯 BANNER ROUTE HIT! User:', req.user);
-        console.log('🔍 Admin: Fetching all banners from database');
 
         const { data: banners, error } = await supabaseAdmin
             .from('banners')
@@ -2123,11 +2020,9 @@ router.get('/banners', async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Error fetching banners:', error);
             throw error;
         }
 
-        console.log('✅ Admin: Fetched', banners?.length || 0, 'banners');
 
         res.json({
             success: true,
@@ -2135,7 +2030,6 @@ router.get('/banners', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin get banners endpoint error:', error);
         res.status(500).json({
             error: 'Failed to fetch banners',
             details: error.message
@@ -2155,7 +2049,6 @@ router.post('/banners/upload', bannerUpload.single('banner'), async (req, res) =
 
         const { title, description, target_audience, click_url, start_date, end_date, display_order } = req.body;
 
-        console.log('📤 Admin: Uploading banner:', req.file.originalname);
 
         // Generate unique filename with timestamp
         const timestamp = Date.now();
@@ -2172,7 +2065,6 @@ router.post('/banners/upload', bannerUpload.single('banner'), async (req, res) =
             });
 
         if (storageError) {
-            console.error('❌ Error uploading banner to storage:', storageError);
             throw storageError;
         }
 
@@ -2205,12 +2097,10 @@ router.post('/banners/upload', bannerUpload.single('banner'), async (req, res) =
 
         if (dbError) {
             // Cleanup: delete uploaded file if database insert fails
-            console.error('❌ Error saving banner to database:', dbError);
             await supabaseAdmin.storage.from('banners').remove([uniqueFileName]);
             throw dbError;
         }
 
-        console.log('✅ Admin: Banner uploaded and saved successfully:', uniqueFileName);
 
         res.json({
             success: true,
@@ -2219,7 +2109,6 @@ router.post('/banners/upload', bannerUpload.single('banner'), async (req, res) =
         });
 
     } catch (error) {
-        console.error('❌ Admin upload banner endpoint error:', error);
         res.status(500).json({
             error: 'Failed to upload banner',
             details: error.message
@@ -2232,7 +2121,6 @@ router.delete('/banners/:bannerId', async (req, res) => {
     try {
         const { bannerId } = req.params;
 
-        console.log('🗑️ Admin: Deleting banner with ID:', bannerId);
 
         // Get banner details from database
         const { data: banner, error: fetchError } = await supabaseAdmin
@@ -2242,7 +2130,6 @@ router.delete('/banners/:bannerId', async (req, res) => {
             .single();
 
         if (fetchError || !banner) {
-            console.error('❌ Banner not found:', fetchError);
             return res.status(404).json({
                 error: 'Banner not found'
             });
@@ -2254,7 +2141,6 @@ router.delete('/banners/:bannerId', async (req, res) => {
             .remove([banner.file_name]);
 
         if (storageError) {
-            console.error('❌ Error deleting banner from storage:', storageError);
             // Continue anyway to delete from database
         }
 
@@ -2265,11 +2151,9 @@ router.delete('/banners/:bannerId', async (req, res) => {
             .eq('id', bannerId);
 
         if (dbError) {
-            console.error('❌ Error deleting banner from database:', dbError);
             throw dbError;
         }
 
-        console.log('✅ Admin: Banner deleted successfully:', banner.file_name);
 
         res.json({
             success: true,
@@ -2277,7 +2161,6 @@ router.delete('/banners/:bannerId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin delete banner endpoint error:', error);
         res.status(500).json({
             error: 'Failed to delete banner',
             details: error.message
@@ -2291,7 +2174,6 @@ router.put('/banners/:bannerId', async (req, res) => {
         const { bannerId } = req.params;
         const { title, description, target_audience, click_url, start_date, end_date, display_order, is_active } = req.body;
 
-        console.log('✏️ Admin: Updating banner with ID:', bannerId);
 
         const { data: banner, error } = await supabaseAdmin
             .from('banners')
@@ -2310,11 +2192,9 @@ router.put('/banners/:bannerId', async (req, res) => {
             .single();
 
         if (error) {
-            console.error('❌ Error updating banner:', error);
             throw error;
         }
 
-        console.log('✅ Admin: Banner updated successfully');
 
         res.json({
             success: true,
@@ -2323,7 +2203,6 @@ router.put('/banners/:bannerId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Admin update banner endpoint error:', error);
         res.status(500).json({
             error: 'Failed to update banner',
             details: error.message

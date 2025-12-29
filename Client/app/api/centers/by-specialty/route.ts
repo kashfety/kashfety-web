@@ -22,7 +22,6 @@ export async function GET(req: Request) {
         const specialty = searchParams.get('specialty');
         const home_visit = searchParams.get('home_visit');
 
-        console.log(`🔍 Fetching centers by specialty: ${specialty}, home_visit: ${home_visit}`);
 
         if (!specialty) {
             return NextResponse.json({
@@ -47,7 +46,6 @@ export async function GET(req: Request) {
         const { data: doctors, error: doctorError } = await doctorQuery;
 
         if (doctorError) {
-            console.error('Error fetching doctors by specialty:', doctorError);
             throw doctorError;
         }
 
@@ -80,7 +78,6 @@ export async function GET(req: Request) {
             .in('doctor_id', doctorIds);
 
         if (centerError) {
-            console.error('Error fetching centers:', centerError);
             throw centerError;
         }
 
@@ -124,7 +121,7 @@ export async function GET(req: Request) {
         // Filter out centers with no doctors for this specialty
         const centersWithDoctors = centers.filter(c => c.doctor_count > 0);
 
-        console.log(`✅ Found ${centersWithDoctors.length} centers with doctors in specialty: ${specialty} (filtered from ${centers.length} total centers)`);
+        `);
 
         return NextResponse.json({
             success: true,
@@ -134,7 +131,6 @@ export async function GET(req: Request) {
         });
 
     } catch (error: any) {
-        console.error('Error fetching centers by specialty:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to fetch centers',

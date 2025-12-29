@@ -9,7 +9,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Admin Update Center] Starting center update');
     
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -18,7 +17,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('📝 [Admin Update Center] Request data received');
 
     const { centerId, ...updates } = body;
     
@@ -43,14 +41,12 @@ export async function POST(request: NextRequest) {
       if (allowedFields.includes(key)) {
         filteredUpdates[key] = centerUpdates[key];
       } else {
-        console.log(`⚠️ Skipping field '${key}' - not in allowed fields`);
       }
     });
     
     // Always update the updated_at timestamp
     filteredUpdates.updated_at = new Date().toISOString();
     
-    console.log('📝 [Admin Update Center] Filtered updates:', filteredUpdates);
 
     // Update center record
     const { data: center, error: centerError } = await supabase
@@ -61,7 +57,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (centerError) {
-      console.error('❌ [Admin Update Center] Supabase error:', centerError);
       return NextResponse.json({ 
         error: 'Failed to update center',
         details: centerError.message 
@@ -72,7 +67,6 @@ export async function POST(request: NextRequest) {
 
     // Handle password update if provided
     if (password && password.trim() !== '') {
-      console.log('📝 [Admin Update Center] Password change requested for center');
       
       if (password !== confirmPassword) {
         return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 });
@@ -94,7 +88,6 @@ export async function POST(request: NextRequest) {
 
       if (userError || !user) {
         // If no user found, try to find by email
-        console.log('⚠️ [Admin Update Center] No user found by center_id, trying email');
         const { data: userByEmail, error: emailError } = await supabase
           .from('users')
           .select('id')
@@ -103,7 +96,6 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (emailError || !userByEmail) {
-          console.log('⚠️ [Admin Update Center] No user found for this center');
           return NextResponse.json({ 
             center, 
             warning: 'Center updated but no user account found to update password' 
@@ -122,7 +114,6 @@ export async function POST(request: NextRequest) {
         .eq('id', userId);
 
       if (passwordError) {
-        console.error('❌ [Admin Update Center] Failed to update password:', passwordError);
         return NextResponse.json({ 
           center, 
           warning: 'Center updated but failed to update password' 
@@ -130,10 +121,8 @@ export async function POST(request: NextRequest) {
       }
 
       passwordUpdated = true;
-      console.log('✅ [Admin Update Center] Password updated successfully');
     }
 
-    console.log('✅ [Admin Update Center] Center updated successfully');
     
     return NextResponse.json({
       success: true,
@@ -142,7 +131,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Admin Update Center] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

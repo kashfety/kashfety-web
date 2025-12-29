@@ -8,7 +8,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Admin Create Specialty] Starting specialty creation');
     
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -17,7 +16,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('📝 [Admin Create Specialty] Request data received');
 
     const { name, name_ar, name_ku, description, icon_name, color_code, is_active, display_order } = body;
     
@@ -57,7 +55,6 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
-    console.log('📝 [Admin Create Specialty] Creating specialty record');
     const { data: specialty, error: specialtyError } = await supabase
       .from('specialties')
       .insert(specialtyData)
@@ -65,11 +62,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (specialtyError) {
-      console.error('❌ [Admin Create Specialty] Specialty creation error:', specialtyError);
       return NextResponse.json({ error: 'Failed to create specialty record' }, { status: 500 });
     }
 
-    console.log('✅ [Admin Create Specialty] Specialty created successfully');
     
     return NextResponse.json({
       success: true,
@@ -79,7 +74,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Admin Create Specialty] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

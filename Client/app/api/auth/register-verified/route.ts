@@ -35,7 +35,6 @@ function generateToken(user: any): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('📥 [Register-Verified] Request body:', body);
     
     const {
       first_name,
@@ -62,7 +61,6 @@ export async function POST(request: NextRequest) {
       supabase_user_id
     } = body;
 
-    console.log('🆔 [Register-Verified] Extracted supabase_user_id:', supabase_user_id);
 
     // Validate required fields
     if (!email || !password || !name || !role) {
@@ -80,7 +78,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingUserByEmail) {
-      console.log('✅ [Register-Verified] User already exists by email, returning existing user');
       // Generate JWT token for existing user
       const token = generateToken(existingUserByEmail);
       const { password_hash: _, ...userResponse } = existingUserByEmail;
@@ -103,7 +100,6 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (existingUserById) {
-        console.log('✅ [Register-Verified] User already exists by Supabase ID, updating with new signup data');
         
         // Update existing user with new signup information
         const updateData: any = {
@@ -143,7 +139,6 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (updateError) {
-          console.error('❌ [Register-Verified] Error updating existing user:', updateError);
           throw new Error('Failed to update user information');
         }
 
@@ -172,7 +167,6 @@ export async function POST(request: NextRequest) {
     } else {
       // Generate a proper UUID v4 if Supabase ID is not available
       userId = generateUserId(role);
-      console.log('🆔 [Register-Verified] Generated fallback UUID:', userId);
     }
 
     // Prepare user data for insertion
@@ -206,7 +200,6 @@ export async function POST(request: NextRequest) {
       if (consultation_fee) userData.consultation_fee = consultation_fee;
     }
 
-    console.log('💾 [Register-Verified] Inserting user with data:', { ...userData, password_hash: '[HIDDEN]' });
 
     // Insert user into database
     const { data: newUser, error: insertError } = await supabase
@@ -216,11 +209,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('❌ [Register-Verified] User creation error:', insertError);
       
       // Handle duplicate key error (user already exists)
       if (insertError.code === '23505' && insertError.message.includes('users_pkey')) {
-        console.log('⚠️ [Register-Verified] Duplicate user detected, attempting to fetch existing user');
         
         // Try to fetch the existing user by email
         const { data: existingUser } = await supabase
@@ -230,7 +221,6 @@ export async function POST(request: NextRequest) {
           .single();
         
         if (existingUser) {
-          console.log('✅ [Register-Verified] Found existing user, returning with token');
           const token = generateToken(existingUser);
           const { password_hash: _, ...userResponse } = existingUser;
           
@@ -247,7 +237,6 @@ export async function POST(request: NextRequest) {
       throw new Error(insertError.message || 'Failed to create user');
     }
 
-    console.log('✅ [Register-Verified] User created successfully:', newUser.id);
 
     // Handle center creation if role is center
     if (role === 'center') {
@@ -273,10 +262,8 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (centerError) {
-          console.error('⚠️ [Register-Verified] Center creation error:', centerError);
           // Don't fail the user creation if center creation fails
         } else {
-          console.log('✅ [Register-Verified] Center created successfully:', newCenter.id);
           // Update user with center_id
           await supabase
             .from('users')
@@ -284,7 +271,6 @@ export async function POST(request: NextRequest) {
             .eq('id', newUser.id);
         }
       } catch (centerErr) {
-        console.error('⚠️ [Register-Verified] Center creation failed:', centerErr);
         // Continue with user creation even if center creation fails
       }
     }
@@ -295,7 +281,6 @@ export async function POST(request: NextRequest) {
     // Remove sensitive information
     const { password_hash: _, ...userResponse } = newUser;
 
-    console.log('✅ [Register-Verified] Registration successful for user:', userResponse.email);
 
     return NextResponse.json({
       message: 'User registered successfully',
@@ -306,7 +291,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Register-Verified] Registration error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

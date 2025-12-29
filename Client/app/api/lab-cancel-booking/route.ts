@@ -10,7 +10,6 @@ export async function PUT(request: NextRequest) {
     const bookingId = searchParams.get('bookingId');
     const { reason } = await request.json();
 
-    console.log('🔬 [Lab Cancel] Request:', { bookingId, reason });
 
     if (!bookingId) {
       return NextResponse.json({ 
@@ -29,7 +28,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !booking) {
-      console.error('❌ Booking not found:', fetchError);
       return NextResponse.json({ 
         success: false, 
         error: 'Booking not found' 
@@ -83,7 +81,6 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update the booking status to cancelled
-    console.log('💾 Cancelling booking...');
     const { data: updatedBooking, error: updateError } = await supabase
       .from('lab_bookings')
       .update({
@@ -100,7 +97,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Failed to cancel booking:', updateError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to cancel booking',
@@ -114,7 +110,6 @@ export async function PUT(request: NextRequest) {
       type: updatedBooking.lab_test_type
     };
 
-    console.log('✅ [Lab Cancel] Booking cancelled successfully');
     return NextResponse.json({
       success: true,
       message: 'Lab booking cancelled successfully',
@@ -122,7 +117,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Lab cancel error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

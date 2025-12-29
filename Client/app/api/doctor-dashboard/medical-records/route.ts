@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
     }
 
-    console.log('🏥 Fallback: Creating medical record...');
     const { patient_id, appointment_id, diagnosis, treatment, prescription, notes } = body;
 
     // Use authenticated doctor's ID
@@ -56,7 +55,6 @@ export async function POST(request: NextRequest) {
         .eq('id', appointment_id)
         .single();
       if (appointmentError) {
-        console.error('❌ Error fetching appointment:', appointmentError);
         return NextResponse.json({ error: 'Failed to fetch appointment details' }, { status: 400 });
       }
       if (appointmentData.doctor_id !== doctor_id) {
@@ -89,13 +87,11 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
     if (error) {
-      console.error('❌ Create medical record error:', error);
       return NextResponse.json({ error: 'Failed to create medical record', details: error }, { status: 500 });
     }
     return NextResponse.json({ success: true, data, message: 'Medical record created successfully' });
 
   } catch (error) {
-    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -154,13 +150,11 @@ export async function GET(request: NextRequest) {
     if (appointment_id) query = query.eq('appointment_id', appointment_id);
     const { data, error } = await query;
     if (error) {
-      console.error('❌ Fetch medical records error:', error);
       return NextResponse.json({ error: 'Failed to fetch medical records' }, { status: 500 });
     }
     return NextResponse.json({ success: true, data, count: data?.length || 0 });
 
   } catch (error) {
-    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

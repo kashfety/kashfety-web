@@ -127,7 +127,6 @@ export default function PatientDoctorsPage() {
 
             // If fallback fails, try the original dynamic route
             if (!response.ok) {
-                console.log('Fallback route failed, trying original route')
                 response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`)
             }
 
@@ -141,7 +140,6 @@ export default function PatientDoctorsPage() {
                 toast.error(data.message || 'Failed to load doctors')
             }
         } catch (error) {
-            console.error('Error fetching doctors:', error)
             toast.error('Failed to load doctors')
         } finally {
             setLoading(false)
@@ -154,19 +152,16 @@ export default function PatientDoctorsPage() {
 
             // Try fallback route first for Vercel compatibility
             try {
-                console.log('🔍 Trying doctor-details fallback route for:', doctorId)
                 const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`)
                 const data = await response.json()
 
                 if (response.ok && data.success) {
-                    console.log('✅ Doctor details fetched successfully via fallback')
                     setSelectedDoctor(data.doctor)
                     setShowDetailsModal(true)
                     setLoadingDetails(false)
                     return
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying dynamic route')
             }
 
             // Fallback to dynamic route
@@ -180,7 +175,6 @@ export default function PatientDoctorsPage() {
                 toast.error(data.message || 'Failed to load doctor details')
             }
         } catch (error) {
-            console.error('Error fetching doctor details:', error)
             toast.error('Failed to load doctor details')
         } finally {
             setLoadingDetails(false)

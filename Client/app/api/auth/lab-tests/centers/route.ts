@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
     const { data: services, error } = await query;
 
     if (error) {
-      console.error('Failed to fetch centers with services:', error);
       return NextResponse.json({ error: 'Failed to fetch centers' }, { status: 500 });
     }
 
@@ -73,7 +72,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Centers API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

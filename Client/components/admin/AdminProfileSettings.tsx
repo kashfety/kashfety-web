@@ -126,7 +126,6 @@ export default function AdminProfileSettings({
         });
       }
     } catch (error) {
-      console.error('Error loading admin profile:', error);
       toast({
         title: "Error",
         description: "Failed to load profile. Please try again.",
@@ -213,10 +212,8 @@ export default function AdminProfileSettings({
         body: JSON.stringify(requestData)
       });
 
-      console.log('📥 Response status:', response.status);
 
       const responseData = await response.json();
-      console.log('📥 Response data:', responseData);
 
       if (response.ok) {
         const updatedProfile = responseData.admin || responseData.user;
@@ -243,7 +240,6 @@ export default function AdminProfileSettings({
           onProfileUpdate(updatedProfile);
         }
       } else {
-        console.error('❌ Update failed:', responseData);
         toast({
           title: "Update Failed",
           description: responseData.message || responseData.error || "Failed to update profile",
@@ -251,7 +247,6 @@ export default function AdminProfileSettings({
         });
       }
     } catch (error) {
-      console.error('❌ Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -302,7 +297,6 @@ export default function AdminProfileSettings({
         });
       }
     } catch (error) {
-      console.error('Error changing password:', error);
       toast({
         title: "Error",
         description: "Failed to change password. Please try again.",

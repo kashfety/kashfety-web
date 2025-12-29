@@ -77,10 +77,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const doctorId = appointment.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
 
       if (doctorId) {
-        console.log('📅 RescheduleModal - Fetching availability for doctor_id:', doctorId);
         fetchDoctorAvailability(doctorId);
       } else {
-        console.error('❌ RescheduleModal - No doctor_id found in appointment:', appointment);
       }
     }
   }, [isOpen, appointment]);
@@ -88,7 +86,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   // Enhanced doctor availability fetching (from BookingModal)
   const fetchDoctorAvailability = async (doctorId: string) => {
     try {
-      console.log('🔍 Fetching doctor availability for reschedule:', doctorId);
 
       // Calculate date range for next 30 days
       const today = new Date();
@@ -113,16 +110,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          console.log(`📅 Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
           const response = await fetch(routes[i]);
           if (response.ok) {
             result = await response.json();
-            console.log('✅ Route worked:', routes[i]);
             break;
           }
-          console.log(`❌ Route failed: ${routes[i]}, status: ${response.status}`);
         } catch (error) {
-          console.log(`❌ Route error: ${routes[i]}`, error);
           if (i === routes.length - 1) {
             throw error; // Rethrow on last attempt
           }
@@ -136,11 +129,9 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       // Accept either working_days or workingDays key
       const rawDays = Array.isArray(result.working_days) ? result.working_days : (Array.isArray(result.workingDays) ? result.workingDays : null);
       if (result.success && Array.isArray(rawDays)) {
-        console.log('📅 Doctor working days data:', result);
         // Normalize to numbers
         const workingDays = rawDays.map((d: any) => Number(d)) || [1, 2, 3, 4, 5];
         setDoctorWorkingDays(workingDays);
-        console.log('📅 Doctor working days:', workingDays);
 
         // Generate available dates for the next 30 days based on working days
         const availableDates = [];
@@ -158,15 +149,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
         // Set available dates from generated list
         setAvailableDates(availableDates);
-        console.log('📅 Available dates for reschedule:', availableDates);
       } else {
-        console.log('❌ Failed to get availability data:', result.message);
         // Use safe fallback on error
         setAvailableDates([]);
         setDoctorWorkingDays([1, 2, 3, 4, 5]); // Monday to Friday as fallback
       }
     } catch (error) {
-      console.error('Error fetching doctor availability:', error);
       // Use safe fallback on any error
       setAvailableDates([]);
       setDoctorWorkingDays([1, 2, 3, 4, 5]); // Monday to Friday as fallback
@@ -188,7 +176,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const dateString = formatDateForAPI(date);
       const appointmentType = appointment?.isHomeVisit ? "home_visit" : "clinic";
 
-      console.log('🔍 Fetching available slots for reschedule - Doctor:', doctorId, 'Date:', dateString, 'Type:', appointmentType);
 
       // Get center_id if available
       const maybeCenterId = (appointment as any)?.center_id;
@@ -214,7 +201,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          console.log(`🕐 Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
           const response = await fetch(routes[i], {
             headers: {
               'Content-Type': 'application/json',
@@ -222,12 +208,9 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           });
           if (response.ok) {
             result = await response.json();
-            console.log('✅ Route worked:', routes[i]);
             break;
           }
-          console.log(`❌ Route failed: ${routes[i]}, status: ${response.status}`);
         } catch (error) {
-          console.log(`❌ Route error: ${routes[i]}`, error);
           if (i === routes.length - 1) {
             throw error; // Rethrow on last attempt
           }
@@ -242,8 +225,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const slots = result.available_slots || result.slots || [];
       const bookedSlotsList = result.booked_slots || [];
 
-      console.log('📅 RESCHEDULE MODAL - Available slots from API:', slots);
-      console.log('📅 RESCHEDULE MODAL - Slot structure:', slots[0]);
 
       // Normalize slots to expected format
       const normalizedSlots = slots.map((slot: any) => {
@@ -261,12 +242,10 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         };
       }).filter((slot: any) => slot.time);
 
-      console.log('📅 RESCHEDULE MODAL - Final normalized slots:', normalizedSlots);
 
       setAvailableSlots(normalizedSlots);
       setBookedSlots(bookedSlotsList);
     } catch (error) {
-      console.error('Error fetching available slots:', error);
       setAvailableSlots([]);
       setBookedSlots([]);
     } finally {
@@ -283,10 +262,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       const doctorId = appointment?.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
 
       if (doctorId) {
-        console.log('📅 RescheduleModal - Using doctor_id:', doctorId, 'for date:', date);
         await fetchAvailableSlots(doctorId, date);
       } else {
-        console.error('❌ RescheduleModal - No doctor_id found in appointment:', appointment);
         showError(
           t('reschedule_error_title') || "Error",
           t('reschedule_error_no_doctor') || "Unable to find doctor information. Please try again."
@@ -319,7 +296,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
     try {
       // ENHANCED: Pre-reschedule validation - check if the slot is still available
-      console.log('🔍 Performing pre-reschedule slot validation...');
       const dateString = formatDateForAPI(selectedDate);
       const maybeCenterId2 = (appointment as any)?.center_id;
 
@@ -346,32 +322,25 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
       for (const url of validationUrls) {
         try {
-          console.log('🕐 Trying validation route:', url);
           const validationResponse = await fetch(url);
           if (validationResponse.ok) {
             validationResult = await validationResponse.json();
             validationSuccess = true;
-            console.log('✅ Validation route worked:', url);
             break;
           }
         } catch (err) {
-          console.log('❌ Validation route failed:', url);
           continue;
         }
       }
 
       if (!validationSuccess || !validationResult) {
-        console.warn('⚠️ Could not validate slot availability, proceeding with reschedule...');
       } else if (validationResult.success && validationResult.available_slots) {
         const availableSlotTimes = validationResult.available_slots
           .filter((slot: any) => slot.is_available && !slot.is_booked)
           .map((slot: any) => slot.time);
 
-        console.log('🔍 Current available slots:', availableSlotTimes);
-        console.log('🔍 Selected time:', selectedTime);
 
         if (!availableSlotTimes.includes(selectedTime)) {
-          console.error('❌ Selected slot is no longer available for reschedule');
           showError(
             t('reschedule_slot_unavailable_title') || "Slot No Longer Available",
             t('reschedule_slot_unavailable_message') || "Sorry, this time slot was just booked by another patient. Please select a different time.",
@@ -387,9 +356,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
           return;
         }
 
-        console.log('✅ Pre-reschedule validation passed - slot is still available');
       } else {
-        console.warn('⚠️ Could not validate slot availability, proceeding with reschedule...');
       }
 
       // Prepare reschedule data
@@ -400,9 +367,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       };
 
       // DEBUG: Log date formatting fix
-      console.log('🔍 RESCHEDULE DATE FIX DEBUG - Selected date object:', selectedDate);
-      console.log('🔍 RESCHEDULE DATE FIX DEBUG - Formatted for API:', formatDateForAPI(selectedDate));
-      console.log('🔍 RESCHEDULE DATE FIX DEBUG - Old method would give:', selectedDate.toISOString().split('T')[0]);
+      );
+      .split('T')[0]);
 
       console.log('Rescheduling appointment:', {
         appointmentId: appointment.id,
@@ -434,7 +400,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         description: t('reschedule_success_message') || "Your appointment was rescheduled successfully."
       });
     } catch (error: any) {
-      console.error('Error rescheduling appointment:', error);
       let errorMessage = t('reschedule_error_default') || "Failed to reschedule appointment. Please try again.";
 
       if (error.response?.data?.message) {

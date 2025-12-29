@@ -132,7 +132,6 @@ export default function MyAppointmentsPage() {
         throw new Error(result?.message || result?.error || 'Failed to fetch appointments');
       }
     } catch (error: any) {
-      console.error('Error fetching appointments:', error);
       setError(error.message || 'Failed to load appointments');
     } finally {
       setAppointmentsLoading(false);

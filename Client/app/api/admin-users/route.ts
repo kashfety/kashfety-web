@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('👥 [Admin Users] Request received');
 
     // Require admin authentication
     const authResult = requireAdmin(request);
@@ -16,10 +15,8 @@ export async function GET(request: NextRequest) {
     }
     const { user: authenticatedUser } = authResult;
 
-    console.log('✅ [Admin Users] Authenticated as:', authenticatedUser.role, authenticatedUser.email);
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({
         success: false,
         error: 'Server configuration error'
@@ -34,7 +31,6 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') || '';
     const status = searchParams.get('status') || '';
 
-    console.log('👥 [Admin Users] Params:', { page, limit, search, role, status });
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -90,7 +86,6 @@ export async function GET(request: NextRequest) {
     const { data: users, error } = await dataQuery;
 
     if (error) {
-      console.error('❌ Failed to fetch users:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch users',
@@ -126,7 +121,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    console.log('✅ [Admin Users] Fetched', transformedUsers.length, 'users (page', page, 'of', totalPages, ')');
+    ');
 
     return NextResponse.json({
       success: true,
@@ -144,7 +139,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin users API error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

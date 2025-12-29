@@ -6,12 +6,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🏥 [Admin Center Requests] Request received');
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -40,7 +38,6 @@ export async function GET(request: NextRequest) {
     });
 
     if (error) {
-      console.error('❌ Failed to fetch center requests:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch center requests',
@@ -67,7 +64,6 @@ export async function GET(request: NextRequest) {
       website: center.website
     }));
 
-    console.log('✅ [Admin Center Requests] Fetched', transformedRequests.length, 'center requests with status:', status);
 
     return NextResponse.json({
       success: true,
@@ -75,7 +71,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin center requests API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

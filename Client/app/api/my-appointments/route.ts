@@ -9,7 +9,6 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📋 [My Appointments API] Request received');
 
     // Require authentication
     const authResult = requireAuth(request);
@@ -36,7 +35,6 @@ export async function GET(request: NextRequest) {
     const finalUserId = userId || authenticatedUser.id;
     const finalRole = role || authenticatedUser.role;
 
-    console.log('📋 [My Appointments API] User ID:', finalUserId, 'Role:', finalRole);
 
     // Mark past appointments as absent before fetching
     if (finalRole === 'doctor') {
@@ -57,7 +55,6 @@ export async function GET(request: NextRequest) {
 
     // Filter by role
     if (finalRole === 'super_admin' || finalRole === 'admin') {
-      console.log('📋 Admin - fetching all');
     } else if (finalRole === 'doctor') {
       appointmentsQuery = appointmentsQuery.eq('doctor_id', finalUserId);
     } else {
@@ -68,7 +65,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('📋 Error:', error);
       return NextResponse.json({
         success: false,
         message: 'Failed to fetch appointments',
@@ -76,7 +72,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log(`📋 Found ${appointments?.length || 0} appointments`);
 
     // Fetch all specialties for translation lookup
     const { data: specialties } = await supabaseAdmin
@@ -122,7 +117,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, appointments: enriched });
   } catch (err: any) {
-    console.error('📋 Error:', err);
     return NextResponse.json({
       success: false,
       message: 'Internal server error',

@@ -179,7 +179,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (storedData) {
         try {
           const bookingData = JSON.parse(storedData);
-          console.log('Restoring booking data:', bookingData);
 
           setSelectedSpecialty(bookingData.specialty || "");
           setSelectedLocation(bookingData.location || "");
@@ -216,7 +215,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
           localStorage.removeItem('bookingData');
         } catch (error) {
-          console.error('Error parsing booking data:', error);
           localStorage.removeItem('bookingData');
         }
       }
@@ -299,10 +297,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         });
         setSpecialtiesMap(map);
       } else {
-        console.error('Failed to fetch specialties');
       }
     } catch (error) {
-      console.error('Error fetching specialties:', error);
     } finally {
       setLoadingSpecialties(false);
     }
@@ -322,7 +318,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             const centers = (centersResp as any)?.centers || [];
             return [t.id, centers] as [string, Center[]];
           } catch (e) {
-            console.error('Error fetching centers for type', t.id, e);
             return [t.id, []] as [string, Center[]];
           }
         })
@@ -331,7 +326,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       for (const [k, v] of entries) map[k] = v;
       setLabCentersByType(map);
     } catch (e) {
-      console.error('Error prefetching lab types/centers:', e);
       setLabTypes([]);
       setLabCentersByType({});
     }
@@ -344,9 +338,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const centersResp = await labService.getCenters({});
       const centers = (centersResp as any)?.centers || [];
       setLabCenters(centers);
-      console.log('Fetched lab centers:', centers.length);
     } catch (e) {
-      console.error('Error fetching lab centers:', e);
       setLabCenters([]);
     } finally {
       setLoading(false);
@@ -376,9 +368,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         }));
 
       setLabTypes(testTypes);
-      console.log('Fetched lab test types for center:', testTypes.length);
     } catch (e) {
-      console.error('Error fetching lab types for center:', e);
       setLabTypes([]);
     } finally {
       setLoading(false);
@@ -420,7 +410,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         setCurrentStep(3);
       }
     } catch (error) {
-      console.error('Error fetching doctor:', error);
     } finally {
       setLoading(false);
     }
@@ -454,7 +443,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         setCurrentStep(2);
       }
     } catch (error) {
-      console.error('Error fetching center:', error);
     } finally {
       setLoading(false);
     }
@@ -464,7 +452,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchDoctorsBySpecialty = async (specialty: string, visitType: "clinic" | "home") => {
     setLoading(true);
     try {
-      console.log('Fetching doctors by specialty:', specialty, 'visitType:', visitType);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -474,8 +461,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const response = await fetch(`/api/doctors?${params.toString()}`);
       const result = await response.json();
 
-      console.log('API Response:', result);
-      console.log('First doctor raw data:', result.doctors?.[0]);
 
       if (result && result.success) {
         let filteredDoctors = (result.doctors || []).map((d: any) => ({
@@ -495,7 +480,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           has_schedule: true,
         }));
 
-        console.log('Mapped first doctor:', filteredDoctors[0]);
 
         // Filter for home visits if requested
         if (visitType === 'home') {
@@ -503,13 +487,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         }
 
         setDoctors(filteredDoctors);
-        console.log('Found doctors:', filteredDoctors.length);
       } else {
-        console.error('Failed to fetch doctors:', result);
         setDoctors([]);
       }
     } catch (error) {
-      console.error('Error fetching doctors:', error);
       setDoctors([]);
     } finally {
       setLoading(false);
@@ -520,7 +501,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchCentersBySpecialty = async (specialty: string, visitType: "clinic" | "home") => {
     setLoading(true);
     try {
-      console.log('Fetching centers by specialty:', specialty, 'visitType:', visitType);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -536,13 +516,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (result && result.success) {
         const centersList = result.centers || [];
         setCenters(centersList);
-        console.log('Found centers:', centersList.length);
       } else {
-        console.error('Failed to fetch centers:', result);
         setCenters([]);
       }
     } catch (error) {
-      console.error('Error fetching centers:', error);
       setCenters([]);
     } finally {
       setLoading(false);
@@ -553,7 +530,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchDoctorsByCenter = async (centerId: string, specialty: string, visitType: "clinic" | "home") => {
     setLoading(true);
     try {
-      console.log('Fetching doctors by center:', centerId, 'specialty:', specialty, 'visitType:', visitType);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -573,16 +549,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
           const response = await fetch(routes[i]);
           if (response.ok) {
             result = await response.json();
-            console.log('✅ Route worked:', routes[i]);
             break;
           }
-          console.log(`❌ Route failed: ${routes[i]}`);
         } catch (error) {
-          console.log(`❌ Route error: ${routes[i]}`, error);
           if (i === routes.length - 1) {
             throw error; // Rethrow on last attempt
           }
@@ -613,13 +585,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         }
 
         setDoctors(filteredDoctors);
-        console.log('Found doctors in center:', filteredDoctors.length);
       } else {
-        console.error('Failed to fetch doctors by center:', result);
         setDoctors([]);
       }
     } catch (error) {
-      console.error('Error fetching doctors by center:', error);
       setDoctors([]);
     } finally {
       setLoading(false);
@@ -630,45 +599,36 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchDoctorCenters = async (doctorId: string, visitType: "clinic" | "home") => {
     setLoading(true);
     try {
-      console.log('🏥 [BookingModal] Fetching centers for doctor:', doctorId, 'visitType:', visitType);
 
       // Try fallback route first (works better on Vercel)
       let response: Response;
       let result: any;
 
       try {
-        console.log('🔄 [BookingModal] Trying doctor-centers-by-id fallback route');
         response = await fetch(`/api/doctor-centers-by-id?doctor_id=${encodeURIComponent(doctorId)}&visit_type=${visitType}`);
         result = await response.json();
 
         if (response.ok && result && result.success) {
-          console.log('✅ [BookingModal] Fallback route worked, found', result.centers?.length || 0, 'centers');
           const centers = result.centers || [];
           setDoctorCenters(centers);
           setLoading(false);
           return;
         } else {
-          console.log('⚠️ [BookingModal] Fallback route returned but no valid data, trying dynamic route');
         }
       } catch (fallbackError: any) {
-        console.log('❌ [BookingModal] Fallback failed:', fallbackError?.message || fallbackError);
       }
 
       // Fallback to dynamic route
-      console.log('🔄 [BookingModal] Trying dynamic route');
       response = await fetch(`/api/doctors/${doctorId}/centers?visit_type=${visitType}`);
       result = await response.json();
 
       if (result && result.success) {
         const centers = result.centers || [];
         setDoctorCenters(centers);
-        console.log('✅ [BookingModal] Found centers for doctor:', centers.length);
       } else {
-        console.error('❌ [BookingModal] Failed to fetch doctor centers:', result);
         setDoctorCenters([]);
       }
     } catch (error) {
-      console.error('❌ [BookingModal] Error fetching doctor centers:', error);
       setDoctorCenters([]);
     } finally {
       setLoading(false);
@@ -682,7 +642,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   // NEW: Fetch doctor's working days using center-specific schedule system
   const fetchDoctorWorkingDays = async (doctorId: string, centerId?: string) => {
     try {
-      console.log('📅 Fetching doctor working days for:', doctorId, 'at center:', centerId, 'visit type:', selectedLocation);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -706,16 +665,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let data = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
           const response = await fetch(routes[i]);
           if (response.ok) {
             data = await response.json();
-            console.log('✅ Route worked:', routes[i]);
             break;
           }
-          console.log(`❌ Route failed: ${routes[i]}`);
         } catch (error) {
-          console.log(`❌ Route error: ${routes[i]}`, error);
           if (i === routes.length - 1) {
             throw error; // Rethrow on last attempt
           }
@@ -723,17 +678,15 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       }
 
       if (data) {
-        console.log('📅 Doctor working days data:', data);
 
         const days = Array.isArray(data.working_days) ? data.working_days : (Array.isArray(data.workingDays) ? data.workingDays : null);
         if (data.success && Array.isArray(days)) {
-          console.log('✅ Received doctor working days:', days);
 
           // If no working days found, use default schedule (Sunday to Thursday)
           const workingDays = days.length > 0 ? days.map((d: any) => Number(d)) : [0, 1, 2, 3, 4];
 
           if (days.length === 0) {
-            console.warn('⚠️ No schedules found for this doctor. Using default working days (Sun-Thu)');
+            ');
           }
 
           setDoctorWorkingDays(workingDays);
@@ -754,9 +707,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
           setAvailableDates(availableDates);
         } else {
-          console.log('❌ Invalid response structure');
           // Use default schedule as fallback
-          console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
+           as fallback');
           setDoctorWorkingDays([0, 1, 2, 3, 4]);
 
           const availableDates = [];
@@ -772,9 +724,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           setAvailableDates(availableDates);
         }
       } else {
-        console.error('Failed to fetch doctor availability - all routes failed');
         // Use default schedule as fallback
-        console.warn('⚠️ Using default working days (Sun-Thu) as fallback');
+         as fallback');
         setDoctorWorkingDays([0, 1, 2, 3, 4]);
 
         const availableDates = [];
@@ -790,7 +741,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         setAvailableDates(availableDates);
       }
     } catch (error) {
-      console.error('Error fetching doctor availability:', error);
       setAvailableDates([]);
       setDoctorWorkingDays([]);
     }
@@ -810,7 +760,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
       const dateString = formatDateForAPI(date);
 
-      console.log('🔍 Fetching available slots - Doctor:', doctorId, 'Date:', dateString, 'Center:', selectedCenter?.id, 'Location:', selectedLocation);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -831,16 +780,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          console.log(`Trying route ${i + 1}/${routes.length}: ${routes[i]}`);
           const response = await fetch(routes[i]);
           if (response.ok) {
             result = await response.json();
-            console.log('✅ Route worked:', routes[i]);
             break;
           }
-          console.log(`❌ Route failed: ${routes[i]}`);
         } catch (error) {
-          console.log(`❌ Route error: ${routes[i]}`, error);
           if (i === routes.length - 1) {
             throw error;
           }
@@ -848,20 +793,16 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       }
 
       if (result && result.success) {
-        console.log('📅 Available slots result:', result);
         // Handle both response formats (slots or available_slots)
         const slots = result.slots || result.available_slots || [];
-        console.log('📅 Setting slots:', slots);
         setAvailableSlots(slots);
         setBookedSlots(result.booked_slots || []);
         setActualConsultationFee(result.consultation_fee || selectedDoctor?.consultation_fee || 0);
       } else {
-        console.error('❌ Failed to fetch available slots:', result);
         setAvailableSlots([]);
         setBookedSlots([]);
       }
     } catch (error) {
-      console.error('❌ Error fetching available slots:', error);
       setAvailableSlots([]);
       setBookedSlots([]);
     } finally {
@@ -876,12 +817,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const res = await labService.getAvailableDates(centerId, typeId, { start_date: fmt(startDate), end_date: fmt(endDate) });
-      console.log('📅 Lab available dates response:', res);
       const dates = (res as any)?.available_dates || (res as any)?.data?.available_dates || [];
-      console.log('📅 Parsed available dates:', dates);
       setLabAvailableDates(dates.map((d: any) => d.date || d));
     } catch (e) {
-      console.error('Error fetching lab available dates:', e);
       setLabAvailableDates([]);
     }
   };
@@ -895,11 +833,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const res = await labService.getAvailableSlots(centerId, typeId, dateString);
       const data = (res as any)?.data || res;
 
-      console.log('🔍 Lab slots response:', data);
 
       // Handle the new API response format with available_slots array
       const availableSlots = data?.available_slots || [];
-      console.log('🔍 Available slots from API:', availableSlots);
 
       // Extract booked slots (where is_available is false)
       const bookedTimes = availableSlots
@@ -915,13 +851,11 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         is_booked: !slot.is_available
       })));
 
-      console.log('✅ Set available slots:', availableSlots.length);
 
       // Optionally set fee if provided
       const fee = data?.fee || data?.serviceFee || data?.consultationFee || 0;
       if (fee) setActualConsultationFee(Number(fee));
     } catch (e) {
-      console.error('Error fetching lab available slots:', e);
       setAvailableSlots([]);
       setBookedSlots([]);
     } finally {
@@ -946,9 +880,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const service = services.find((s: any) => s.lab_test_type_id === type.id);
       const fee = service?.base_fee || service?.lab_test_types?.default_fee || 0;
       setActualConsultationFee(fee);
-      console.log(`[BookingModal] Set lab fee for ${type.name} at ${center.name}: $${fee}`);
     } catch (error) {
-      console.error('Error fetching center services for fee:', error);
       setActualConsultationFee(0);
     }
 
@@ -966,7 +898,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setAvailableSlots([]);
     setLabAvailableDates([]);
 
-    console.log('[BookingModal] Lab Step 1 -> Step 2: Selected center:', center.name);
     setCurrentStep(2);
     setLoading(true);
     await fetchLabTypesForCenter(center.id);
@@ -988,13 +919,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const service = services.find((s: any) => s.lab_test_type_id === type.id);
       const fee = service?.base_fee || service?.lab_test_types?.default_fee || 0;
       setActualConsultationFee(fee);
-      console.log(`[BookingModal] Set lab fee for ${type.name} at ${selectedCenter!.name}: $${fee}`);
     } catch (error) {
-      console.error('Error fetching center services for fee:', error);
       setActualConsultationFee(0);
     }
 
-    console.log('[BookingModal] Lab Step 2 -> Step 3: Selected test type:', type.name);
     await fetchLabAvailableDates(selectedCenter!.id, type.id);
     setCurrentStep(3);
   };
@@ -1025,7 +953,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
     
     if (selectedSpecialty && selectedLocation && searchMethodToUse) {
-      console.log('[BookingModal] Step1 -> Step2', { selectedSpecialty, selectedLocation, searchMethod: searchMethodToUse });
 
       // Ensure searchMethod state is set
       if (searchMethodToUse !== searchMethod) {
@@ -1069,7 +996,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Step2 -> Step3/4', { doctorId: doctor.id, visitType: selectedLocation });
 
     // For home visits, skip center selection and go directly to step 4 (schedule)
     if (selectedLocation === "home") {
@@ -1105,7 +1031,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Centers Flow Step2 -> Step3', { centerId: center.id, specialty: selectedSpecialty });
     if (selectedSpecialty && selectedLocation) {
       await fetchDoctorsByCenter(center.id, selectedSpecialty, selectedLocation);
     }
@@ -1130,7 +1055,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Centers Flow Step3 -> Step4', { doctorId: doctor.id, centerId: selectedCenter?.id, visitType: selectedLocation });
 
     // For home visits, we don't need the center - fetch working days without center
     // For clinic visits, use the selected center
@@ -1160,7 +1084,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     setAvailableDates([]);
     setDoctorWorkingDays([]);
 
-    console.log('[BookingModal] Step3 -> Step4', { centerId: center.id, doctorId: selectedDoctor?.id });
     // Fetch doctor's working days for this specific center
     if (selectedDoctor) {
       await fetchDoctorWorkingDays(selectedDoctor.id, center.id);
@@ -1169,12 +1092,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   };
 
   const handleBookAppointment = async () => {
-    console.log('🚀 Starting appointment booking...');
-    console.log('Auth status:', { isAuthenticated, user: !!user });
 
     // Check authentication
     if (!isAuthenticated || !user) {
-      console.log('❌ User not authenticated, redirecting to login');
       // Store complete booking state for post-login restoration
       localStorage.setItem('bookingData', JSON.stringify({
         specialty: selectedSpecialty,
@@ -1195,7 +1115,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     const storedUser = localStorage.getItem('auth_user');
 
     if (!storedToken) {
-      console.error('❌ No auth token found in localStorage');
       showError(
         t('booking_error_auth') || "Authentication Error",
         t('booking_error_please_login') || "Please log in again.",
@@ -1205,7 +1124,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
 
     if (!storedUser) {
-      console.error('❌ No user data found in localStorage');
       showError(
         t('booking_error_auth') || "Authentication Error",
         t('booking_error_user_not_found') || "User data not found. Please log in again.",
@@ -1218,9 +1136,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     let userData;
     try {
       userData = JSON.parse(storedUser);
-      console.log('👤 Current user data:', userData);
     } catch (error) {
-      console.error('❌ Invalid user data in localStorage:', error);
       showError(
         t('booking_error_auth') || "Authentication Error",
         t('booking_error_invalid_user') || "Invalid user data. Please log in again.",
@@ -1230,7 +1146,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
 
     if (!isLabMode && (!selectedDoctor || !selectedDate || !selectedTime)) {
-      console.error('❌ Missing required booking data');
       showError(
         t('booking_error_missing_info') || "Missing Information",
         t('booking_error_select_doctor_date_time') || "Please select a doctor, date, and time"
@@ -1239,7 +1154,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
 
     if (isLabMode && (!selectedLabType || !selectedCenter || !selectedDate || !selectedTime)) {
-      console.error('❌ Missing required lab booking data');
       showError(
         t('booking_error_missing_info') || "Missing Information",
         t('booking_error_select_test_center_date_time') || "Please select a test, center, date, and time"
@@ -1248,7 +1162,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     }
 
     setLoading(true);
-    console.log('📋 Booking data validation passed');
 
     // Helper function for date formatting
     const formatDateForAPI = (date: Date): string => {
@@ -1268,15 +1181,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
         // Handle the new API response format with available_slots array
         const availableSlots = data?.available_slots || [];
-        console.log('🔍 Booking validation - available slots:', availableSlots);
 
         // Extract available times from the slots array
         const availableTimes = availableSlots
           .filter((slot: any) => slot.is_available)
           .map((slot: any) => slot.time);
 
-        console.log('🔍 Booking validation - available times:', availableTimes);
-        console.log('🔍 Booking validation - selected time:', selectedTime);
 
         if (!availableTimes.includes(selectedTime)) {
           showError(
@@ -1321,7 +1231,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       } else {
         // Doctor appointment flow (existing)
         // ENHANCED: Pre-booking validation - check if the slot is still available
-        console.log('🔍 Performing pre-booking slot validation...');
 
         // Build query parameters
         const validationParams = new URLSearchParams();
@@ -1342,18 +1251,13 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         let validationResult = null;
         for (let i = 0; i < validationRoutes.length; i++) {
           try {
-            console.log(`Trying validation route ${i + 1}/${validationRoutes.length}: ${validationRoutes[i]}`);
             const validationResponse = await fetch(validationRoutes[i]);
             if (validationResponse.ok) {
               validationResult = await validationResponse.json();
-              console.log('✅ Validation route worked:', validationRoutes[i]);
               break;
             }
-            console.log(`❌ Validation route failed: ${validationRoutes[i]}`);
           } catch (error) {
-            console.log(`❌ Validation route error: ${validationRoutes[i]}`, error);
             if (i === validationRoutes.length - 1) {
-              console.warn('⚠️ All validation routes failed, proceeding with booking...');
             }
           }
         }
@@ -1365,11 +1269,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             .filter((slot: any) => slot.is_available && !slot.is_booked)
             .map((slot: any) => slot.time);
 
-          console.log('🔍 Current available slots:', availableSlotTimes);
-          console.log('🔍 Selected time:', selectedTime);
 
           if (!availableSlotTimes.includes(selectedTime)) {
-            console.error('❌ Selected slot is no longer available');
             showError(
               t('booking_error_slot_unavailable') || "Slot No Longer Available",
               t('booking_error_slot_just_booked') || "Sorry, this time slot was just booked by another patient. Please select a different time.",
@@ -1383,9 +1284,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
             return;
           }
 
-          console.log('✅ Pre-booking validation passed - slot is still available');
         } else {
-          console.warn('⚠️ Could not validate slot availability, proceeding with booking...');
         }
 
         // Prepare booking request data with enhanced logging and center support
@@ -1401,14 +1300,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           consultation_fee: actualConsultationFee || selectedDoctor!.consultation_fee || 0
         };
 
-        console.log('📤 Booking appointment with enhanced debugging:');
-        console.log('📤 User data:', userData);
-        console.log('📤 Doctor data:', selectedDoctor);
-        console.log('📤 Request data:', requestData);
-        console.log('📤 Token exists:', !!storedToken);
 
         const result = await appointmentService.book({ ...requestData, center_id: selectedCenter?.id });
-        console.log('✅ Response result:', result);
 
         if (result && (result as any).success !== false) {
           // Refresh available slots to reflect the new booking
@@ -1435,14 +1328,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       throw new Error('Unknown error from server');
 
     } catch (error: any) {
-      console.error('❌ Error booking appointment:', error);
 
       // Enhanced error handling with specific messages
       let errorMessage = t('booking_error_message');
       let errorTitle = t('booking_error_title');
 
       if (error.response) {
-        console.error('❌ HTTP Error Response:', error.response.status, error.response.data);
 
         switch (error.response.status) {
           case 400:

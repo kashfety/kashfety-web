@@ -65,15 +65,12 @@ apiClient.interceptors.request.use((config) => {
 // Ultra Simple Login
 export const ultraSimpleLogin = async (email: string, password: string) => {
   try {
-    console.log('=== ULTRA SIMPLE LOGIN API CALL ===');
-    console.log('Email:', email);
     
     const response = await apiClient.post('/ultra-appointments/login', {
       email,
       password
     });
 
-    console.log('Login response:', response.data);
 
     if (response.data.success) {
       setAuthToken(response.data.token);
@@ -88,7 +85,6 @@ export const ultraSimpleLogin = async (email: string, password: string) => {
       throw new Error(response.data.message || 'Login failed');
     }
   } catch (error: any) {
-    console.error('Ultra simple login error:', error);
     throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
@@ -103,12 +99,9 @@ export const ultraSimpleRegister = async (userData: {
   role: 'patient' | 'doctor';
 }) => {
   try {
-    console.log('=== ULTRA SIMPLE REGISTRATION ===');
-    console.log('Registration data:', userData);
     
     const response = await apiClient.post('/ultra-appointments/register', userData);
 
-    console.log('Registration response:', response.data);
 
     if (response.data.success) {
       setAuthToken(response.data.token);
@@ -123,7 +116,6 @@ export const ultraSimpleRegister = async (userData: {
       throw new Error(response.data.message || 'Registration failed');
     }
   } catch (error: any) {
-    console.error('Registration error:', error);
     throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
@@ -138,14 +130,11 @@ export const ultraSimpleLogout = () => {
 // Get Doctors for Booking
 export const getDoctors = async () => {
   try {
-    console.log('=== GET DOCTORS API CALL ===');
     
     const response = await apiClient.get('/ultra-appointments/doctors');
     
-    console.log('Doctors response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Get doctors error:', error);
     throw new Error(error.response?.data?.message || 'Failed to get doctors');
   }
 };
@@ -160,15 +149,11 @@ export const createAppointment = async (appointmentData: {
   notes?: string;
 }) => {
   try {
-    console.log('=== CREATE APPOINTMENT API CALL ===');
-    console.log('Appointment data:', appointmentData);
     
     const response = await apiClient.post('/ultra-appointments/booking/create', appointmentData);
     
-    console.log('Create appointment response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Create appointment error:', error);
     throw new Error(error.response?.data?.message || 'Failed to create appointment');
   }
 };
@@ -176,14 +161,11 @@ export const createAppointment = async (appointmentData: {
 // Get Patient Appointments
 export const getPatientAppointments = async () => {
   try {
-    console.log('=== GET PATIENT APPOINTMENTS API CALL ===');
     
     const response = await apiClient.get('/ultra-appointments/patient/appointments');
     
-    console.log('Patient appointments response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Get patient appointments error:', error);
     throw new Error(error.response?.data?.message || 'Failed to get appointments');
   }
 };
@@ -191,14 +173,11 @@ export const getPatientAppointments = async () => {
 // Get Doctor Appointments
 export const getDoctorAppointments = async () => {
   try {
-    console.log('=== GET DOCTOR APPOINTMENTS API CALL ===');
     
     const response = await apiClient.get('/ultra-appointments/doctor/appointments');
     
-    console.log('Doctor appointments response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Get doctor appointments error:', error);
     throw new Error(error.response?.data?.message || 'Failed to get doctor appointments');
   }
 };

@@ -6,10 +6,8 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 [Admin Analytics] Request received');
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -37,20 +35,16 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (userError) {
-      console.error('❌ Failed to fetch user stats:', userError);
       throw userError;
     }
     if (appointmentError) {
-      console.error('❌ Failed to fetch appointment stats:', appointmentError);
       throw appointmentError;
     }
     if (centerError) {
-      console.error('❌ Failed to fetch center stats:', centerError);
       throw centerError;
     }
     // Lab bookings error is not critical, just log it
     if (labError) {
-      console.warn('⚠️ Failed to fetch lab bookings:', labError);
     }
 
     // Calculate current date ranges
@@ -274,7 +268,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin analytics API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

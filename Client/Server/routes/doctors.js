@@ -19,7 +19,6 @@ router.get('/:doctorId/available-slots', async (req, res) => {
     const { doctorId } = req.params;
     const { date, center_id } = req.query;
 
-    console.log(`🔍 Getting available slots - Doctor: ${doctorId}, Date: ${date}, Center: ${center_id || 'ALL'}`);
 
     if (!date) {
       return res.status(400).json({ error: 'Date parameter is required' });
@@ -44,12 +43,11 @@ router.get('/:doctorId/available-slots', async (req, res) => {
     const { data: schedules, error: scheduleError } = await scheduleQuery;
 
     if (scheduleError) {
-      console.error('Schedule query error:', scheduleError);
       return res.status(500).json({ error: 'Failed to fetch schedule' });
     }
 
     if (!schedules || schedules.length === 0) {
-      console.log(`ℹ️  No schedule found for Doctor ${doctorId} on day ${dayOfWeek} ${center_id ? `at center ${center_id}` : '(any center)'}`);
+      '}`);
       return res.json({
         success: true,
         doctor_id: doctorId,
@@ -72,12 +70,11 @@ router.get('/:doctorId/available-slots', async (req, res) => {
   // Even if an appointment was booked at a different center (or with null center_id),
   // the doctor is still unavailable at that time slot for ALL centers
 
-    console.log(`🔍 DOCTORS.JS DEBUG - Appointment query: doctor_id=${doctorId}, date=${date}, NO center filter (doctor can't be in 2 places)`);
+    `);
 
     const { data: appointments, error: appointmentError } = await appointmentQuery;
 
     if (appointmentError) {
-      console.error('Appointment query error:', appointmentError);
       return res.status(500).json({ error: 'Failed to fetch appointments' });
     }
 
@@ -87,24 +84,20 @@ router.get('/:doctorId/available-slots', async (req, res) => {
         const timeStr = apt.appointment_time;
         // Convert HH:MM:SS to HH:MM for comparison with schedule slots
         const normalizedTime = timeStr.length === 8 ? timeStr.substring(0, 5) : timeStr;
-        console.log(`🔍 DOCTORS.JS DEBUG - Normalizing booked time: ${timeStr} -> ${normalizedTime}`);
         return normalizedTime;
       }) || []
     );
 
-    console.log(`🔍 DOCTORS.JS DEBUG - Found ${appointments?.length || 0} booked appointments:`);
-    console.log(`🔍 DOCTORS.JS DEBUG - Raw booked appointments:`, appointments);
-    console.log(`🔍 DOCTORS.JS DEBUG - Normalized booked times set:`, Array.from(bookedTimes));
+    );
 
     // Generate available slots from schedules - KEEP ALL SLOTS, mark booked ones
     const allSlots = [];
     
     schedules.forEach(schedule => {
       if (schedule.time_slots && Array.isArray(schedule.time_slots)) {
-        console.log(`🔍 DOCTORS.JS DEBUG - Processing schedule with ${schedule.time_slots.length} slots:`, schedule.time_slots);
         schedule.time_slots.forEach(slot => {
           const isBooked = bookedTimes.has(slot.time);
-          console.log(`🔍 DOCTORS.JS DEBUG - Checking slot ${slot.time}: ${isBooked ? 'BOOKED (marking as disabled)' : 'AVAILABLE (keeping enabled)'}`);
+          ' : 'AVAILABLE (keeping enabled)'}`);
           
           allSlots.push({
             time: slot.time,
@@ -123,8 +116,7 @@ router.get('/:doctorId/available-slots', async (req, res) => {
     // Count only available slots for the total
     const availableCount = allSlots.filter(slot => slot.is_available).length;
 
-    console.log(`✅ DOCTORS.JS FINAL RESULT - Total slots: ${allSlots.length}, Available: ${availableCount}, Booked: ${allSlots.length - availableCount}`);
-    console.log(`✅ DOCTORS.JS FINAL RESULT - All slots with status:`, allSlots.map(slot => `${slot.time}:${slot.is_available ? 'available' : 'booked'}`));
+    );
 
     res.json({
       success: true,
@@ -138,7 +130,6 @@ router.get('/:doctorId/available-slots', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get available slots error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -149,7 +140,6 @@ router.get('/:doctorId/working-days', async (req, res) => {
     const { doctorId } = req.params;
     const { center_id } = req.query;
 
-    console.log(`🔍 Getting working days - Doctor: ${doctorId}, Center: ${center_id || 'ALL'}`);
 
     let query = supabase
       .from('doctor_schedules')
@@ -164,14 +154,13 @@ router.get('/:doctorId/working-days', async (req, res) => {
     const { data: schedules, error } = await query;
 
     if (error) {
-      console.error('Working days query error:', error);
       return res.status(500).json({ error: 'Failed to fetch working days' });
     }
 
     const workingDays = [...new Set(schedules?.map(s => s.day_of_week) || [])];
     workingDays.sort();
 
-    console.log(`✅ Doctor ${doctorId} working days ${center_id ? `at center ${center_id}` : '(all centers)'}: [${workingDays.join(', ')}]`);
+    '}: [${workingDays.join(', ')}]`);
 
     res.json({
       success: true,
@@ -181,7 +170,6 @@ router.get('/:doctorId/working-days', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get working days error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -201,7 +189,6 @@ router.get('/:doctorId/schedule', async (req, res) => {
       .order('day_of_week');
 
     if (error) {
-      console.error('Schedule query error:', error);
       return res.status(500).json({ error: 'Failed to fetch schedule' });
     }
 
@@ -212,7 +199,6 @@ router.get('/:doctorId/schedule', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor schedule error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -222,7 +208,6 @@ router.get('/:doctorId/centers', async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    console.log(`🔍 Getting centers for Doctor: ${doctorId}`);
 
     const { data: doctorCenters, error } = await supabase
       .from('doctor_centers')
@@ -233,7 +218,6 @@ router.get('/:doctorId/centers', async (req, res) => {
       .eq('doctor_id', doctorId);
 
     if (error) {
-      console.error('Doctor centers query error:', error);
       return res.status(500).json({ error: 'Failed to fetch doctor centers' });
     }
 
@@ -243,7 +227,7 @@ router.get('/:doctorId/centers', async (req, res) => {
       assignment_date: dc.created_at
     })) || [];
 
-    console.log(`✅ Doctor ${doctorId} assigned to ${centers.length} centers: [${centers.map(c => c.name).join(', ')}]`);
+    .join(', ')}]`);
 
     res.json({
       success: true,
@@ -252,7 +236,6 @@ router.get('/:doctorId/centers', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get doctor centers error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

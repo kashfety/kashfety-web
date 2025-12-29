@@ -68,14 +68,12 @@ export default function AppointmentsList() {
             }
             
           } catch (err) {
-            console.error("Error fetching basic appointments:", err);
             setError("Failed to load appointments");
             setLoading(false);
           }
         }, 150); // Fast initial load
         
       } catch (err) {
-        console.error("Error in progressive loading:", err);
         setError("Failed to load appointments");
         setLoading(false);
       }
@@ -105,7 +103,6 @@ export default function AppointmentsList() {
       }, 300); // Additional 300ms for details (total 450ms vs original 1000ms)
       
     } catch (err) {
-      console.error("Error loading appointment details:", err);
       setIsLoadingDetails(false);
     }
   };
@@ -123,7 +120,6 @@ export default function AppointmentsList() {
         apt.id === id ? { ...apt, status: "no-show" } : apt
       ));
     } catch (error) {
-      console.error("Error updating appointment status:", error);
     }
   };
 

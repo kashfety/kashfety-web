@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
     const doctorId = searchParams.get('doctorId');
     const centerId = searchParams.get('center_id');
     
-    console.log('📅 [Doctor Working Days API] Request - Doctor:', doctorId, 'Center:', centerId);
 
     if (!doctorId) {
       return NextResponse.json({ 
@@ -35,7 +34,6 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error('📅 Error fetching working days:', error);
       return NextResponse.json({ 
         success: false, 
         message: 'Failed to fetch doctor working days' 
@@ -45,7 +43,6 @@ export async function GET(request: NextRequest) {
     // Get unique working days and sort them
     const workingDays = [...new Set((data || []).map((r: any) => Number(r.day_of_week)))].sort((a, b) => a - b);
     
-    console.log(`📅 Found ${workingDays.length} working days for doctor ${doctorId}`);
 
     return NextResponse.json({ 
       success: true, 
@@ -53,7 +50,6 @@ export async function GET(request: NextRequest) {
       workingDays: workingDays // Support both formats for backward compatibility
     });
   } catch (error: any) {
-    console.error('📅 Error:', error);
     return NextResponse.json({ 
       success: false, 
       message: error.message || 'Internal server error' 

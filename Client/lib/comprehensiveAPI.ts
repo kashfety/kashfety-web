@@ -23,7 +23,6 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${session.access_token}`;
         }
       } catch (error) {
-        console.error('Error getting auth token:', error);
       }
     }
     return config;
@@ -44,7 +43,6 @@ apiClient.interceptors.response.use(
             await clientAuthHelpers.signOut();
             window.location.href = '/login';
           } catch (signOutError) {
-            console.error('Error during sign out:', signOutError);
           }
         }
       }

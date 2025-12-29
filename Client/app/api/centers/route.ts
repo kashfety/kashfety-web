@@ -74,7 +74,6 @@ export async function GET(req: Request) {
         });
 
     } catch (error: any) {
-        console.error('Error fetching centers:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to fetch medical centers'

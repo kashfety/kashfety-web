@@ -48,18 +48,15 @@ export async function GET(request: NextRequest) {
 
             const assigned = (filtered as any[]).filter((c: any) => c.is_assigned);
             const payloadOut = { ...(data || {}), centers: filtered, assigned_centers: assigned };
-            console.log('[centers][GET][proxy] doctorId=', doctorId, 'in=', centersPayload.length, 'out=', filtered.length);
             // Also print any dropped personal clinics for visibility
             centersPayload.forEach((c: any) => {
               const m = meta.get(c.id);
               if (m?.center_type === 'personal' && m?.owner_doctor_id !== doctorId) {
-                console.log('[centers][GET][proxy] drop foreign personal:', c.id, c.name, 'owner=', m?.owner_doctor_id);
               }
             });
             return NextResponse.json(payloadOut);
           }
         } catch (e) {
-          console.warn('[centers][GET][proxy] post-filter failed, returning backend data', e);
         }
         return NextResponse.json(data);
       }
@@ -144,7 +141,6 @@ export async function GET(request: NextRequest) {
       assigned_centers: assignedCenters,
     });
   } catch (e: any) {
-    console.error('centers GET fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to load centers' }, { status: 500 });
   }
 }
@@ -173,7 +169,6 @@ export async function PUT(request: NextRequest) {
         .in('id', centerIds);
       for (const r of rows || []) {
         if ((r as any).center_type === 'personal' && (r as any).owner_doctor_id && (r as any).owner_doctor_id !== computedDoctorId) {
-          console.warn('[centers][PUT][proxy] reject assigning other doctor personal clinic', { doctor: computedDoctorId, center: r.id });
           return NextResponse.json({ error: "Cannot assign another doctor's personal clinic" }, { status: 403 });
         }
         if ((r as any).approval_status && (r as any).approval_status !== 'approved') {
@@ -181,7 +176,6 @@ export async function PUT(request: NextRequest) {
         }
       }
     } catch (e) {
-      console.warn('[centers][PUT][proxy] pre-validation failed, continuing', e);
     }
   }
   if (authHeader) {
@@ -200,7 +194,6 @@ export async function PUT(request: NextRequest) {
       const data = await response.json();
       if (response.ok) return NextResponse.json(data);
       // Log details to aid debugging in dev
-      console.error('Proxy PUT /doctor-dashboard/centers failed', response.status, data);
       // If unauthorized/forbidden and fallback enabled, continue to fallback; else forward error
       // Also in dev, allow fallback on 400/404 to keep UI flowing.
       if (!FALLBACK_ENABLED || ![401, 403, 400, 404].includes(response.status)) {
@@ -291,7 +284,6 @@ export async function PUT(request: NextRequest) {
       primary_center: primary_center_id || (center_ids.length === 1 ? center_ids[0] : null),
     });
   } catch (e: any) {
-    console.error('centers PUT fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to save center assignments' }, { status: 500 });
   }
 }
@@ -370,7 +362,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, center_id: newCenterId, approval_status: (inserted as any)?.approval_status || 'pending' });
   } catch (e: any) {
-    console.error('centers POST fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to create center' }, { status: 500 });
   }
 }

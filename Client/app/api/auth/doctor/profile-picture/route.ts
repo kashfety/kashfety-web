@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error fetching profile picture:', error);
       return NextResponse.json({ error: 'Failed to fetch profile picture' }, { status: 500 });
     }
 
@@ -58,7 +57,7 @@ export async function GET(request: NextRequest) {
       profile_picture_url: user?.profile_picture_url || null 
     });
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/profile-picture GET):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -130,7 +129,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
@@ -149,7 +147,6 @@ export async function POST(request: NextRequest) {
       .eq('role', 'doctor');
 
     if (updateError) {
-      console.error('Database update error:', updateError);
       // Try to delete the uploaded file if database update fails
       await supabase.storage.from('profile-pictures').remove([fileName]);
       return NextResponse.json({ error: 'Failed to update profile picture URL' }, { status: 500 });
@@ -161,7 +158,7 @@ export async function POST(request: NextRequest) {
       message: 'Profile picture uploaded successfully'
     });
   } catch (error) {
-    console.error('Proxy error (/api/auth/doctor/profile-picture POST):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

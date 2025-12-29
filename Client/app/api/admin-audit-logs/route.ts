@@ -38,15 +38,12 @@ interface AuditLog {
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  console.log('📋 Audit logs endpoint hit!');
   
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');
-    console.log('🔑 Auth header present:', !!authHeader);
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ No valid authorization header');
       return NextResponse.json(
         { error: 'Unauthorized - No token provided' },
         { status: 401 }
@@ -55,10 +52,8 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
-    console.log('🔓 Token decoded:', !!decoded, 'Role:', decoded?.role);
 
     if (!decoded) {
-      console.log('❌ Invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
@@ -67,7 +62,6 @@ export async function GET(request: NextRequest) {
 
     // Check if user is admin or super_admin
     if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
-      console.log('❌ User is not admin/super_admin, role:', decoded.role);
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -85,7 +79,6 @@ export async function GET(request: NextRequest) {
     const end_date = searchParams.get('end_date');
     const offset = (page - 1) * limit;
 
-    console.log('📝 Fetching audit logs - Page:', page, 'Limit:', limit, 'Filters:', { action, resource_type, user_id, start_date, end_date });
 
     let auditLogs: AuditLog[] = [];
 
@@ -371,7 +364,7 @@ export async function GET(request: NextRequest) {
     const paginatedLogs = filteredLogs.slice(offset, offset + limit);
     const totalPages = Math.ceil(totalLogs / limit);
 
-    console.log(`✅ Admin: Generated ${paginatedLogs.length} audit logs from system data (${totalLogs} total)`);
+    `);
 
     return NextResponse.json({
       success: true,
@@ -388,8 +381,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Audit logs endpoint error:', error);
-    console.error('❌ Error stack:', error.stack);
     return NextResponse.json(
       { 
         error: 'Failed to fetch audit logs',

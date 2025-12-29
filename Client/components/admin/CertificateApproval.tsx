@@ -112,7 +112,6 @@ export default function CertificateApproval() {
             let data;
             
             try {
-                console.log('📜 Trying admin-doctor-certificates fallback route');
                 response = await fetch(`/api/admin-doctor-certificates?${params}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -123,7 +122,6 @@ export default function CertificateApproval() {
                 if (response.ok) {
                     data = await response.json();
                     if (data.success && data.data?.certificates) {
-                        console.log('✅ Fallback route worked for certificates');
                         
                         // Transform the certificate data to match our CertificateSubmission interface
                         const transformedCertificates = data.data.certificates.map((cert: any) => ({
@@ -141,7 +139,6 @@ export default function CertificateApproval() {
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -173,7 +170,6 @@ export default function CertificateApproval() {
             setCertificates(transformedCertificates);
             setTotalPages(data.data.pagination.totalPages);
         } catch (error) {
-            console.error('Error fetching certificates:', error);
 
             // Show error instead of using mock data
             toast({
@@ -197,7 +193,6 @@ export default function CertificateApproval() {
             let data;
             
             try {
-                console.log('📜 Trying admin-certificate-details fallback route');
                 response = await fetch(`/api/admin-certificate-details?certificateId=${certificateId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -208,7 +203,6 @@ export default function CertificateApproval() {
                 if (response.ok) {
                     data = await response.json();
                     if (data.success && data.data) {
-                        console.log('✅ Fallback route worked for certificate details');
                         
                         // Transform the certificate data to match our CertificateSubmission interface
                         const transformedCertificate = {
@@ -226,7 +220,6 @@ export default function CertificateApproval() {
                     }
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
             }
 
             // Fallback to backend route
@@ -258,7 +251,6 @@ export default function CertificateApproval() {
             setSelectedCertificate(transformedCertificate);
             setShowCertificateDetails(true);
         } catch (error) {
-            console.error('Error fetching certificate details:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_load_certificate_details') || "Failed to load certificate details",
@@ -271,7 +263,6 @@ export default function CertificateApproval() {
         try {
             // Use static API route (Vercel-compatible, no dynamic [id] in URL)
             const endpoint = '/api/admin-review-certificate-action';
-            console.log('📝 [Certificate Approval] Calling:', endpoint, 'for certificate:', certificateId);
             
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -285,16 +276,13 @@ export default function CertificateApproval() {
                 })
             });
 
-            console.log('📡 [Certificate Approval] Response status:', response.status);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ [Certificate Approval] Error:', errorData);
                 throw new Error('Failed to review certificate');
             }
 
             const responseData = await response.json();
-            console.log('✅ [Certificate Approval] Success:', responseData);
 
             toast({
                 title: t('admin_success') || "Success",
@@ -305,7 +293,6 @@ export default function CertificateApproval() {
             setShowReviewDialog(false);
             setReviewingCertificate(null);
         } catch (error) {
-            console.error('Error reviewing certificate:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_review_certificate') || "Failed to review certificate",
@@ -319,7 +306,6 @@ export default function CertificateApproval() {
             // If we have a certificate ID, use the download proxy route to get a fresh signed URL
             if (certificateId) {
                 try {
-                    console.log('📥 Trying admin-download-certificate fallback route');
                     const response = await fetch(`/api/admin-download-certificate?certificateId=${certificateId}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -330,14 +316,12 @@ export default function CertificateApproval() {
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success && data.download_url) {
-                            console.log('✅ Fallback route worked, got fresh download URL');
                             // Use the fresh signed URL
                             fileUrl = data.download_url;
                             fileName = data.file_name || fileName;
                         }
                     }
                 } catch (fallbackError) {
-                    console.log('❌ Fallback download route failed, using original URL');
                 }
             }
 
@@ -354,7 +338,6 @@ export default function CertificateApproval() {
                 fullUrl = `${baseUrl}${cleanPath}`
             }
 
-            console.log('📥 Downloading certificate from:', fullUrl);
             const response = await fetch(fullUrl);
 
             if (!response.ok) {
@@ -376,7 +359,6 @@ export default function CertificateApproval() {
                 description: t('admin_certificate_downloaded') || "Certificate downloaded successfully",
             });
         } catch (error: any) {
-            console.error('Error downloading certificate:', error);
             toast({
                 title: t('admin_error') || "Error",
                 description: t('admin_failed_to_download_certificate') || "Failed to download certificate",

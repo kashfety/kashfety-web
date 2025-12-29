@@ -39,7 +39,6 @@ export async function GET(
     return NextResponse.json(data, { status: response.status });
 
   } catch (error) {
-    console.error('Frontend download API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

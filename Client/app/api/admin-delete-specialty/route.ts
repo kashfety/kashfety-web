@@ -8,7 +8,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 [Admin Delete Specialty] Starting specialty deletion');
     
     // Get authorization header
     const authHeader = request.headers.get('authorization');
@@ -25,7 +24,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('📝 [Admin Delete Specialty] Checking if specialty is in use');
 
     // Check if specialty is being used by any doctors
     const { data: doctors, error: doctorsError } = await supabase
@@ -36,7 +34,6 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (doctorsError) {
-      console.error('❌ [Admin Delete Specialty] Error checking doctors:', doctorsError);
     }
 
     if (doctors && doctors.length > 0) {
@@ -45,7 +42,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('📝 [Admin Delete Specialty] Deleting specialty');
 
     // Delete specialty
     const { error: deleteError } = await supabase
@@ -54,14 +50,12 @@ export async function POST(request: NextRequest) {
       .eq('id', specialtyId);
 
     if (deleteError) {
-      console.error('❌ [Admin Delete Specialty] Delete error:', deleteError);
       return NextResponse.json({ 
         error: 'Failed to delete specialty',
         details: deleteError.message 
       }, { status: 500 });
     }
 
-    console.log('✅ [Admin Delete Specialty] Specialty deleted successfully');
     
     return NextResponse.json({
       success: true,
@@ -69,7 +63,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Admin Delete Specialty] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

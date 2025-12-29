@@ -36,7 +36,6 @@ export default function Profile01({
 
   const handleLogout = async () => {
     try {
-      console.log("Logging out...")
       // Call the logout method from authService
       await authService.logout()
 
@@ -44,11 +43,9 @@ export default function Profile01({
       authService.clearAuthToken()
       localStorage.removeItem('auth_token')
 
-      console.log("Redirecting to login page...")
       // Redirect to login page
       router.push('/login')
     } catch (error) {
-      console.error("Logout error:", error)
       // Even if there's an error, try to redirect to login
       router.push('/login')
     }

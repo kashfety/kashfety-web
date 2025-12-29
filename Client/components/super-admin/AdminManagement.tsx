@@ -141,7 +141,6 @@ export default function AdminManagement() {
             let data;
 
             try {
-                console.log('👑 Trying super-admin-admins fallback route');
                 // Add cache-busting timestamp to ensure fresh data
                 const cacheBuster = `&_t=${Date.now()}`;
                 response = await fetch(`/api/super-admin-admins?${params}${cacheBuster}`, {
@@ -155,7 +154,6 @@ export default function AdminManagement() {
                 if (response.ok) {
                     data = await response.json();
                     if (data.success && data.data?.admins) {
-                        console.log('✅ Fallback route worked for super admin admins');
                         // Continue with transformation below
                     } else {
                         throw new Error('Invalid response structure');
@@ -164,7 +162,6 @@ export default function AdminManagement() {
                     throw new Error('Fallback route failed');
                 }
             } catch (fallbackError) {
-                console.log('❌ Fallback failed, trying backend route');
 
                 // Fallback to backend route
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -185,7 +182,6 @@ export default function AdminManagement() {
             }
 
             // Transform the data from the super-admin endpoint
-            console.log('📊 [AdminManagement] Raw data received:', data);
             const adminUsers = (data.data?.admins || data.admins || [])
                 .map((user: any) => {
                     // Determine the name - prioritize name field, then first_name + last_name, then email prefix
@@ -224,24 +220,19 @@ export default function AdminManagement() {
                     };
                     // Log the transformed user for debugging
                     if (user.email === 'm.ismail.official23@gmail.com') {
-                        console.log('🔍 [AdminManagement] Transformed user:', transformed);
-                        console.log('🔍 [AdminManagement] Original user data:', user);
                     }
 
                     // Log name resolution for debugging (only for specific user to avoid console spam)
                     if (user.email === 'm.ismail.official23@gmail.com' || !user.name) {
-                        console.log(`👤 [AdminManagement] User ${user.id || user.email}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
                     }
 
                     return transformed;
                 });
 
-            console.log('📊 [AdminManagement] Setting admins:', adminUsers.length, 'admins');
-            console.log('📊 [AdminManagement] Admin names:', adminUsers.map((a: AdminUser) => ({ id: a.id, name: a.name, email: a.email })));
+             => ({ id: a.id, name: a.name, email: a.email })));
             setAdmins(adminUsers);
             setTotalPages(data.data?.pagination?.totalPages || data.pagination?.totalPages || 1);
         } catch (error) {
-            console.error('Error fetching admins:', error);
 
             toast({
                 title: "Error",
@@ -262,7 +253,6 @@ export default function AdminManagement() {
 
     const createAdmin = async () => {
         try {
-            console.log('🚀 Creating admin with data:', formData);
 
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
@@ -276,8 +266,6 @@ export default function AdminManagement() {
                 password: formData.password
             };
 
-            console.log('📤 Sending request to:', `${baseUrl}/super-admin/admins`);
-            console.log('📤 Admin data:', { ...adminData, password: '[HIDDEN]' });
 
             const response = await fetch(`${baseUrl}/super-admin/admins`, {
                 method: 'POST',
@@ -288,16 +276,13 @@ export default function AdminManagement() {
                 body: JSON.stringify(adminData)
             });
 
-            console.log('📥 Response status:', response.status);
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('❌ Server error:', errorData);
                 throw new Error(errorData.message || 'Failed to create admin');
             }
 
             const result = await response.json();
-            console.log('✅ Admin created successfully:', result);
 
             toast({
                 title: "Success",
@@ -308,7 +293,6 @@ export default function AdminManagement() {
             resetFormData();
             fetchAdmins();
         } catch (error) {
-            console.error('❌ Error creating admin:', error);
             const errorMessage = error instanceof Error ? error.message : "Failed to create admin";
             toast({
                 title: "Error",
@@ -320,7 +304,6 @@ export default function AdminManagement() {
 
     const updateAdmin = async (adminId: string, formData: AdminFormData) => {
         try {
-            console.log('🔄 Updating admin with data:', formData);
 
             // Prepare data for backend - only send editable fields
             const updateData = {
@@ -335,7 +318,6 @@ export default function AdminManagement() {
             let result;
 
             try {
-                console.log('👑 Using super-admin-update-admin route with POST method');
                 response = await fetch('/api/super-admin-update-admin', {
                     method: 'POST',
                     headers: {
@@ -348,7 +330,6 @@ export default function AdminManagement() {
                 if (response.ok) {
                     result = await response.json();
                     if (result.success) {
-                        console.log('✅ Admin updated successfully');
                         // Continue with success handling below
                     } else {
                         throw new Error(result.error || 'Update failed');
@@ -357,14 +338,11 @@ export default function AdminManagement() {
                     throw new Error('Update request failed');
                 }
             } catch (fallbackError) {
-                console.log('❌ API route failed, trying backend route');
 
                 // Fallback to backend route
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
                 const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
 
-                console.log('📤 Sending update request to:', `${baseUrl}/super-admin/admins/${adminId}`);
-                console.log('📤 Update data:', updateData);
 
                 response = await fetch(`${baseUrl}/super-admin/admins/${adminId}`, {
                     method: 'PUT',
@@ -375,18 +353,15 @@ export default function AdminManagement() {
                     body: JSON.stringify(updateData)
                 });
 
-                console.log('📥 Response status:', response.status);
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('❌ Server error:', errorData);
                     throw new Error(errorData.message || 'Failed to update admin');
                 }
 
                 result = await response.json();
             }
 
-            console.log('✅ Admin updated successfully:', result);
 
             toast({
                 title: "Success",
@@ -401,11 +376,9 @@ export default function AdminManagement() {
             // Refresh the admin list with a small delay to ensure DB is updated
             // Don't use setCurrentPage as it triggers useEffect which could cause loops
             setTimeout(() => {
-                console.log('🔄 [AdminManagement] Refreshing admin list after update...');
                 fetchAdmins();
             }, 1000); // Increased delay to ensure DB consistency
         } catch (error) {
-            console.error('❌ Error updating admin:', error);
             const errorMessage = error instanceof Error ? error.message : "Failed to update admin";
             toast({
                 title: "Error",
@@ -417,10 +390,8 @@ export default function AdminManagement() {
 
     const deleteAdmin = async (adminId: string) => {
         try {
-            console.log('🗑️ [AdminManagement] Deleting admin:', adminId);
 
             // Use POST method with adminId in body (Vercel-compatible)
-            console.log('🗑️ Using super-admin-delete-admin route with POST method');
             const response = await fetch('/api/super-admin-delete-admin', {
                 method: 'POST',
                 headers: {
@@ -432,12 +403,10 @@ export default function AdminManagement() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Delete admin error:', response.status, errorData);
                 throw new Error(errorData.error || errorData.message || 'Failed to delete admin');
             }
 
             const data = await response.json();
-            console.log('✅ Admin deleted successfully:', data);
 
             toast({
                 title: "Success",
@@ -446,7 +415,6 @@ export default function AdminManagement() {
 
             fetchAdmins();
         } catch (error) {
-            console.error('❌ Error deleting admin:', error);
             const errorMessage = error instanceof Error ? error.message : "Failed to delete admin";
             toast({
                 title: "Error",
@@ -931,12 +899,9 @@ export default function AdminManagement() {
                             <Button
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    console.log('🔘 Create Admin button clicked');
-                                    console.log('📝 Current form data:', formData);
 
                                     // Validation
                                     if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
-                                        console.log('❌ Validation failed: Missing required fields');
                                         toast({
                                             title: "Validation Error",
                                             description: "Please fill in all required fields (name, email, phone)",
@@ -948,7 +913,6 @@ export default function AdminManagement() {
                                     if (!editingAdmin) {
                                         // For new admin creation, validate passwords
                                         if (!formData.password.trim() || !formData.confirmPassword.trim()) {
-                                            console.log('❌ Validation failed: Missing password fields');
                                             toast({
                                                 title: "Validation Error",
                                                 description: "Please provide a password and confirmation",
@@ -958,7 +922,6 @@ export default function AdminManagement() {
                                         }
 
                                         if (formData.password !== formData.confirmPassword) {
-                                            console.log('❌ Validation failed: Passwords do not match');
                                             toast({
                                                 title: "Validation Error",
                                                 description: "Passwords do not match",
@@ -968,7 +931,6 @@ export default function AdminManagement() {
                                         }
                                     }
 
-                                    console.log('✅ Validation passed, proceeding with creation');
 
                                     if (editingAdmin) {
                                         updateAdmin(editingAdmin.id, formData);

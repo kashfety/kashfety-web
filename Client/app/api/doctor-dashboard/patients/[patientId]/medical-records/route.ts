@@ -41,7 +41,6 @@ export async function GET(
     }
 
     const { patientId } = await params;
-    console.log('📋 Fetching medical records for patient:', patientId);
 
     // Verify doctor has appointments with this patient
     const { data: appointments, error: appointmentCheckError } = await supabase
@@ -73,14 +72,12 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Fetch medical records error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch medical records' },
         { status: 500 }
       );
     }
 
-    console.log(`✅ Found ${data?.length || 0} medical records for patient`);
 
     return NextResponse.json({
       success: true,
@@ -89,7 +86,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

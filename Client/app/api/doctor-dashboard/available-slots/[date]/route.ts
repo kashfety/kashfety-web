@@ -38,7 +38,6 @@ export async function GET(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Proxy error:', error);
     return NextResponse.json(
       { error: 'Failed to connect to backend server' },
       { status: 500 }

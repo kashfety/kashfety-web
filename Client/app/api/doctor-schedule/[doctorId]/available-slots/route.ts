@@ -139,7 +139,6 @@ export async function GET(
     const { data: schedules, error: scheduleError } = await baseQuery;
     
     if (scheduleError) {
-      console.error('❌ Error fetching doctor schedules:', scheduleError);
       return NextResponse.json({
         success: true,
         available_slots: [],
@@ -234,7 +233,7 @@ export async function GET(
       consultation_fee: schedule.consultation_fee || 0
     }, { status: 200 });
   } catch (error) {
-    console.error('Proxy error (available slots):', error);
+    :', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch available slots' }, { status: 500 });
   }
 }

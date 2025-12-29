@@ -7,7 +7,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('👤 [Admin User Details] Request received');
     
     // Require admin authentication
     const authResult = requireAdmin(request);
@@ -24,7 +23,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -38,7 +36,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError || !user) {
-      console.error('❌ Failed to fetch user:', userError);
       return NextResponse.json({ success: false, error: 'User not found', details: userError?.message }, { status: 404 });
     }
 
@@ -183,7 +180,6 @@ export async function GET(request: NextRequest) {
       totalReviews: reviews.length
     };
 
-    console.log('✅ [Admin User Details] Fetched user:', userId, 'with', appointments.length, 'appointments,', medicalRecords.length, 'records');
 
     return NextResponse.json({
       success: true,
@@ -197,7 +193,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin user details API error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

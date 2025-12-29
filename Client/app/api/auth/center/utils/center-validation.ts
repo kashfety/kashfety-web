@@ -28,7 +28,6 @@ export async function validateCenterExists(centerId: string): Promise<CenterVali
       .single();
 
     if (error) {
-      console.error('Center validation error:', error);
       
       // If center not found, provide helpful error message
       if (error.code === 'PGRST116') {
@@ -50,7 +49,6 @@ export async function validateCenterExists(centerId: string): Promise<CenterVali
     };
 
   } catch (error) {
-    console.error('Center validation exception:', error);
     return {
       exists: false,
       error: `Center validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -98,7 +96,6 @@ export async function ensureCenterExists(
       }
       
       // Center ID exists but center record is missing - this is a data integrity issue
-      console.warn(`User ${userId} has center_id ${user.center_id} but center record is missing`);
     }
 
     // Create center record if it doesn't exist
@@ -133,11 +130,9 @@ export async function ensureCenterExists(
       .eq('id', userId);
 
     if (updateError) {
-      console.warn(`Failed to update user ${userId} with center_id ${newCenter.id}:`, updateError);
       // Don't fail the operation, just log the warning
     }
 
-    console.log(`✅ Created center record ${newCenter.id} for user ${userId}`);
 
     return {
       exists: true,
@@ -145,7 +140,6 @@ export async function ensureCenterExists(
     };
 
   } catch (error) {
-    console.error('Ensure center exists exception:', error);
     return {
       exists: false,
       error: `Failed to ensure center exists: ${error instanceof Error ? error.message : 'Unknown error'}`

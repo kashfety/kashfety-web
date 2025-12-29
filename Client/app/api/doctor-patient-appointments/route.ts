@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
     const patientId = searchParams.get('patientId');
     const doctorId = searchParams.get('doctorId');
 
-    console.log('📅 [Doctor - Patient Appointments] Fetching:', { patientId, doctorId });
 
     if (!patientId) {
       return NextResponse.json({ 
@@ -41,7 +40,6 @@ export async function GET(request: NextRequest) {
       .order('appointment_time', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching appointments:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch appointments',
@@ -49,14 +47,12 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Doctor - Patient Appointments] Found', appointments?.length || 0, 'appointments');
     return NextResponse.json({
       success: true,
       appointments: appointments || []
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor patient appointments error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

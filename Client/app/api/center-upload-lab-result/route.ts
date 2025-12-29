@@ -6,14 +6,12 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📤 [Center Upload Lab Result] Request received');
     
     const formData = await request.formData();
     const booking_id = formData.get('booking_id') as string;
     const result_notes = formData.get('result_notes') as string;
     const file = formData.get('labResult') as File;
 
-    console.log('📤 [Center Upload Lab Result] Data:', { booking_id, result_notes, hasFile: !!file });
 
     if (!booking_id) {
       return NextResponse.json({ success: false, error: 'Booking ID is required' }, { status: 400 });
@@ -33,7 +31,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (bookingError || !booking) {
-      console.error('❌ Booking not found:', bookingError);
       return NextResponse.json({ success: false, error: 'Booking not found' }, { status: 404 });
     }
 
@@ -41,7 +38,6 @@ export async function POST(request: NextRequest) {
     const fileName = `${booking_id}_${Date.now()}_${file.name}`;
     const filePath = `lab-results/${booking.center_id}/${fileName}`;
     
-    console.log('📤 [Center Upload Lab Result] Uploading file to:', filePath);
 
     const fileBuffer = await file.arrayBuffer();
     const { data: uploadData, error: uploadError } = await supabase
@@ -53,7 +49,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('❌ File upload error:', uploadError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to upload file',
@@ -67,7 +62,6 @@ export async function POST(request: NextRequest) {
       .from('medical-documents')
       .getPublicUrl(filePath);
 
-    console.log('📤 [Center Upload Lab Result] File uploaded successfully:', urlData.publicUrl);
 
     // Update booking with result
     const { data: updatedBooking, error: updateError } = await supabase
@@ -85,13 +79,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Failed to update booking:', updateError);
       
       // Try to clean up uploaded file
       try {
         await supabase.storage.from('medical-documents').remove([filePath]);
       } catch (cleanupError) {
-        console.error('⚠️ Failed to cleanup uploaded file:', cleanupError);
       }
       
       return NextResponse.json({ 
@@ -101,7 +93,6 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Center Upload Lab Result] Lab result uploaded successfully');
     return NextResponse.json({
       success: true,
       message: 'Lab result uploaded successfully',
@@ -110,7 +101,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Center upload lab result error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

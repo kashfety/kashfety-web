@@ -145,7 +145,6 @@ export default async function handler(req, res) {
       .single();
 
     if (createError) {
-      console.error('Error creating appointment:', createError);
       return res.status(500).json({
         success: false,
         error: 'Failed to create appointment'
@@ -169,7 +168,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error booking appointment:', error);
     return res.status(500).json({
       success: false,
       error: 'Internal server error'

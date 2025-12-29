@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📥 [Admin Download Certificate] Request received');
     const { searchParams } = new URL(request.url);
     const certificateId = searchParams.get('certificateId');
 
@@ -14,10 +13,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Certificate ID is required' }, { status: 400 });
     }
 
-    console.log('📥 [Admin Download Certificate] Fetching certificate:', certificateId);
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -31,7 +28,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (certError || !certificate) {
-      console.error('❌ Failed to fetch certificate:', certError);
       return NextResponse.json({ success: false, error: 'Certificate not found', details: certError?.message }, { status: 404 });
     }
 
@@ -60,7 +56,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!filePath) {
-      console.error('❌ No file path found for certificate:', certificate);
       return NextResponse.json({ success: false, error: 'Certificate file path not found' }, { status: 404 });
     }
 
@@ -69,7 +64,6 @@ export async function GET(request: NextRequest) {
       filePath = filePath.replace('medical-documents/', '');
     }
 
-    console.log('📥 [Admin Download Certificate] File path:', filePath);
 
     // Generate a fresh signed URL (valid for 1 hour)
     const { data: urlData, error: urlError } = await supabase.storage
@@ -77,7 +71,6 @@ export async function GET(request: NextRequest) {
       .createSignedUrl(filePath, 3600); // 1 hour expiry
 
     if (urlError) {
-      console.error('❌ Failed to generate signed URL:', urlError);
       
       // Try to get public URL as fallback
       const { data: publicUrlData } = supabase.storage
@@ -85,7 +78,6 @@ export async function GET(request: NextRequest) {
         .getPublicUrl(filePath);
       
       if (publicUrlData?.publicUrl) {
-        console.log('📥 [Admin Download Certificate] Using public URL as fallback');
         return NextResponse.json({
           success: true,
           download_url: publicUrlData.publicUrl,
@@ -100,7 +92,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Admin Download Certificate] Generated signed URL for certificate:', certificateId);
 
     return NextResponse.json({
       success: true,
@@ -110,7 +101,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin download certificate API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

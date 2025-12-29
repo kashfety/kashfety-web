@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { requestId, action } = body;
 
-    console.log('📥 [Center Request Action] Request body:', { requestId, action });
 
     // Validate required fields
     if (!requestId || !action) {
@@ -36,7 +35,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (fetchError || !center) {
-      console.error('❌ [Center Request Action] Fetch error:', fetchError);
       return NextResponse.json(
         { error: 'Center not found', success: false },
         { status: 404 }
@@ -55,11 +53,9 @@ export async function POST(request: NextRequest) {
       .eq('id', requestId);
 
     if (updateError) {
-      console.error('❌ [Center Request Action] Update error:', updateError);
       throw new Error(updateError.message || 'Failed to update center');
     }
 
-    console.log(`✅ [Center Request Action] Request ${action}d successfully:`, requestId);
 
     return NextResponse.json({
       message: `Center request ${action}d successfully`,
@@ -67,7 +63,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Center Request Action] Error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

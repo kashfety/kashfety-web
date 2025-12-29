@@ -90,7 +90,6 @@ export async function GET(request: NextRequest) {
       appointments: upcomingList,
     });
   } catch (e: any) {
-    console.error('today-stats fallback error:', e);
     return NextResponse.json({ error: e.message || 'Failed to compute stats' }, { status: 500 });
   }
 }

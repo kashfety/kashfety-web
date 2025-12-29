@@ -31,7 +31,6 @@ export async function GET(
       .eq('is_available', true);
 
     if (error) {
-      console.error('Database error:', error);
       return NextResponse.json(
         { success: false, message: 'Failed to fetch doctor schedule', error: error.message },
         { status: 500 }
@@ -61,7 +60,6 @@ export async function GET(
       message: workingDays.length > 0 ? 'Schedule loaded successfully' : 'No working days configured for this doctor'
     });
   } catch (error: any) {
-    console.error('API route error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal server error', error: error.message },
       { status: 500 }

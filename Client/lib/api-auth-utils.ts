@@ -39,7 +39,6 @@ export function verifyToken(token: string): AuthenticatedUser | null {
       const decoded = jwt.verify(token, JWT_SECRET) as AuthenticatedUser;
       return decoded;
     } catch (fallbackError) {
-      console.error('Token verification failed:', error);
       return null;
     }
   }

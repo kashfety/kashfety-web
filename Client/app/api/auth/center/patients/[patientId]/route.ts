@@ -17,27 +17,22 @@ export async function GET(
   const resolvedParams = await (params instanceof Promise ? params : Promise.resolve(params));
   const { patientId } = resolvedParams;
 
-  console.log('🔍 Patient API Debug:', { patientId, hasAuth: !!authHeader });
 
   if (!patientId) {
-    console.log('❌ Patient ID is missing');
     return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
   }
 
   // Try backend first if JWT provided
   if (authHeader) {
     try {
-      console.log('🔄 Attempting backend request for patient:', patientId);
       const response = await fetch(`${BACKEND_URL}/api/center-dashboard/patients/${patientId}`, {
         method: 'GET',
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
       });
       const data = await response.json();
-      console.log('📊 Backend patient response:', response.status, data);
       if (response.ok) return NextResponse.json(data);
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -60,7 +55,6 @@ export async function GET(
       .single();
 
     if (patientError) {
-      console.error('Failed to fetch patient:', patientError);
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
 
@@ -70,7 +64,6 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error('Center patient details fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch patient details' }, { status: 500 });
   }
 }

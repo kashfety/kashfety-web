@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
     const doctorId = searchParams.get('doctor_id') || searchParams.get('doctorId');
     const visitType = searchParams.get('visit_type'); // 'clinic' or 'home'
 
-    console.log('🏥 [Doctor Centers By ID] Request:', { doctorId, visitType });
 
     if (!doctorId) {
       return NextResponse.json({
@@ -52,7 +51,6 @@ export async function GET(request: NextRequest) {
       .eq('doctor_id', doctorId);
 
     if (error) {
-      console.error('❌ [Doctor Centers By ID] Error fetching doctor centers:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch doctor centers',
@@ -61,7 +59,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!doctorCenters || doctorCenters.length === 0) {
-      console.log('⚠️ [Doctor Centers By ID] No centers found for doctor:', doctorId);
       return NextResponse.json({
         success: true,
         centers: [],
@@ -76,7 +73,6 @@ export async function GET(request: NextRequest) {
     filteredCenters = typedDoctorCenters.filter(dc => {
       // Only include approved centers
       if (dc.centers?.approval_status !== 'approved') {
-        console.log('🚫 [Doctor Centers By ID] Filtering out unapproved center:', dc.centers?.name, 'status:', dc.centers?.approval_status);
         return false;
       }
       
@@ -92,7 +88,6 @@ export async function GET(request: NextRequest) {
       return true;
     });
 
-    console.log('✅ [Doctor Centers By ID] Filtered centers:', filteredCenters.length, 'for visit type:', visitType);
 
     // Get doctor's schedules for each center
     const centerIds = filteredCenters.map(dc => dc.center_id);
@@ -107,7 +102,6 @@ export async function GET(request: NextRequest) {
         .eq('is_available', true);
       
       if (scheduleError) {
-        console.error('⚠️ [Doctor Centers By ID] Error fetching schedules:', scheduleError);
       } else {
         schedules = scheduleData || [];
       }
@@ -141,7 +135,6 @@ export async function GET(request: NextRequest) {
         : (dc.centers?.services ? JSON.parse(dc.centers.services as string) : [])
     }));
 
-    console.log('✅ [Doctor Centers By ID] Returning', enhancedCenters.length, 'centers');
 
     return NextResponse.json({
       success: true,
@@ -151,7 +144,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Doctor Centers By ID] Error:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

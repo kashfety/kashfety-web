@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
       .order('submitted_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching certificates:', error);
       return NextResponse.json({ error: 'Failed to fetch certificates' }, { status: 500 });
     }
 
@@ -94,7 +93,6 @@ export async function GET(request: NextRequest) {
             .createSignedUrl(filePath, 3600); // 3600 seconds = 1 hour
 
           if (signError) {
-            console.error('Error signing URL for certificate:', cert.id, signError);
             return cert;
           }
 
@@ -103,7 +101,6 @@ export async function GET(request: NextRequest) {
             certificate_file_url: signedUrlData?.signedUrl || cert.certificate_file_url
           };
         } catch (err) {
-          console.error('Error generating signed URL for certificate:', cert.id, err);
           return cert; // Return original if signing fails
         }
       })
@@ -115,7 +112,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Proxy error (/api/auth/doctor/certificates GET):', error);
+    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

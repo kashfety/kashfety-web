@@ -150,7 +150,7 @@ export const dbHelpers = {
         new_values: newValues
       }]);
 
-    if (error) console.error('Failed to log activity:', error);
+    if (error) 
   }
 };
 

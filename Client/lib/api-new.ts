@@ -24,7 +24,6 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error('Error getting auth token:', error);
       }
     }
     return config;
@@ -48,10 +47,8 @@ apiClient.interceptors.response.use(
             // Clear auth data and redirect to login
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
-            console.error('Authentication failed. Redirecting to login.');
             window.location.href = '/login';
           } catch (signOutError) {
-            console.error('Error clearing auth data:', signOutError);
           }
         }
       }
@@ -108,7 +105,6 @@ export const authService = {
       const response = await api.post('/api/auth/login', credentials);
       return response;
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     }
   },
@@ -119,7 +115,6 @@ export const authService = {
       const response = await api.post('/api/auth/register', userData);
       return response;
     } catch (error) {
-      console.error('Registration failed:', error);
       throw error;
     }
   },
@@ -130,7 +125,6 @@ export const authService = {
       const response = await api.get('/api/auth/verify');
       return response;
     } catch (error) {
-      console.error('Token verification failed:', error);
       throw error;
     }
   },
@@ -141,7 +135,6 @@ export const authService = {
       const response = await api.get('/api/auth/profile');
       return response;
     } catch (error) {
-      console.error('Get profile failed:', error);
       throw error;
     }
   },
@@ -155,7 +148,6 @@ export const appointmentService = {
       const response = await api.post('/api/appointments/book', appointmentData);
       return response;
     } catch (error) {
-      console.error('Appointment booking failed:', error);
       throw error;
     }
   },
@@ -166,7 +158,6 @@ export const appointmentService = {
       const response = await api.get('/api/appointments');
       return response;
     } catch (error) {
-      console.error('Get appointments failed:', error);
       throw error;
     }
   },
@@ -177,7 +168,6 @@ export const appointmentService = {
       const response = await api.get(`/api/appointments/${id}`);
       return response;
     } catch (error) {
-      console.error('Get appointment failed:', error);
       throw error;
     }
   },
@@ -188,7 +178,6 @@ export const appointmentService = {
       const response = await api.put(`/api/appointments/${id}`, updates);
       return response;
     } catch (error) {
-      console.error('Update appointment failed:', error);
       throw error;
     }
   },
@@ -199,7 +188,6 @@ export const appointmentService = {
       const response = await api.delete(`/api/appointments/${id}`);
       return response;
     } catch (error) {
-      console.error('Cancel appointment failed:', error);
       throw error;
     }
   },
@@ -213,7 +201,6 @@ export const appointmentService = {
       });
       return response;
     } catch (error) {
-      console.error('Reschedule appointment failed:', error);
       throw error;
     }
   },
@@ -227,7 +214,6 @@ export const doctorService = {
       const response = await api.get('/api/doctors');
       return response;
     } catch (error) {
-      console.error('Get doctors failed:', error);
       throw error;
     }
   },
@@ -238,7 +224,6 @@ export const doctorService = {
       const response = await api.get(`/api/doctors/${id}`);
       return response;
     } catch (error) {
-      console.error('Get doctor failed:', error);
       throw error;
     }
   },
@@ -249,7 +234,6 @@ export const doctorService = {
       const response = await api.get(`/api/doctors/${doctorId}/availability?date=${date}`);
       return response;
     } catch (error) {
-      console.error('Get doctor availability failed:', error);
       throw error;
     }
   },
@@ -263,7 +247,6 @@ export const patientService = {
       const response = await api.get('/api/patients/profile');
       return response;
     } catch (error) {
-      console.error('Get patient profile failed:', error);
       throw error;
     }
   },
@@ -274,7 +257,6 @@ export const patientService = {
       const response = await api.put('/api/patients/profile', updates);
       return response;
     } catch (error) {
-      console.error('Update patient profile failed:', error);
       throw error;
     }
   },

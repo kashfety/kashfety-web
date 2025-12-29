@@ -20,7 +20,6 @@ const logAdminActivity = async (adminId, actionType, targetType, targetId = null
                 session_id: req.sessionId || null
             });
     } catch (error) {
-        console.error('Failed to log admin activity:', error);
         // Don't fail the request if logging fails
     }
 };
@@ -28,12 +27,10 @@ const logAdminActivity = async (adminId, actionType, targetType, targetId = null
 // Enhanced auth middleware that works with unified users table and JWT tokens
 export const verifyTokenEnhanced = async (req, res, next) => {
     try {
-        console.log('🔐 Super Admin Auth - Starting verification');
         
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('❌ No valid authorization header');
             return res.status(401).json({
                 success: false,
                 message: "No token provided",
@@ -41,7 +38,6 @@ export const verifyTokenEnhanced = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        console.log('📝 Token extracted from header');
 
         // Import JWT verification from auth middleware
         const { verifyToken } = await import('./auth.js');
@@ -50,9 +46,7 @@ export const verifyTokenEnhanced = async (req, res, next) => {
         let decodedToken;
         try {
             decodedToken = verifyToken(token);
-            console.log('✅ JWT token validation successful for user:', decodedToken.phone);
         } catch (jwtError) {
-            console.log('❌ JWT token validation failed:', jwtError.message);
             return res.status(401).json({
                 success: false,
                 message: "Invalid or expired token",
@@ -67,18 +61,15 @@ export const verifyTokenEnhanced = async (req, res, next) => {
             .single();
 
         if (userError || !userData) {
-            console.log('❌ Database user lookup failed:', userError?.message);
             return res.status(403).json({
                 success: false,
                 message: "User not found in database",
             });
         }
 
-        console.log('✅ Database user found:', userData.role, userData.first_name, userData.last_name);
 
         // Check if account is approved (using approval_status instead of is_active)
         if (userData.approval_status !== 'approved') {
-            console.log('❌ Account is not approved - status:', userData.approval_status);
             return res.status(403).json({
                 success: false,
                 message: "Account is not approved",
@@ -90,14 +81,12 @@ export const verifyTokenEnhanced = async (req, res, next) => {
 
         // Check for super admin or admin role
         if (!['super_admin', 'admin'].includes(userData.role)) {
-            console.log('❌ Insufficient permissions - role:', userData.role);
             return res.status(403).json({
                 success: false,
                 message: "Insufficient permissions for admin operations",
             });
         }
 
-        console.log('✅ All verification checks passed');
 
         // Update last login for admin and super admin users (if columns exist)
         try {
@@ -108,7 +97,6 @@ export const verifyTokenEnhanced = async (req, res, next) => {
                 })
                 .eq('id', userData.id);
         } catch (updateError) {
-            console.log('Note: Could not update last login timestamp:', updateError.message);
             // Don't fail the request if update fails
         }
 
@@ -129,7 +117,6 @@ export const verifyTokenEnhanced = async (req, res, next) => {
 
         next();
     } catch (error) {
-        console.error('❌ Super Admin Auth Middleware error:', error);
         return res.status(500).json({
             success: false,
             message: "Authentication error",

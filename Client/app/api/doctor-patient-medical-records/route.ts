@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
 
-    console.log('📋 [Doctor - Patient Medical Records] Fetching for patient:', patientId);
 
     if (!patientId) {
       return NextResponse.json({ 
@@ -54,7 +53,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching medical records:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch medical records',
@@ -62,14 +60,12 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Doctor - Patient Medical Records] Found', records?.length || 0, 'records');
     return NextResponse.json({
       success: true,
       medical_records: records || []
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor patient medical records error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

@@ -22,15 +22,12 @@ export const dynamic = 'force-dynamic';
 
 // GET - Get current admin's profile
 export async function GET(request: NextRequest) {
-  console.log('👤 Admin profile endpoint hit!');
   
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');
-    console.log('🔑 Auth header present:', !!authHeader);
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ No valid authorization header');
       return NextResponse.json(
         { error: 'Unauthorized - No token provided' },
         { status: 401 }
@@ -39,10 +36,8 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
-    console.log('🔓 Token decoded:', decoded);
 
     if (!decoded) {
-      console.log('❌ Invalid token');
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
         { status: 401 }
@@ -53,18 +48,16 @@ export async function GET(request: NextRequest) {
     const userId = decoded.userId || decoded.id || decoded.sub;
     
     if (!userId) {
-      console.log('❌ No user ID in token. Token structure:', Object.keys(decoded));
+      );
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token structure' },
         { status: 401 }
       );
     }
     
-    console.log('👤 User ID from token:', userId);
 
     // Check if user is admin or super_admin
     if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
-      console.log('❌ User is not admin/super_admin, role:', decoded.role);
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -79,19 +72,16 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (userError) {
-      console.error('❌ Error fetching admin profile:', userError);
       throw userError;
     }
 
     if (!user) {
-      console.log('❌ Admin profile not found');
       return NextResponse.json(
         { error: 'Profile not found' },
         { status: 404 }
       );
     }
 
-    console.log('✅ Admin profile fetched successfully:', user.email);
 
     return NextResponse.json({
       success: true,
@@ -111,8 +101,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin profile endpoint error:', error);
-    console.error('❌ Error stack:', error.stack);
     return NextResponse.json(
       { 
         error: 'Failed to fetch profile',
@@ -125,7 +113,6 @@ export async function GET(request: NextRequest) {
 
 // PUT - Update current admin's profile
 export async function PUT(request: NextRequest) {
-  console.log('✏️ Admin profile update endpoint hit!');
   
   try {
     // Get authorization token
@@ -169,7 +156,6 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { name, first_name, last_name, email, phone, password, currentPassword } = body;
 
-    console.log('📝 Update data:', { name, first_name, last_name, email, phone, hasPassword: !!password });
 
     // Prepare update data
     const updateData: any = {};
@@ -197,11 +183,9 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Error updating admin profile:', updateError);
       throw updateError;
     }
 
-    console.log('✅ Admin profile updated successfully');
 
     return NextResponse.json({
       success: true,
@@ -219,7 +203,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Admin profile update error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to update profile',

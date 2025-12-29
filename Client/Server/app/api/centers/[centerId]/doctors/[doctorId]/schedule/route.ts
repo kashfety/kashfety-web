@@ -26,7 +26,6 @@ export async function GET(
       .order('day_of_week');
 
     if (error) {
-      console.error('Error fetching doctor schedule:', error);
       return NextResponse.json(
         { success: false, error: 'Failed to fetch schedule' },
         { status: 500 }
@@ -43,7 +42,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error in center-specific schedule API:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -110,7 +108,6 @@ export async function POST(
         .insert(scheduleInserts);
 
       if (insertError) {
-        console.error('Error inserting schedule:', insertError);
         return NextResponse.json(
           { success: false, error: 'Failed to save schedule' },
           { status: 500 }
@@ -129,7 +126,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('Error saving center-specific schedule:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -185,7 +181,6 @@ export async function PUT(
         });
 
       if (error) {
-        console.error('Error updating schedule:', error);
         return NextResponse.json(
           { success: false, error: 'Failed to update schedule' },
           { status: 500 }
@@ -207,7 +202,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Error updating center-specific schedule:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

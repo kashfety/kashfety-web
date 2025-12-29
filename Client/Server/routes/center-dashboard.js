@@ -64,7 +64,6 @@ router.get('/lab-tests/today', authenticateToken, async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching lab bookings:', error);
       throw error;
     }
 
@@ -95,7 +94,6 @@ router.get('/lab-tests/today', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get center lab tests error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -116,7 +114,6 @@ router.get('/profile', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get center profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -142,7 +139,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Error updating center profile:', error);
       throw error;
     }
 
@@ -152,7 +148,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update center profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -179,7 +174,6 @@ router.get('/patients/:patientId', authenticateToken, async (req, res) => {
       .single();
 
     if (patientError) {
-      console.error('Failed to fetch patient:', patientError);
       return res.status(404).json({ error: 'Patient not found' });
     }
 
@@ -189,7 +183,6 @@ router.get('/patients/:patientId', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get patient details error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -219,7 +212,6 @@ router.get('/patients', authenticateToken, async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching center patients:', error);
       throw error;
     }
 
@@ -245,7 +237,6 @@ router.get('/patients', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get patients list error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -270,7 +261,6 @@ router.get('/analytics', authenticateToken, async (req, res) => {
       .eq('center_id', centerId);
 
     if (error) {
-      console.error('Error fetching center analytics:', error);
       throw error;
     }
 
@@ -359,7 +349,6 @@ router.get('/analytics', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get analytics error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -382,7 +371,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Error updating center profile:', error);
       throw error;
     }
 
@@ -392,7 +380,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update center profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -446,7 +433,6 @@ router.post('/upload-lab-result', authenticateToken, labResultUpload.single('lab
     }
 
     // Upload file to Supabase Storage
-    console.log('📤 Uploading lab result to Supabase Storage...');
     const uploadResult = await storageService.uploadLabResult(
       booking_id,
       centerId,
@@ -474,12 +460,10 @@ router.post('/upload-lab-result', authenticateToken, labResultUpload.single('lab
       try {
         await storageService.deleteFile('medical-documents', uploadResult.path);
       } catch (cleanupError) {
-        console.error('Failed to cleanup uploaded file:', cleanupError);
       }
       throw updateError;
     }
 
-    console.log('✅ Lab result uploaded successfully for booking:', booking_id);
 
     res.status(201).json({
       success: true,
@@ -493,7 +477,6 @@ router.post('/upload-lab-result', authenticateToken, labResultUpload.single('lab
     });
 
   } catch (error) {
-    console.error('Lab result upload error:', error);
     
     res.status(500).json({
       error: error.message || 'Failed to upload lab result',
@@ -549,7 +532,6 @@ router.get('/download-lab-result/:booking_id', authenticateToken, async (req, re
     });
 
   } catch (error) {
-    console.error('Download lab result error:', error);
     res.status(500).json({ error: 'Failed to generate download link' });
   }
 });
@@ -557,7 +539,6 @@ router.get('/download-lab-result/:booking_id', authenticateToken, async (req, re
 // Verify authentication endpoint - /api/center-dashboard/verify-auth
 router.get('/verify-auth', authenticateToken, async (req, res) => {
   try {
-    console.log('🔐 Backend verify-auth called for:', req.user?.id);
     
     if (req.user.role !== 'center') {
       return res.status(403).json({ error: 'Only centers can access this endpoint' });
@@ -575,7 +556,6 @@ router.get('/verify-auth', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Verify auth error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

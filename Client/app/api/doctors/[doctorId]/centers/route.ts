@@ -40,7 +40,6 @@ export async function GET(
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    console.log('🔍 [Doctor Centers] Fetching centers for doctor:', doctorId, 'visitType:', visitType);
 
     // Get centers associated with this doctor
     const { data: doctorCenters, error } = await supabase
@@ -68,7 +67,6 @@ export async function GET(
     });
 
     if (error) {
-      console.error('Error fetching doctor centers:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to fetch doctor centers'
@@ -90,7 +88,6 @@ export async function GET(
     filteredCenters = typedDoctorCenters.filter(dc => {
       // Only include approved centers
       if (dc.centers?.approval_status !== 'approved') {
-        console.log('🚫 [Doctor Centers] Filtering out unapproved center:', dc.centers?.name, 'status:', dc.centers?.approval_status);
         return false;
       }
       
@@ -106,7 +103,6 @@ export async function GET(
       return true;
     });
 
-    console.log('✅ [Doctor Centers] Filtered centers:', filteredCenters.length, 'for visit type:', visitType);
 
     // Get doctor's schedules for each center
     const centerIds = filteredCenters.map(dc => dc.center_id);
@@ -158,7 +154,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching doctor centers:', error);
     return NextResponse.json({
       success: false,
       error: 'Internal server error'

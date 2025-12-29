@@ -28,11 +28,9 @@ export async function DELETE(
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting lab test type:', error);
       throw new Error(error.message || 'Failed to delete lab test type');
     }
 
-    console.log('✅ [Lab Test Types] Deleted successfully:', id);
 
     return NextResponse.json({
       message: 'Lab test type deleted successfully',
@@ -40,7 +38,6 @@ export async function DELETE(
     });
 
   } catch (error: any) {
-    console.error('❌ [Lab Test Types] DELETE error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

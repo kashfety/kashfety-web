@@ -64,12 +64,9 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('🔘 Menu button clicked, onMenuToggle exists:', !!onMenuToggle);
               if (onMenuToggle) {
-                console.log('🔘 Calling onMenuToggle');
                 onMenuToggle();
               } else {
-                console.error('🔘 onMenuToggle is undefined!');
               }
             }}
             className="text-foreground/80 transition-all duration-300 p-1.5 sm:p-2 z-[60] relative cursor-pointer hover:scale-110 hover:translate-y-[-2px] hover:shadow-lg"

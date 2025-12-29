@@ -142,7 +142,6 @@ export default function MedicalRecordsForm({
         medical_records: records
       };
 
-      console.log('Submitting medical data:', medicalData);
 
       // Use the medical records API endpoint
       const response = await fetch('/api/medical-records', {
@@ -169,7 +168,6 @@ export default function MedicalRecordsForm({
       );
 
     } catch (error: any) {
-      console.error('Error saving medical records:', error);
       showError(
         t('error') || 'Error',
         t('mr_save_error') || "Failed to save medical records. Please try again."

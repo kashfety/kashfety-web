@@ -61,7 +61,6 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error('Database update error:', error);
       return NextResponse.json({ error: 'Failed to update booking record' }, { status: 500 });
     }
 
@@ -73,7 +72,6 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error('Upload result error:', error);
     return NextResponse.json({ error: 'Failed to upload result' }, { status: 500 });
   }
 }

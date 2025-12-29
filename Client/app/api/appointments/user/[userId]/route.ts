@@ -12,7 +12,6 @@ export async function GET(
   context: { params: Promise<{ userId: string }> }
 ) {
   try {
-    console.log('📋 [Appointments API - Alternative Route] Request received');
     
     // Require authentication
     const authResult = requireAuth(request);
@@ -36,10 +35,8 @@ export async function GET(
       }
     }
 
-    console.log('📋 [Appointments API] User ID:', userId, 'Role:', role);
 
     if (!userId) {
-      console.error('📋 [Appointments API] Missing user ID');
       return NextResponse.json({ success: false, message: 'User ID is required' }, { status: 400 });
     }
 
@@ -56,25 +53,20 @@ export async function GET(
     // Filter by role - super_admin sees all, others see their own
     if (role === 'super_admin' || role === 'admin') {
       // Super admin and admin can see all appointments - no filter
-      console.log('📋 [Appointments API] Admin/Super Admin - fetching all appointments');
     } else if (role === 'doctor') {
       appointmentsQuery = appointmentsQuery.eq('doctor_id', userId);
-      console.log('📋 [Appointments API] Doctor - fetching appointments for doctor:', userId);
     } else {
       // Default to patient
       appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
-      console.log('📋 [Appointments API] Patient - fetching appointments for patient:', userId);
     }
 
     const { data: appointments, error } = await appointmentsQuery
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('📋 [Appointments API] Error:', error);
       return NextResponse.json({ success: false, message: 'Failed to fetch appointments', error: error.message }, { status: 500 });
     }
 
-    console.log(`📋 [Appointments API] Found ${appointments?.length || 0} appointments`);
 
     // Debug and enrich missing center info
     const enriched = [] as any[];
@@ -97,7 +89,6 @@ export async function GET(
 
     return NextResponse.json({ success: true, appointments: enriched });
   } catch (err: any) {
-    console.error('📋 [Appointments API] Error:', err);
     return NextResponse.json({ success: false, message: 'Internal server error', error: err.message }, { status: 500 });
   }
 }

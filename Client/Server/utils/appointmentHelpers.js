@@ -13,14 +13,12 @@ import { supabaseAdmin } from "./supabase.js";
  */
 export async function markPastAppointmentsAsAbsent(doctorId = null, patientId = null) {
   try {
-    console.log('🔍 [Mark Absent] Checking for past appointments...');
     
     // Get current date and time in ISO format
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
     const currentTime = now.toTimeString().split(' ')[0].slice(0, 5); // HH:MM
     
-    console.log('🕐 [Mark Absent] Current date/time:', { currentDate, currentTime });
 
     // Build query to find past appointments that are still scheduled or confirmed
     let query = supabaseAdmin
@@ -41,16 +39,13 @@ export async function markPastAppointmentsAsAbsent(doctorId = null, patientId = 
     const { data: appointments, error: fetchError } = await query;
 
     if (fetchError) {
-      console.error('❌ [Mark Absent] Error fetching appointments:', fetchError);
       return { success: false, error: fetchError.message, updatedCount: 0 };
     }
 
     if (!appointments || appointments.length === 0) {
-      console.log('✅ [Mark Absent] No scheduled/confirmed appointments found');
       return { success: true, updatedCount: 0 };
     }
 
-    console.log(`📋 [Mark Absent] Found ${appointments.length} scheduled/confirmed appointments`);
 
     // Filter appointments to find ones that have passed
     const pastAppointments = appointments.filter(apt => {
@@ -69,17 +64,14 @@ export async function markPastAppointmentsAsAbsent(doctorId = null, patientId = 
         
         return isPast;
       } catch (e) {
-        console.error('❌ [Mark Absent] Error parsing appointment date/time:', e);
         return false;
       }
     });
 
     if (pastAppointments.length === 0) {
-      console.log('✅ [Mark Absent] No past appointments to mark as absent');
       return { success: true, updatedCount: 0 };
     }
 
-    console.log(`🔄 [Mark Absent] Marking ${pastAppointments.length} appointments as absent...`);
 
     // Extract IDs of appointments to update
     const appointmentIds = pastAppointments.map(apt => apt.id);
@@ -96,12 +88,10 @@ export async function markPastAppointmentsAsAbsent(doctorId = null, patientId = 
       .select('id');
 
     if (updateError) {
-      console.error('❌ [Mark Absent] Error updating appointments:', updateError);
       return { success: false, error: updateError.message, updatedCount: 0 };
     }
 
     const updatedCount = updatedAppointments?.length || 0;
-    console.log(`✅ [Mark Absent] Successfully marked ${updatedCount} appointments as absent`);
 
     return { 
       success: true, 
@@ -110,7 +100,6 @@ export async function markPastAppointmentsAsAbsent(doctorId = null, patientId = 
     };
 
   } catch (error) {
-    console.error('❌ [Mark Absent] Unexpected error:', error);
     return { 
       success: false, 
       error: error.message, 
@@ -134,7 +123,6 @@ export function isAppointmentAbsent(appointment) {
     const now = new Date();
     return aptDateTime < now;
   } catch (e) {
-    console.error('Error checking if appointment is absent:', e);
     return false;
   }
 }

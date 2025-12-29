@@ -92,7 +92,6 @@ export async function POST(request: NextRequest) {
     const { user } = authResult;
 
     const body = await request.json();
-    console.log('📥 [Medical Records] Request body:', body);
 
     const {
       patient_id,
@@ -159,11 +158,9 @@ export async function POST(request: NextRequest) {
       .eq('id', patient_id);
 
     if (updateError) {
-      console.error('❌ [Medical Records] Update error:', updateError);
       throw new Error(updateError.message || 'Failed to update patient medical records');
     }
 
-    console.log('✅ [Medical Records] Patient medical info updated successfully');
 
     // Insert medical records if provided
     if (medical_records && Array.isArray(medical_records) && medical_records.length > 0) {
@@ -183,10 +180,8 @@ export async function POST(request: NextRequest) {
         .insert(recordsToInsert);
 
       if (recordsError) {
-        console.error('⚠️ [Medical Records] Records insertion error:', recordsError);
         // Don't fail the entire request if records insertion fails
       } else {
-        console.log(`✅ [Medical Records] Inserted ${recordsToInsert.length} medical records`);
       }
     }
 
@@ -196,7 +191,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Medical Records] Error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

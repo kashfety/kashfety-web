@@ -21,7 +21,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Failed to update booking status:', error);
       return NextResponse.json({ error: 'Failed to update booking status' }, { status: 500 });
     }
 
@@ -32,7 +31,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Status update API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -122,7 +122,6 @@ export default function DoctorCertificateUpload({
             const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`;
             const uploadUrl = `${baseUrl}/auth/doctor/upload-certificate`;
 
-            console.log('Certificate upload URL:', uploadUrl);
 
             const response = await fetch(uploadUrl, {
                 method: 'POST',
@@ -149,7 +148,6 @@ export default function DoctorCertificateUpload({
             onUploadComplete();
 
         } catch (error: any) {
-            console.error('Certificate upload error:', error);
             toast({
                 title: t('dc_upload_failed') || "Upload Failed",
                 description: t('dc_upload_error') || "Failed to upload certificate. Please try again.",

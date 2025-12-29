@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       if (response.ok) return NextResponse.json(data);
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -38,16 +37,13 @@ export async function GET(request: NextRequest) {
   if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
   
   try {
-    console.log('🔄 Profile fallback: Starting Supabase fallback');
     // Use center_id from authenticated user
     const centerId = user.center_id || searchParams.get('center_id');
     
     if (!centerId) {
-      console.log('❌ Profile fallback: No center_id found, returning null');
       return NextResponse.json({ center: null, message: 'No center record found' });
     }
 
-    console.log(`🎯 Profile fallback: Using center_id: ${centerId}`);
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // First check if center exists
@@ -57,20 +53,17 @@ export async function GET(request: NextRequest) {
       .eq('id', centerId);
 
     if (error) {
-      console.error('Get center profile error:', error);
       return NextResponse.json({ error: 'Failed to fetch center profile' }, { status: 500 });
     }
 
     // If no center found, return null profile (not an error)
     if (!center || center.length === 0) {
-      console.log('No center found for ID:', centerId);
       return NextResponse.json({ center: null });
     }
 
     return NextResponse.json({ center: center[0] });
 
   } catch (error: any) {
-    console.error('Center profile fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch center profile' }, { status: 500 });
   }
 }
@@ -99,7 +92,6 @@ export async function PUT(request: NextRequest) {
       if (response.ok) return NextResponse.json(data);
       // fall through on non-OK
     } catch (e) {
-      console.error('Backend request failed:', e);
       // fall back to supabase
     }
   }
@@ -132,7 +124,6 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (createError) {
-        console.error('Failed to create center:', createError);
         return NextResponse.json({ error: 'Failed to create center profile' }, { status: 500 });
       }
 
@@ -147,7 +138,6 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Failed to update center:', error);
         return NextResponse.json({ error: 'Failed to update center profile' }, { status: 500 });
       }
 
@@ -155,7 +145,6 @@ export async function PUT(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Center profile update fallback error:', error);
     return NextResponse.json({ error: error.message || 'Failed to update center profile' }, { status: 500 });
   }
 }

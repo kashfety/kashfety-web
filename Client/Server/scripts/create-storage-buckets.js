@@ -9,7 +9,6 @@ dotenv.config();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 async function createStorageBuckets() {
-  console.log('🚀 Creating Supabase Storage Buckets...');
 
   const buckets = [
     { 
@@ -31,7 +30,6 @@ async function createStorageBuckets() {
 
   for (const bucket of buckets) {
     try {
-      console.log(`Creating bucket: ${bucket.name}...`);
       
       const { data, error } = await supabase.storage.createBucket(bucket.name, {
         public: bucket.public,
@@ -43,27 +41,21 @@ async function createStorageBuckets() {
 
       if (error) {
         if (error.message.includes('already exists')) {
-          console.log(`✅ Bucket ${bucket.name} already exists`);
         } else {
-          console.error(`❌ Error creating ${bucket.name}:`, error);
         }
       } else {
-        console.log(`✅ Created bucket: ${bucket.name}`);
       }
     } catch (err) {
-      console.error(`❌ Failed to create ${bucket.name}:`, err);
     }
   }
 
   // List all buckets to verify
-  console.log('\n📋 Listing all storage buckets:');
   const { data: bucketList, error: listError } = await supabase.storage.listBuckets();
   
   if (listError) {
-    console.error('❌ Error listing buckets:', listError);
   } else {
     bucketList.forEach(bucket => {
-      console.log(`  - ${bucket.name} (${bucket.public ? 'public' : 'private'})`);
+      `);
     });
   }
 }

@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (e: any) {
-    console.error('Proxy error (/api/doctor-dashboard/analytics GET):', e);
+    :', e);
     return NextResponse.json({ error: e.message || 'Failed to connect to backend server' }, { status: 500 });
   }
 }

@@ -6,7 +6,6 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('👑 [Super Admin Admins] Request received');
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -14,10 +13,8 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') || 'all';
     const status = searchParams.get('status') || 'all';
 
-    console.log('👑 [Super Admin Admins] Params:', { page, limit, search, role, status });
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase credentials');
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -66,8 +63,7 @@ export async function GET(request: NextRequest) {
     const { data: users, error } = await dataQuery;
 
     if (error) {
-      console.error('❌ Failed to fetch admins:', error);
-      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      );
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch admins',
@@ -77,7 +73,6 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Super Admin Admins] Fetched', users?.length || 0, 'users from database');
 
     // Transform users to match AdminUser interface
     const transformedAdmins = (users || []).map((user: any) => {
@@ -93,7 +88,6 @@ export async function GET(request: NextRequest) {
       
       // Log name resolution for debugging (only for specific cases to avoid spam)
       if (!user.name || user.email === 'm.ismail.official23@gmail.com') {
-        console.log(`👤 [Super Admin Admins] User ${user.id}: name="${user.name}", first_name="${user.first_name}", last_name="${user.last_name}", displayName="${displayName}"`);
       }
       
       return {
@@ -124,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    console.log('✅ [Super Admin Admins] Fetched', transformedAdmins.length, 'admins (page', page, 'of', totalPages, ')');
+    ');
 
     return NextResponse.json({
       success: true,
@@ -142,7 +136,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Super admin admins API error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

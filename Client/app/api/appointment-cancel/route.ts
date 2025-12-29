@@ -12,7 +12,6 @@ export async function PUT(request: NextRequest) {
     const appointmentId = searchParams.get('appointmentId');
     const { reason } = await request.json();
 
-    console.log('📅 [Appointment Cancel] Request:', { appointmentId, reason });
 
     if (!appointmentId) {
       return NextResponse.json({
@@ -57,21 +56,16 @@ export async function PUT(request: NextRequest) {
 
           if (!userError && userData) {
             userRoleFromDB = userData.role;
-            console.log('✅ [Appointment Cancel] Fetched role from database:', userRoleFromDB);
           } else if (userError) {
-            console.log('⚠️ Could not fetch user role from database:', userError);
           }
 
           // Use database role if available, otherwise use token role
           userRole = userRoleFromDB || userRole;
         } else {
-          console.log('⚠️ Token validation failed - no payload returned');
         }
       } catch (error) {
-        console.log('⚠️ Could not decode JWT token:', error);
       }
     } else {
-      console.log('⚠️ No authorization header provided');
     }    // First, check if the appointment exists and get doctor_id
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
@@ -80,7 +74,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !appointment) {
-      console.error('❌ Appointment not found:', fetchError);
       return NextResponse.json({
         success: false,
         message: 'Appointment not found'
@@ -142,10 +135,8 @@ export async function PUT(request: NextRequest) {
 
       // Only apply restrictions for patients (not doctors/admins or the appointment's doctor)
       if (!canBypassRestrictions) {
-        console.log('⚠️ [Appointment Cancel] User does NOT have bypass privileges - applying restrictions');
         // Check if appointment is in the past
         if (hoursUntilAppointment <= 0) {
-          console.log('❌ [Appointment Cancel] Blocking: appointment is in the past');
           return NextResponse.json({
             success: false,
             message: 'Cannot cancel a past appointment',
@@ -156,7 +147,6 @@ export async function PUT(request: NextRequest) {
 
         // Block cancellation if less than 24 hours away (patients only)
         if (hoursUntilAppointment < 24) {
-          console.log('❌ [Appointment Cancel] Blocking: within 24 hours');
           return NextResponse.json({
             success: false,
             message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
@@ -166,10 +156,8 @@ export async function PUT(request: NextRequest) {
           }, { status: 400 });
         }
       } else {
-        console.log('✅ [Appointment Cancel] User authorized to bypass time restrictions');
       }
     }    // Update the appointment status to cancelled
-    console.log('💾 Cancelling appointment...');
     const { data: updatedAppointment, error: updateError } = await supabase
       .from('appointments')
       .update({
@@ -182,7 +170,6 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('❌ Failed to cancel appointment:', updateError);
       return NextResponse.json({
         success: false,
         message: 'Failed to cancel appointment',
@@ -190,7 +177,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ [Appointment Cancel] Appointment cancelled successfully');
     return NextResponse.json({
       success: true,
       message: 'Appointment cancelled successfully',
@@ -198,7 +184,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Appointment cancel error:', error);
     return NextResponse.json({
       success: false,
       message: 'Internal server error',

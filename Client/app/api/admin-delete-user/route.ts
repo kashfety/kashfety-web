@@ -18,26 +18,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        console.log('🗑️ [Admin Delete User Proxy] Request received');
 
         // Get the request body
         const body = await request.json();
         const { userId } = body;
 
         if (!userId) {
-            console.error('❌ Missing userId in request body');
             return NextResponse.json({
                 success: false,
                 error: 'User ID is required'
             }, { status: 400 });
         }
 
-        console.log('🗑️ [Admin Delete User Proxy] Forwarding delete request for user:', userId);
 
         // Get the authorization token from the request
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
-            console.error('❌ Missing authorization header');
             return NextResponse.json({
                 success: false,
                 error: 'Unauthorized'
@@ -57,7 +53,6 @@ export async function POST(request: NextRequest) {
         for (const baseUrl of backendUrls) {
             try {
                 const apiUrl = `${baseUrl}/${userId}`;
-                console.log('🔄 [Admin Delete User Proxy] Trying endpoint:', apiUrl);
 
                 const backendResponse = await fetch(apiUrl, {
                     method: 'DELETE',
@@ -69,7 +64,6 @@ export async function POST(request: NextRequest) {
 
                 if (backendResponse.ok) {
                     const responseData = await backendResponse.json().catch(() => ({}));
-                    console.log('✅ [Admin Delete User Proxy] Success with endpoint:', apiUrl);
                     return NextResponse.json(responseData || {
                         success: true,
                         message: 'User deleted successfully'
@@ -77,20 +71,16 @@ export async function POST(request: NextRequest) {
                 }
 
                 lastError = await backendResponse.json().catch(() => ({ error: `HTTP ${backendResponse.status}` }));
-                console.log('⚠️ [Admin Delete User Proxy] Failed with endpoint:', apiUrl, 'Status:', backendResponse.status);
 
             } catch (error: any) {
-                console.log('⚠️ [Admin Delete User Proxy] Network error with endpoint:', baseUrl, error.message);
                 lastError = { error: error.message };
                 continue;
             }
         }
 
         // All backend endpoints failed, try Supabase fallback
-        console.log('🔄 [Admin Delete User Proxy] Backend endpoints failed, trying Supabase fallback');
 
         if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-            console.error('❌ Missing Supabase credentials for fallback');
             return NextResponse.json(
                 lastError || { success: false, error: 'Failed to delete user - no fallback available' },
                 { status: 500 }
@@ -108,7 +98,6 @@ export async function POST(request: NextRequest) {
                 .single();
 
             if (fetchError || !existingUser) {
-                console.error('❌ User not found in Supabase:', fetchError);
                 return NextResponse.json({
                     success: false,
                     error: 'User not found'
@@ -128,7 +117,6 @@ export async function POST(request: NextRequest) {
                 .eq('id', userId);
 
             if (deleteError) {
-                console.error('❌ Failed to delete user from Supabase:', deleteError);
                 return NextResponse.json({
                     success: false,
                     error: 'Failed to delete user',
@@ -136,7 +124,6 @@ export async function POST(request: NextRequest) {
                 }, { status: 500 });
             }
 
-            console.log('✅ [Admin Delete User Proxy] User deleted successfully from Supabase');
             return NextResponse.json({
                 success: true,
                 message: 'User deleted successfully',
@@ -144,7 +131,6 @@ export async function POST(request: NextRequest) {
             });
 
         } catch (supabaseError: any) {
-            console.error('❌ Supabase fallback error:', supabaseError);
             return NextResponse.json(
                 lastError || { success: false, error: 'Failed to delete user', details: supabaseError.message },
                 { status: 500 }
@@ -152,8 +138,6 @@ export async function POST(request: NextRequest) {
         }
 
     } catch (error: any) {
-        console.error('❌ Admin delete user proxy error:', error);
-        console.error('❌ Error stack:', error.stack);
         return NextResponse.json({
             success: false,
             error: 'Failed to delete user',

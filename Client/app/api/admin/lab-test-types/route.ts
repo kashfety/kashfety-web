@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching lab test types:', error);
       throw new Error(error.message || 'Failed to fetch lab test types');
     }
 
@@ -25,7 +24,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Lab Test Types] GET error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',
@@ -40,7 +38,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('📥 [Lab Test Types] POST request body:', body);
 
     const { 
       name, 
@@ -104,11 +101,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating lab test type:', error);
       throw new Error(error.message || 'Failed to create lab test type');
     }
 
-    console.log('✅ [Lab Test Types] Created successfully:', newLabTestType.id);
 
     return NextResponse.json({
       message: 'Lab test type created successfully',
@@ -117,7 +112,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Lab Test Types] POST error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',
@@ -134,7 +128,6 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
-    console.log('📥 [Lab Test Types] DELETE request for ID:', id);
 
     if (!id) {
       return NextResponse.json(
@@ -153,7 +146,6 @@ export async function DELETE(request: NextRequest) {
       .limit(1);
 
     if (bookingsCheckError) {
-      console.error('Error checking lab bookings:', bookingsCheckError);
       throw new Error('Failed to check if lab test type is in use');
     }
 
@@ -176,7 +168,6 @@ export async function DELETE(request: NextRequest) {
       .limit(1);
 
     if (servicesCheckError) {
-      console.error('Error checking center services:', servicesCheckError);
       throw new Error('Failed to check if lab test type is in use');
     }
 
@@ -199,7 +190,6 @@ export async function DELETE(request: NextRequest) {
       .limit(1);
 
     if (schedulesCheckError) {
-      console.error('Error checking center schedules:', schedulesCheckError);
       throw new Error('Failed to check if lab test type is in use');
     }
 
@@ -221,11 +211,9 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting lab test type:', error);
       throw new Error(error.message || 'Failed to delete lab test type');
     }
 
-    console.log('✅ [Lab Test Types] Deleted successfully:', id);
 
     return NextResponse.json({
       message: 'Lab test type deleted successfully',
@@ -233,7 +221,6 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Lab Test Types] DELETE error:', error);
     return NextResponse.json(
       {
         error: error.message || 'Internal server error',

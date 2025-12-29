@@ -109,7 +109,6 @@ export default function DoctorProfileSettings({
       const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
       const doctorId = (storedUser?.role === 'doctor') ? storedUser?.id : undefined;
 
-      console.log('Loading doctor profile with token:', token ? 'present' : 'missing');
 
       const response = await fetch(`/api/auth/doctor/profile${doctorId ? `?doctor_id=${encodeURIComponent(doctorId)}` : ''}`, {
         headers: {
@@ -118,12 +117,10 @@ export default function DoctorProfileSettings({
         }
       });
 
-      console.log('Profile response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
         const doctorProfile = data.doctor;
-        console.log('Profile data received:', doctorProfile);
 
         setProfile(doctorProfile);
         setFormData({
@@ -138,11 +135,9 @@ export default function DoctorProfileSettings({
         });
       } else {
         const errorText = await response.text();
-        console.error('Profile load error:', response.status, errorText);
         throw new Error(`Failed to load profile: ${response.status} ${errorText}`);
       }
     } catch (error: any) {
-      console.error('Error loading doctor profile:', error);
       showError(t('error'), `Failed to load your profile: ${error.message}`);
     } finally {
       setLoading(false);
@@ -173,11 +168,9 @@ export default function DoctorProfileSettings({
         setCertificates(data.certificates || []);
         return data.certificates || [];
       } else {
-        console.error('Failed to load certificates:', response.status);
         return [];
       }
     } catch (error) {
-      console.error('Error loading certificates:', error);
       return [];
     } finally {
       setLoadingCertificates(false);
@@ -192,7 +185,6 @@ export default function DoctorProfileSettings({
       const urlToOpen = freshCert?.certificate_file_url || currentUrl;
       window.open(urlToOpen, '_blank');
     } catch (error) {
-      console.error('Error opening certificate:', error);
       // Fallback to current URL if refresh fails
       window.open(currentUrl, '_blank');
     }
@@ -210,7 +202,6 @@ export default function DoctorProfileSettings({
       link.download = fileName;
       link.click();
     } catch (error) {
-      console.error('Error downloading certificate:', error);
       // Fallback to current URL if refresh fails
       const link = document.createElement('a');
       link.href = currentUrl;
@@ -241,10 +232,8 @@ export default function DoctorProfileSettings({
         const data = await response.json();
         setProfilePictureUrl(data.profile_picture_url);
       } else {
-        console.error('Failed to load profile picture:', response.status);
       }
     } catch (error) {
-      console.error('Error loading profile picture:', error);
     }
   };
 
@@ -301,7 +290,6 @@ export default function DoctorProfileSettings({
         throw new Error(errorData.error || `Failed to upload profile picture: ${response.status}`);
       }
     } catch (error: any) {
-      console.error('Error uploading profile picture:', error);
       showError(t('dp_upload_failed') || 'فشل الرفع', error.message || t('dp_picture_upload_failed') || 'فشل رفع الصورة. يرجى المحاولة مرة أخرى');
     } finally {
       setUploadingPicture(false);
@@ -334,8 +322,6 @@ export default function DoctorProfileSettings({
         return;
       }
 
-      console.log('Saving profile with token:', token ? 'present' : 'missing');
-      console.log('Profile data:', formData);
 
       const storedUserStr = localStorage.getItem('auth_user');
       const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
@@ -350,12 +336,10 @@ export default function DoctorProfileSettings({
         body: JSON.stringify({ ...formData, doctor_id: doctorId })
       });
 
-      console.log('Save profile response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
         const updatedProfile = data.doctor;
-        console.log('Profile saved successfully:', updatedProfile);
 
         setProfile(updatedProfile);
 
@@ -370,11 +354,9 @@ export default function DoctorProfileSettings({
         );
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Save profile error:', response.status, errorData);
         throw new Error(errorData.message || `Failed to update profile: ${response.status}`);
       }
     } catch (error: any) {
-      console.error('Error updating profile:', error);
       showError(t('dp_update_failed') || 'فشل التحديث', error.message || t('dp_profile_update_failed') || 'فشل تحديث ملفك الشخصي. يرجى المحاولة مرة أخرى');
     } finally {
       setSaving(false);

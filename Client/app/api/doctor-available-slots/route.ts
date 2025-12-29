@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date');
     const centerId = searchParams.get('center_id');
 
-    console.log('🕐 [Doctor Available Slots API] Request - Doctor:', doctorId, 'Date:', date, 'Center:', centerId);
 
     if (!doctorId || !date) {
       return NextResponse.json({ 
@@ -65,7 +64,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (scheduleError) {
-      console.error('🕐 Error fetching schedules:', scheduleError);
       return NextResponse.json({ 
         success: false, 
         message: 'Failed to fetch doctor schedules' 
@@ -73,7 +71,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!schedules || schedules.length === 0) {
-      console.log('🕐 No schedules found for this doctor on this day - using default schedule');
       
       // Generate default time slots (9 AM to 5 PM) when no schedule exists
       const defaultSlots: Array<{time: string, is_available: boolean, is_booked: boolean}> = [];
@@ -95,7 +92,6 @@ export async function GET(request: NextRequest) {
       const { data: appointments, error: appointmentsError } = await appointmentsQuery;
 
       if (appointmentsError) {
-        console.error('🕐 Error fetching appointments:', appointmentsError);
       }
 
       // Filter appointments by center if center_id is provided
@@ -123,7 +119,6 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      console.log(`🕐 Generated ${defaultSlots.length} default slots for doctor ${doctorId} on ${date}`);
 
       return NextResponse.json({ 
         success: true, 
@@ -150,7 +145,6 @@ export async function GET(request: NextRequest) {
     const { data: appointments, error: appointmentsError } = await appointmentsQuery;
 
     if (appointmentsError) {
-      console.error('🕐 Error fetching appointments:', appointmentsError);
     }
 
     // Filter appointments by center if center_id is provided (for clinic visits)
@@ -172,7 +166,6 @@ export async function GET(request: NextRequest) {
     for (const schedule of schedules) {
       // First check if time_slots field exists (new format)
       if (schedule.time_slots && Array.isArray(schedule.time_slots)) {
-        console.log('🕐 Using time_slots from schedule:', schedule.time_slots);
         
         // Use the time_slots array from the schedule
         for (const slot of schedule.time_slots) {
@@ -192,7 +185,6 @@ export async function GET(request: NextRequest) {
         
         if (!startTime || !endTime) continue;
 
-        console.log('🕐 Using start_time/end_time:', startTime, '-', endTime);
 
         // Parse times (format: "HH:MM:SS" or "HH:MM")
         const [startHour, startMinute] = startTime.split(':').map(Number);
@@ -229,7 +221,6 @@ export async function GET(request: NextRequest) {
       new Map(slots.map(slot => [slot.time, slot])).values()
     ).sort((a, b) => a.time.localeCompare(b.time));
 
-    console.log(`🕐 Generated ${uniqueSlots.length} slots for doctor ${doctorId} on ${date}`);
 
     return NextResponse.json({ 
       success: true, 
@@ -240,7 +231,6 @@ export async function GET(request: NextRequest) {
       doctor_id: doctorId
     });
   } catch (error: any) {
-    console.error('🕐 Error:', error);
     return NextResponse.json({ 
       success: false, 
       message: error.message || 'Internal server error' 

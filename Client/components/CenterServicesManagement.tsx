@@ -133,7 +133,6 @@ export default function CenterServicesManagement() {
       setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
       setShowCreateDialog(false);
     } catch (error: any) {
-      console.error('Failed to create lab test type:', error);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || t('services_failed_create') || 'Failed to create lab test type',

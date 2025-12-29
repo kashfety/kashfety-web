@@ -19,7 +19,6 @@ export const getPatientProfile = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    console.error('Error fetching patient profile:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch patient profile',
@@ -67,7 +66,6 @@ export const updatePatientProfile = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    console.error('Error updating patient profile:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update profile',
@@ -108,7 +106,6 @@ export const getPatientMedicalRecords = async (req, res) => {
       data: records
     });
   } catch (error) {
-    console.error('Error fetching medical records:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch medical records',
@@ -196,7 +193,6 @@ export const createMedicalRecord = async (req, res) => {
       data: record
     });
   } catch (error) {
-    console.error('Error creating medical record:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create medical record',
@@ -230,7 +226,6 @@ export const updateMedicalRecord = async (req, res) => {
       data: record
     });
   } catch (error) {
-    console.error('Error updating medical record:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update medical record',
@@ -280,7 +275,6 @@ export const getPatientAppointmentHistory = async (req, res) => {
       data: appointments
     });
   } catch (error) {
-    console.error('Error fetching appointment history:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch appointment history',
@@ -336,7 +330,7 @@ export const getPatientDashboard = async (req, res) => {
     const { data: appointmentStats, error: statsError } = await supabaseAdmin
       .rpc('get_patient_appointment_stats', { p_patient_id: patient.id });
 
-    if (statsError) console.error('Stats error:', statsError);
+    if (statsError) 
 
     // Get health summary
     const healthSummary = {
@@ -360,7 +354,6 @@ export const getPatientDashboard = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching patient dashboard:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch dashboard data',
@@ -391,7 +384,6 @@ export const updateEmergencyContact = async (req, res) => {
       data: patient
     });
   } catch (error) {
-    console.error('Error updating emergency contact:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update emergency contact',
@@ -428,7 +420,6 @@ export const searchPatients = async (req, res) => {
       data: patients
     });
   } catch (error) {
-    console.error('Error searching patients:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to search patients',

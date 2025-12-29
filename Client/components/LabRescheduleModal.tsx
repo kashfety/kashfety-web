@@ -105,7 +105,6 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-      console.log('🔬 LabRescheduleModal - Fetching available dates for:', { centerId, typeId });
 
       const res = await labService.getAvailableDates(centerId, typeId, {
         start_date: fmt(startDate),
@@ -113,10 +112,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       });
 
       const dates = (res as any)?.available_dates || (res as any)?.data?.available_dates || [];
-      console.log('🔬 LabRescheduleModal - Received available dates:', dates);
       setAvailableDates(dates.map((d: any) => d.date || d));
     } catch (e) {
-      console.error('❌ Error fetching lab available dates:', e);
       setAvailableDates([]);
     }
   };
@@ -144,13 +141,11 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
       const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const dateString = fmt(date);
 
-      console.log('🔬 LabRescheduleModal - Fetching slots for:', { centerId, typeId, dateString, bookingId: booking?.id });
 
       // Fetch available slots, excluding the current booking ID for rescheduling
       const res = await labService.getAvailableSlots(centerId, typeId, dateString, booking.id);
       const data = (res as any)?.data || res;
 
-      console.log('🔬 LabRescheduleModal - Received slots data:', data);
 
       const availableSlots = data?.available_slots || [];
       setAvailableSlots(availableSlots.map((slot: any) => ({
@@ -159,7 +154,6 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
         is_booked: !slot.is_available
       })));
     } catch (e) {
-      console.error('❌ Error fetching lab available slots:', e);
       showError(
         t('reschedule_error_title') || "Error",
         t('reschedule_error_fetch_slots') || "Failed to fetch available time slots. Please try again."
@@ -203,7 +197,6 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
         }
       );
     } catch (error: any) {
-      console.error('Error rescheduling lab booking:', error);
       showError(
         t('reschedule_error_title') || "Reschedule Failed",
         error.message || t('reschedule_error_message') || "Unable to reschedule your lab test. Please try again."

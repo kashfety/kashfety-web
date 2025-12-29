@@ -37,7 +37,6 @@ export async function GET(req: NextRequest) {
             }, { status: 400 });
         }
 
-        console.log(`🔍 Fetching medical info for user: ${userId}`);
 
         const { data: user, error } = await supabaseAdmin
             .from('users')
@@ -47,7 +46,6 @@ export async function GET(req: NextRequest) {
             .single();
 
         if (error) {
-            console.error('Error fetching user medical info:', error);
             throw error;
         }
 
@@ -73,7 +71,6 @@ export async function GET(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Error in GET medical-info:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to fetch medical information'
@@ -113,7 +110,6 @@ export async function PUT(req: NextRequest) {
             }, { status: 400 });
         }
 
-        console.log(`📝 Updating medical info for user: ${finalUserId}`);
 
         // Validate that user exists and is a patient
         const { data: existingUser, error: userError } = await supabaseAdmin
@@ -145,11 +141,9 @@ export async function PUT(req: NextRequest) {
             .eq('id', finalUserId);
 
         if (updateError) {
-            console.error('Error updating medical info:', updateError);
             throw updateError;
         }
 
-        console.log(`✅ Successfully updated medical info for user: ${finalUserId}`);
 
         return NextResponse.json({
             success: true,
@@ -157,7 +151,6 @@ export async function PUT(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Error in PUT medical-info:', error);
         return NextResponse.json({
             success: false,
             message: error.message || 'Failed to update medical information'

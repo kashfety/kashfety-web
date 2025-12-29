@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     }
 
-    console.log('📋 [Doctor Reviews] Fetching reviews for doctor:', doctorId);
 
     // Fetch reviews for the doctor
     const { data: reviews, error: reviewsError } = await supabase
@@ -25,7 +24,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (reviewsError) {
-      console.error('❌ [Doctor Reviews] Error fetching reviews:', reviewsError);
       return NextResponse.json({ 
         error: 'Failed to fetch reviews',
         details: reviewsError.message 
@@ -82,7 +80,6 @@ export async function GET(request: NextRequest) {
       avgRating = Math.round((sum / reviews.length) * 100) / 100; // Round to 2 decimal places
     }
 
-    console.log('✅ [Doctor Reviews] Fetched', enrichedReviews.length, 'reviews, avg rating:', avgRating);
 
     return NextResponse.json({
       success: true,
@@ -92,7 +89,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ [Doctor Reviews] Error:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

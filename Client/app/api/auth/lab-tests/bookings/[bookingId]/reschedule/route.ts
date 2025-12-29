@@ -48,7 +48,6 @@ export async function PUT(
       .neq('id', bookingId);
 
     if (conflictError) {
-      console.error('Error checking for conflicts:', conflictError);
       return NextResponse.json({ error: 'Failed to check availability' }, { status: 500 });
     }
 
@@ -92,7 +91,6 @@ export async function PUT(
       .single();
 
     if (updateError) {
-      console.error('Failed to reschedule booking:', updateError);
       return NextResponse.json({ error: 'Failed to reschedule booking' }, { status: 500 });
     }
 
@@ -102,7 +100,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Error rescheduling booking:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

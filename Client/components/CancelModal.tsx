@@ -52,7 +52,6 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
 
       // Check if date is valid
       if (isNaN(appointmentDateTime.getTime())) {
-        console.error('❌ [CancelModal] Invalid date format:', { date: appointment.date, time: appointment.time });
         return true; // Allow cancellation if we can't parse the date
       }
 
@@ -71,7 +70,6 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
       // Can cancel if 24 hours or more away (not if appointment is in the past)
       return hoursUntilAppointment >= 24;
     } catch (error) {
-      console.error('❌ [CancelModal] Error parsing date:', error);
       return true; // Allow cancellation if parsing fails
     }
   };
@@ -120,7 +118,6 @@ export default function CancelModal({ isOpen, onClose, appointment, onSuccess }:
       onSuccess();
       onClose();
     } catch (error: any) {
-      console.error('Error cancelling appointment:', error);
       let errorMessage = t('cancel_appointment_error') || "Failed to cancel appointment. Please try again.";
 
       if (error.response?.data?.message) {

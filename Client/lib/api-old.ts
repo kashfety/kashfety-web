@@ -25,7 +25,6 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${session.access_token}`;
         }
       } catch (error) {
-        console.error('Error getting auth token:', error);
       }
     }
     return config;
@@ -47,10 +46,8 @@ apiClient.interceptors.response.use(
         if (typeof window !== 'undefined') {
           try {
             await clientAuthHelpers.signOut();
-            console.error('Authentication failed. Redirecting to login.');
             window.location.href = '/login';
           } catch (signOutError) {
-            console.error('Error signing out:', signOutError);
           }
         }
       }
@@ -230,7 +227,6 @@ export const authService = {
       const response = await api.post(ENDPOINTS.USER_MANAGEMENT.LOGIN, credentials);
       return response;
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     }
   },
@@ -256,7 +252,6 @@ export const authService = {
       const response = await api.post(ENDPOINTS.USER_MANAGEMENT.CREATE_ACCOUNT, userData);
       return response;
     } catch (error) {
-      console.error('Registration failed:', error);
       throw error;
     }
   },
@@ -267,7 +262,6 @@ export const authService = {
       const response = await api.post(ENDPOINTS.USER_MANAGEMENT.PASSWORD_RESET, { email });
       return response;
     } catch (error) {
-      console.error('Password reset failed:', error);
       throw error;
     }
   },
@@ -286,7 +280,6 @@ export const authService = {
       const response = await api.get(ENDPOINTS.USER_MANAGEMENT.PROFILE_DATA(userId));
       return response.user;
     } catch (error) {
-      console.error('Get profile failed:', error);
       throw error;
     }
   },
@@ -297,7 +290,6 @@ export const authService = {
       const response = await api.put(ENDPOINTS.USER_MANAGEMENT.PROFILE_UPDATE(userId), updates);
       return response;
     } catch (error) {
-      console.error('Update profile failed:', error);
       throw error;
     }
   },
@@ -315,13 +307,11 @@ export const authService = {
   // Set auth token (legacy - now handled by Supabase)
   setAuthToken: (token: string, persistent = true) => {
     // This is now handled by Supabase automatically
-    console.log('Auth token is now managed by Supabase');
   },
 
   // Clear auth token (legacy - now handled by Supabase)
   clearAuthToken: () => {
     // This is now handled by Supabase automatically
-    console.log('Auth token clearing is now managed by Supabase');
   },
 
   // Logout
@@ -330,7 +320,6 @@ export const authService = {
       await clientAuthHelpers.signOut();
       return true;
     } catch (error) {
-      console.error('Logout error:', error);
       throw error;
     }
   }
@@ -348,7 +337,6 @@ export const doctorService = {
       const response = await api.get(url);
       return response.doctors || response.data?.doctors;
     } catch (error) {
-      console.error('Get doctors failed:', error);
       throw error;
     }
   },
@@ -367,7 +355,6 @@ export const doctorService = {
       const response = await api.get(ENDPOINTS.DOCTOR_MANAGEMENT.PROFILE_DETAILS(uid));
       return response.doctor || response.data?.doctor;
     } catch (error) {
-      console.error('Get doctor profile failed:', error);
       throw error;
     }
   },
@@ -378,7 +365,6 @@ export const doctorService = {
       const response = await api.put(ENDPOINTS.DOCTOR_MANAGEMENT.PROFILE_UPDATE(uid), updates);
       return response;
     } catch (error) {
-      console.error('Update doctor profile failed:', error);
       throw error;
     }
   },
@@ -389,7 +375,6 @@ export const doctorService = {
       const response = await api.post(ENDPOINTS.DOCTOR_MANAGEMENT.CREATE_PROFILE, doctorData);
       return response;
     } catch (error) {
-      console.error('Create doctor profile failed:', error);
       throw error;
     }
   },
@@ -403,7 +388,6 @@ export const doctorService = {
       const response = await api.get(url);
       return response.appointments || response.data?.appointments;
     } catch (error) {
-      console.error('Get doctor appointments failed:', error);
       throw error;
     }
   },
@@ -414,7 +398,6 @@ export const doctorService = {
       const response = await api.get(ENDPOINTS.DOCTOR_MANAGEMENT.APPOINTMENTS_TODAY(doctorId));
       return response.appointments || response.data?.appointments;
     } catch (error) {
-      console.error('Get today appointments failed:', error);
       throw error;
     }
   },
@@ -428,7 +411,6 @@ export const doctorService = {
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Get doctor analytics failed:', error);
       throw error;
     }
   },
@@ -439,7 +421,6 @@ export const doctorService = {
       const response = await api.get(ENDPOINTS.DOCTOR_MANAGEMENT.WORKING_HOURS(doctorId));
       return response.schedule || response.data?.schedule;
     } catch (error) {
-      console.error('Get working hours failed:', error);
       throw error;
     }
   },
@@ -450,7 +431,6 @@ export const doctorService = {
       const response = await api.put(ENDPOINTS.DOCTOR_MANAGEMENT.WORKING_HOURS(doctorId), { schedules });
       return response;
     } catch (error) {
-      console.error('Update working hours failed:', error);
       throw error;
     }
   },
@@ -466,7 +446,6 @@ export const doctorService = {
       const response = await api.get(url);
       return response.availability || response.data?.availability;
     } catch (error) {
-      console.error('Get doctor availability failed:', error);
       throw error;
     }
   },
@@ -477,7 +456,6 @@ export const doctorService = {
       const response = await api.put(ENDPOINTS.DOCTOR_MANAGEMENT.AVAILABILITY_UPDATE(doctorId), availabilityData);
       return response;
     } catch (error) {
-      console.error('Update availability failed:', error);
       throw error;
     }
   },
@@ -488,7 +466,6 @@ export const doctorService = {
       const response = await api.get(ENDPOINTS.DOCTOR_MANAGEMENT.AFFILIATED_CENTERS(doctorId));
       return response.centers || response.data?.centers;
     } catch (error) {
-      console.error('Get affiliated centers failed:', error);
       throw error;
     }
   },
@@ -499,7 +476,6 @@ export const doctorService = {
       const response = await api.get(ENDPOINTS.DOCTOR_MANAGEMENT.REVIEWS(doctorId));
       return response.reviews || response.data?.reviews;
     } catch (error) {
-      console.error('Get doctor reviews failed:', error);
       throw error;
     }
   },
@@ -518,7 +494,6 @@ export const doctorService = {
       const response = await api.uploadFile(`/doctor-management/profile/${doctorId}/profile-picture`, file, onProgress);
       return response;
     } catch (error) {
-      console.error('Upload profile picture failed:', error);
       throw error;
     }
   }
@@ -531,7 +506,6 @@ export const userService = {
       const response = await api.get(ENDPOINTS.USER_MANAGEMENT.ALL_USERS);
       return response.users || response.data?.users;
     } catch (error) {
-      console.error('Get all users failed:', error);
       throw error;
     }
   }
@@ -545,7 +519,6 @@ export const appointmentService = {
       const response = await api.post(ENDPOINTS.APPOINTMENT_MANAGEMENT.CREATE_BOOKING, appointmentData);
       return response;
     } catch (error) {
-      console.error('Create booking failed:', error);
       throw error;
     }
   },
@@ -556,7 +529,6 @@ export const appointmentService = {
       const response = await api.post(ENDPOINTS.APPOINTMENT_MANAGEMENT.EMERGENCY_BOOKING, emergencyData);
       return response;
     } catch (error) {
-      console.error('Create emergency booking failed:', error);
       throw error;
     }
   },
@@ -567,7 +539,6 @@ export const appointmentService = {
       const response = await api.put(ENDPOINTS.APPOINTMENT_MANAGEMENT.UPDATE_STATUS(appointmentId), { status, notes });
       return response;
     } catch (error) {
-      console.error('Update appointment status failed:', error);
       throw error;
     }
   },
@@ -578,7 +549,6 @@ export const appointmentService = {
       const response = await api.put(ENDPOINTS.APPOINTMENT_MANAGEMENT.RESCHEDULE(appointmentId), rescheduleData);
       return response;
     } catch (error) {
-      console.error('Reschedule appointment failed:', error);
       throw error;
     }
   },
@@ -589,7 +559,6 @@ export const appointmentService = {
       const response = await api.put(ENDPOINTS.APPOINTMENT_MANAGEMENT.COMPLETE(appointmentId), completionData);
       return response;
     } catch (error) {
-      console.error('Complete appointment failed:', error);
       throw error;
     }
   },
@@ -603,7 +572,6 @@ export const appointmentService = {
       });
       return response;
     } catch (error) {
-      console.error('Cancel appointment failed:', error);
       throw error;
     }
   },
@@ -614,7 +582,6 @@ export const appointmentService = {
       const response = await api.get(ENDPOINTS.APPOINTMENT_MANAGEMENT.DETAILS(appointmentId));
       return response.appointment || response.data?.appointment;
     } catch (error) {
-      console.error('Get appointment details failed:', error);
       throw error;
     }
   },
@@ -630,7 +597,6 @@ export const appointmentService = {
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Get analytics overview failed:', error);
       throw error;
     }
   },
@@ -641,7 +607,6 @@ export const appointmentService = {
       const response = await api.get(ENDPOINTS.APPOINTMENT_MANAGEMENT.SEARCH, { params: criteria });
       return response.appointments || response.data?.appointments;
     } catch (error) {
-      console.error('Search appointments failed:', error);
       throw error;
     }
   }
@@ -662,7 +627,6 @@ export const patientService = {
       const response = await api.get(ENDPOINTS.PATIENT_MANAGEMENT.PROFILE_DETAILS(uid));
       return response.patient || response.data?.patient;
     } catch (error) {
-      console.error('Get patient profile failed:', error);
       throw error;
     }
   },
@@ -673,7 +637,6 @@ export const patientService = {
       const response = await api.put(ENDPOINTS.PATIENT_MANAGEMENT.PROFILE_UPDATE(uid), updates);
       return response;
     } catch (error) {
-      console.error('Update patient profile failed:', error);
       throw error;
     }
   },
@@ -684,7 +647,6 @@ export const patientService = {
       const response = await api.post(ENDPOINTS.PATIENT_MANAGEMENT.CREATE_PROFILE, patientData);
       return response;
     } catch (error) {
-      console.error('Create patient profile failed:', error);
       throw error;
     }
   },
@@ -703,7 +665,6 @@ export const patientService = {
       const response = await api.get(ENDPOINTS.PATIENT_MANAGEMENT.DASHBOARD_OVERVIEW);
       return response.dashboard || response.data || response;
     } catch (error) {
-      console.error('Get patient dashboard failed:', error);
       throw error;
     }
   },
@@ -714,7 +675,6 @@ export const patientService = {
       const response = await api.get(ENDPOINTS.PATIENT_MANAGEMENT.MEDICAL_HISTORY(uid));
       return response.data || response.records;
     } catch (error) {
-      console.error('Get patient medical records failed:', error);
       throw error;
     }
   },
@@ -725,7 +685,6 @@ export const patientService = {
       const response = await api.post(ENDPOINTS.PATIENT_MANAGEMENT.ADD_MEDICAL_RECORD(patientId), recordData);
       return response;
     } catch (error) {
-      console.error('Add medical record failed:', error);
       throw error;
     }
   },
@@ -739,7 +698,6 @@ export const patientService = {
       const response = await api.get(url);
       return response.data || response.appointments;
     } catch (error) {
-      console.error('Get patient appointments failed:', error);
       throw error;
     }
   },
@@ -750,7 +708,6 @@ export const patientService = {
       const response = await api.get(ENDPOINTS.PATIENT_MANAGEMENT.APPOINTMENTS_UPCOMING(patientId));
       return response.data || response.appointments;
     } catch (error) {
-      console.error('Get upcoming appointments failed:', error);
       throw error;
     }
   },
@@ -761,7 +718,6 @@ export const patientService = {
       const response = await api.get(ENDPOINTS.PATIENT_MANAGEMENT.APPOINTMENTS_HISTORY(patientId));
       return response.data || response.appointments;
     } catch (error) {
-      console.error('Get appointment history failed:', error);
       throw error;
     }
   },
@@ -772,7 +728,6 @@ export const patientService = {
       const response = await api.post(ENDPOINTS.PATIENT_MANAGEMENT.CREATE_REVIEW(patientId), reviewData);
       return response;
     } catch (error) {
-      console.error('Create doctor review failed:', error);
       throw error;
     }
   },
@@ -783,7 +738,6 @@ export const patientService = {
       const response = await api.put(ENDPOINTS.PATIENT_MANAGEMENT.PROFILE_UPDATE(uid), { emergency_contact: emergencyContact });
       return response;
     } catch (error) {
-      console.error('Update emergency contact failed:', error);
       throw error;
     }
   },

@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await verifyToken(storedToken)
         }
       } catch (err) {
-        console.error('Error initializing auth:', err)
         // Clear invalid data
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
@@ -88,7 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Token invalid')
       }
     } catch (err) {
-      console.error('Token verification failed:', err)
       await logout()
     }
   }
@@ -98,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      console.log('Starting login process...')
       // Normalize API URL to avoid double slashes or missing /api
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
@@ -125,11 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(result.user)
         setIsAuthenticated(true)
 
-        console.log('Login successful, user role:', result.user.role)
 
         // Redirect based on user role
         const dashboardPath = getDashboardPath(result.user.role)
-        console.log('Redirecting to:', dashboardPath)
         router.push(dashboardPath)
       } else {
         throw new Error('Invalid response from server')
@@ -137,7 +132,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Login failed')
-      console.error('Login error:', error)
       setError(error)
       setIsAuthenticated(false)
       setUser(null)
@@ -188,7 +182,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      console.log('Starting registration process...')
       // Normalize API URL to avoid double slashes or missing /api
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api`
@@ -207,7 +200,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (result.success) {
-        console.log('Registration successful, logging in...')
         // After successful registration, log in the user
         await login(userData.phone, userData.password)
       } else {

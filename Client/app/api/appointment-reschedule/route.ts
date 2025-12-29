@@ -10,7 +10,6 @@ export async function PUT(request: NextRequest) {
         const appointmentId = searchParams.get('appointmentId');
         const { new_date, new_time, reason } = await request.json();
 
-        console.log('📅 [Appointment Reschedule] Request:', { appointmentId, new_date, new_time });
 
         if (!appointmentId) {
             return NextResponse.json({
@@ -36,7 +35,6 @@ export async function PUT(request: NextRequest) {
             .single();
 
         if (fetchError || !appointment) {
-            console.error('❌ Appointment not found:', fetchError);
             return NextResponse.json({
                 success: false,
                 message: 'Appointment not found'
@@ -52,7 +50,6 @@ export async function PUT(request: NextRequest) {
         }
 
         // Update the appointment with new date and time
-        console.log('💾 Rescheduling appointment...');
         const { data: updatedAppointment, error: updateError } = await supabase
             .from('appointments')
             .update({
@@ -66,7 +63,6 @@ export async function PUT(request: NextRequest) {
             .single();
 
         if (updateError) {
-            console.error('❌ Failed to reschedule appointment:', updateError);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to reschedule appointment',
@@ -74,7 +70,6 @@ export async function PUT(request: NextRequest) {
             }, { status: 500 });
         }
 
-        console.log('✅ [Appointment Reschedule] Appointment rescheduled successfully');
         return NextResponse.json({
             success: true,
             message: 'Appointment rescheduled successfully',
@@ -82,7 +77,6 @@ export async function PUT(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('❌ Appointment reschedule error:', error);
         return NextResponse.json({
             success: false,
             message: 'Internal server error',

@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
       .order('name', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch lab test types:', error);
       return NextResponse.json({ error: 'Failed to fetch test types' }, { status: 500 });
     }
 
@@ -41,7 +40,6 @@ export async function GET(request: NextRequest) {
       types: types || [] 
     });
   } catch (error) {
-    console.error('Lab test types error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

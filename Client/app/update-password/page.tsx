@@ -23,7 +23,6 @@ export default function UpdatePasswordPage() {
       const tokenHash = urlParams.get('token_hash')
       const type = urlParams.get('type')
 
-      console.log('Token hash:', tokenHash ? 'present' : 'none', 'Type:', type)
 
       if (!tokenHash || type !== 'recovery') {
         setError("Invalid reset link. Please request a new password reset.")
@@ -38,7 +37,6 @@ export default function UpdatePasswordPage() {
       setIsAuthenticated(true)
       
       // We don't need to verify the token separately - Supabase will verify it when we update the password
-      console.log('Token hash received, ready to update password')
     }
     verifyToken()
   }, [router])
@@ -65,7 +63,6 @@ export default function UpdatePasswordPage() {
     setIsLoading(true)
 
     try {
-      console.log('Attempting to update password with token hash')
       
       // Call our custom reset password API with token_hash
       const response = await fetch('/api/auth/reset-password', {
@@ -85,7 +82,6 @@ export default function UpdatePasswordPage() {
         throw new Error(data.error || 'Failed to update password')
       }
 
-      console.log('Password updated successfully')
       
       setSuccess(true)
       
@@ -95,7 +91,6 @@ export default function UpdatePasswordPage() {
       }, 3000)
       
     } catch (err: any) {
-      console.error("Password update error:", err)
       setError(err.message || "An error occurred. Please try again.")
     } finally {
       setIsLoading(false)

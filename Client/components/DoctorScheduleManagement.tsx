@@ -349,7 +349,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       // Try fallback route first for Vercel compatibility
       let response;
       try {
-        console.log('🏥 Trying doctor-centers fallback route');
         response = await axios.get(
           `/api/doctor-centers`,
           {
@@ -357,7 +356,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           }
         );
       } catch (fallbackError) {
-        console.log('❌ Fallback failed, trying dynamic route');
         response = await axios.get(
           `/api/doctor-dashboard/centers`,
           {
@@ -369,7 +367,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       if (response.data.success) {
         // ONLY show assigned centers in the Schedule tab
         const assignedCenters = response.data.assigned_centers || [];
-        console.log('📅 [Schedule] Assigned centers:', assignedCenters.length);
         setCenters(assignedCenters);
 
         // Only set default selection if there are assigned centers
@@ -395,7 +392,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }
       }
     } catch (error) {
-      console.error('Fetch centers error:', error);
       toast({
         title: t('error') || 'Error',
         description: t('dd_load_centers_failed') || 'Failed to load centers',
@@ -411,11 +407,9 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       setLoading(true);
       const token = localStorage.getItem('auth_token');
 
-      console.log('📅 [Fetch Schedule] Starting fetch for center:', selectedCenterId);
-      console.log('📅 [Fetch Schedule] Initialized centers:', Array.from(initializedCenters));
+      );
 
       if (!selectedCenterId) {
-        console.log('📅 [Fetch Schedule] No center selected, skipping fetch');
         setSchedule([]);
         setLoading(false);
         return;
@@ -428,42 +422,37 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }
       );
 
-      console.log('📅 [Fetch Schedule] Response received:', response.data);
 
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
-        console.log('📅 [Fetch Schedule] Schedule rows from DB:', rows.length);
-        console.log('📅 [Fetch Schedule] Raw schedule data:', JSON.stringify(rows, null, 2));
+        );
 
         setSchedule(rows);
 
         // Always load from DB if center hasn't been initialized yet in this session
         // This ensures first visit to each center loads from database
         const shouldUpdateFromDB = !initializedCenters.has(selectedCenterId);
-        console.log('📅 [Fetch Schedule] Should update from DB:', shouldUpdateFromDB);
 
         if (shouldUpdateFromDB) {
-          console.log('📅 [Fetch Schedule] Building configs from schedule...');
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
-          console.log('📅 [Fetch Schedule] Built configs:', JSON.stringify(newConfigs, null, 2));
+          );
 
           setCenterFormStates(prev => {
             const updated = {
               ...prev,
               [selectedCenterId]: newConfigs
             };
-            console.log('📅 [Fetch Schedule] Updated form states:', JSON.stringify(updated, null, 2));
+            );
             return updated;
           });
 
           setInitializedCenters(prev => {
             const updated = new Set([...prev, selectedCenterId]);
-            console.log('📅 [Fetch Schedule] Updated initialized centers:', Array.from(updated));
+            );
             return updated;
           });
         } else {
-          console.log('📅 [Fetch Schedule] Center already initialized, using existing form state');
-          console.log('📅 [Fetch Schedule] Existing config:', JSON.stringify(centerFormStates[selectedCenterId], null, 2));
+          );
         }
 
         setLastFetchedCenterId(selectedCenterId);
@@ -472,13 +461,10 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
         // Mark initial mount as complete after any fetch
         if (isInitialMount) {
-          console.log('📅 [Fetch Schedule] Marking initial mount as complete');
           setIsInitialMount(false);
         }
       }
     } catch (error: any) {
-      console.error('📅 [Fetch Schedule] Error:', error);
-      console.error('📅 [Fetch Schedule] Error response:', error.response?.data);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),
@@ -526,7 +512,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         });
       }
     } catch (error: any) {
-      console.error('Refresh schedule error:', error);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_load_schedule_failed') || 'Failed to load schedule'),
@@ -593,14 +578,12 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         return;
       }
 
-      console.log('📅 [Save Schedule] Starting save for center:', selectedCenterId);
-      console.log('📅 [Save Schedule] Current form states:', centerFormStates);
 
       // Build schedule array for API - only include days that are marked as available
       const scheduleData = DAYS_OF_WEEK
         .filter(day => {
           const config = getDayConfig(day.value);
-          console.log(`📅 [Save Schedule] Day ${day.value} (${day.labelKey}):`, {
+          :`, {
             isAvailable: config.isAvailable,
             startTime: config.startTime,
             endTime: config.endTime,
@@ -612,7 +595,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           const config = getDayConfig(day.value);
           const slots = generateSlotsForDay(day.value);
 
-          console.log(`📅 [Save Schedule] Generated ${slots.length} slots for day ${day.value}`);
 
           return {
             day_of_week: day.value,
@@ -626,13 +608,11 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         .filter(day => {
           const hasSlots = day.time_slots.length > 0;
           if (!hasSlots) {
-            console.log(`⚠️ [Save Schedule] Day ${day.day_of_week} excluded - no time slots generated`);
           }
           return hasSlots;
         });
 
-      console.log('📅 [Save Schedule] Final schedule data to send:', JSON.stringify(scheduleData, null, 2));
-      console.log('📅 [Save Schedule] Number of days with schedules:', scheduleData.length);
+      );
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,
@@ -645,7 +625,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }
       );
 
-      console.log('📅 [Save Schedule] Response:', response.data);
 
       if (response.data.success) {
         // Update the schedule state with the response data
@@ -660,13 +639,9 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         // The form state should remain as the user configured it
       }
     } catch (error: any) {
-      console.error('Save schedule error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
 
       // Handle schedule conflict (409) with detailed message
       if (error.response?.status === 409) {
-        console.log('🚨 DETECTED 409 CONFLICT - SHOWING DIALOG');
         const conflictData = error.response.data;
 
         // Set conflict message and details
@@ -677,10 +652,8 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         setConflictDetails(conflicts);
         setShowConflictDialog(true);
       } else {
-        console.log('🚨 NON-409 ERROR - SHOWING GENERIC TOAST');
         // Generic error handling
         const errorMessage = error.response?.data?.error || error.response?.data?.message || (t('dd_save_schedule_failed') || 'Failed to save schedule');
-        console.log('📢 Error message:', errorMessage);
 
         toast({
           title: t('error') || 'Error',
@@ -733,7 +706,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
         }, 1000);
       }
     } catch (error: any) {
-      console.error('Toggle home visits error:', error);
       toast({
         title: t('error') || 'Error',
         description: error.response?.data?.error || (t('dd_update_home_visits_failed') || 'Failed to update home visits setting'),

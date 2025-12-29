@@ -89,7 +89,6 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         setCenters(data.centers || []);
       }
     } catch (error) {
-      console.error('Failed to fetch centers:', error);
       toast({
         title: t('error'),
         description: "Failed to load medical centers.",
@@ -147,7 +146,6 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         throw new Error('Failed to add center');
       }
     } catch (error) {
-      console.error('Failed to add center:', error);
       toast({
         title: t('error'),
         description: "Failed to add medical center.",
@@ -181,7 +179,6 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         throw new Error('Failed to update center');
       }
     } catch (error) {
-      console.error('Failed to update center:', error);
       toast({
         title: t('error'),
         description: "Failed to update medical center.",
@@ -214,7 +211,6 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         throw new Error('Failed to delete center');
       }
     } catch (error) {
-      console.error('Failed to delete center:', error);
       toast({
         title: t('error'),
         description: "Failed to delete medical center.",
@@ -245,7 +241,6 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         });
       }
     } catch (error) {
-      console.error('Failed to set primary center:', error);
       toast({
         title: t('error'),
         description: "Failed to update primary center.",

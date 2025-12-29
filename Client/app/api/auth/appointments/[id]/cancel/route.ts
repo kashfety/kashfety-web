@@ -105,7 +105,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, message: 'Appointment cancelled' });
   } catch (error) {
-    console.error('Proxy error (cancel):', error);
+    :', error);
     return NextResponse.json({ success: false, message: 'Failed to cancel appointment' }, { status: 500 });
   }
 }

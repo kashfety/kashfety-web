@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
 
-    console.log('👤 [Doctor - Patient Details] Fetching for patient:', patientId);
 
     if (!patientId) {
       return NextResponse.json({ 
@@ -29,7 +28,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('❌ Error fetching patient:', error);
       return NextResponse.json({ 
         success: false, 
         error: 'Patient not found',
@@ -37,14 +35,12 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    console.log('✅ [Doctor - Patient Details] Found patient:', patient.name);
     return NextResponse.json({
       success: true,
       patient
     });
 
   } catch (error: any) {
-    console.error('❌ Doctor patient details error:', error);
     return NextResponse.json({ 
       success: false, 
       error: 'Internal server error',

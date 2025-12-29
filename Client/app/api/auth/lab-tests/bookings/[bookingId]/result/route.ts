@@ -29,7 +29,6 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Failed to update lab result:', error);
       return NextResponse.json({ error: 'Failed to update lab result' }, { status: 500 });
     }
 
@@ -40,7 +39,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Update result error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

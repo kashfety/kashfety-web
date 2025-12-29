@@ -249,7 +249,6 @@ export default function MyAppointmentsPage() {
         setReviewedIds(new Set(data.reviewedAppointmentIds))
       }
     } catch (error) {
-      console.error('Failed to fetch reviewed appointments:', error)
     }
   }
 
@@ -321,32 +320,26 @@ export default function MyAppointmentsPage() {
         // Handle appointment date more safely with timezone-aware parsing
         let appointmentDate: Date;
         if (!apt.appointment_date) {
-          console.warn('⚠️ Missing appointment_date for appointment:', apt.id);
           appointmentDate = new Date(); // fallback to today
         } else {
           // Parse date string as local date to avoid timezone issues
           const dateString = apt.appointment_date;
-          console.log('📅 Parsing date string:', dateString);
 
           if (dateString.includes('T')) {
             // If it's an ISO string, parse normally
             appointmentDate = new Date(dateString);
-            console.log('📅 Parsed as ISO date:', appointmentDate);
           } else {
             // If it's just a date (YYYY-MM-DD), parse as local date
             const [year, month, day] = dateString.split('-').map(Number);
             appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
-            console.log('📅 Parsed as local date:', appointmentDate, 'from parts:', { year, month: month - 1, day });
           }
 
           // Check if the date is valid
           if (isNaN(appointmentDate.getTime())) {
-            console.warn('⚠️ Invalid appointment_date:', apt.appointment_date, 'for appointment:', apt.id);
             appointmentDate = new Date(); // fallback to today
           }
         }
 
-        console.log('📅 Parsed appointment date:', appointmentDate, 'from:', apt.appointment_date);
 
         const appointmentTime = apt.appointment_time
 
@@ -362,7 +355,6 @@ export default function MyAppointmentsPage() {
           formattedDate = toArabicNumerals(formattedDate, locale);
         }
 
-        console.log('📅 Formatted date:', formattedDate, 'from parsed date:', appointmentDate);
 
         // Format time
         let formattedTime = appointmentTime;
@@ -496,7 +488,6 @@ export default function MyAppointmentsPage() {
           if (a.center_id && idToCenter[a.center_id]) {
             const name = idToCenter[a.center_id].name || a.location;
             const addr = idToCenter[a.center_id].address || a.address;
-            console.log('🏥 Enriched center from id', a.center_id, '→', name);
             return { ...a, location: name || a.location, address: addr || a.address } as Appointment;
           }
           return a as Appointment;

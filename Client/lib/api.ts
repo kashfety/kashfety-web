@@ -806,7 +806,6 @@ export const adminService = {
       // Try fallback route first for Vercel compatibility
       try {
         const response = await api.get('/api/admin-users', { params });
-        );
 
         // Check if response has users data (multiple possible formats)
         const hasUsers = response.data?.users ||

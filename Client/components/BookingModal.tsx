@@ -720,7 +720,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         }
       } else {
         // Use default schedule as fallback
-         as fallback');
         setDoctorWorkingDays([0, 1, 2, 3, 4]);
 
         const availableDates = [];

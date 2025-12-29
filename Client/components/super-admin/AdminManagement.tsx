@@ -229,7 +229,6 @@ export default function AdminManagement() {
                     return transformed;
                 });
 
-             => ({ id: a.id, name: a.name, email: a.email })));
             setAdmins(adminUsers);
             setTotalPages(data.data?.pagination?.totalPages || data.pagination?.totalPages || 1);
         } catch (error) {

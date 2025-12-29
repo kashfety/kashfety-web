@@ -423,7 +423,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
       if (response.data.success) {
         const rows: ScheduleData[] = response.data.schedule || [];
-        );
 
         setSchedule(rows);
 

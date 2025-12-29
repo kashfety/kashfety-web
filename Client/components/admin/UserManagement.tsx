@@ -309,8 +309,6 @@ export default function UserManagement() {
             });
 
             // Immediately refresh the user list to get the latest data
-            ));
-
             // Track refresh completion
             await fetchUsers();
 

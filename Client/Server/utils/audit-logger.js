@@ -1,4 +1,4 @@
-import { supabase } from '../app/supabase-admin.js';
+import { supabaseAdmin } from './supabase.js';
 
 /**
  * Audit Logger Utility
@@ -48,7 +48,7 @@ export const AuditLogger = {
                 user_agent: userAgent
             };
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseAdmin
                 .from('audit_logs')
                 .insert([auditData])
                 .select()

@@ -77,13 +77,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify patient_id matches authenticated user (unless admin)
-    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+    // Only patients can submit reviews for their own appointments
+    if (authenticatedUser.role === 'patient') {
       if (patient_id !== authenticatedUser.id) {
         return NextResponse.json({
           success: false,
           message: 'Forbidden - You can only create reviews for your own appointments'
         }, { status: 403 });
       }
+    } else if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      // Other roles (doctors, centers) cannot submit reviews
+      return NextResponse.json({
+        success: false,
+        message: 'Forbidden - Only patients and admins can submit reviews'
+      }, { status: 403 });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

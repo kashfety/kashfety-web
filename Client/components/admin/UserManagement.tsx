@@ -176,7 +176,6 @@ export default function UserManagement() {
             const paginationData = data.data?.pagination || data.pagination || {};
 
             // Transform users data to match our interface and filter out other admins
-            .map((u: any) => ({ id: u.id, first_name: u.first_name, last_name: u.last_name, name: u.name, email: u.email })));
 
             const transformedUsers = usersData
                 .filter((user: any) => {
@@ -221,7 +220,6 @@ export default function UserManagement() {
                     return transformedUser;
                 });
 
-            .map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
             setUsers(transformedUsers);
             setTotalPages(paginationData.totalPages || Math.ceil(transformedUsers.length / 20));
 

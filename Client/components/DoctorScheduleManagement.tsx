@@ -407,8 +407,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       setLoading(true);
       const token = localStorage.getItem('auth_token');
 
-      );
-
       if (!selectedCenterId) {
         setSchedule([]);
         setLoading(false);

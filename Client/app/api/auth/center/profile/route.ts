@@ -79,14 +79,21 @@ export async function PUT(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   
+  // Read body once and reuse it
+  let bodyData: any;
+  try {
+    bodyData = await request.json();
+  } catch (e) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+  
   // Try backend first if JWT provided
   if (authHeader) {
     try {
-      const body = await request.json();
       const response = await fetch(`${BACKEND_URL}/api/center-dashboard/profile`, {
         method: 'PUT',
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(bodyData)
       });
       const data = await response.json();
       if (response.ok) return NextResponse.json(data);
@@ -104,7 +111,7 @@ export async function PUT(request: NextRequest) {
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const updates = await request.json();
+    const updates = bodyData;
     
     // Check if center exists first
     const { data: existingCenter } = await supabase

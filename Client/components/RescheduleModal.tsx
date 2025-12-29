@@ -366,10 +366,6 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         reason: reason || t('reschedule_default_reason') || "Rescheduled by patient request"
       };
 
-      // DEBUG: Log date formatting fix
-      );
-      .split('T')[0]);
-
       console.log('Rescheduling appointment:', {
         appointmentId: appointment.id,
         appointmentData: appointment,

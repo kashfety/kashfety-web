@@ -18,13 +18,20 @@ export async function GET(request: NextRequest) {
     const patientId = searchParams.get('patientId') || authenticatedUser.id;
 
     // Verify patientId matches authenticated user (unless admin)
-    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+    // Patients can only access their own bookings
+    if (authenticatedUser.role === 'patient') {
       if (patientId !== authenticatedUser.id) {
         return NextResponse.json({
           success: false,
           error: 'Forbidden - You can only access your own lab bookings'
         }, { status: 403 });
       }
+    } else if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      // Other roles (doctors, centers) cannot access patient lab bookings
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Only patients and admins can access lab bookings'
+      }, { status: 403 });
     }
 
     if (!patientId) {

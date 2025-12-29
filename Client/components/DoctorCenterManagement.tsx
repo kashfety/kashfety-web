@@ -102,7 +102,6 @@ export default function DoctorCenterManagement() {
           return approved;
         });
 
-        filtered.forEach((c) => );
         setCenters(filtered);
 
         // Set current assignments

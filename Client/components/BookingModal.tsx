@@ -685,10 +685,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           // If no working days found, use default schedule (Sunday to Thursday)
           const workingDays = days.length > 0 ? days.map((d: any) => Number(d)) : [0, 1, 2, 3, 4];
 
-          if (days.length === 0) {
-            ');
-          }
-
           setDoctorWorkingDays(workingDays);
 
           // Generate available dates for the next 30 days based on working days
@@ -708,7 +704,6 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
           setAvailableDates(availableDates);
         } else {
           // Use default schedule as fallback
-           as fallback');
           setDoctorWorkingDays([0, 1, 2, 3, 4]);
 
           const availableDates = [];

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { markPastAppointmentsAsAbsent } from '@/lib/appointmentHelpers';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -10,24 +11,38 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📋 [My Appointments API] Request received');
 
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const role = searchParams.get('role') || 'patient';
+    const role = searchParams.get('role') || authenticatedUser.role;
 
-    console.log('📋 [My Appointments API] User ID:', userId, 'Role:', role);
-
-    if (!userId) {
-      return NextResponse.json({
-        success: false,
-        message: 'User ID is required as query parameter'
-      }, { status: 400 });
+    // Verify userId matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (!userId || userId !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only access your own appointments'
+        }, { status: 403 });
+      }
     }
 
+    // Use authenticated user's ID and role if not provided
+    const finalUserId = userId || authenticatedUser.id;
+    const finalRole = role || authenticatedUser.role;
+
+    console.log('📋 [My Appointments API] User ID:', finalUserId, 'Role:', finalRole);
+
     // Mark past appointments as absent before fetching
-    if (role === 'doctor') {
-      await markPastAppointmentsAsAbsent(userId, null);
-    } else if (role === 'patient') {
-      await markPastAppointmentsAsAbsent(null, userId);
+    if (finalRole === 'doctor') {
+      await markPastAppointmentsAsAbsent(finalUserId, null);
+    } else if (finalRole === 'patient') {
+      await markPastAppointmentsAsAbsent(null, finalUserId);
     }
 
     // Build query
@@ -41,12 +56,12 @@ export async function GET(request: NextRequest) {
       `);
 
     // Filter by role
-    if (role === 'super_admin' || role === 'admin') {
+    if (finalRole === 'super_admin' || finalRole === 'admin') {
       console.log('📋 Admin - fetching all');
-    } else if (role === 'doctor') {
-      appointmentsQuery = appointmentsQuery.eq('doctor_id', userId);
+    } else if (finalRole === 'doctor') {
+      appointmentsQuery = appointmentsQuery.eq('doctor_id', finalUserId);
     } else {
-      appointmentsQuery = appointmentsQuery.eq('patient_id', userId);
+      appointmentsQuery = appointmentsQuery.eq('patient_id', finalUserId);
     }
 
     const { data: appointments, error } = await appointmentsQuery

@@ -1,13 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { searchParams } = new URL(request.url);
-    const patientId = searchParams.get('patientId');
+    const patientId = searchParams.get('patientId') || authenticatedUser.id;
+
+    // Verify patientId matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (patientId !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only access your own lab bookings'
+        }, { status: 403 });
+      }
+    }
 
     if (!patientId) {
       return NextResponse.json({ 

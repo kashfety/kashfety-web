@@ -1,6 +1,6 @@
 import express from "express";
 import * as centerController from "../controllers/centerController.js";
-import { verifyToken, isAdmin, isDoctorOrAdmin } from "../middleware/authMiddleware.js";
+import { authenticateToken, isAdmin, isDoctorOrAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get("/services/:centerId", centerController.getCenterServices);
 router.get("/nearby", centerController.getNearbyCenters);
 
 // Protected routes
-router.use(verifyToken);
+router.use(authenticateToken);
 
 // Admin routes for center management
 router.post("/", isAdmin, centerController.createCenter);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -10,17 +11,24 @@ export async function PUT(request: NextRequest) {
   try {
     console.log('🔄 [Doctor Update Appointment Status] PUT request received');
     
+    // Require doctor authentication
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user } = authResult;
+    
     const { searchParams } = new URL(request.url);
     const appointmentId = searchParams.get('appointmentId') || searchParams.get('appointment_id');
-    const doctorId = searchParams.get('doctor_id');
     
     const body = await request.json();
     const status = body?.status || searchParams.get('status');
     const notes = body?.notes;
     
-    // Also check body for appointmentId and doctorId if not in query
+    // Also check body for appointmentId if not in query
     const finalAppointmentId = appointmentId || body?.appointmentId || body?.appointment_id;
-    const finalDoctorId = doctorId || body?.doctor_id;
+    // Use authenticated doctor's ID instead of trusting query/body
+    const finalDoctorId = user.id;
 
     console.log('📋 [Doctor Update Appointment Status] Updating appointment:', {
       appointmentId: finalAppointmentId,
@@ -30,10 +38,6 @@ export async function PUT(request: NextRequest) {
 
     if (!finalAppointmentId) {
       return NextResponse.json({ error: 'appointmentId is required' }, { status: 400 });
-    }
-
-    if (!finalDoctorId) {
-      return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     }
 
     if (!status || !['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'].includes(status)) {
@@ -56,7 +60,7 @@ export async function PUT(request: NextRequest) {
 
     if (appointment.doctor_id !== finalDoctorId) {
       console.error('❌ [Doctor Update Appointment Status] Access denied - doctor_id mismatch');
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden - You can only update your own appointments' }, { status: 403 });
     }
 
     // Prepare update data

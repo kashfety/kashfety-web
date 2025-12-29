@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -7,6 +8,14 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET(request: NextRequest) {
   try {
     console.log('👤 [Admin User Details] Request received');
+    
+    // Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId') || searchParams.get('id');
 
@@ -21,10 +30,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch user details (including password_hash for admin view)
+    // Fetch user details (excluding password_hash - use boolean flag instead)
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('*, password_hash')
+      .select('*')
       .eq('id', userId)
       .single();
 
@@ -91,7 +100,7 @@ export async function GET(request: NextRequest) {
       home_visits_available: user.home_visits_available,
       rating: user.rating,
       // Password status (for admin view) - don't expose the actual hash
-      password_hash: user.password_hash ? 'set' : null
+      password_set: !!user.password_hash
     };
 
     // Transform appointments and enrich with doctor/center info

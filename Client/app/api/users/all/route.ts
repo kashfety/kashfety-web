@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export async function GET(request: NextRequest) {
   try {
+    // Require admin authentication and verify token
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization');
     

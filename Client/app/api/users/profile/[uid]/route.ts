@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export async function GET(request: NextRequest, { params }: { params: { uid: string } }) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Authorization header missing' },
-        { status: 401 }
-      );
+    // Require authentication and verify token
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
     }
+    const { user: authenticatedUser } = authResult;
 
     const { uid } = params;
+
+    // Verify uid matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (uid !== authenticatedUser.id && uid !== authenticatedUser.uid) {
+        return NextResponse.json({
+          error: 'Forbidden - You can only access your own profile'
+        }, { status: 403 });
+      }
+    }
+
+    const authHeader = request.headers.get('authorization');
 
     const response = await fetch(`${API_BASE_URL}/api/users/profile/${uid}`, {
       headers: {
@@ -44,16 +54,25 @@ export async function GET(request: NextRequest, { params }: { params: { uid: str
 
 export async function PUT(request: NextRequest, { params }: { params: { uid: string } }) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Authorization header missing' },
-        { status: 401 }
-      );
+    // Require authentication and verify token
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
     }
+    const { user: authenticatedUser } = authResult;
 
     const { uid } = params;
+
+    // Verify uid matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (uid !== authenticatedUser.id && uid !== authenticatedUser.uid) {
+        return NextResponse.json({
+          error: 'Forbidden - You can only update your own profile'
+        }, { status: 403 });
+      }
+    }
+
+    const authHeader = request.headers.get('authorization');
     const body = await request.json();
 
     const response = await fetch(`${API_BASE_URL}/api/users/profile/${uid}`, {
@@ -87,16 +106,25 @@ export async function PUT(request: NextRequest, { params }: { params: { uid: str
 
 export async function DELETE(request: NextRequest, { params }: { params: { uid: string } }) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Authorization header missing' },
-        { status: 401 }
-      );
+    // Require authentication and verify token
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
     }
+    const { user: authenticatedUser } = authResult;
 
     const { uid } = params;
+
+    // Verify uid matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (uid !== authenticatedUser.id && uid !== authenticatedUser.uid) {
+        return NextResponse.json({
+          error: 'Forbidden - You can only delete your own account'
+        }, { status: 403 });
+      }
+    }
+
+    const authHeader = request.headers.get('authorization');
 
     const response = await fetch(`${API_BASE_URL}/api/users/account/${uid}/delete`, {
       method: 'DELETE',

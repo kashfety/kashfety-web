@@ -1,12 +1,12 @@
 import express from "express";
 import { supabaseAdmin } from "../utils/supabase.js";
 import Patient from "../models/Patient.js";
-import { verifyToken, isPatient, isDoctor, isAdmin } from "../middleware/authMiddleware.js";
+import { authenticateToken, isPatient, isDoctor, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Patient Profile Management
-router.post("/profile/create", verifyToken, async (req, res) => {
+router.post("/profile/create", authenticateToken, async (req, res) => {
   try {
     const patient = await Patient.createPatientProfile(req.body);
     res.status(201).json({
@@ -22,7 +22,7 @@ router.post("/profile/create", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/profile/:uid/details", verifyToken, async (req, res) => {
+router.get("/profile/:uid/details", authenticateToken, async (req, res) => {
   try {
     const patient = await Patient.getPatientByUid(req.params.uid);
     if (!patient) {
@@ -43,7 +43,7 @@ router.get("/profile/:uid/details", verifyToken, async (req, res) => {
   }
 });
 
-router.put("/profile/:uid/update", verifyToken, async (req, res) => {
+router.put("/profile/:uid/update", authenticateToken, async (req, res) => {
   try {
     const updatedPatient = await Patient.updatePatientProfile(req.params.uid, req.body);
     res.json({
@@ -60,7 +60,7 @@ router.put("/profile/:uid/update", verifyToken, async (req, res) => {
 });
 
 // Patient Medical History
-router.get("/medical-history/:uid/records", verifyToken, async (req, res) => {
+router.get("/medical-history/:uid/records", authenticateToken, async (req, res) => {
   try {
     const medicalHistory = await Patient.getPatientMedicalHistory(req.params.uid);
     res.json({
@@ -75,7 +75,7 @@ router.get("/medical-history/:uid/records", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/medical-history/:patientId/add-record", verifyToken, isDoctor, async (req, res) => {
+router.post("/medical-history/:patientId/add-record", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('medical_records')
@@ -111,7 +111,7 @@ router.post("/medical-history/:patientId/add-record", verifyToken, isDoctor, asy
 });
 
 // Patient Appointments Management
-router.get("/appointments/:patientId/all", verifyToken, async (req, res) => {
+router.get("/appointments/:patientId/all", authenticateToken, async (req, res) => {
   try {
     const { status } = req.query;
     const appointments = await Patient.getPatientAppointments(req.params.patientId, status);
@@ -127,7 +127,7 @@ router.get("/appointments/:patientId/all", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/appointments/:patientId/upcoming", verifyToken, async (req, res) => {
+router.get("/appointments/:patientId/upcoming", authenticateToken, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     const { data: appointments, error } = await supabaseAdmin
@@ -156,7 +156,7 @@ router.get("/appointments/:patientId/upcoming", verifyToken, async (req, res) =>
   }
 });
 
-router.get("/appointments/:patientId/history", verifyToken, async (req, res) => {
+router.get("/appointments/:patientId/history", authenticateToken, async (req, res) => {
   try {
     const { data: appointments, error } = await supabaseAdmin
       .from('appointments')
@@ -184,7 +184,7 @@ router.get("/appointments/:patientId/history", verifyToken, async (req, res) => 
 });
 
 // Patient Dashboard Data
-router.get("/dashboard", verifyToken, isPatient, async (req, res) => {
+router.get("/dashboard", authenticateToken, isPatient, async (req, res) => {
   try {
     // Get patient by authenticated user's UID
     const patient = await Patient.getPatientByUid(req.user.uid);
@@ -267,7 +267,7 @@ router.get("/dashboard", verifyToken, isPatient, async (req, res) => {
 });
 
 // Patient Directory (Admin only)
-router.get("/directory/all-patients", verifyToken, isAdmin, async (req, res) => {
+router.get("/directory/all-patients", authenticateToken, isAdmin, async (req, res) => {
   try {
     const patients = await Patient.getAllPatients();
     res.json({
@@ -283,7 +283,7 @@ router.get("/directory/all-patients", verifyToken, isAdmin, async (req, res) => 
 });
 
 // Patient Search (Doctor access)
-router.get("/search/by-criteria", verifyToken, isDoctor, async (req, res) => {
+router.get("/search/by-criteria", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { name, email, phone } = req.query;
     
@@ -321,7 +321,7 @@ router.get("/search/by-criteria", verifyToken, isDoctor, async (req, res) => {
 });
 
 // Patient Reviews for Doctors
-router.post("/reviews/:patientId/create", verifyToken, isPatient, async (req, res) => {
+router.post("/reviews/:patientId/create", authenticateToken, isPatient, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('doctor_reviews')

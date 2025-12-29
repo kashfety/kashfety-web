@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -7,10 +8,27 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 // GET: Fetch patient's medical information
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     try {
+        // Require authentication
+        const authResult = requireAuth(req);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401 error
+        }
+        const { user: authenticatedUser } = authResult;
+
         const { searchParams } = new URL(req.url);
-        const userId = searchParams.get('userId');
+        const userId = searchParams.get('userId') || authenticatedUser.id;
+
+        // Verify userId matches authenticated user (unless admin)
+        if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+            if (userId !== authenticatedUser.id) {
+                return NextResponse.json({
+                    success: false,
+                    message: 'Forbidden - You can only access your own medical information'
+                }, { status: 403 });
+            }
+        }
 
         if (!userId) {
             return NextResponse.json({
@@ -64,25 +82,44 @@ export async function GET(req: Request) {
 }
 
 // PUT: Update patient's medical information
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
     try {
+        // Require authentication
+        const authResult = requireAuth(req);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401 error
+        }
+        const { user: authenticatedUser } = authResult;
+
         const body = await req.json();
         const { userId, medical_history, allergies, medications, emergency_contact } = body;
 
-        if (!userId) {
+        const finalUserId = userId || authenticatedUser.id;
+
+        // Verify userId matches authenticated user (unless admin)
+        if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+            if (finalUserId !== authenticatedUser.id) {
+                return NextResponse.json({
+                    success: false,
+                    message: 'Forbidden - You can only update your own medical information'
+                }, { status: 403 });
+            }
+        }
+
+        if (!finalUserId) {
             return NextResponse.json({
                 success: false,
                 message: "User ID is required"
             }, { status: 400 });
         }
 
-        console.log(`📝 Updating medical info for user: ${userId}`);
+        console.log(`📝 Updating medical info for user: ${finalUserId}`);
 
         // Validate that user exists and is a patient
         const { data: existingUser, error: userError } = await supabaseAdmin
             .from('users')
             .select('id, role')
-            .eq('id', userId)
+            .eq('id', finalUserId)
             .single();
 
         if (userError || !existingUser || existingUser.role !== 'patient') {
@@ -105,14 +142,14 @@ export async function PUT(req: Request) {
         const { error: updateError } = await supabaseAdmin
             .from('users')
             .update(updateData)
-            .eq('id', userId);
+            .eq('id', finalUserId);
 
         if (updateError) {
             console.error('Error updating medical info:', updateError);
             throw updateError;
         }
 
-        console.log(`✅ Successfully updated medical info for user: ${userId}`);
+        console.log(`✅ Successfully updated medical info for user: ${finalUserId}`);
 
         return NextResponse.json({
             success: true,

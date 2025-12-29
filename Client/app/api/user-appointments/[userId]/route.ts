@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -12,9 +13,27 @@ export async function GET(
 ) {
   try {
     console.log('📋 [User Appointments API] Request received');
+    
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { userId } = await context.params;
     const { searchParams } = new URL(request.url);
-    const role = searchParams.get('role') || 'patient';
+    const role = searchParams.get('role') || authenticatedUser.role;
+
+    // Verify userId matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (!userId || userId !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only access your own appointments'
+        }, { status: 403 });
+      }
+    }
 
     console.log('📋 [User Appointments API] User ID:', userId, 'Role:', role);
 

@@ -116,3 +116,127 @@ export const optionalAuth = (req, res, next) => {
 
   next();
 };
+
+// Helper functions for role checks (compatible with authMiddleware.js)
+export const isDoctor = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (req.user.role !== 'doctor') {
+    return res.status(403).json({ error: 'Access denied. Doctors only.' });
+  }
+  next();
+};
+
+export const isPatient = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (req.user.role !== 'patient') {
+    return res.status(403).json({ error: 'Access denied. Patients only.' });
+  }
+  next();
+};
+
+export const isAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Access denied. Admins only.' });
+  }
+  next();
+};
+
+export const isDoctorOrAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (!['doctor', 'admin', 'super_admin'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied. Doctors or Admins only.' });
+  }
+  next();
+};
+
+// Check if user can access patient data (patient accessing own data or doctor/admin accessing any)
+export const canAccessPatientData = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const requestedPatientId = req.params.patientId || req.params.uid;
+  
+  // If user is admin or super_admin, allow access to any patient data
+  if (req.user.role === 'admin' || req.user.role === 'super_admin') {
+    return next();
+  }
+  
+  // If user is a patient, only allow access to their own data
+  if (req.user.role === 'patient') {
+    if (requestedPatientId && requestedPatientId !== req.user.id && requestedPatientId !== req.user.uid) {
+      return res.status(403).json({ error: 'Access denied. You can only access your own data.' });
+    }
+    return next();
+  }
+  
+  // If user is a doctor, allow access (they should only see their own patients, enforced in controller)
+  if (req.user.role === 'doctor') {
+    return next();
+  }
+  
+  return res.status(403).json({ error: 'Access denied.' });
+};
+
+// Check if user can access doctor data (doctor accessing own data or admin accessing any)
+export const canAccessDoctorData = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const requestedDoctorId = req.params.doctorId || req.params.uid;
+  
+  // If user is admin or super_admin, allow access to any doctor data
+  if (req.user.role === 'admin' || req.user.role === 'super_admin') {
+    return next();
+  }
+  
+  // If user is a doctor, only allow access to their own data
+  if (req.user.role === 'doctor') {
+    if (requestedDoctorId && requestedDoctorId !== req.user.id && requestedDoctorId !== req.user.uid) {
+      return res.status(403).json({ error: 'Access denied. You can only access your own data.' });
+    }
+    return next();
+  }
+  
+  return res.status(403).json({ error: 'Access denied. Doctors or Admins only.' });
+};
+
+// Middleware for patient-only routes that use authenticated user's data
+export const requirePatientSelf = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  if (req.user.role !== 'patient') {
+    return res.status(403).json({ error: 'Access denied. Patients only.' });
+  }
+
+  // Set the patientId to the authenticated user's ID to prevent parameter manipulation
+  req.authenticatedPatientUid = req.user.id || req.user.uid;
+  next();
+};
+
+// Middleware for doctor-only routes that use authenticated user's data  
+export const requireDoctorSelf = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  if (req.user.role !== 'doctor') {
+    return res.status(403).json({ error: 'Access denied. Doctors only.' });
+  }
+
+  // Set the doctorId to the authenticated user's ID to prevent parameter manipulation
+  req.authenticatedDoctorUid = req.user.id || req.user.uid;
+  next();
+};

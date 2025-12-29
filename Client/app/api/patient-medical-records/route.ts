@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth, AuthenticatedUser } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -9,14 +10,54 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 // GET: Fetch all medical records for a patient
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patient_id');
 
     if (!patientId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Patient ID is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Patient ID is required'
       }, { status: 400 });
+    }
+
+    // Role-based access control:
+    // - Patients can only see their own records
+    // - Doctors can only see records for patients who booked with them
+    // - Admins can see all records
+    if (user.role === 'patient') {
+      if (patientId !== user.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only access your own medical records'
+        }, { status: 403 });
+      }
+    } else if (user.role === 'doctor') {
+      // Check if doctor has any appointments with this patient
+      const { data: appointments, error: appointmentCheckError } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('doctor_id', user.id)
+        .eq('patient_id', patientId)
+        .limit(1);
+
+      if (appointmentCheckError || !appointments || appointments.length === 0) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only access records for patients who booked with you'
+        }, { status: 403 });
+      }
+    } else if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Insufficient permissions'
+      }, { status: 403 });
     }
 
     console.log('📋 [Patient Medical Records] Fetching for patient:', patientId);
@@ -50,10 +91,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error fetching medical records:', error);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to fetch medical records',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 
@@ -65,10 +106,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Patient medical records error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
@@ -76,37 +117,115 @@ export async function GET(request: NextRequest) {
 // POST: Create a new medical record
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const body = await request.json();
-    const { 
-      patient_id, 
-      doctor_id, 
+    const {
+      patient_id,
+      doctor_id,
       appointment_id,
       record_type,
       title,
       description,
-      diagnosis, 
-      treatment, 
+      diagnosis,
+      treatment,
       prescription,
       lab_results,
       attachments,
       allergies,
       medications,
       medical_history,
-      record_date 
+      record_date
     } = body;
 
     if (!patient_id) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Patient ID is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Patient ID is required'
       }, { status: 400 });
     }
 
     if (!title) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Title is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Title is required'
       }, { status: 400 });
+    }
+
+    // Role-based access control:
+    // - Patients can create records for themselves
+    // - Doctors can create records for patients who booked with them
+    // - Admins can create records for any patient
+    if (user.role === 'patient') {
+      if (patient_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only create records for yourself'
+        }, { status: 403 });
+      }
+    } else if (user.role === 'doctor') {
+      // If doctor_id is provided, it must match the authenticated doctor
+      if (doctor_id && doctor_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - Invalid doctor ID'
+        }, { status: 403 });
+      }
+
+      // If appointment_id is provided, verify the doctor is assigned to it
+      if (appointment_id) {
+        const { data: appointment, error: appointmentError } = await supabase
+          .from('appointments')
+          .select('doctor_id, patient_id')
+          .eq('id', appointment_id)
+          .single();
+
+        if (appointmentError || !appointment) {
+          return NextResponse.json({
+            success: false,
+            error: 'Appointment not found'
+          }, { status: 404 });
+        }
+
+        if (appointment.doctor_id !== user.id) {
+          return NextResponse.json({
+            success: false,
+            error: 'Forbidden - You can only create records for your own appointments'
+          }, { status: 403 });
+        }
+
+        if (appointment.patient_id !== patient_id) {
+          return NextResponse.json({
+            success: false,
+            error: 'Forbidden - Patient ID does not match appointment'
+          }, { status: 403 });
+        }
+      } else {
+        // If no appointment_id, check if doctor has any appointments with this patient
+        const { data: appointments, error: appointmentCheckError } = await supabase
+          .from('appointments')
+          .select('id')
+          .eq('doctor_id', user.id)
+          .eq('patient_id', patient_id)
+          .limit(1);
+
+        if (appointmentCheckError || !appointments || appointments.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Forbidden - You can only create records for patients who booked with you'
+          }, { status: 403 });
+        }
+      }
+    } else if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Insufficient permissions'
+      }, { status: 403 });
     }
 
     console.log('📝 [Patient Medical Records] Creating record for patient:', patient_id);
@@ -116,7 +235,7 @@ export async function POST(request: NextRequest) {
       .from('medical_records')
       .insert({
         patient_id,
-        doctor_id: doctor_id || null,
+        doctor_id: doctor_id || (user.role === 'doctor' ? user.id : null),
         appointment_id: appointment_id || null,
         record_type: record_type || 'consultation',
         title,
@@ -158,10 +277,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error creating medical record:', error);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to create medical record',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 
@@ -174,10 +293,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Patient medical records POST error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
@@ -185,28 +304,84 @@ export async function POST(request: NextRequest) {
 // PUT: Update a medical record
 export async function PUT(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const body = await request.json();
-    const { 
+    const {
       record_id,
       record_type,
       title,
       description,
-      diagnosis, 
-      treatment, 
+      diagnosis,
+      treatment,
       prescription,
       lab_results,
       attachments,
       allergies,
       medications,
       medical_history,
-      record_date 
+      record_date
     } = body;
 
     if (!record_id) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Record ID is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Record ID is required'
       }, { status: 400 });
+    }
+
+    // First, get the existing record to check permissions
+    const { data: existingRecord, error: fetchError } = await supabase
+      .from('medical_records')
+      .select('patient_id, doctor_id')
+      .eq('id', record_id)
+      .single();
+
+    if (fetchError || !existingRecord) {
+      return NextResponse.json({
+        success: false,
+        error: 'Medical record not found'
+      }, { status: 404 });
+    }
+
+    // Role-based access control:
+    // - Patients can only update their own records
+    // - Doctors can only update records for patients who booked with them
+    // - Admins can update any record
+    if (user.role === 'patient') {
+      if (existingRecord.patient_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only update your own medical records'
+        }, { status: 403 });
+      }
+    } else if (user.role === 'doctor') {
+      if (existingRecord.doctor_id !== user.id) {
+        // Check if doctor has appointments with this patient
+        const { data: appointments, error: appointmentCheckError } = await supabase
+          .from('appointments')
+          .select('id')
+          .eq('doctor_id', user.id)
+          .eq('patient_id', existingRecord.patient_id)
+          .limit(1);
+
+        if (appointmentCheckError || !appointments || appointments.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Forbidden - You can only update records for patients who booked with you'
+          }, { status: 403 });
+        }
+      }
+    } else if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Insufficient permissions'
+      }, { status: 403 });
     }
 
     console.log('📝 [Patient Medical Records] Updating record:', record_id);
@@ -259,10 +434,10 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error updating medical record:', error);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to update medical record',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 
@@ -275,10 +450,10 @@ export async function PUT(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Patient medical records PUT error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
@@ -286,14 +461,70 @@ export async function PUT(request: NextRequest) {
 // DELETE: Delete a medical record
 export async function DELETE(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const { searchParams } = new URL(request.url);
     const recordId = searchParams.get('record_id');
 
     if (!recordId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Record ID is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Record ID is required'
       }, { status: 400 });
+    }
+
+    // First, get the existing record to check permissions
+    const { data: existingRecord, error: fetchError } = await supabase
+      .from('medical_records')
+      .select('patient_id, doctor_id')
+      .eq('id', recordId)
+      .single();
+
+    if (fetchError || !existingRecord) {
+      return NextResponse.json({
+        success: false,
+        error: 'Medical record not found'
+      }, { status: 404 });
+    }
+
+    // Role-based access control:
+    // - Patients can only delete their own records
+    // - Doctors can only delete records for patients who booked with them
+    // - Admins can delete any record
+    if (user.role === 'patient') {
+      if (existingRecord.patient_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only delete your own medical records'
+        }, { status: 403 });
+      }
+    } else if (user.role === 'doctor') {
+      if (existingRecord.doctor_id !== user.id) {
+        // Check if doctor has appointments with this patient
+        const { data: appointments, error: appointmentCheckError } = await supabase
+          .from('appointments')
+          .select('id')
+          .eq('doctor_id', user.id)
+          .eq('patient_id', existingRecord.patient_id)
+          .limit(1);
+
+        if (appointmentCheckError || !appointments || appointments.length === 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Forbidden - You can only delete records for patients who booked with you'
+          }, { status: 403 });
+        }
+      }
+    } else if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Insufficient permissions'
+      }, { status: 403 });
     }
 
     console.log('🗑️ [Patient Medical Records] Deleting record:', recordId);
@@ -306,10 +537,10 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error deleting medical record:', error);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to delete medical record',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 
@@ -321,10 +552,10 @@ export async function DELETE(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Patient medical records DELETE error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

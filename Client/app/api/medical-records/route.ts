@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth, AuthenticatedUser } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const { searchParams } = new URL(request.url);
     const appointmentId = searchParams.get('appointment_id');
     const patientId = searchParams.get('patient_id');
@@ -16,6 +24,45 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // First, verify the appointment exists and get its details
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('patient_id, doctor_id')
+      .eq('id', appointmentId)
+      .single();
+
+    if (appointmentError || !appointment) {
+      return NextResponse.json({
+        success: false,
+        message: 'Appointment not found'
+      }, { status: 404 });
+    }
+
+    // Role-based access control:
+    // - Patients can only see their own records
+    // - Doctors can only see records for patients who booked with them
+    // - Admins can see all records
+    if (user.role === 'patient') {
+      if (appointment.patient_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only access your own medical records'
+        }, { status: 403 });
+      }
+    } else if (user.role === 'doctor') {
+      if (appointment.doctor_id !== user.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only access records for your own patients'
+        }, { status: 403 });
+      }
+    } else if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        message: 'Forbidden - Insufficient permissions'
+      }, { status: 403 });
+    }
 
     let query = supabase
       .from('medical_records')
@@ -37,9 +84,16 @@ export async function GET(request: NextRequest) {
 // POST endpoint for saving patient medical records during signup
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user } = authResult;
+
     const body = await request.json();
     console.log('📥 [Medical Records] Request body:', body);
-    
+
     const {
       patient_id,
       allergies,
@@ -54,6 +108,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'patient_id is required', success: false },
         { status: 400 }
+      );
+    }
+
+    // Role-based access control: Only patients can update their own records, or admins
+    if (user.role === 'patient' && user.id !== patient_id) {
+      return NextResponse.json(
+        { error: 'Forbidden - You can only update your own medical records', success: false },
+        { status: 403 }
+      );
+    }
+
+    if (user.role !== 'patient' && user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - Insufficient permissions', success: false },
+        { status: 403 }
       );
     }
 
@@ -137,4 +206,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
- 

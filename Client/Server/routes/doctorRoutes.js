@@ -1,6 +1,6 @@
 import express from "express";
 import * as doctorController from "../controllers/doctorController.js";
-import { verifyToken, requireDoctorSelf, isDoctorOrAdmin, canAccessDoctorData, optionalAuth } from "../middleware/authMiddleware.js";
+import { authenticateToken, requireDoctorSelf, isDoctorOrAdmin, canAccessDoctorData, optionalAuth } from "../middleware/auth.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.get("/:doctorId/availability/:date", doctorController.getDoctorAvailabili
 router.get("/:doctorId/working-days", doctorController.getDoctorWorkingDays); // Public access for patients to see working days
 
 // Protected routes
-router.use(verifyToken);
+router.use(authenticateToken);
 
 // Doctor-only routes - these routes use authenticated user's data (no doctorId parameter)
 router.get("/profile", requireDoctorSelf, doctorController.getDoctorProfile);

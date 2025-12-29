@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> | { id: string } }
+) {
   try {
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const centerId = resolvedParams.id;
+
+    if (!centerId) {
+      return NextResponse.json({ error: 'Center ID is required' }, { status: 400 });
+    }
+
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
@@ -24,8 +39,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (!isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
-
-    const centerId = params.id;
     const body = await request.json().catch(() => ({}));
     const { action } = body;
 

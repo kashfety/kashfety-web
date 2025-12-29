@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -7,51 +8,14 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the authorization token from headers
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
+    // Require doctor authentication with proper token verification
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
     }
-
-    const token = authHeader.substring(7);
-
-    // Verify the token and get user info
-    // For now, we'll decode the JWT to get the user ID
-    // In production, you should properly verify the JWT signature
-    let userId: string;
-    try {
-      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-      userId = payload.id || payload.sub;
-    } catch (e) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Verify user is a doctor
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, role')
-      .eq('id', userId)
-      .single();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    if (user.role !== 'doctor') {
-      return NextResponse.json(
-        { error: 'Only doctors can skip certificate upload' },
-        { status: 403 }
-      );
-    }
+    const { user } = authResult;
+    
+    const userId = user.id;
 
     // Don't create any certificate record - just let the absence of records indicate they skipped
     // The login route will check if no certificates exist and allow login with certificate_status: 'not_uploaded'

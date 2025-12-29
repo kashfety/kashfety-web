@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -14,6 +15,13 @@ export async function GET(
   { params }: { params: { patientId: string } }
 ) {
   try {
+    // Require doctor authentication even in fallback mode
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user } = authResult;
+
     const authHeader = request.headers.get('authorization');
     if (authHeader) {
       try {
@@ -29,11 +37,26 @@ export async function GET(
     }
 
     if (!FALLBACK_ENABLED) {
-      return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
+      return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
     }
 
     const { patientId } = await params;
     console.log('👤 Fetching patient details:', patientId);
+
+    // Verify doctor has appointments with this patient
+    const { data: appointments, error: appointmentCheckError } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('doctor_id', user.id)
+      .eq('patient_id', patientId)
+      .limit(1);
+
+    if (appointmentCheckError || !appointments || appointments.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - You can only access details for patients who booked with you'
+      }, { status: 403 });
+    }
 
     // Fetch patient from users table where role = 'patient'
     // Include all medical information fields

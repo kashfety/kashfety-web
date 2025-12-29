@@ -1,11 +1,11 @@
 import express from "express";
 import * as appointmentController from "../controllers/appointmentController.js";
-import { verifyToken, isDoctor, isPatient, isDoctorOrAdmin } from "../middleware/authMiddleware.js";
+import { authenticateToken, isDoctor, isPatient, isDoctorOrAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(verifyToken);
+router.use(authenticateToken);
 
 // Patient appointment routes
 router.get("/patient/:patientId", isPatient, appointmentController.getPatientAppointments);

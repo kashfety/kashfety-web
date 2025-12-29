@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -7,6 +8,14 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET(request: NextRequest) {
   try {
     console.log('🏥 [Admin Center Details] Request received');
+    
+    // Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { searchParams } = new URL(request.url);
     const centerId = searchParams.get('centerId');
 
@@ -46,8 +55,9 @@ export async function GET(request: NextRequest) {
       ownerInfo = owner;
     }
 
-    // Fetch center user account (for password status)
+    // Fetch center user account (for password status - don't fetch password_hash)
     let centerUser = null;
+    let passwordSet = false;
     if (center.email) {
       const { data: user } = await supabase
         .from('users')
@@ -56,6 +66,7 @@ export async function GET(request: NextRequest) {
         .eq('role', 'center')
         .single();
       centerUser = user;
+      passwordSet = !!user?.password_hash;
     }
 
     // Fetch statistics (doctors, appointments, ratings)
@@ -98,7 +109,7 @@ export async function GET(request: NextRequest) {
       is_active: center.is_active !== false,
       created_at: center.created_at,
       updated_at: center.updated_at,
-      password_hash: centerUser?.password_hash || null,
+      password_set: passwordSet,
       stats
     };
 

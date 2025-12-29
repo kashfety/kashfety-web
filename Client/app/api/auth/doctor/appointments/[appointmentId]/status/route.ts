@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -13,6 +14,13 @@ export async function PUT(
   try {
     console.log('🔄 [Doctor Appointment Status] PUT request received');
     
+    // Require doctor authentication
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user } = authResult;
+    
     const body = await request.json();
     // Handle both Promise and synchronous params (Next.js 14 vs 15)
     const resolvedParams = params instanceof Promise ? await params : params;
@@ -24,15 +32,10 @@ export async function PUT(
 
     console.log('📋 [Doctor Appointment Status] Updating appointment:', appointmentId, 'with body:', body);
 
-    // Get doctor_id from query params or body
-    const { searchParams } = new URL(request.url);
-    const doctorId = searchParams.get('doctor_id') || body?.doctor_id;
+    // Use authenticated doctor's ID instead of trusting query/body
+    const doctorId = user.id;
     const status = body?.status;
     const notes = body?.notes;
-
-    if (!doctorId) {
-      return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
-    }
 
     if (!status || !['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'].includes(status)) {
       return NextResponse.json({ 
@@ -54,7 +57,7 @@ export async function PUT(
 
     if (appointment.doctor_id !== doctorId) {
       console.error('❌ [Doctor Appointment Status] Access denied - doctor_id mismatch');
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden - You can only update your own appointments' }, { status: 403 });
     }
 
     // Prepare update data

@@ -1,47 +1,22 @@
 // ULTRA SIMPLIFIED APPOINTMENT MANAGEMENT - Works with unified users table only
+// SECURITY UPDATE: Replaced ultraSimplifiedAuth with standard JWT authentication
 import express from "express";
 import { supabaseAdmin } from "../utils/supabase.js";
-import { verifyToken, isDoctor, isPatient, ultraSimpleLogin } from "../middleware/ultraSimplifiedAuth.js";
+import { authenticateToken, authenticateRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Ultra Simple Login Endpoint
-router.post("/login", async (req, res) => {
-  try {
-    console.log('=== ULTRA SIMPLE LOGIN ENDPOINT ===');
-    const { email, password } = req.body;
-    
-    const result = await ultraSimpleLogin(email, password);
-    
-    res.json({
-      success: true,
-      message: "Login successful",
-      ...result
-    });
-    
-  } catch (error) {
-    console.error('Login endpoint error:', error);
-    res.status(401).json({
-      success: false,
-      message: error.message || "Login failed"
-    });
-  }
-});
+// SECURITY: Login endpoint removed - use /api/auth/login instead
+// SECURITY: Register endpoint removed - use /api/auth/register instead
 
-// Create Appointment - Ultra Simplified
-router.post("/booking/create", verifyToken, async (req, res) => {
+// Create Appointment - Requires authentication
+router.post("/booking/create", authenticateToken, authenticateRole(['patient']), async (req, res) => {
   try {
     console.log('=== ULTRA SIMPLE APPOINTMENT BOOKING ===');
     console.log('Request body:', req.body);
     console.log('Authenticated user:', req.user);
     
-    // Validate user is a patient
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: "Only patients can book appointments"
-      });
-    }
+    // Role check is handled by authenticateRole(['patient']) middleware
 
     // Validate doctor exists and is actually a doctor
     const { data: doctor, error: doctorError } = await supabaseAdmin
@@ -128,7 +103,7 @@ router.post("/booking/create", verifyToken, async (req, res) => {
 });
 
 // Get Patient Appointments
-router.get("/patient/appointments", verifyToken, isPatient, async (req, res) => {
+router.get("/patient/appointments", authenticateToken, authenticateRole(['patient']), async (req, res) => {
   try {
     console.log('=== GET PATIENT APPOINTMENTS ===');
     console.log('Patient user ID:', req.user.id);
@@ -204,7 +179,7 @@ router.get("/doctors", async (req, res) => {
 });
 
 // Get Doctor Appointments (for doctor dashboard)
-router.get("/doctor/appointments", verifyToken, isDoctor, async (req, res) => {
+router.get("/doctor/appointments", authenticateToken, authenticateRole(['doctor']), async (req, res) => {
   try {
     console.log('=== GET DOCTOR APPOINTMENTS ===');
     console.log('Doctor user ID:', req.user.id);
@@ -243,85 +218,7 @@ router.get("/doctor/appointments", verifyToken, isDoctor, async (req, res) => {
   }
 });
 
-// User Registration - Ultra Simplified
-router.post("/register", async (req, res) => {
-  try {
-    console.log('=== ULTRA SIMPLE REGISTRATION ===');
-    const { email, password, first_name, last_name, phone, role } = req.body;
-    
-    // Validate required fields
-    if (!email || !password || !first_name || !last_name || !role) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields"
-      });
-    }
-
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User with this email already exists"
-      });
-    }
-
-    // Create new user
-    const newUser = {
-      id: `${role}-${Date.now()}`,
-      email,
-      password, // In production, hash this!
-      first_name,
-      last_name,
-      phone,
-      role,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    const { data: user, error: createError } = await supabaseAdmin
-      .from('users')
-      .insert([newUser])
-      .select()
-      .single();
-
-    if (createError) {
-      console.error('User creation failed:', createError);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to create user account"
-      });
-    }
-
-    console.log('User created successfully:', user);
-
-    // Generate token (just use user ID)
-    const token = user.id;
-
-    res.status(201).json({
-      success: true,
-      message: "Account created successfully",
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: `${user.first_name} ${user.last_name}`
-      },
-      token: token
-    });
-
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: "Registration failed"
-    });
-  }
-});
+// SECURITY: Registration endpoint removed - use /api/auth/register instead
+// The previous implementation stored plain text passwords which is a critical security vulnerability
 
 export default router;

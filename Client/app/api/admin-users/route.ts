@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -7,17 +8,26 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET(request: NextRequest) {
   try {
     console.log('👥 [Admin Users] Request received');
-    
+
+    // Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403 error
+    }
+    const { user: authenticatedUser } = authResult;
+
+    console.log('✅ [Admin Users] Authenticated as:', authenticatedUser.role, authenticatedUser.email);
+
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       console.error('❌ Missing Supabase credentials');
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Server configuration error' 
+      return NextResponse.json({
+        success: false,
+        error: 'Server configuration error'
       }, { status: 500 });
     }
-    
+
     const { searchParams } = new URL(request.url);
-    
+
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search') || '';
@@ -81,10 +91,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Failed to fetch users:', error);
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to fetch users',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 
@@ -104,8 +114,7 @@ export async function GET(request: NextRequest) {
       specialty: user.specialty,
       certificate_status: user.certificate_status,
       profile_picture: user.profile_picture,
-      // Password status (for admin view)
-      password_hash: user.password_hash || null,
+      // Password hash removed for security - admins should not see password hashes
       // Medical info for patients
       medical_history: user.medical_history,
       allergies: user.allergies,
@@ -136,10 +145,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('❌ Admin users API error:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

@@ -1,11 +1,11 @@
 import express from "express";
 import * as patientController from "../controllers/patientController.js";
-import { verifyToken, requirePatientSelf, isDoctorOrAdmin, canAccessPatientData } from "../middleware/authMiddleware.js";
+import { authenticateToken, requirePatientSelf, isDoctorOrAdmin, canAccessPatientData } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(verifyToken);
+router.use(authenticateToken);
 
 // Patient-only routes - these routes use authenticated user's data (no patientId parameter)
 router.get("/profile", requirePatientSelf, patientController.getPatientProfile);

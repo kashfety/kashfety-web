@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireCenter } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -7,6 +8,13 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(request: NextRequest) {
+  // Require center authentication even in fallback mode
+  const authResult = requireCenter(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 or 403 error
+  }
+  const { user } = authResult;
+
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   
@@ -26,51 +34,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Supabase fallback: requires center_id query param
-  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
+  // Supabase fallback: requires authentication (already verified above)
+  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
   
   try {
     console.log('🔄 Profile fallback: Starting Supabase fallback');
-    // Get center_id from query param as fallback
-    let centerId = searchParams.get('center_id');
-    console.log('📍 Profile fallback: center_id from query param:', centerId);
-    
-    // Always try to get center_id from authenticated user first if auth header exists
-    if (authHeader) {
-      console.log('🔍 Profile fallback: Auth header found, trying to get center_id from JWT');
-      const token = authHeader.replace('Bearer ', '');
-      
-      try {
-        // Decode JWT to get user ID
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payload = parts[1];
-          const decodedPayload = JSON.parse(Buffer.from(payload, 'base64').toString());
-          const userId = decodedPayload.id;
-          console.log('👤 Profile fallback: Decoded user ID:', userId);
-          
-          if (userId) {
-            // Look up user to get their center_id
-            const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-            const { data: user, error: userError } = await supabase
-              .from('users')
-              .select('center_id')
-              .eq('id', userId)
-              .eq('role', 'center')
-              .single();
-              
-            if (!userError && user?.center_id) {
-              centerId = user.center_id;
-              console.log(`✅ Found center_id ${centerId} for user ${userId}`);
-            } else {
-              console.log(`❌ No center_id found for user ${userId}, error:`, userError);
-            }
-          }
-        }
-      } catch (jwtError) {
-        console.error('Failed to decode JWT:', jwtError);
-      }
-    }
+    // Use center_id from authenticated user
+    const centerId = user.center_id || searchParams.get('center_id');
     
     if (!centerId) {
       console.log('❌ Profile fallback: No center_id found, returning null');
@@ -106,6 +76,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // Require center authentication even in fallback mode
+  const authResult = requireCenter(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 or 403 error
+  }
+  const { user } = authResult;
+
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   
@@ -127,11 +104,11 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  // Supabase fallback: requires center_id query param
-  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
+  // Supabase fallback: requires authentication (already verified above)
+  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
   
   try {
-    const centerId = searchParams.get('center_id');
+    const centerId = user.center_id || searchParams.get('center_id');
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

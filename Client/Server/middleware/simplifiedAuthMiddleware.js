@@ -8,45 +8,34 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-simple-jwt-secret-key';
 export const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
         message: "No token provided",
       });
     }
-    
+
     const token = authHeader.split(' ')[1];
-    
-    // For now, let's bypass token verification and use a simple approach
-    // In a real app, you'd verify the JWT properly
-    
+
     // Extract user info from token or use default for testing
     let userId, email, role;
-    
+
+    // Verify JWT token - no fallback to hardcoded test tokens
+    let decoded;
     try {
-      // Try to decode JWT if it's a real token
-      const decoded = jwt.verify(token, JWT_SECRET);
-      userId = decoded.userId;
+      decoded = jwt.verify(token, JWT_SECRET);
+      userId = decoded.userId || decoded.id;
       email = decoded.email;
       role = decoded.role;
     } catch (jwtError) {
-      // If not a valid JWT, assume it's a simple user identifier for testing
-      // This is a temporary approach for development
-      if (token === 'simple-patient-1') {
-        userId = 'simple-user-1';
-        email = 'qora@gmail.com';
-        role = 'patient';
-      } else if (token === 'simple-patient-2') {
-        userId = 'simple-user-2';
-        email = 'sora@gmail.com';
-        role = 'patient';
-      } else {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid token format",
-        });
-      }
+      // Token verification failed - reject the request
+      console.error('JWT verification failed:', jwtError);
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+        error: jwtError.message
+      });
     }
 
     console.log('=== SIMPLIFIED AUTH DEBUG ===');
@@ -168,7 +157,7 @@ export const simpleLogin = async (email, password) => {
   // In a real app, you'd verify the password hash
   // For now, just return a token
   const token = generateSimpleToken(user.id, user.email, user.role);
-  
+
   return {
     user,
     token,

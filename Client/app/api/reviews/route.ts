@@ -1,18 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { searchParams } = new URL(request.url);
     const appointmentId = searchParams.get('appointment_id');
     const doctorId = searchParams.get('doctor_id');
-    const patientId = searchParams.get('patient_id');
+    const patientId = searchParams.get('patient_id') || authenticatedUser.id;
     const appointmentIdsCsv = searchParams.get('appointment_ids');
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // If patientId is specified, verify it matches authenticated user (unless admin)
+    if (patientId && authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (patientId !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only view your own reviews'
+        }, { status: 403 });
+      }
+    }
 
     // Batch check: return which appointment_ids have a review by this patient
     if (appointmentIdsCsv && patientId) {
@@ -44,11 +62,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const body = await request.json();
     const { appointment_id, doctor_id, patient_id, rating, comment } = body || {};
 
     if (!appointment_id || !doctor_id || !patient_id || !rating) {
       return NextResponse.json({ success: false, message: 'appointment_id, doctor_id, patient_id and rating are required' }, { status: 400 });
+    }
+
+    // Verify patient_id matches authenticated user (unless admin)
+    if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      if (patient_id !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          message: 'Forbidden - You can only create reviews for your own appointments'
+        }, { status: 403 });
+      }
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

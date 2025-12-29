@@ -1,12 +1,12 @@
 import express from "express";
 import { supabaseAdmin } from "../utils/supabase.js";
 import Doctor from "../models/Doctor.js";
-import { verifyToken, isDoctor, isAdmin } from "../middleware/authMiddleware.js";
+import { authenticateToken, isDoctor, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Doctor Profile Management
-router.post("/profile/create", verifyToken, async (req, res) => {
+router.post("/profile/create", authenticateToken, async (req, res) => {
   try {
     const doctor = await Doctor.createDoctorProfile(req.body);
     res.status(201).json({
@@ -43,7 +43,7 @@ router.get("/profile/:uid/details", async (req, res) => {
   }
 });
 
-router.put("/profile/:uid/update", verifyToken, isDoctor, async (req, res) => {
+router.put("/profile/:uid/update", authenticateToken, isDoctor, async (req, res) => {
   try {
     const updatedDoctor = await Doctor.updateDoctorProfile(req.params.uid, req.body);
     res.json({
@@ -111,7 +111,7 @@ router.get("/availability/:doctorId/schedule", async (req, res) => {
   }
 });
 
-router.put("/availability/:doctorId/update", verifyToken, isDoctor, async (req, res) => {
+router.put("/availability/:doctorId/update", authenticateToken, isDoctor, async (req, res) => {
   try {
     const availability = await Doctor.updateDoctorAvailability(req.params.doctorId, req.body);
     res.json({
@@ -128,7 +128,7 @@ router.put("/availability/:doctorId/update", verifyToken, isDoctor, async (req, 
 });
 
 // Doctor Appointments Management
-router.get("/appointments/:doctorId/all", verifyToken, isDoctor, async (req, res) => {
+router.get("/appointments/:doctorId/all", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { status } = req.query;
     const appointments = await Doctor.getDoctorAppointments(req.params.doctorId, status);
@@ -144,7 +144,7 @@ router.get("/appointments/:doctorId/all", verifyToken, isDoctor, async (req, res
   }
 });
 
-router.get("/appointments/:doctorId/today", verifyToken, isDoctor, async (req, res) => {
+router.get("/appointments/:doctorId/today", authenticateToken, isDoctor, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     const { data: appointments, error } = await supabaseAdmin
@@ -194,7 +194,7 @@ router.get("/schedule/:doctorId/working-hours", async (req, res) => {
   }
 });
 
-router.put("/schedule/:doctorId/working-hours", verifyToken, isDoctor, async (req, res) => {
+router.put("/schedule/:doctorId/working-hours", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { schedules } = req.body;
     
@@ -280,7 +280,7 @@ router.get("/centers/:doctorId/affiliated", async (req, res) => {
   }
 });
 
-router.post("/centers/:doctorId/affiliate", verifyToken, isDoctor, async (req, res) => {
+router.post("/centers/:doctorId/affiliate", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { center_id, is_primary } = req.body;
     

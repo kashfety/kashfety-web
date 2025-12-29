@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken, isDoctorOrAdmin } from '../middleware/authMiddleware.js';
+import { authenticateToken, isDoctorOrAdmin } from '../middleware/auth.js';
 import {
   getDoctorSchedule,
   updateWorkHours,
@@ -14,21 +14,21 @@ const router = express.Router();
 router.get('/public/:doctorId', getDoctorSchedule);
 
 // Get doctor schedule (work hours, vacations, overrides) - AUTH REQUIRED  
-router.get('/:doctorId', verifyToken, getDoctorSchedule);
+router.get('/:doctorId', authenticateToken, getDoctorSchedule);
 
 // Update doctor work hours
-router.put('/:doctorId/work-hours', verifyToken, isDoctorOrAdmin, updateWorkHours);
+router.put('/:doctorId/work-hours', authenticateToken, isDoctorOrAdmin, updateWorkHours);
 
 // Add vacation period
-router.post('/:doctorId/vacation', verifyToken, isDoctorOrAdmin, addVacation);
+router.post('/:doctorId/vacation', authenticateToken, isDoctorOrAdmin, addVacation);
 
 // Check availability for specific date/time
-router.get('/:doctorId/availability', verifyToken, checkAvailability);
+router.get('/:doctorId/availability', authenticateToken, checkAvailability);
 
 // Public endpoint: Get available time slots for a date - NO AUTH REQUIRED
 router.get('/public/:doctorId/available-slots', getAvailableSlots);
 
 // Get available time slots for a date - AUTH REQUIRED
-router.get('/:doctorId/available-slots', verifyToken, getAvailableSlots);
+router.get('/:doctorId/available-slots', authenticateToken, getAvailableSlots);
 
 export default router; 

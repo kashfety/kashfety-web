@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 // Use service role key for admin operations
 const supabaseAdmin = createClient(
@@ -7,9 +8,16 @@ const supabaseAdmin = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         console.log('POST /api/appointments/book - Request received');
+        
+        // Require authentication
+        const authResult = requireAuth(req);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401 error
+        }
+        const { user: authenticatedUser } = authResult;
         
         const body = await req.json();
         console.log('Request body:', body);
@@ -31,6 +39,16 @@ export async function POST(req: Request) {
                 success: false,
                 message: "Missing required fields"
             }, { status: 400 });
+        }
+
+        // Verify patient_id matches authenticated user (unless admin)
+        if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+            if (patient_id !== authenticatedUser.id) {
+                return NextResponse.json({
+                    success: false,
+                    message: 'Forbidden - You can only book appointments for yourself'
+                }, { status: 403 });
+            }
         }
 
         console.log('Checking for existing appointment...');
@@ -92,8 +110,14 @@ export async function POST(req: Request) {
     }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     try {
+        // Require authentication (even for checking availability)
+        const authResult = requireAuth(req);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401 error
+        }
+        
         const { searchParams } = new URL(req.url);
         const doctorId = searchParams.get('doctor_id');
         const date = searchParams.get('date');

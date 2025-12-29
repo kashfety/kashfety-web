@@ -1,11 +1,11 @@
 import express from "express";
 import { supabaseAdmin } from "../utils/supabase.js";
-import { verifyToken, isDoctor, isPatient, isAdmin } from "../middleware/authMiddleware.js";
+import { authenticateToken, isDoctor, isPatient, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Appointment Booking & Creation
-router.post("/booking/create", verifyToken, async (req, res) => {
+router.post("/booking/create", authenticateToken, async (req, res) => {
   try {
     console.log('=== APPOINTMENT BOOKING DEBUG ===');
     console.log('Raw request body:', req.body);
@@ -171,7 +171,7 @@ router.post("/booking/create", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/booking/emergency", verifyToken, async (req, res) => {
+router.post("/booking/emergency", authenticateToken, async (req, res) => {
   try {
     // Ensure patient record exists for the authenticated user
     // First check by uid (frontend compatibility)
@@ -409,7 +409,7 @@ router.put("/test-reschedule/:appointmentId", async (req, res) => {
 });
 
 // Appointment Status Management
-router.put("/status/:appointmentId/update", verifyToken, async (req, res) => {
+router.put("/status/:appointmentId/update", authenticateToken, async (req, res) => {
   try {
     const { status, notes } = req.body;
     const appointmentId = req.params.appointmentId;
@@ -481,7 +481,7 @@ router.put("/status/:appointmentId/update", verifyToken, async (req, res) => {
   }
 });
 
-router.put("/reschedule/:appointmentId", verifyToken, async (req, res) => {
+router.put("/reschedule/:appointmentId", authenticateToken, async (req, res) => {
   try {
     const { appointment_date, appointment_time, reason } = req.body;
     const appointmentId = req.params.appointmentId;
@@ -587,7 +587,7 @@ router.put("/reschedule/:appointmentId", verifyToken, async (req, res) => {
 });
 
 // Appointment Details & Information
-router.get("/details/:appointmentId", verifyToken, async (req, res) => {
+router.get("/details/:appointmentId", authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('appointments')
@@ -632,7 +632,7 @@ router.get("/details/:appointmentId", verifyToken, async (req, res) => {
 });
 
 // Doctor Appointments
-router.get("/doctor/:doctorId/all", verifyToken, isDoctor, async (req, res) => {
+router.get("/doctor/:doctorId/all", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { status, date, limit = 50 } = req.query;
     
@@ -670,7 +670,7 @@ router.get("/doctor/:doctorId/all", verifyToken, isDoctor, async (req, res) => {
   }
 });
 
-router.get("/doctor/:doctorId/today", verifyToken, isDoctor, async (req, res) => {
+router.get("/doctor/:doctorId/today", authenticateToken, isDoctor, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     
@@ -700,7 +700,7 @@ router.get("/doctor/:doctorId/today", verifyToken, isDoctor, async (req, res) =>
 });
 
 // Patient Appointments
-router.get("/patient/:patientId/all", verifyToken, async (req, res) => {
+router.get("/patient/:patientId/all", authenticateToken, async (req, res) => {
   try {
     const { status, limit = 50 } = req.query;
     
@@ -735,7 +735,7 @@ router.get("/patient/:patientId/all", verifyToken, async (req, res) => {
 });
 
 // Appointment Analytics & Reports
-router.get("/analytics/overview", verifyToken, isAdmin, async (req, res) => {
+router.get("/analytics/overview", authenticateToken, isAdmin, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -791,7 +791,7 @@ router.get("/analytics/overview", verifyToken, isAdmin, async (req, res) => {
 });
 
 // Appointment Search & Filtering
-router.get("/search/by-criteria", verifyToken, async (req, res) => {
+router.get("/search/by-criteria", authenticateToken, async (req, res) => {
   try {
     const { 
       doctor_id, 
@@ -836,7 +836,7 @@ router.get("/search/by-criteria", verifyToken, async (req, res) => {
 });
 
 // Complete Appointment with Medical Records
-router.put("/complete/:appointmentId", verifyToken, isDoctor, async (req, res) => {
+router.put("/complete/:appointmentId", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { diagnosis, prescription, notes, follow_up_required, follow_up_date } = req.body;
 

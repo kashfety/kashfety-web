@@ -44,9 +44,8 @@ const DoctorsSection = () => {
   const getLocalizedSpecialty = (specialtyName: string) => {
     const specialtyData = specialtiesMap.get(specialtyName);
     if (!specialtyData) return specialtyName;
-    
+
     if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
-    if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
     return specialtyName;
   };
 
@@ -58,7 +57,7 @@ const DoctorsSection = () => {
   useEffect(() => {
     fetchSpecialties();
     fetchDoctors();
-    
+
     // Setup intersection observer for scroll animations
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -111,7 +110,7 @@ const DoctorsSection = () => {
     try {
       const response = await fetch('/api/specialties');
       const result = await response.json();
-      
+
       if (result.success && result.specialties) {
         const map = new Map();
         result.specialties.forEach((specialty: any) => {
@@ -130,7 +129,7 @@ const DoctorsSection = () => {
     try {
       const response = await fetch('/api/doctors');
       const result = await response.json();
-      
+
       if (result.success) {
         setDoctors(result.doctors.slice(0, 6)); // Show only first 6 doctors
       }
@@ -168,7 +167,7 @@ const DoctorsSection = () => {
       <div className="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-800 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] -z-10"></div>
       <div className="absolute top-10 left-5 sm:top-20 sm:left-10 w-48 h-48 sm:w-72 sm:h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float"></div>
       <div className="absolute bottom-10 right-5 sm:bottom-20 sm:right-10 w-48 h-48 sm:w-72 sm:h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float-slow"></div>
-      
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-12 sm:mb-16 lg:mb-20">
@@ -180,7 +179,7 @@ const DoctorsSection = () => {
             {t('doctors_section_title_prefix') || 'Meet Our Expert'}
             <span className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] bg-clip-text text-transparent"> {t('doctors_section_title_suffix') || 'Doctors'}</span>
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-slide-in-up px-4" style={{animationDelay: '0.2s'}}>
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed animate-slide-in-up px-4" style={{ animationDelay: '0.2s' }}>
             {t('doctors_section_description') || "Discover exceptional healthcare with Kashfety's network of certified doctors. Experience personalized care from the comfort of your home or visit our modern clinics."}
           </p>
         </div>
@@ -188,9 +187,9 @@ const DoctorsSection = () => {
         {/* Doctors Showcase */}
         <div className="space-y-12 sm:space-y-16">
           {doctors.map((doctor, index) => (
-            <DoctorShowcaseCard 
-              key={doctor.id} 
-              doctor={doctor} 
+            <DoctorShowcaseCard
+              key={doctor.id}
+              doctor={doctor}
               index={index}
               isVisible={visibleDoctors.has(index)}
               locale={locale}
@@ -230,22 +229,22 @@ const DoctorsSection = () => {
 };
 
 // Doctor Showcase Card for advertising display
-const DoctorShowcaseCard = ({ 
-  doctor, 
-  index, 
+const DoctorShowcaseCard = ({
+  doctor,
+  index,
   isVisible,
   locale,
   specialtiesMap,
-}: { 
-  doctor: Doctor; 
-  index: number; 
+}: {
+  doctor: Doctor;
+  index: number;
   isVisible: boolean;
   locale: any;
   specialtiesMap: Map<string, { name_ar?: string; name_ku?: string }>;
 }) => {
   const isEven = index % 2 === 0;
   const { t } = useLocale();
-  
+
   // Get localized doctor name from database
   const getLocalizedName = (item: { name?: string; name_ar?: string; first_name_ar?: string; last_name_ar?: string } | null) => {
     if (!item) return '';
@@ -260,23 +259,23 @@ const DoctorShowcaseCard = ({
   const getLocalizedSpecialty = (specialtyName: string) => {
     const specialtyData = specialtiesMap.get(specialtyName);
     if (!specialtyData) return specialtyName;
-    
+
     if (locale === 'ar' && specialtyData.name_ar) return specialtyData.name_ar;
     if (locale === 'ku' && specialtyData.name_ku) return specialtyData.name_ku;
     return specialtyName;
   };
-  
+
   const localizedName = getLocalizedName(doctor);
   const localizedSpecialty = getLocalizedSpecialty(doctor.specialty)
 
   return (
-    <div 
+    <div
       className={`doctor-card flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} 
                   gap-6 sm:gap-8 lg:gap-16 items-center transition-all duration-1000 ease-out
-                  ${isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
-                  }`}
+                  ${isVisible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-8'
+        }`}
       data-index={index}
       style={{
         transitionDelay: isVisible ? `${(index % 3) * 0.2}s` : '0s'
@@ -298,7 +297,7 @@ const DoctorShowcaseCard = ({
                 ⭐ {toArabicNumerals(doctor.rating || '4.8', locale)}
               </div>
             </div>
-            
+
             {/* Achievement Badges */}
             <div className="flex flex-wrap gap-2 justify-center">
               <div className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 dark:bg-blue-900/30 dark:text-blue-300">
@@ -339,7 +338,7 @@ const DoctorShowcaseCard = ({
               <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_years_line') || 'With'} {toArabicNumerals(doctor.experience_years, locale)}+ {t('doctors_section_years') || 'years'} {t('doctors_section_dedicated_practice') || 'of dedicated practice'}</p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Heart className="w-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
             <div>
@@ -347,7 +346,7 @@ const DoctorShowcaseCard = ({
               <p className="text-muted-foreground text-xs sm:text-sm">{t('doctors_section_personalized') || 'Personalized treatment plans for every patient'}</p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-2 sm:gap-3 justify-center lg:justify-start text-start">
             <Clock className="w-5 sm:w-6 sm:h-6 text-blue-500 mt-1 flex-shrink-0" />
             <div>

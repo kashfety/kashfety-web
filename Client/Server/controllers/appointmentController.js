@@ -5,8 +5,6 @@ import { supabaseAdmin, TABLES } from "../utils/supabase.js";
 
 // Book a regular appointment
 export const bookAppointment = async (req, res) => {
-  .toISOString());
-
   try {
     const {
       patient_id,
@@ -30,8 +28,6 @@ export const bookAppointment = async (req, res) => {
     });
 
     // Enhanced logging for debugging
-    );
-
     // Validate required fields
     if (!patient_id || !doctor_id || !appointment_date || !appointment_time) {
       return res.status(400).json({
@@ -1241,8 +1237,6 @@ export const getAvailableSlots = async (req, res) => {
 export const getAllAppointments = async (req, res) => {
   try {
     const { page = 1, limit = 20, status, doctorId, patientId, dateFrom, dateTo } = req.query;
-
-    ');
 
     let query = supabaseAdmin
       .from(TABLES.APPOINTMENTS)

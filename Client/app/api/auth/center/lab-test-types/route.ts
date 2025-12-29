@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(request: NextRequest) {
+import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromAuth(request);
     if (!user || user.role !== 'center') {
@@ -19,8 +19,6 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
         details: error.message
       }, { status: 500 });
     }
-
-    ));
 
     // Get center's current services
     const centerId = user.center_id || user.id;
@@ -57,8 +55,6 @@ import { getUserFromAuth } from '../utils/jwt-auth';export async function GET(re
       base_fee: servicesMap[testType.id]?.base_fee || testType.default_fee || 0,
       is_active: servicesMap[testType.id]?.is_active || false
     }));
-
-    ));
 
     return NextResponse.json({
       success: true,

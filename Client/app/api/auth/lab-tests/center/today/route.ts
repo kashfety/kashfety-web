@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
       });
       const responseText = await response.text();
-      );
 
       if (response.ok) {
         const data = JSON.parse(responseText);

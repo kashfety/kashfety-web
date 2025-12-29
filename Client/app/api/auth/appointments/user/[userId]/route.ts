@@ -51,7 +51,6 @@ export async function GET(
     // Debug and enrich missing center info
     const enriched = [] as any[];
     for (const apt of appointments || []) {
-      :', { id: apt.id, center_id: apt.center_id, center: apt.center?.id });
       if (!apt.center && apt.center_id) {
         const { data: center } = await supabaseAdmin
           .from('centers')

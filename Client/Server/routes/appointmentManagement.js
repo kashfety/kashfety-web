@@ -7,7 +7,7 @@ const router = express.Router();
 // Appointment Booking & Creation
 router.post("/booking/create", authenticateToken, async (req, res) => {
   try {
-    
+
     // Use the authenticated user's patient ID from the token, not from the request body
     const appointmentData = {
       ...req.body,
@@ -77,7 +77,7 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
         .select('id, name, email, uid')
         .eq('id', req.user.id)
         .single();
-      
+
       if (patientById) {
         existingPatient = patientById;
         patientCheckError = null;
@@ -143,7 +143,7 @@ router.post("/booking/create", authenticateToken, async (req, res) => {
       appointment: data
     });
   } catch (error) {
-    
+
     res.status(500).json({
       success: false,
       message: error.message
@@ -168,7 +168,7 @@ router.post("/booking/emergency", authenticateToken, async (req, res) => {
         .select('id, name, email, uid')
         .eq('id', req.user.id)
         .single();
-      
+
       if (patientById) {
         existingPatient = patientById;
         patientCheckError = null;
@@ -262,14 +262,14 @@ router.get("/test-db", async (req, res) => {
       .from('appointments')
       .select('id, status')
       .limit(1);
-    
+
     if (error) {
       return res.status(500).json({
         success: false,
         message: `Database error: ${error.message}`
       });
     }
-    
+
     res.json({
       success: true,
       message: "Database connection working",
@@ -296,14 +296,14 @@ router.get("/list-appointments", async (req, res) => {
       `)
       .limit(10)
       .order('appointment_date', { ascending: true });
-    
+
     if (error) {
       return res.status(500).json({
         success: false,
         message: `Database error: ${error.message}`
       });
     }
-    
+
     res.json({
       success: true,
       message: "Appointments list",
@@ -321,29 +321,29 @@ router.get("/list-appointments", async (req, res) => {
 router.put("/test-reschedule/:appointmentId", async (req, res) => {
   try {
     const appointmentId = req.params.appointmentId;
-    
+
     // Try to fetch the appointment first
     const { data: existingAppointment, error: fetchError } = await supabaseAdmin
       .from('appointments')
       .select('*')
       .eq('id', appointmentId)
       .single();
-    
-    
+
+
     if (fetchError) {
       return res.status(500).json({
         success: false,
         message: `Fetch error: ${fetchError.message}`
       });
     }
-    
+
     if (!existingAppointment) {
       return res.status(404).json({
         success: false,
         message: "Appointment not found"
       });
     }
-    
+
     // Try a simple update
     const { data, error } = await supabaseAdmin
       .from('appointments')
@@ -353,21 +353,21 @@ router.put("/test-reschedule/:appointmentId", async (req, res) => {
       .eq('id', appointmentId)
       .select('id, notes')
       .single();
-    
-    
+
+
     if (error) {
       return res.status(500).json({
         success: false,
         message: `Update error: ${error.message}`
       });
     }
-    
+
     res.json({
       success: true,
       message: "Test update successful",
       data: data
     });
-    
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -388,7 +388,7 @@ router.put("/status/:appointmentId/update", authenticateToken, async (req, res) 
       notes,
       body: req.body
     });
-    
+
     if (!['scheduled', 'confirmed', 'cancelled', 'completed', 'no_show'].includes(status)) {
       return res.status(400).json({
         success: false,
@@ -420,7 +420,7 @@ router.put("/status/:appointmentId/update", authenticateToken, async (req, res) 
 
     const { data, error } = await supabaseAdmin
       .from('appointments')
-      .update({ 
+      .update({
         status,
         notes: notes ? `${existingAppointment.notes || ''}\n${notes}` : existingAppointment.notes,
         updated_at: new Date().toISOString()
@@ -599,7 +599,7 @@ router.get("/details/:appointmentId", authenticateToken, async (req, res) => {
 router.get("/doctor/:doctorId/all", authenticateToken, isDoctor, async (req, res) => {
   try {
     const { status, date, limit = 50 } = req.query;
-    
+
     let query = supabaseAdmin
       .from('appointments')
       .select(`
@@ -614,7 +614,7 @@ router.get("/doctor/:doctorId/all", authenticateToken, isDoctor, async (req, res
     if (status) {
       query = query.eq('status', status);
     }
-    
+
     if (date) {
       query = query.eq('appointment_date', date);
     }
@@ -637,7 +637,7 @@ router.get("/doctor/:doctorId/all", authenticateToken, isDoctor, async (req, res
 router.get("/doctor/:doctorId/today", authenticateToken, isDoctor, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    
+
     const { data, error } = await supabaseAdmin
       .from('appointments')
       .select(`
@@ -667,7 +667,7 @@ router.get("/doctor/:doctorId/today", authenticateToken, isDoctor, async (req, r
 router.get("/patient/:patientId/all", authenticateToken, async (req, res) => {
   try {
     const { status, limit = 50 } = req.query;
-    
+
     let query = supabaseAdmin
       .from('appointments')
       .select(`
@@ -757,14 +757,14 @@ router.get("/analytics/overview", authenticateToken, isAdmin, async (req, res) =
 // Appointment Search & Filtering
 router.get("/search/by-criteria", authenticateToken, async (req, res) => {
   try {
-    const { 
-      doctor_id, 
-      patient_id, 
-      status, 
-      date_from, 
-      date_to, 
+    const {
+      doctor_id,
+      patient_id,
+      status,
+      date_from,
+      date_to,
       booking_reference,
-      limit = 50 
+      limit = 50
     } = req.query;
 
     let query = supabaseAdmin
@@ -837,7 +837,6 @@ router.put("/complete/:appointmentId", authenticateToken, isDoctor, async (req, 
           description: notes
         }]);
 
-      if (recordError) 
     }
 
     res.json({

@@ -2,6 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-auth-utils';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
+
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -9,7 +14,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ userId: string }> }
+  context: { params: Promise<{ userId: string }> | { userId: string } }
 ) {
   try {
     
@@ -20,8 +25,9 @@ export async function GET(
     }
     const { user: authenticatedUser } = authResult;
 
-    // Await params in Next.js App Router
-    const { userId } = await context.params;
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(context.params);
+    const { userId } = resolvedParams;
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role') || authenticatedUser.role;
 

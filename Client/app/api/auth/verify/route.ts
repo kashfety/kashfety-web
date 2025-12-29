@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
 
     // First, try to decode the token without verification to see what's in it
     const decodedWithoutVerify = jwt.decode(token, { complete: true });
-    :', decodedWithoutVerify ? 'Valid JWT structure' : 'Invalid JWT structure');
 
     if (decodedWithoutVerify && typeof decodedWithoutVerify === 'object' && 'payload' in decodedWithoutVerify) {
     }
@@ -49,7 +48,6 @@ export async function GET(request: NextRequest) {
 
     // Extract user ID from decoded token
     const userId = decoded.id || decoded.userId || decoded.uid;
-    );
 
     if (!userId) {
       return NextResponse.json(

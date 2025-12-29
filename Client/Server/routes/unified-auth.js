@@ -106,7 +106,6 @@ router.get('/appointments/availability', async (req, res) => {
 // Create new user (patient or doctor) - Works with unified users table + supplementary tables
 router.post('/register', async (req, res) => {
   try {
-    );
 
     const {
       phone, password, role, first_name, last_name, email, gender, date_of_birth,
@@ -119,12 +118,6 @@ router.post('/register', async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    ');
-    ');
-    ');
-    ');
-    ');
-
     if (!phone || !password || !role || !first_name || !last_name) {
       const missingFields = [];
       if (!phone) missingFields.push('phone');
@@ -848,9 +841,6 @@ router.get('/verify', authenticateToken, async (req, res) => {
 
 // Book appointment - Requires authentication (UPDATED FOR UNIFIED SCHEMA)
 router.post('/appointments', authenticateToken, async (req, res) => {
-  .toISOString());
-  );
-
   try {
     const {
       patient_id, appointment_date, appointment_time,
@@ -858,14 +848,6 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     } = req.body;
 
     let { doctor_id } = req.body;
-
-    // Enhanced validation with detailed logging
-    ');
-    ');
-    ');
-    ');
-    ');
-    ');
 
     // Validate required fields
     if (!patient_id || !doctor_id || !appointment_date || !appointment_time) {
@@ -881,9 +863,6 @@ router.post('/appointments', authenticateToken, async (req, res) => {
       });
     }
 
-    // Enhanced authorization check with detailed logging
-    ');
-    ');
 
     if (req.user.role === 'patient' && req.user.id !== patient_id) {
       return res.status(403).json({
@@ -968,12 +947,10 @@ router.post('/appointments', authenticateToken, async (req, res) => {
     const bookingRef = `A${Date.now().toString().slice(-8)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
 
     // DEBUG: Log the received date
-    .toISOString());
 
     // Create appointment using users table IDs directly (unified schema)
     const finalConsultationFee = consultation_fee || doctorUser.consultation_fee || 0;
 
-    ');
 
     const { data: appointment, error } = await supabase
       .from('appointments')
@@ -1929,20 +1906,20 @@ router.get('/appointments/:userId', authenticateToken, async (req, res) => {
     const { userId } = req.params;
     const { role } = req.query; // patient or doctor
 
-  // Authorization check: users can only view their own appointments unless they're doctors
-  if (req.user.role === 'patient' && req.user.id !== userId) {
-    return res.status(403).json({ error: 'Patients can only view their own appointments' });
-  }
+    // Authorization check: users can only view their own appointments unless they're doctors
+    if (req.user.role === 'patient' && req.user.id !== userId) {
+      return res.status(403).json({ error: 'Patients can only view their own appointments' });
+    }
 
-  // Mark past appointments as absent before fetching
-  const userRole = role || req.user.role;
-  if (userRole === 'doctor') {
-    await markPastAppointmentsAsAbsent(userId, null);
-  } else if (userRole === 'patient') {
-    await markPastAppointmentsAsAbsent(null, userId);
-  }
+    // Mark past appointments as absent before fetching
+    const userRole = role || req.user.role;
+    if (userRole === 'doctor') {
+      await markPastAppointmentsAsAbsent(userId, null);
+    } else if (userRole === 'patient') {
+      await markPastAppointmentsAsAbsent(null, userId);
+    }
 
-  let appointments = [];
+    let appointments = [];
 
     if (userRole === 'patient') {
       // Get appointments with doctor details using correct foreign key names
@@ -2285,7 +2262,6 @@ router.get('/doctors/:doctorId/available-slots', async (req, res) => {
 
     const finalAvailableSlots = availableSlots.filter(slot => {
       const isBooked = bookedTimes.includes(slot);
-      ' : 'AVAILABLE (keeping)'}`);
       return !isBooked;
     });
 
@@ -2522,7 +2498,7 @@ router.get('/doctor/profile', authenticateToken, async (req, res) => {
         .select('name_ar')
         .or(`name.eq.${doctorWithoutPassword.specialty},name_en.eq.${doctorWithoutPassword.specialty}`)
         .single();
-      
+
       if (specialtyData) {
         doctorWithoutPassword.specialty_ar = specialtyData.name_ar;
       }

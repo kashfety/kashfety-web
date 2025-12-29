@@ -60,6 +60,10 @@ interface Center {
     created_at: string;
     updated_at: string;
     owner_doctor_id?: string;
+    owner?: {
+        name: string;
+        specialty?: string;
+    };
     is_active?: boolean;
     description?: string;
     admin_notes?: string;

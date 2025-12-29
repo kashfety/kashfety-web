@@ -110,7 +110,6 @@ export async function GET(request: NextRequest) {
 
     // Filter to only patients for patient demographics
     const patients = (users || []).filter((u: any) => u.role === 'patient');
-    .length, 'Patients:', patients.length);
 
     patients.forEach((user: any) => {
       // Gender - normalize to lowercase to avoid duplicates

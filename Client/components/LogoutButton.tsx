@@ -23,17 +23,16 @@ export default function LogoutButton({ className = "", onClick, variant = 'defau
         } catch (error) {
         } finally {
             // Clear auth token regardless of API result
-            if (authService.clearAuthToken) {
-                authService.clearAuthToken()
-            } else {
-                // Fallback if clearAuthToken doesn't exist
-                localStorage.removeItem('authToken')
-                localStorage.removeItem('userRole')
-                localStorage.removeItem('defaultDashboard')
-                localStorage.removeItem('rememberMe')
-                sessionStorage.removeItem('authToken')
-                document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            }
+            // Clear all auth-related storage
+            localStorage.removeItem('auth_token')
+            localStorage.removeItem('auth_user')
+            localStorage.removeItem('authToken')
+            localStorage.removeItem('userRole')
+            localStorage.removeItem('defaultDashboard')
+            localStorage.removeItem('rememberMe')
+            sessionStorage.removeItem('auth_token')
+            sessionStorage.removeItem('authToken')
+            document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
             // Force window reload to clear any memory state
             window.location.href = '/login';

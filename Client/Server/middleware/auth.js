@@ -41,8 +41,8 @@ export const generateToken = (user) => {
     last_name: user.last_name,
     center_id: user.center_id || null
   };
-  
-  return jwt.sign(payload, JWT_SECRET, { 
+
+  return jwt.sign(payload, JWT_SECRET, {
     expiresIn: '24h',
     issuer: 'doctor-appointment-system'
   });
@@ -60,9 +60,7 @@ export const verifyToken = (token) => {
 // Middleware to authenticate JWT token
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-   + '...' : 'NONE');
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-   + '...' : 'NONE');
 
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
@@ -160,12 +158,12 @@ export const canAccessPatientData = (req, res, next) => {
   }
 
   const requestedPatientId = req.params.patientId || req.params.uid;
-  
+
   // If user is admin or super_admin, allow access to any patient data
   if (req.user.role === 'admin' || req.user.role === 'super_admin') {
     return next();
   }
-  
+
   // If user is a patient, only allow access to their own data
   if (req.user.role === 'patient') {
     if (requestedPatientId && requestedPatientId !== req.user.id && requestedPatientId !== req.user.uid) {
@@ -173,12 +171,12 @@ export const canAccessPatientData = (req, res, next) => {
     }
     return next();
   }
-  
+
   // If user is a doctor, allow access (they should only see their own patients, enforced in controller)
   if (req.user.role === 'doctor') {
     return next();
   }
-  
+
   return res.status(403).json({ error: 'Access denied.' });
 };
 
@@ -189,12 +187,12 @@ export const canAccessDoctorData = (req, res, next) => {
   }
 
   const requestedDoctorId = req.params.doctorId || req.params.uid;
-  
+
   // If user is admin or super_admin, allow access to any doctor data
   if (req.user.role === 'admin' || req.user.role === 'super_admin') {
     return next();
   }
-  
+
   // If user is a doctor, only allow access to their own data
   if (req.user.role === 'doctor') {
     if (requestedDoctorId && requestedDoctorId !== req.user.id && requestedDoctorId !== req.user.uid) {
@@ -202,7 +200,7 @@ export const canAccessDoctorData = (req, res, next) => {
     }
     return next();
   }
-  
+
   return res.status(403).json({ error: 'Access denied. Doctors or Admins only.' });
 };
 

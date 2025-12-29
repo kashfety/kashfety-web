@@ -142,7 +142,6 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  ');
   // Call the same logic as PUT
   return PUT(request, context);
 }

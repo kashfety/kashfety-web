@@ -164,9 +164,8 @@ export async function GET(request: NextRequest) {
     const slots: Array<{time: string, is_available: boolean, is_booked: boolean}> = [];
 
     for (const schedule of schedules) {
-      // First check if time_slots field exists (new format)
-      if (schedule.time_slots && Array.isArray(schedule.time_slots)) {
-        
+      // Use the time_slots array from the schedule
+      if (schedule.time_slots && Array.isArray(schedule.time_slots) && schedule.time_slots.length > 0) {
         // Use the time_slots array from the schedule
         for (const slot of schedule.time_slots) {
           const timeStr = slot.time || slot;
@@ -178,42 +177,9 @@ export async function GET(request: NextRequest) {
             is_booked: isBooked
           });
         }
-      } else {
-        // Fallback to start_time/end_time if time_slots not available
-        const startTime = schedule.start_time;
-        const endTime = schedule.end_time;
-        
-        if (!startTime || !endTime) continue;
-
-
-        // Parse times (format: "HH:MM:SS" or "HH:MM")
-        const [startHour, startMinute] = startTime.split(':').map(Number);
-        const [endHour, endMinute] = endTime.split(':').map(Number);
-
-        let currentHour = startHour;
-        let currentMinute = startMinute;
-
-        while (
-          currentHour < endHour ||
-          (currentHour === endHour && currentMinute < endMinute)
-        ) {
-          const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
-          const isBooked = bookedTimes.has(timeStr) || bookedTimes.has(`${timeStr}:00`);
-
-          slots.push({
-            time: timeStr,
-            is_available: !isBooked,
-            is_booked: isBooked
-          });
-
-          // Increment by 30 minutes
-          currentMinute += 30;
-          if (currentMinute >= 60) {
-            currentMinute -= 60;
-            currentHour += 1;
-          }
-        }
       }
+      // Note: If time_slots is empty or missing, skip this schedule
+      // The schema uses time_slots as the primary field, so no fallback needed
     }
 
     // Remove duplicates and sort

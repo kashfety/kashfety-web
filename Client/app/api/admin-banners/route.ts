@@ -81,8 +81,6 @@ export async function POST(request: NextRequest) {
     const startDate = formData.get('start_date') as string;
     const endDate = formData.get('end_date') as string;
 
-    ));
-
     if (!file) {
       return NextResponse.json({ 
         success: false, 

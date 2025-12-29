@@ -47,7 +47,6 @@ router.get('/:doctorId/available-slots', async (req, res) => {
     }
 
     if (!schedules || schedules.length === 0) {
-      '}`);
       return res.json({
         success: true,
         doctor_id: doctorId,
@@ -66,11 +65,9 @@ router.get('/:doctorId/available-slots', async (req, res) => {
       // Exclude cancelled/no_show/completed so completed slots are free again
       .not('status', 'in', '(cancelled,no_show,completed)');
 
-  // Don't filter by center_id for appointments — a doctor can't be in two places at once
-  // Even if an appointment was booked at a different center (or with null center_id),
-  // the doctor is still unavailable at that time slot for ALL centers
-
-    `);
+    // Don't filter by center_id for appointments — a doctor can't be in two places at once
+    // Even if an appointment was booked at a different center (or with null center_id),
+    // the doctor is still unavailable at that time slot for ALL centers
 
     const { data: appointments, error: appointmentError } = await appointmentQuery;
 
@@ -88,17 +85,14 @@ router.get('/:doctorId/available-slots', async (req, res) => {
       }) || []
     );
 
-    );
-
     // Generate available slots from schedules - KEEP ALL SLOTS, mark booked ones
     const allSlots = [];
-    
+
     schedules.forEach(schedule => {
       if (schedule.time_slots && Array.isArray(schedule.time_slots)) {
         schedule.time_slots.forEach(slot => {
           const isBooked = bookedTimes.has(slot.time);
-          ' : 'AVAILABLE (keeping enabled)'}`);
-          
+
           allSlots.push({
             time: slot.time,
             duration: slot.duration || schedule.slot_duration || 30,
@@ -115,8 +109,6 @@ router.get('/:doctorId/available-slots', async (req, res) => {
 
     // Count only available slots for the total
     const availableCount = allSlots.filter(slot => slot.is_available).length;
-
-    );
 
     res.json({
       success: true,
@@ -159,8 +151,6 @@ router.get('/:doctorId/working-days', async (req, res) => {
 
     const workingDays = [...new Set(schedules?.map(s => s.day_of_week) || [])];
     workingDays.sort();
-
-    '}: [${workingDays.join(', ')}]`);
 
     res.json({
       success: true,
@@ -226,8 +216,6 @@ router.get('/:doctorId/centers', async (req, res) => {
       is_primary: dc.is_primary,
       assignment_date: dc.created_at
     })) || [];
-
-    .join(', ')}]`);
 
     res.json({
       success: true,

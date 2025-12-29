@@ -30,7 +30,7 @@ async function getDoctorProfile(doctorId) {
     .single();
 
   if (error) throw error;
-  
+
   console.log('🔍 Doctor data from DB:', {
     name: doctor?.name,
     name_ar: doctor?.name_ar,
@@ -38,7 +38,7 @@ async function getDoctorProfile(doctorId) {
     last_name_ar: doctor?.last_name_ar,
     specialty: doctor?.specialty
   });
-  
+
   // If doctor has specialty text, try to get the corresponding specialty data
   if (doctor && doctor.specialty) {
     const { data: specialtyData } = await supabase
@@ -46,8 +46,8 @@ async function getDoctorProfile(doctorId) {
       .select('name, name_ar, name_en, name_ku')
       .eq('name', doctor.specialty)
       .single();
-    
-    
+
+
     if (specialtyData) {
       doctor.specialty_name = specialtyData.name;
       doctor.specialty_name_ar = specialtyData.name_ar;
@@ -55,7 +55,7 @@ async function getDoctorProfile(doctorId) {
       doctor.specialty_name_ku = specialtyData.name_ku;
     }
   }
-  
+
   return doctor;
 }
 
@@ -1155,9 +1155,6 @@ router.put('/schedule', authenticateToken, async (req, res) => {
     }
 
     const { schedule, center_id } = req.body;
-
-    // Debug logging
-    );
 
     // Validate that center_id is provided
     if (!center_id) {

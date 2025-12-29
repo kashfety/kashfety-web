@@ -2093,18 +2093,11 @@ export const translations = {
     deselect_all: "Deselect All",
     save_services: "Save Services",
     reset: "Reset",
-    services_reset: "Services Reset",
     services_reset_desc: "Services have been reset to saved settings",
     add_new_type: "Add New Type",
     create_lab_test_type: "Create Lab Test Type",
     code: "Code",
-    name: "Name",
-    category: "Category",
-    lab: "Lab",
-    imaging: "Imaging",
     default_fee: "Default Fee (Optional)",
-    cancel: "Cancel",
-    create: "Create",
     creating: "Creating...",
     enable_all: "Enable All",
     disable_all: "Disable All",
@@ -2127,7 +2120,7 @@ export const translations = {
     gender_female: "Female",
     gender_other: "Other",
     age: "Age",
-    
+
     // Bulk Schedule Management
     bulk_schedule_management: "Bulk Schedule Management",
     select_test_types_bulk: "Select Test Types for Bulk Update",
@@ -3936,7 +3929,7 @@ export const translations = {
     general: "عام",
     failed_load_schedule_config: "فشل تحميل تكوين الجدول",
     please_select_test_type_first: "يرجى اختيار نوع تحليل أولاً",
-    
+
     // Bulk Schedule Management (Arabic)
     bulk_schedule_management: "إدارة الجدول الجماعي",
     select_test_types_bulk: "اختر أنواع التحاليل للتحديث الجماعي",

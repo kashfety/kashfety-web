@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('end_date');
 
     if (!centerId || !typeId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Center ID and Type ID are required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Center ID and Type ID are required'
       }, { status: 400 });
     }
 
@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
       .eq('is_available', true);
 
     if (scheduleError) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Failed to fetch lab schedule' 
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to fetch lab schedule'
       }, { status: 500 });
     }
 
@@ -46,10 +46,7 @@ export async function GET(request: NextRequest) {
 
     // If no schedule exists, provide default working days (Monday-Friday, 0-4 or 1-5)
     const hasSchedule = schedule && schedule.length > 0;
-    
-    if (!hasSchedule) {
-      ');
-    }
+
 
     while (current <= end) {
       const dayOfWeek = current.getDay(); // 0 = Sunday, 1 = Monday, etc.
@@ -61,7 +58,7 @@ export async function GET(request: NextRequest) {
       if (hasSchedule) {
         // Check if this day has available schedule
         const daySchedule = schedule?.find((s: any) => s.day_of_week === dayOfWeek);
-        
+
         if (daySchedule && daySchedule.is_available) {
           // Parse time_slots if it's a JSON string
           let timeSlots = daySchedule.time_slots;
@@ -72,7 +69,7 @@ export async function GET(request: NextRequest) {
               timeSlots = [];
             }
           }
-          
+
           slotsCount = Array.isArray(timeSlots) ? timeSlots.length : 0;
           shouldInclude = slotsCount > 0;
         }
@@ -104,10 +101,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

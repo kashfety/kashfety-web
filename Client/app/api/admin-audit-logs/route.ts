@@ -364,8 +364,6 @@ export async function GET(request: NextRequest) {
     const paginatedLogs = filteredLogs.slice(offset, offset + limit);
     const totalPages = Math.ceil(totalLogs / limit);
 
-    `);
-
     return NextResponse.json({
       success: true,
       data: {

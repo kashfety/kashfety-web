@@ -9,7 +9,7 @@ export const setSchedule = async (req, res) => {
     // Use authenticated doctor's UID instead of URL parameter for security
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { workHours } = req.body;
-    
+
     // Update doctor in unified users table
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -21,11 +21,11 @@ export const setSchedule = async (req, res) => {
       .eq('role', 'doctor')
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Schedule updated successfully",
@@ -45,7 +45,7 @@ export const setVacationDays = async (req, res) => {
     // Use authenticated doctor's UID instead of URL parameter for security
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { vacationDays } = req.body;
-    
+
     // Update doctor in unified users table
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -57,11 +57,11 @@ export const setVacationDays = async (req, res) => {
       .eq('role', 'doctor')
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Vacation days updated successfully",
@@ -79,7 +79,7 @@ export const setVacationDays = async (req, res) => {
 export const getDoctorProfile = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor from unified users table
     const { data: doctor, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -87,18 +87,18 @@ export const getDoctorProfile = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     if (!doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     res.status(200).json({
       success: true,
       doctor
@@ -116,16 +116,16 @@ export const updateDoctorProfile = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const updateData = req.body;
-    
+
     // Remove fields that shouldn't be updated directly
     delete updateData.id;
     delete updateData.uid;
     delete updateData.role;
     delete updateData.created_at;
-    
+
     // Add updated timestamp
     updateData.updated_at = new Date().toISOString();
-    
+
     // Update doctor in unified users table
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -134,11 +134,11 @@ export const updateDoctorProfile = async (req, res) => {
       .eq('role', 'doctor')
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
@@ -156,7 +156,7 @@ export const updateDoctorProfile = async (req, res) => {
 export const getAllDoctors = async (req, res) => {
   try {
     const { specialty, search } = req.query;
-    
+
     // Use the unified users table for doctors
     let query = supabaseAdmin
       .from(TABLES.USERS)
@@ -182,28 +182,28 @@ export const getAllDoctors = async (req, res) => {
       `)
       .eq('role', 'doctor')
       .order('rating', { ascending: false });
-    
+
     // Filter by specialty if provided
     if (specialty) {
       query = query.ilike('specialty', `%${specialty}%`);
     }
-    
+
     // Search by name if provided
     if (search) {
       query = query.or(`name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
     }
-    
+
     const { data: doctors, error } = await query;
-    
+
     if (error) {
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         error: 'Failed to fetch doctors',
-        details: error.message 
+        details: error.message
       });
     }
 
-    
+
     res.status(200).json({
       success: true,
       doctors: doctors || [],
@@ -211,10 +211,10 @@ export const getAllDoctors = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     });
   }
 };
@@ -223,7 +223,7 @@ export const getAllDoctors = async (req, res) => {
 export const getDoctorById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Get doctor from unified users table
     const { data: doctor, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -231,22 +231,22 @@ export const getDoctorById = async (req, res) => {
       .eq('id', id)
       .eq('role', 'doctor')
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     if (!doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Get doctor's availability for the next 7 days
     const today = new Date();
     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
+
     const { data: availability, error: availError } = await supabaseAdmin
       .from(TABLES.DOCTOR_AVAILABILITY)
       .select('*')
@@ -254,7 +254,7 @@ export const getDoctorById = async (req, res) => {
       .gte('date', today.toISOString().split('T')[0])
       .lte('date', nextWeek.toISOString().split('T')[0])
       .order('date', { ascending: true });
-    
+
     res.status(200).json({
       success: true,
       doctor: {
@@ -274,7 +274,7 @@ export const getDoctorById = async (req, res) => {
 export const getDoctorAvailability = async (req, res) => {
   try {
     const { doctorId, date } = req.params;
-    
+
     // Verify doctor exists in unified users table
     const { data: doctor, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -282,14 +282,14 @@ export const getDoctorAvailability = async (req, res) => {
       .eq('id', doctorId)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError || !doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Get availability for specific date
     const { data: availability, error } = await supabaseAdmin
       .from(TABLES.DOCTOR_AVAILABILITY)
@@ -297,11 +297,11 @@ export const getDoctorAvailability = async (req, res) => {
       .eq('doctor_id', doctorId)
       .eq('date', date)
       .single();
-    
+
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       availability: availability || null,
@@ -320,7 +320,7 @@ export const setDoctorAvailability = async (req, res) => {
   try {
     const { doctorId, date } = req.params;
     const { isAvailable, slots, notes, homeAvailable } = req.body;
-    
+
     // Verify doctor exists and user has permission
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { data: doctor, error: doctorError } = await supabaseAdmin
@@ -329,14 +329,14 @@ export const setDoctorAvailability = async (req, res) => {
       .eq('id', doctorId)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError || !doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Check if user has permission to modify this doctor's schedule
     if (doctor.uid !== doctorUid && req.user.role !== 'admin') {
       return res.status(403).json({
@@ -344,7 +344,7 @@ export const setDoctorAvailability = async (req, res) => {
         message: "Not authorized to modify this doctor's schedule"
       });
     }
-    
+
     // Upsert availability
     const { data, error } = await supabaseAdmin
       .from(TABLES.DOCTOR_AVAILABILITY)
@@ -361,11 +361,11 @@ export const setDoctorAvailability = async (req, res) => {
       })
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Availability updated successfully",
@@ -384,7 +384,7 @@ export const getDoctorAppointments = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { status, date, limit = 50 } = req.query;
-    
+
     // Get doctor ID from unified users table
     const { data: doctor, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -392,14 +392,14 @@ export const getDoctorAppointments = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError || !doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Build query for appointments
     let query = supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -417,22 +417,22 @@ export const getDoctorAppointments = async (req, res) => {
       .order('appointment_date', { ascending: true })
       .order('appointment_time', { ascending: true })
       .limit(limit);
-    
+
     // Add filters
     if (status) {
       query = query.eq('status', status);
     }
-    
+
     if (date) {
       query = query.eq('appointment_date', date);
     }
-    
+
     const { data: appointments, error } = await query;
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       appointments: appointments || [],
@@ -452,7 +452,7 @@ export const updateAppointmentStatus = async (req, res) => {
     const { appointmentId } = req.params;
     const { status, notes } = req.body;
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor ID
     const { data: doctor, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -460,14 +460,14 @@ export const updateAppointmentStatus = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError || !doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Update appointment
     const { data, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -480,18 +480,18 @@ export const updateAppointmentStatus = async (req, res) => {
       .eq('doctor_id', doctor.id)
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     if (!data) {
       return res.status(404).json({
         success: false,
         message: "Appointment not found or not authorized"
       });
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Appointment updated successfully",
@@ -509,14 +509,14 @@ export const updateAppointmentStatus = async (req, res) => {
 export const uploadProfilePicture = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
         message: "No file uploaded"
       });
     }
-    
+
     // Upload to storage
     const fileName = `profile_${doctorUid}_${Date.now()}.${req.file.originalname.split('.').pop()}`;
     const { data: uploadData, error: uploadError } = await storageHelpers.uploadFile(
@@ -528,14 +528,14 @@ export const uploadProfilePicture = async (req, res) => {
         cacheControl: '3600'
       }
     );
-    
+
     if (uploadError) {
       throw uploadError;
     }
-    
+
     // Get public URL
     const { data: urlData } = await storageHelpers.getPublicUrl('profile-pictures', fileName);
-    
+
     // Update doctor profile with new picture URL
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -547,11 +547,11 @@ export const uploadProfilePicture = async (req, res) => {
       .eq('role', 'doctor')
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Profile picture updated successfully",
@@ -572,7 +572,7 @@ export const uploadProfilePicture = async (req, res) => {
 export const getDoctorStats = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor ID
     const { data: doctor, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -580,32 +580,32 @@ export const getDoctorStats = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError || !doctor) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found"
       });
     }
-    
+
     // Get appointment statistics
     const { data: appointments, error: appointmentError } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
       .select('status, appointment_date')
       .eq('doctor_id', doctor.id);
-    
+
     if (appointmentError) {
       throw appointmentError;
     }
-    
+
     // Calculate statistics
     const totalAppointments = appointments.length;
     const completedAppointments = appointments.filter(a => a.status === 'completed').length;
     const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
-    const upcomingAppointments = appointments.filter(a => 
+    const upcomingAppointments = appointments.filter(a =>
       a.status === 'scheduled' && new Date(a.appointment_date) >= new Date()
     ).length;
-    
+
     res.status(200).json({
       success: true,
       stats: {
@@ -628,18 +628,18 @@ export const getDoctorStats = async (req, res) => {
 export const getSchedule = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
       .select('work_hours, vacation_days')
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -660,12 +660,12 @@ export const updateSchedule = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { workHours, vacationDays } = req.body;
-    
+
     const updateData = {};
     if (workHours !== undefined) updateData.work_hours = workHours;
     if (vacationDays !== undefined) updateData.vacation_days = vacationDays;
     updateData.updated_at = new Date().toISOString();
-    
+
     const { data, error } = await supabaseAdmin
       .from(TABLES.USERS)
       .update(updateData)
@@ -673,11 +673,11 @@ export const updateSchedule = async (req, res) => {
       .eq('role', 'doctor')
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Schedule updated successfully",
@@ -695,7 +695,7 @@ export const updateSchedule = async (req, res) => {
 export const getPatientsList = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -703,11 +703,11 @@ export const getPatientsList = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Get unique patients who have appointments with this doctor
     const { data, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -725,11 +725,11 @@ export const getPatientsList = async (req, res) => {
       `)
       .eq('doctor_id', doctorData.id)
       .not('users', 'is', null);
-    
+
     if (error) {
       throw error;
     }
-    
+
     // Remove duplicates and format data
     const uniquePatients = data.reduce((acc, appointment) => {
       const patient = appointment.users;
@@ -738,7 +738,7 @@ export const getPatientsList = async (req, res) => {
       }
       return acc;
     }, []);
-    
+
     res.status(200).json({
       success: true,
       data: uniquePatients
@@ -755,7 +755,7 @@ export const getPatientsList = async (req, res) => {
 export const getDoctorAnalytics = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -763,26 +763,26 @@ export const getDoctorAnalytics = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Get appointment analytics
     const { data: appointments, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
       .select('*')
       .eq('doctor_id', doctorData.id);
-    
+
     if (error) {
       throw error;
     }
-    
+
     const totalAppointments = appointments.length;
     const completedAppointments = appointments.filter(a => a.status === 'completed').length;
     const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
     const upcomingAppointments = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length;
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -805,7 +805,7 @@ export const getDoctorAnalytics = async (req, res) => {
 export const getPatientDemographics = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -813,11 +813,11 @@ export const getPatientDemographics = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Get unique patients with demographics
     const { data, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -831,11 +831,11 @@ export const getPatientDemographics = async (req, res) => {
       `)
       .eq('doctor_id', doctorData.id)
       .not('users', 'is', null);
-    
+
     if (error) {
       throw error;
     }
-    
+
     // Process demographics
     const uniquePatients = data.reduce((acc, appointment) => {
       const patient = appointment.users;
@@ -844,7 +844,7 @@ export const getPatientDemographics = async (req, res) => {
       }
       return acc;
     }, []);
-    
+
     const demographics = {
       totalPatients: uniquePatients.length,
       genderDistribution: {
@@ -853,7 +853,7 @@ export const getPatientDemographics = async (req, res) => {
         other: uniquePatients.filter(p => p.gender && p.gender !== 'male' && p.gender !== 'female').length
       }
     };
-    
+
     res.status(200).json({
       success: true,
       data: demographics
@@ -882,7 +882,7 @@ export const getAppointmentStats = async (req, res) => {
 export const getFinancialAnalytics = async (req, res) => {
   try {
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -890,35 +890,35 @@ export const getFinancialAnalytics = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Get completed appointments for financial calculation
     const { data: appointments, error } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
       .select('consultation_fee, appointment_date')
       .eq('doctor_id', doctorData.id)
       .eq('status', 'completed');
-    
+
     if (error) {
       throw error;
     }
-    
+
     const totalRevenue = appointments.reduce((sum, apt) => {
       return sum + (apt.consultation_fee || doctorData.consultation_fee || 0);
     }, 0);
-    
+
     const thisMonth = new Date();
     thisMonth.setDate(1); // First day of current month
-    
+
     const monthlyRevenue = appointments
       .filter(apt => new Date(apt.appointment_date) >= thisMonth)
       .reduce((sum, apt) => {
         return sum + (apt.consultation_fee || doctorData.consultation_fee || 0);
       }, 0);
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -941,7 +941,7 @@ export const getPatientDetails = async (req, res) => {
   try {
     const { patientId } = req.params;
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -949,11 +949,11 @@ export const getPatientDetails = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Verify that this patient has appointments with this doctor
     const { data: appointmentCheck, error: appointmentError } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -961,18 +961,18 @@ export const getPatientDetails = async (req, res) => {
       .eq('doctor_id', doctorData.id)
       .eq('patient_id', patientId)
       .limit(1);
-    
+
     if (appointmentError) {
       throw appointmentError;
     }
-    
+
     if (!appointmentCheck || appointmentCheck.length === 0) {
       return res.status(403).json({
         success: false,
         message: "You don't have access to this patient's details"
       });
     }
-    
+
     // Get patient details
     const { data: patient, error: patientError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -993,11 +993,11 @@ export const getPatientDetails = async (req, res) => {
       .eq('id', patientId)
       .eq('role', 'patient')
       .single();
-    
+
     if (patientError) {
       throw patientError;
     }
-    
+
     res.status(200).json({
       success: true,
       data: patient
@@ -1016,7 +1016,7 @@ export const createMedicalRecord = async (req, res) => {
     const { patientId } = req.params;
     const doctorUid = req.authenticatedDoctorUid || req.user.uid;
     const { diagnosis, treatment, prescription, notes, appointmentId } = req.body;
-    
+
     // Get doctor's ID from users table
     const { data: doctorData, error: doctorError } = await supabaseAdmin
       .from(TABLES.USERS)
@@ -1024,11 +1024,11 @@ export const createMedicalRecord = async (req, res) => {
       .eq('uid', doctorUid)
       .eq('role', 'doctor')
       .single();
-    
+
     if (doctorError) {
       throw doctorError;
     }
-    
+
     // Verify that this patient has appointments with this doctor
     const { data: appointmentCheck, error: appointmentError } = await supabaseAdmin
       .from(TABLES.APPOINTMENTS)
@@ -1036,18 +1036,18 @@ export const createMedicalRecord = async (req, res) => {
       .eq('doctor_id', doctorData.id)
       .eq('patient_id', patientId)
       .limit(1);
-    
+
     if (appointmentError) {
       throw appointmentError;
     }
-    
+
     if (!appointmentCheck || appointmentCheck.length === 0) {
       return res.status(403).json({
         success: false,
         message: "You don't have access to create medical records for this patient"
       });
     }
-    
+
     // Create medical record
     const { data, error } = await supabaseAdmin
       .from(TABLES.MEDICAL_RECORDS)
@@ -1063,11 +1063,11 @@ export const createMedicalRecord = async (req, res) => {
       })
       .select()
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     res.status(201).json({
       success: true,
       message: "Medical record created successfully",
@@ -1106,8 +1106,6 @@ export const getDoctorWorkingDays = async (req, res) => {
 
     const workingDays = [...new Set(schedules?.map(s => s.day_of_week) || [])];
     workingDays.sort();
-
-    '}: [${workingDays.join(', ')}]`);
 
     res.json({
       success: true,

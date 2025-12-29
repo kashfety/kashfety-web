@@ -119,6 +119,14 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   };
 
   const fetchAvailableSlots = async (date: Date) => {
+    if (!booking) {
+      showError(
+        t('reschedule_error_title') || "Error",
+        t('reschedule_error_no_booking') || "No booking information available. Please try again."
+      );
+      return;
+    }
+
     // Try to get center_id and type_id from various possible locations
     const centerId = booking?.center?.id || (booking as any)?.center_id || (booking as any)?.centers?.id;
     const typeId = booking?.type?.id || (booking as any)?.lab_test_type_id || (booking as any)?.lab_test_type?.id;

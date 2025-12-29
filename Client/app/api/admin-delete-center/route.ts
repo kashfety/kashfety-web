@@ -49,8 +49,6 @@ export async function POST(request: NextRequest) {
 
         if (usersError) {
         } else if (centerUsers && centerUsers.length > 0) {
-             to delete');
-            
             // Delete associated users
             const { error: deleteUsersError } = await supabase
                 .from('users')

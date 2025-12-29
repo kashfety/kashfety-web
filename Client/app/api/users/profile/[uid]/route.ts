@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-auth-utils';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-export async function GET(request: NextRequest, { params }: { params: { uid: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ uid: string }> | { uid: string } }) {
   try {
     // Require authentication and verify token
     const authResult = requireAuth(request);
@@ -12,7 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: { uid: str
     }
     const { user: authenticatedUser } = authResult;
 
-    const { uid } = params;
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const { uid } = resolvedParams;
 
     // Verify uid matches authenticated user (unless admin)
     if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
@@ -25,11 +32,15 @@ export async function GET(request: NextRequest, { params }: { params: { uid: str
 
     const authHeader = request.headers.get('authorization');
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/users/profile/${uid}`, {
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     if (!response.ok) {
@@ -51,7 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: { uid: str
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { uid: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ uid: string }> | { uid: string } }) {
   try {
     // Require authentication and verify token
     const authResult = requireAuth(request);
@@ -60,7 +71,9 @@ export async function PUT(request: NextRequest, { params }: { params: { uid: str
     }
     const { user: authenticatedUser } = authResult;
 
-    const { uid } = params;
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const { uid } = resolvedParams;
 
     // Verify uid matches authenticated user (unless admin)
     if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
@@ -74,12 +87,16 @@ export async function PUT(request: NextRequest, { params }: { params: { uid: str
     const authHeader = request.headers.get('authorization');
     const body = await request.json();
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/users/profile/${uid}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify(body)
     });
 
@@ -102,7 +119,7 @@ export async function PUT(request: NextRequest, { params }: { params: { uid: str
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { uid: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ uid: string }> | { uid: string } }) {
   try {
     // Require authentication and verify token
     const authResult = requireAuth(request);
@@ -111,7 +128,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { uid: 
     }
     const { user: authenticatedUser } = authResult;
 
-    const { uid } = params;
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const { uid } = resolvedParams;
 
     // Verify uid matches authenticated user (unless admin)
     if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
@@ -124,12 +143,16 @@ export async function DELETE(request: NextRequest, { params }: { params: { uid: 
 
     const authHeader = request.headers.get('authorization');
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/users/account/${uid}/delete`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     if (!response.ok) {

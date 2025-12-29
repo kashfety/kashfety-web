@@ -10,8 +10,6 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
 
-  );
-
   if (authHeader) {
     try {
       const qs = searchParams.toString();
@@ -78,7 +76,6 @@ export async function GET(request: NextRequest) {
     const { data: schedule, error } = await query;
 
     if (error) {
-      );
 
       // Try a simpler query without joins as fallback
       let fallbackQuery = supabase
@@ -101,8 +98,6 @@ export async function GET(request: NextRequest) {
       // Use the simple query results instead
       const scheduleWithFallback = scheduleSimple;
 
-      // Continue with the fallback data
-      ');
 
       // Get doctor info and return
       const { data: doctor } = await supabase
@@ -126,7 +121,6 @@ export async function GET(request: NextRequest) {
 
     // Log detailed schedule data for debugging
     if (scheduleArray.length > 0) {
-      );
       scheduleArray.forEach((item: any, idx: number) => {
         console.log(`📅 [Schedule GET] Item ${idx}:`, {
           day_of_week: item.day_of_week,
@@ -171,7 +165,6 @@ export async function GET(request: NextRequest) {
         }
         groupedSchedule[cid].schedule.push(item);
       });
-      .length, 'centers');
     }
 
     const responseData = {
@@ -199,8 +192,6 @@ export async function PUT(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   const body = await request.json();
-
-  );
 
   if (authHeader) {
     try {
@@ -236,7 +227,6 @@ export async function PUT(request: NextRequest) {
     if (!Array.isArray(body?.schedule || body)) return NextResponse.json({ error: 'schedule array required' }, { status: 400 });
 
     const scheduleArray = Array.isArray(body) ? body : body.schedule;
-    );
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -306,8 +296,6 @@ export async function PUT(request: NextRequest) {
         break_end: item.break_end ?? null,
         notes: item.notes ?? null,
       }));
-
-      );
 
       // Try to insert new schedules
       // If the database constraint hasn't been updated yet, this will fail with a unique constraint error

@@ -307,8 +307,6 @@ export default function SignupPage() {
     try {
       setIsLoading(true);
 
-      );
-
       if (!pendingUserData) {
         throw new Error('No pending user data found');
       }

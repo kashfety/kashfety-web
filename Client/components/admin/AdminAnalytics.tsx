@@ -308,7 +308,7 @@ export default function AdminAnalytics() {
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={100}
-                                    label={({ status, count }) => `${status}: ${count}`}
+                                    label={(entry: any) => `${entry.status}: ${entry.count}`}
                                 >
                                     {analytics.appointments.statusDistribution.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />

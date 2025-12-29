@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
     const userId = decoded.userId || decoded.id || decoded.sub;
     
     if (!userId) {
-      );
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token structure' },
         { status: 401 }

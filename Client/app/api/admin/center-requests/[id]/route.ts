@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 export const runtime = 'nodejs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;

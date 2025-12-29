@@ -25,7 +25,6 @@ export async function POST(request: NextRequest, { params }: { params: { centerI
 
     return NextResponse.json(data);
   } catch (error) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

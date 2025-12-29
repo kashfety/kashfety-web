@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ centerId: string }> }
+  { params }: { params: Promise<{ centerId: string }> | { centerId: string } }
 ) {
   try {
-    const { centerId } = await params;
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const { centerId } = resolvedParams;
     if (!centerId) {
       return NextResponse.json({ success: false, message: 'centerId is required' }, { status: 400 });
     }

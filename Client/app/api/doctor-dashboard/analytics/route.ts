@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       .from('reviews')
       .select('rating')
       .eq('doctor_id', doctorId);
-    
+
     if (ratings && ratings.length > 0) {
       const sum = ratings.reduce((s: number, r: any) => s + Number(r.rating || 0), 0);
       avgRating = Math.round((sum / ratings.length) * 100) / 100; // Round to 2 decimal places
@@ -106,7 +106,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (e: any) {
-    :', e);
     return NextResponse.json({ error: e.message || 'Failed to connect to backend server' }, { status: 500 });
   }
 }

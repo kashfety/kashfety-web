@@ -399,7 +399,9 @@ export default function SystemSettings() {
                                                             {setting.setting_key.replace(/_/g, ' ')}
                                                         </h4>
                                                         {!setting.is_public && (
-                                                            <Shield className="h-4 w-4 text-orange-500" title="Private setting" />
+                                                            <span title="Private setting">
+                                                                <Shield className="h-4 w-4 text-orange-500" />
+                                                            </span>
                                                         )}
                                                         {modifiedSettings[settingKey] !== undefined && (
                                                             <span className="text-xs text-yellow-600 font-medium">Modified</span>

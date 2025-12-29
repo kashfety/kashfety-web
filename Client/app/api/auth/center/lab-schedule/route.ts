@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const labTestTypeId = searchParams.get('lab_test_type_id');
     const centerId = searchParams.get('center_id');
-    
+
 
     const user = await getUserFromAuth(request);
-    
+
     if (!user || user.role !== 'center') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Parse time_slots JSON strings back to arrays
     const parsedSchedule = (schedule || []).map((daySchedule: any) => ({
       ...daySchedule,
-      time_slots: typeof daySchedule.time_slots === 'string' 
+      time_slots: typeof daySchedule.time_slots === 'string'
         ? JSON.parse(daySchedule.time_slots || '[]')
         : daySchedule.time_slots || []
     }));
@@ -54,29 +54,29 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    
+
     const user = await getUserFromAuth(request);
-    console.log('👤 [Lab Schedule PUT] User from auth:', { 
-      id: user?.id, 
-      role: user?.role, 
-      center_id: user?.center_id 
+    console.log('👤 [Lab Schedule PUT] User from auth:', {
+      id: user?.id,
+      role: user?.role,
+      center_id: user?.center_id
     });
-    
+
     if (!user || user.role !== 'center') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const body = await request.json();
-    console.log('📦 [Lab Schedule PUT] Request body:', { 
+    console.log('📦 [Lab Schedule PUT] Request body:', {
       lab_test_type_id: body.lab_test_type_id,
       schedule_length: body.schedule?.length,
       schedule: body.schedule
     });
-    
+
     const { lab_test_type_id, schedule } = body;
-    
+
     if (!lab_test_type_id || !Array.isArray(schedule)) {
-      console.error('❌ [Lab Schedule PUT] Invalid request data:', { 
+      console.error('❌ [Lab Schedule PUT] Invalid request data:', {
         has_lab_test_type_id: !!lab_test_type_id,
         is_array: Array.isArray(schedule),
         schedule_type: typeof schedule
@@ -119,13 +119,13 @@ export async function PUT(request: NextRequest) {
         const timeSlots = day.slots
           .map((slot: any) => {
             // Handle both string and object formats
-            const time = typeof slot === 'string' 
-              ? slot 
+            const time = typeof slot === 'string'
+              ? slot
               : (slot.time || slot.start_time || slot.slot_time || '');
             const duration = typeof slot === 'object' && slot.duration !== undefined
               ? slot.duration
               : (day.slot_duration || 30);
-            
+
             return { time, duration };
           })
           .filter((slot: any) => slot.time); // Remove any invalid slots
@@ -149,8 +149,6 @@ export async function PUT(request: NextRequest) {
         };
       });
 
-    );
-
     // Insert the new schedule if there are any entries
     if (scheduleInserts.length > 0) {
       const { data, error } = await supabase
@@ -159,33 +157,24 @@ export async function PUT(request: NextRequest) {
         .select();
 
       if (error) {
-        );
-        return NextResponse.json({ 
-          error: 'Failed to save schedule', 
+        return NextResponse.json({
+          error: 'Failed to save schedule',
           details: error.message,
           code: error.code,
           hint: error.hint
         }, { status: 500 });
       }
 
-      );
     } else {
-      ');
-       => ({
-        day_of_week: d.day_of_week,
-        is_available: d.is_available,
-        slots_count: d.slots?.length || 0,
-        slots: d.slots
-      })));
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: `Successfully saved ${scheduleInserts.length} schedule entries`,
       entries_saved: scheduleInserts.length
     });
   } catch (error: any) {
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Internal server error',
       details: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

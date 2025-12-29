@@ -836,7 +836,6 @@ export const adminService = {
       // Try fallback route first for Vercel compatibility
       try {
         const response = await api.get('/api/admin-user-details', { params: { userId: id } });
-        );
 
         // Check if response has user data (multiple possible formats)
         const hasUserData = response.data?.success ||
@@ -897,7 +896,6 @@ export const adminService = {
       // Try fallback route first for Vercel compatibility
       try {
         const response = await api.get('/api/admin-centers', { params });
-        );
 
         // Check if response has centers data
         if (response.data?.success || response.data?.data || response.data?.centers) {
@@ -961,7 +959,6 @@ export const adminService = {
       // Try fallback route first for Vercel compatibility
       try {
         const response = await api.get('/api/admin-analytics', { params });
-        );
 
         // Check if response has analytics data
         if (response.data?.success || response.data?.data || response.data?.appointments || response.data?.revenue) {

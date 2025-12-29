@@ -30,11 +30,24 @@ export function useAuth(): UseAuthReturn {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        if (authService.isAuthenticated()) {
-          setIsAuthenticated(true);
-          // Fetch user profile if authenticated
-          const userProfile = await authService.getProfile();
-          setUser(userProfile);
+        // Check if token exists in localStorage
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) {
+          // Verify token is valid by fetching profile
+          try {
+            const response = await authService.getProfile();
+            const userProfile = response.data?.user || response.data || response;
+            setUser(userProfile);
+            setIsAuthenticated(true);
+          } catch (verifyError) {
+            // Token is invalid, clear it
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('auth_user');
+            }
+            setIsAuthenticated(false);
+            setUser(null);
+          }
         } else {
           setIsAuthenticated(false);
           setUser(null);
@@ -55,9 +68,17 @@ export function useAuth(): UseAuthReturn {
     setLoading(true);
     try {
       const response = await authService.login({ phone, password });
-      const { token, user } = response;
+      const token = response.data?.token || response.token;
+      const user = response.data?.user || response.user || response.data;
       
-      authService.setAuthToken(token);
+      // Store token and user in localStorage
+      if (token && typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', token);
+        if (user) {
+          localStorage.setItem('auth_user', JSON.stringify(user));
+        }
+      }
+      
       setUser(user);
       setIsAuthenticated(true);
       setError(null);
@@ -76,7 +97,17 @@ export function useAuth(): UseAuthReturn {
   const logout = async () => {
     setLoading(true);
     try {
-      await authService.logout();
+      // Clear all auth tokens and user data
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        sessionStorage.removeItem('auth_token');
+        sessionStorage.removeItem('authToken');
+        document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
+      
       setUser(null);
       setIsAuthenticated(false);
       
@@ -93,9 +124,17 @@ export function useAuth(): UseAuthReturn {
     setLoading(true);
     try {
       const response = await authService.register(userData);
-      const { token, user } = response;
+      const token = response.data?.token || response.token;
+      const user = response.data?.user || response.user || response.data;
       
-      authService.setAuthToken(token);
+      // Store token and user in localStorage
+      if (token && typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', token);
+        if (user) {
+          localStorage.setItem('auth_user', JSON.stringify(user));
+        }
+      }
+      
       setUser(user);
       setIsAuthenticated(true);
       setError(null);

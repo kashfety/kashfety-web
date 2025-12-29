@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // Fetch doctor's profile picture URL
     const { data: user, error } = await supabase
       .from('users')
@@ -52,12 +52,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch profile picture' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      profile_picture_url: user?.profile_picture_url || null 
+    return NextResponse.json({
+      success: true,
+      profile_picture_url: user?.profile_picture_url || null
     });
   } catch (error) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -97,7 +96,7 @@ export async function POST(request: NextRequest) {
     const doctorId = searchParams.get('doctor_id');
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     const file = formData.get('profile_picture') as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
@@ -152,13 +151,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update profile picture URL' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       profile_picture_url: profilePictureUrl,
       message: 'Profile picture uploaded successfully'
     });
   } catch (error) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

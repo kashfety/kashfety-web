@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
     const excludeBookingId = searchParams.get('exclude_booking_id'); // For rescheduling
 
     if (!centerId || !typeId || !date) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Center ID, Type ID, and date are required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Center ID, Type ID, and date are required'
       }, { status: 400 });
     }
 
@@ -37,17 +37,16 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (scheduleError) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Failed to fetch lab schedule' 
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to fetch lab schedule'
       }, { status: 500 });
     }
 
     let timeSlots = [];
-    
+
     if (!schedule) {
-      ');
-      
+
       // Generate default time slots: 8:00 AM to 4:00 PM, every 30 minutes
       const defaultSlots = [];
       for (let hour = 8; hour < 16; hour++) {
@@ -86,12 +85,12 @@ export async function GET(request: NextRequest) {
       .eq('lab_test_type_id', typeId)
       .eq('booking_date', date)
       .in('status', ['scheduled', 'confirmed', 'in_progress']);
-    
+
     // Exclude the current booking if rescheduling
     if (excludeBookingId) {
       bookingsQuery = bookingsQuery.neq('id', excludeBookingId);
     }
-    
+
     const { data: bookings, error: bookingsError } = await bookingsQuery;
 
     if (bookingsError) {
@@ -106,7 +105,6 @@ export async function GET(request: NextRequest) {
       }
       return time;
     }));
-    );
 
     // Map slots to include availability
     // Handle both string slots and object slots
@@ -121,13 +119,13 @@ export async function GET(request: NextRequest) {
       } else {
         return null;
       }
-      
+
       // Normalize time to HH:MM format
       time = time.slice(0, 5);
-      
+
       // Check if this time is booked
       const isBooked = bookedTimes.has(time);
-      
+
       return {
         time,
         is_available: !isBooked,
@@ -135,7 +133,6 @@ export async function GET(request: NextRequest) {
       };
     }).filter((slot: any) => slot !== null); // Remove any null slots
 
-    );
 
     return NextResponse.json({
       success: true,
@@ -148,10 +145,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

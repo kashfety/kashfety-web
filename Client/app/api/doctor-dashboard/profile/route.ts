@@ -27,16 +27,16 @@ export async function GET(request: NextRequest) {
     const doctorId = searchParams.get('doctor_id');
     if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     // Fetch doctor profile with Arabic name fields
     const { data: user, error } = await supabase
       .from('users')
       .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, phone, specialty, consultation_fee, home_visits_available, rating, bio')
       .eq('id', doctorId)
       .single();
-    
+
     if (error) throw error;
-    
+
     console.log('🔍 Doctor data from Supabase:', {
       name: user?.name,
       name_ar: user?.name_ar,
@@ -44,24 +44,28 @@ export async function GET(request: NextRequest) {
       last_name_ar: user?.last_name_ar,
       specialty: user?.specialty
     });
-    
+
     // If doctor has specialty, fetch Arabic specialty name from specialties table
+    let doctorProfile: any = { ...user };
     if (user?.specialty) {
       const { data: specialtyData } = await supabase
         .from('specialties')
         .select('name, name_ar, name_en, name_ku')
         .eq('name', user.specialty)
         .single();
-      
-      
+
+
       if (specialtyData) {
-        user.specialty_name_ar = specialtyData.name_ar;
-        user.specialty_name_en = specialtyData.name_en;
-        user.specialty_name_ku = specialtyData.name_ku;
+        doctorProfile = {
+          ...user,
+          specialty_name_ar: specialtyData.name_ar,
+          specialty_name_en: specialtyData.name_en,
+          specialty_name_ku: specialtyData.name_ku
+        };
       }
     }
-    
-    return NextResponse.json({ success: true, doctor: user });
+
+    return NextResponse.json({ success: true, doctor: doctorProfile });
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Failed to load profile' }, { status: 500 });
   }

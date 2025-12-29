@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         .select('name_ar')
         .or(`name.eq.${user.specialty},name_en.eq.${user.specialty}`)
         .single();
-      
+
       if (specialtyData) {
         (user as any).specialty_ar = specialtyData.name_ar;
       }
@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, doctor: user });
   } catch (error) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }
@@ -125,7 +124,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, doctor: updated });
   } catch (error) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

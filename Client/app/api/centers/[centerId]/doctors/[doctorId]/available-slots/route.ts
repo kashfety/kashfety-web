@@ -40,7 +40,7 @@ export async function GET(
           .eq('appointment_date', date)
           .eq('center_id', centerId)
           .in('status', ['scheduled', 'confirmed']);
-        const bookedTimes = (appts || []).map((a: any) => (a.appointment_time || '').slice(0,5));
+        const bookedTimes = (appts || []).map((a: any) => (a.appointment_time || '').slice(0, 5));
 
         const srcSlots: any[] = Array.isArray(data.available_slots)
           ? data.available_slots
@@ -65,7 +65,7 @@ export async function GET(
         }, { status: 200 });
       }
       // if not ok, fall through to Supabase computation
-    } catch {}
+    } catch { }
 
     // Supabase fallback: compute available slots and booked flags for this center/date
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -103,7 +103,7 @@ export async function GET(
       .eq('center_id', centerId)
       .in('status', ['scheduled', 'confirmed']);
 
-    const bookedTimes = (appts || []).map((a: any) => (a.appointment_time || '').slice(0,5));
+    const bookedTimes = (appts || []).map((a: any) => (a.appointment_time || '').slice(0, 5));
 
     const rawSlots: any[] = Array.isArray(schedule.time_slots) ? schedule.time_slots : [];
     const normalized = rawSlots
@@ -130,7 +130,6 @@ export async function GET(
       consultation_fee: schedule.consultation_fee || 0
     }, { status: 200 });
   } catch (error) {
-    :', error);
     return NextResponse.json({ success: false, message: 'Failed to fetch available slots' }, { status: 500 });
   }
 }

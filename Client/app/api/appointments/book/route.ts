@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
             // If center_id is provided on the request, enforce center-aware conflict.
             // If existing.center_id is null (legacy), still treat as conflict to avoid double booking.
             if (!center_id || !existing.center_id || existing.center_id === center_id) {
-                :', existing);
                 return NextResponse.json({
                     success: false,
                     message: "This time slot is already booked"

@@ -33,9 +33,9 @@ export default function LabTestTypesManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newTestType, setNewTestType] = useState({ 
-    name: '', 
-    name_ar: '', 
+  const [newTestType, setNewTestType] = useState({
+    name: '',
+    name_ar: '',
     name_ku: '',
     code: '',
     category: 'lab',
@@ -56,7 +56,7 @@ export default function LabTestTypesManagement() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/lab-test-types');
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch lab test types');
       }
@@ -108,15 +108,15 @@ export default function LabTestTypesManagement() {
       }
 
       const data = await response.json();
-      
+
       showSuccess(
         t('success') || 'Success',
         'Lab test type added successfully',
         () => {
           setLabTestTypes([data.labTestType, ...labTestTypes]);
-          setNewTestType({ 
-            name: '', 
-            name_ar: '', 
+          setNewTestType({
+            name: '',
+            name_ar: '',
             name_ku: '',
             code: '',
             category: 'lab',
@@ -167,9 +167,6 @@ export default function LabTestTypesManagement() {
           );
         }
       },
-      true,
-      'Delete',
-      'Cancel'
     );
   };
 
@@ -252,7 +249,7 @@ export default function LabTestTypesManagement() {
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <Label htmlFor="category">Category</Label>
@@ -322,7 +319,7 @@ export default function LabTestTypesManagement() {
                 disabled={submitting}
               />
             </div>
-            
+
             <div className="flex gap-2 mt-4">
               <Button
                 onClick={handleAddTestType}
@@ -334,9 +331,9 @@ export default function LabTestTypesManagement() {
               <Button
                 onClick={() => {
                   setIsAddingNew(false);
-                  setNewTestType({ 
-                    name: '', 
-                    name_ar: '', 
+                  setNewTestType({
+                    name: '',
+                    name_ar: '',
                     name_ku: '',
                     code: '',
                     category: 'lab',

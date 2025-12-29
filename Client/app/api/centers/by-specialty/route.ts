@@ -83,7 +83,7 @@ export async function GET(req: Request) {
 
         // Remove duplicates and format the response
         const uniqueCentersMap = new Map();
-        
+
         doctorCenters?.forEach(dc => {
             const center = dc.centers as any; // Type assertion to handle Supabase nested object
             if (!uniqueCentersMap.has(center.id)) {
@@ -94,11 +94,11 @@ export async function GET(req: Request) {
                     address: center.address,
                     phone: center.phone,
                     email: center.email,
-                    services: center.services && center.services.length > 0 
-                        ? center.services 
+                    services: center.services && center.services.length > 0
+                        ? center.services
                         : ["General Consultation", "Checkup"], // Default services
-                    operating_hours: typeof center.operating_hours === 'string' 
-                        ? center.operating_hours 
+                    operating_hours: typeof center.operating_hours === 'string'
+                        ? center.operating_hours
                         : '8:00 AM - 6:00 PM', // Convert JSONB object to string or use default
                     doctor_count: 0 // Will be calculated below
                 });
@@ -120,8 +120,6 @@ export async function GET(req: Request) {
 
         // Filter out centers with no doctors for this specialty
         const centersWithDoctors = centers.filter(c => c.doctor_count > 0);
-
-        `);
 
         return NextResponse.json({
             success: true,

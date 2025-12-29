@@ -30,11 +30,9 @@ export default function RoleRedirect() {
             !currentPath.startsWith('/login') &&
             !currentPath.startsWith('/signup') &&
             currentPath !== '/') {
-
-             redirected from ${currentPath} to ${expectedPath}`)
             router.replace(expectedPath)
         }
     }, [user, isAuthenticated, loading, pathname, router])
 
     return null // This component doesn't render anything
-} 
+}

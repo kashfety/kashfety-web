@@ -13,7 +13,7 @@ export async function GET(
   try {
     // Await params to get the centerId first
     const { centerId } = await params;
-    
+
     const { searchParams } = new URL(request.url);
     const specialty = searchParams.get('specialty') || undefined;
     const homeVisit = searchParams.get('home_visit') || undefined;
@@ -52,7 +52,6 @@ export async function GET(
       .eq('center_id', centerId);
 
     if (error) {
-      :', error);
       return NextResponse.json({ success: false, message: 'Failed to fetch center doctors' }, { status: 500 });
     }
 

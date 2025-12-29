@@ -21,7 +21,7 @@ export async function GET(
     const qs = new URLSearchParams();
     if (specialty) qs.set('specialty', specialty);
     if (homeVisit) qs.set('home_visit', homeVisit);
-  const url = `${BACKEND_URL}/api/auth/centers/${centerId}/doctors${qs.toString() ? `?${qs.toString()}` : ''}`;
+    const url = `${BACKEND_URL}/api/auth/centers/${centerId}/doctors${qs.toString() ? `?${qs.toString()}` : ''}`;
     const response = await fetch(url, { method: 'GET', headers: authHeader ? { Authorization: authHeader } : undefined });
     if (response.ok) {
       const data = await response.json();
@@ -42,10 +42,9 @@ export async function GET(
           id, name, specialty, consultation_fee, home_visits_available, rating
         )
       `)
-  .eq('center_id', centerId);
+      .eq('center_id', centerId);
 
     if (error) {
-      :', error);
       return NextResponse.json({ success: false, message: 'Failed to fetch center doctors' }, { status: 500 });
     }
 

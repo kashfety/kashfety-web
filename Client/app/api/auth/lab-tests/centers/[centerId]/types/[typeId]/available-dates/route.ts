@@ -41,8 +41,7 @@ export async function GET(
 
       // Check if this day has available schedule
       const daySchedule = schedule?.find((s: any) => s.day_of_week === dayOfWeek);
-      :`, { found: !!daySchedule, isAvailable: daySchedule?.is_available });
-      
+
       if (daySchedule && daySchedule.is_available) {
         // Parse time_slots if it's a JSON string
         let timeSlots = daySchedule.time_slots;
@@ -53,9 +52,9 @@ export async function GET(
             timeSlots = [];
           }
         }
-        
+
         const slotsCount = Array.isArray(timeSlots) ? timeSlots.length : 0;
-        
+
         availableDates.push({
           date: dateStr,
           day_of_week: dayOfWeek,

@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
+
 // Use service role key for admin operations
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,14 +15,16 @@ const AUTH_FALLBACK_ENABLED = process.env.AUTH_FALLBACK_ENABLED !== '0';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         const authHeader = request.headers.get('authorization');
         if (!authHeader && !AUTH_FALLBACK_ENABLED) {
             return NextResponse.json({ success: false, message: 'Authorization header required' }, { status: 401 });
         }
-        const { id } = params;
+        // Handle params as Promise (Next.js 15) or object (Next.js 14)
+        const resolvedParams = await Promise.resolve(params);
+        const { id } = resolvedParams;
         const { searchParams } = new URL(request.url);
         const role = searchParams.get('role') || 'patient';
 

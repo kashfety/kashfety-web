@@ -63,9 +63,8 @@ export async function GET(request: NextRequest) {
     const { data: users, error } = await dataQuery;
 
     if (error) {
-      );
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: 'Failed to fetch admins',
         details: error.message,
         code: error.code,
@@ -85,40 +84,38 @@ export async function GET(request: NextRequest) {
       } else if (user.email) {
         displayName = user.email.split('@')[0];
       }
-      
+
       // Log name resolution for debugging (only for specific cases to avoid spam)
       if (!user.name || user.email === 'm.ismail.official23@gmail.com') {
       }
-      
+
       return {
-      id: user.id,
-      uid: user.uid || user.id,
-      name: displayName,
-      email: user.email || '',
-      phone: user.phone || '',
-      role: user.role as 'admin' | 'super_admin',
-      isActive: user.is_active !== false,
-      lastLogin: user.last_login || null,
-      loginCount: user.login_count || 0,
-      createdAt: user.created_at,
-      createdBy: user.created_by || null,
-      accountLocked: user.account_locked || false,
-      lockReason: user.lock_reason || null,
-      lockedAt: user.locked_at || null,
-      lockedBy: user.locked_by || null,
-      permissions: {
-        user_management: user.permissions?.user_management || false,
-        admin_management: user.permissions?.admin_management || false,
-        system_settings: user.permissions?.system_settings || false,
-        audit_logs: user.permissions?.audit_logs || false,
-        all: user.permissions?.all || user.role === 'super_admin'
-      }
+        id: user.id,
+        uid: user.uid || user.id,
+        name: displayName,
+        email: user.email || '',
+        phone: user.phone || '',
+        role: user.role as 'admin' | 'super_admin',
+        isActive: user.is_active !== false,
+        lastLogin: user.last_login || null,
+        loginCount: user.login_count || 0,
+        createdAt: user.created_at,
+        createdBy: user.created_by || null,
+        accountLocked: user.account_locked || false,
+        lockReason: user.lock_reason || null,
+        lockedAt: user.locked_at || null,
+        lockedBy: user.locked_by || null,
+        permissions: {
+          user_management: user.permissions?.user_management || false,
+          admin_management: user.permissions?.admin_management || false,
+          system_settings: user.permissions?.system_settings || false,
+          audit_logs: user.permissions?.audit_logs || false,
+          all: user.permissions?.all || user.role === 'super_admin'
+        }
       };
     });
 
     const totalPages = Math.ceil((count || 0) / limit);
-
-    ');
 
     return NextResponse.json({
       success: true,
@@ -136,10 +133,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

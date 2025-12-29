@@ -432,24 +432,20 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
 
         if (shouldUpdateFromDB) {
           const newConfigs = buildConfigsFromSchedule(selectedCenterId, rows);
-          );
 
           setCenterFormStates(prev => {
             const updated = {
               ...prev,
               [selectedCenterId]: newConfigs
             };
-            );
             return updated;
           });
 
           setInitializedCenters(prev => {
             const updated = new Set([...prev, selectedCenterId]);
-            );
             return updated;
           });
         } else {
-          );
         }
 
         setLastFetchedCenterId(selectedCenterId);
@@ -580,12 +576,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
       const scheduleData = DAYS_OF_WEEK
         .filter(day => {
           const config = getDayConfig(day.value);
-          :`, {
-            isAvailable: config.isAvailable,
-            startTime: config.startTime,
-            endTime: config.endTime,
-            duration: config.duration
-          });
           return config.isAvailable;
         })
         .map(day => {
@@ -608,8 +598,6 @@ export default function DoctorScheduleManagement({ doctorId }: ScheduleManagemen
           }
           return hasSlots;
         });
-
-      );
 
       const response = await axios.put(
         `/api/doctor-dashboard/schedule`,

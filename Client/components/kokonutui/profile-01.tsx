@@ -36,12 +36,14 @@ export default function Profile01({
 
   const handleLogout = async () => {
     try {
-      // Call the logout method from authService
-      await authService.logout()
-
-      // Clear any auth tokens
-      authService.clearAuthToken()
+      // Clear all auth tokens and user data
       localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_user')
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('userRole')
+      sessionStorage.removeItem('auth_token')
+      sessionStorage.removeItem('authToken')
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
       // Redirect to login page
       router.push('/login')

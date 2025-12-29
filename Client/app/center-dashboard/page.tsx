@@ -611,8 +611,6 @@ function CenterAnalytics({
       const monthStart = new Date(year, month, 1).toISOString().slice(0, 10);
       const monthEnd = new Date(year, month + 1, 0).toISOString().slice(0, 10);
 
-      `);
-
       const monthBookings = (allAppointments || []).filter((b: any) => {
         // Handle both booking_date and appointment_date fields
         const appointmentDate = b.booking_date || b.appointment_date;
@@ -621,12 +619,7 @@ function CenterAnalytics({
         }
         const isInRange = appointmentDate >= monthStart && appointmentDate <= monthEnd;
         if (isInRange) {
-          console.log(`✅ Found appointment for ${monthName}:`, {
-            date: appointmentDate,
-            status: b.status,
-            fee: b.fee || b.consultation_fee,
-            id: b.id
-          });
+          // Found appointment for this month
         }
         return isInRange;
       });
@@ -1407,7 +1400,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
       }
     } else {
       // Clear current config
-      ');
       setScheduleConfig({});
     }
   };
@@ -1831,7 +1823,7 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                           {t('bulk_action_options') || 'Bulk Action Options'}
                         </Label>
                       </div>
-                      
+
                       <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Button
                           onClick={async () => {
@@ -2469,8 +2461,6 @@ export default function CenterDashboardPage() {
                 variant: "destructive",
               });
             }
-          } else {
-            ');
           }
         } else {
           const errorData = await statusResponse.json();
@@ -2584,7 +2574,6 @@ export default function CenterDashboardPage() {
 
       // Set lab test types with their current service settings
       if (labTestTypesRes?.success && Array.isArray(labTestTypesRes.labTestTypes)) {
-         => ({ id: t.id, name: t.name, code: t.code, category: t.category, is_active: t.is_active })));
         setAllTestTypes(labTestTypesRes.labTestTypes);
 
         // Initialize service states from the loaded data

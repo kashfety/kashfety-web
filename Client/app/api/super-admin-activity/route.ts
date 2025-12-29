@@ -20,11 +20,11 @@ function verifyToken(token: string) {
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  
+
   try {
     // Get authorization token
     const authHeader = request.headers.get('authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { error: 'Unauthorized - No token provided' },
@@ -197,7 +197,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      filteredActivities = filteredActivities.filter(log => 
+      filteredActivities = filteredActivities.filter(log =>
         log.actionDetails.message?.toLowerCase().includes(search.toLowerCase()) ||
         log.actionType.toLowerCase().includes(search.toLowerCase())
       );
@@ -205,8 +205,6 @@ export async function GET(request: NextRequest) {
 
     const total = filteredActivities.length;
     const activities = filteredActivities.slice(offset, offset + limit);
-
-    `);
 
     return NextResponse.json({
       success: true,
@@ -221,9 +219,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch admin activities',
-        details: error.message 
+        details: error.message
       },
       { status: 500 }
     );

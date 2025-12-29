@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
           // Extract the storage path from the URL
           // URL format: https://<supabase-url>/storage/v1/object/sign/medical-documents/certificates/<doctor-id>/<file>?token=...
           let filePath = cert.certificate_file_name;
-          
+
           if (cert.certificate_file_url) {
             // Try to extract path after 'medical-documents/'
             const urlParts = cert.certificate_file_url.split('/medical-documents/');
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
               }
             }
           }
-          
+
           // Generate a fresh signed URL valid for 1 hour
           const { data: signedUrlData, error: signError } = await supabase.storage
             .from('medical-documents')
@@ -106,13 +106,12 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ 
-      success: true, 
-      certificates: certificatesWithFreshUrls || [] 
+    return NextResponse.json({
+      success: true,
+      certificates: certificatesWithFreshUrls || []
     });
 
   } catch (error: any) {
-    :', error);
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }
 }

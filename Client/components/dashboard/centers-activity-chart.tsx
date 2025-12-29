@@ -1,8 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Chart, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Chart, ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 const data = [
   { name: "Center A", students: 120, classes: 45 },
@@ -36,8 +36,8 @@ export default function CentersActivityChart() {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="name" className="text-sm text-muted-foreground" tickLine={false} axisLine={false} />
                 <YAxis className="text-sm text-muted-foreground" tickLine={false} axisLine={false} />
-                <ChartTooltip
-                  content={({ active, payload }) => {
+                <Tooltip
+                  content={({ active, payload }: { active?: boolean; payload?: any[] }) => {
                     if (active && payload && payload.length) {
                       return (
                         <ChartTooltipContent>

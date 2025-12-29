@@ -5,7 +5,7 @@ export const getPatientProfile = async (req, res) => {
   try {
     // Use authenticated user's UID instead of URL parameter for security
     const patientUid = req.authenticatedPatientUid || req.user.uid;
-    
+
     const { data: patient, error } = await supabaseAdmin
       .from(TABLES.PATIENTS)
       .select('*')
@@ -33,13 +33,13 @@ export const updatePatientProfile = async (req, res) => {
     // Use authenticated user's UID instead of URL parameter for security
     const patientUid = req.authenticatedPatientUid || req.user.uid;
     const updateData = req.body;
-    
+
     // Remove sensitive fields that shouldn't be updated directly
     delete updateData.id;
     delete updateData.uid;
     delete updateData.created_at;
     delete updateData.updated_at;
-    
+
     // Update patient data
     const { data: patient, error } = await supabaseAdmin
       .from(TABLES.PATIENTS)
@@ -79,7 +79,7 @@ export const getPatientMedicalRecords = async (req, res) => {
   try {
     // Use authenticated user's UID instead of URL parameter for security
     const patientUid = req.authenticatedPatientUid || req.user.uid;
-    
+
     // Get patient ID from UID
     const { data: patient, error: patientError } = await supabaseAdmin
       .from(TABLES.PATIENTS)
@@ -145,7 +145,7 @@ export const createMedicalRecord = async (req, res) => {
           .eq('uid', patientId)
           .single()).data?.id)
         .limit(1);
-      
+
       if (!appointmentCheck || appointmentCheck.length === 0) {
         return res.status(403).json({
           success: false,
@@ -240,7 +240,7 @@ export const getPatientAppointmentHistory = async (req, res) => {
     // Use authenticated user's UID instead of URL parameter for security
     const patientUid = req.authenticatedPatientUid || req.user.uid;
     const { status, type, from_date, to_date } = req.query;
-    
+
     // Get patient ID from UID
     const { data: patient, error: patientError } = await supabaseAdmin
       .from(TABLES.PATIENTS)
@@ -288,7 +288,7 @@ export const getPatientDashboard = async (req, res) => {
   try {
     // Use authenticated user's UID instead of URL parameter for security
     const patientUid = req.authenticatedPatientUid || req.user.uid;
-    
+
     // Get patient ID from UID
     const { data: patient, error: patientError } = await supabaseAdmin
       .from(TABLES.PATIENTS)
@@ -330,7 +330,7 @@ export const getPatientDashboard = async (req, res) => {
     const { data: appointmentStats, error: statsError } = await supabaseAdmin
       .rpc('get_patient_appointment_stats', { p_patient_id: patient.id });
 
-    if (statsError) 
+    if (statsError) throw statsError;
 
     // Get health summary
     const healthSummary = {
@@ -396,7 +396,7 @@ export const updateEmergencyContact = async (req, res) => {
 export const searchPatients = async (req, res) => {
   try {
     const { query: searchQuery, age_min, age_max, gender } = req.query;
-    
+
     let query = supabaseAdmin
       .from(TABLES.PATIENTS)
       .select('id, uid, name, email, age, gender, created_at');

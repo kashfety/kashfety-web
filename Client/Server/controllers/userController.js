@@ -240,7 +240,6 @@ export const getUserProfileData = async (req, res) => {
           default_dashboard: getRoleDefaultDashboard(authUser.user.user_metadata?.role || 'patient')
         };
 
-        );
         // Create user in database
         const createdUser = await User.createUser(newUserData);
 

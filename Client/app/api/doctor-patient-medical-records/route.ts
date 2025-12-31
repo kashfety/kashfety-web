@@ -7,12 +7,25 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if authorization header is present
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      console.error('❌ No Authorization header found in request');
+      return NextResponse.json(
+        { error: 'Unauthorized - No token provided' },
+        { status: 401 }
+      );
+    }
+
     // Require doctor authentication
     const authResult = requireDoctor(request);
     if (authResult instanceof NextResponse) {
+      console.error('❌ Authentication failed - status:', authResult.status);
       return authResult; // Returns 401 or 403 error
     }
     const { user } = authResult;
+    
+    console.log('✅ Doctor authenticated:', user.id, user.role);
 
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');

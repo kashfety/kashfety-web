@@ -813,14 +813,36 @@ export default function DoctorDashboard() {
   // Enhanced patient view handler
   const handleViewPatient = async (patientId: string) => {
     try {
+      // Verify user is a doctor
+      if (!user || user.role !== 'doctor') {
+        toast({
+          title: t('error') || "Error",
+          description: t('dd_error_doctor_only') || "Only doctors can view patient details",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Get auth token for authenticated requests
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      
+      if (!token) {
+        console.error('❌ No auth token found in localStorage');
+        toast({
+          title: t('error') || "Error",
+          description: t('dd_error_auth_required') || "Authentication required. Please log in again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       };
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
+
+      // Debug: Log token presence (don't log the actual token for security)
+      console.log('🔑 Making authenticated request with token:', token ? 'Token present' : 'Token missing');
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only

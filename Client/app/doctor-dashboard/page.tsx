@@ -813,13 +813,21 @@ export default function DoctorDashboard() {
   // Enhanced patient view handler
   const handleViewPatient = async (patientId: string) => {
     try {
+      // Get auth token for authenticated requests
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
       const [patientResponse, medicalRecordsResponse, appointmentsResponse] = await Promise.all([
-        fetch(`/api/doctor-patient-details?patientId=${patientId}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}`)),
-        fetch(`/api/doctor-patient-medical-records?patientId=${patientId}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`)),
-        fetch(`/api/doctor-patient-appointments?patientId=${patientId}${doctorProfile?.id ? `&doctorId=${doctorProfile.id}` : ''}`).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`))
+        fetch(`/api/doctor-patient-details?patientId=${patientId}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}`, { headers })),
+        fetch(`/api/doctor-patient-medical-records?patientId=${patientId}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`, { headers })),
+        fetch(`/api/doctor-patient-appointments?patientId=${patientId}${doctorProfile?.id ? `&doctorId=${doctorProfile.id}` : ''}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`, { headers }))
       ]);
 
       if (patientResponse.ok) {

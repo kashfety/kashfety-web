@@ -1000,12 +1000,6 @@ export default function DoctorDashboard() {
         fetchDoctorData(); // Refresh dashboard data
       } else {
         const errorData = await response.json();
-          errorData
-        });
-
-        // Log debug info if available
-        if (errorData.debug) {
-        }
 
         toast({
           title: t('error') || "Error",

@@ -9,6 +9,66 @@ export const runtime = 'nodejs';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
+// GET handler for build-time validation and to get center request details
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> | { id: string } }
+) {
+  try {
+    // Handle params as Promise (Next.js 15) or object (Next.js 14)
+    const resolvedParams = await Promise.resolve(params);
+    const { id: centerId } = resolvedParams;
+    
+    if (!centerId) {
+      return NextResponse.json({ error: 'Center ID is required' }, { status: 400 });
+    }
+    
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
+    }
+
+    // Verify admin role
+    let isAdmin = false;
+    try {
+      const token = authHeader.replace(/^Bearer\s+/i, '');
+      const payload = JSON.parse(Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
+      isAdmin = payload.role === 'admin' || payload.role === 'super_admin';
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Get center request details
+    const { data, error } = await supabase
+      .from('centers')
+      .select('id, name, address, phone, email, center_type, approval_status, created_at, owner_doctor_id')
+      .eq('id', centerId)
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to fetch center request' }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Center not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: data
+    });
+
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || 'Failed to fetch center request' }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: NextRequest, 
   { params }: { params: Promise<{ id: string }> | { id: string } }
@@ -16,7 +76,7 @@ export async function PUT(
   try {
     // Handle params as Promise (Next.js 15) or object (Next.js 14)
     const resolvedParams = await Promise.resolve(params);
-    const centerId = resolvedParams.id;
+    const { id: centerId } = resolvedParams;
 
     if (!centerId) {
       return NextResponse.json({ error: 'Center ID is required' }, { status: 400 });

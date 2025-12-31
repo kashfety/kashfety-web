@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { validateCenterExists } from '../utils/center-validation';
 import { getUserFromAuth } from '../utils/jwt-auth';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +24,9 @@ export async function GET(request: NextRequest) {
         services: []
       }, { status: 404 });
     }
+
+    // Use server-side Supabase client with service role key
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { data: services, error } = await supabase
       .from('center_lab_services')
@@ -69,6 +75,9 @@ export async function PUT(request: NextRequest) {
         error: centerValidation.error || 'Center not found. Please ensure the center is properly registered.' 
       }, { status: 404 });
     }
+
+    // Use server-side Supabase client with service role key
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // First, deactivate all existing services for this center
     await supabase

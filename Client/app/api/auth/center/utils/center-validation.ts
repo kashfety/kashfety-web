@@ -1,4 +1,7 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export interface CenterValidationResult {
   exists: boolean;
@@ -19,6 +22,9 @@ export async function validateCenterExists(centerId: string): Promise<CenterVali
         error: 'Center ID is required'
       };
     }
+
+    // Use server-side Supabase client with service role key
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Check if center exists in centers table
     const { data: center, error } = await supabase
@@ -73,6 +79,9 @@ export async function ensureCenterExists(
   }
 ): Promise<CenterValidationResult> {
   try {
+    // Use server-side Supabase client with service role key
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
     // First check if user already has a center_id
     const { data: user, error: userError } = await supabase
       .from('users')

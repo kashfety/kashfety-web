@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export interface AuthUser {
   id: string;
@@ -18,6 +21,9 @@ export async function getUserFromAuth(request: NextRequest, includeProfile: bool
   }
   
   const token = authHeader.replace('Bearer ', '');
+  
+  // Use server-side Supabase client with service role key
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   
   try {
     // Try to decode JWT token payload (without verification for now)

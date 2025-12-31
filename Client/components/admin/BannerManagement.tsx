@@ -286,11 +286,12 @@ export default function BannerManagement() {
             }
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/admin/banners/${bannerToDelete.id}`,
+                `/api/admin/banners/${bannerToDelete.id}`,
                 {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 }
             );

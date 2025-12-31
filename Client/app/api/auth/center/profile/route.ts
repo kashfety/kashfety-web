@@ -118,15 +118,15 @@ export async function PUT(request: NextRequest) {
     Object.keys(bodyData).forEach(key => {
       const value = bodyData[key];
       // Keep the value if it's not undefined or null
-      // For string fields, keep empty strings for optional fields that can be cleared
       if (value !== undefined && value !== null) {
-        // For required fields like name and email, don't allow empty strings
-        if ((key === 'name' || key === 'email') && value === '') {
-          return; // Skip empty required fields
-        }
         updates[key] = value;
       }
     });
+    
+    // Validate that we have at least one field to update
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
     
     // Check if center exists first
     const { data: existingCenter, error: checkError } = await supabase

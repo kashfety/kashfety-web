@@ -112,13 +112,21 @@ export async function PUT(request: NextRequest) {
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Clean up the updates object - remove any undefined, null, or empty string values that might cause issues
-    // But keep empty strings for fields that should be cleared (like description, website)
+    // Define allowed fields that exist in the centers table schema
+    // Based on the actual schema: name, name_ar, address, phone, email, 
+    // operating_hours, services, center_type, approval_status, offers_labs, offers_imaging
+    const allowedFields = [
+      'name', 'name_ar', 'address', 'phone', 'email', 
+      'operating_hours', 'services', 'center_type', 
+      'approval_status', 'offers_labs', 'offers_imaging'
+    ];
+    
+    // Clean up the updates object - only include allowed fields
     const updates: any = {};
     Object.keys(bodyData).forEach(key => {
       const value = bodyData[key];
-      // Keep the value if it's not undefined or null
-      if (value !== undefined && value !== null) {
+      // Only include allowed fields and non-null/undefined values
+      if (allowedFields.includes(key) && value !== undefined && value !== null) {
         updates[key] = value;
       }
     });
@@ -174,7 +182,9 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ 
           error: 'Failed to update center profile', 
           details: updateError.message,
-          code: updateError.code
+          code: updateError.code,
+          hint: updateError.hint || 'Check that all fields exist in the database schema',
+          attemptedFields: Object.keys(updates)
         }, { status: 500 });
       }
 

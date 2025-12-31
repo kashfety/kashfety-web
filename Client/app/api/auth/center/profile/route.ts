@@ -111,13 +111,27 @@ export async function PUT(request: NextRequest) {
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const updates = bodyData;
+    
+    // Clean up the updates object - remove any undefined or null values that might cause issues
+    const updates: any = {};
+    Object.keys(bodyData).forEach(key => {
+      if (bodyData[key] !== undefined && bodyData[key] !== null) {
+        updates[key] = bodyData[key];
+      }
+    });
     
     // Check if center exists first
-    const { data: existingCenter } = await supabase
+    const { data: existingCenter, error: checkError } = await supabase
       .from('centers')
       .select('id')
       .eq('id', centerId);
+
+    if (checkError) {
+      return NextResponse.json({ 
+        error: 'Failed to check center existence', 
+        details: checkError.message 
+      }, { status: 500 });
+    }
 
     if (!existingCenter || existingCenter.length === 0) {
       // Create center if it doesn't exist
@@ -131,27 +145,38 @@ export async function PUT(request: NextRequest) {
         .single();
 
       if (createError) {
-        return NextResponse.json({ error: 'Failed to create center profile' }, { status: 500 });
+        return NextResponse.json({ 
+          error: 'Failed to create center profile', 
+          details: createError.message,
+          code: createError.code
+        }, { status: 500 });
       }
 
       return NextResponse.json({ center: newCenter });
     } else {
       // Update existing center
-      const { data: center, error } = await supabase
+      const { data: center, error: updateError } = await supabase
         .from('centers')
         .update(updates)
         .eq('id', centerId)
         .select()
         .single();
 
-      if (error) {
-        return NextResponse.json({ error: 'Failed to update center profile' }, { status: 500 });
+      if (updateError) {
+        return NextResponse.json({ 
+          error: 'Failed to update center profile', 
+          details: updateError.message,
+          code: updateError.code
+        }, { status: 500 });
       }
 
       return NextResponse.json({ center });
     }
 
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to update center profile' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'Failed to update center profile',
+      details: error.stack 
+    }, { status: 500 });
   }
 }

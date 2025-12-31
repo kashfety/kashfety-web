@@ -1,16 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
+
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ patientId: string }> }
 ) {
   try {
+    // Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 error
+    }
+    const { user: authenticatedUser } = authResult;
+
     const { patientId } = await params;
 
     if (!patientId) {
       return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
     }
+
+    // Verify patientId matches authenticated user (unless admin)
+    // Patients can only access their own bookings
+    if (authenticatedUser.role === 'patient') {
+      if (patientId !== authenticatedUser.id) {
+        return NextResponse.json({
+          success: false,
+          error: 'Forbidden - You can only access your own lab bookings'
+        }, { status: 403 });
+      }
+    } else if (authenticatedUser.role !== 'admin' && authenticatedUser.role !== 'super_admin') {
+      // Other roles (doctors, centers) cannot access patient lab bookings
+      return NextResponse.json({
+        success: false,
+        error: 'Forbidden - Only patients and admins can access lab bookings'
+      }, { status: 403 });
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Get patient's lab bookings with center and test type details
     const { data: bookings, error } = await supabase

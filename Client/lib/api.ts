@@ -36,20 +36,25 @@ frontendApiClient.interceptors.request.use(
         // Get current JWT token from localStorage
         const token = localStorage.getItem('auth_token');
 
-        // Add token for protected endpoints (auth/, center-dashboard/, or download routes)
-        if (token && config.headers && config.url && (
-          config.url.includes('/api/auth/') ||
-          config.url.includes('/api/center-dashboard/') ||
-          config.url.includes('/download-lab-result/')
-        )) {
+        // List of public endpoints that don't require authentication
+        const publicEndpoints = [
+          '/api/public/',
+          '/api/auth/login',
+          '/api/auth/register',
+          '/api/auth/verify',
+        ];
+
+        // Check if this is a public endpoint
+        const isPublicEndpoint = config.url && publicEndpoints.some(endpoint => 
+          config.url!.includes(endpoint)
+        );
+
+        // Add token for all /api/ routes EXCEPT public endpoints
+        if (token && config.headers && config.url && config.url.startsWith('/api/') && !isPublicEndpoint) {
           config.headers.Authorization = `Bearer ${token}`;
-        } else if (config.url && (
-          config.url.includes('/api/auth/') ||
-          config.url.includes('/api/center-dashboard/') ||
-          config.url.includes('/download-lab-result/')
-        )) {
         }
       } catch (error) {
+        // Silently fail - token might not be available
       }
     }
     return config;
@@ -72,7 +77,16 @@ frontendApiClient.interceptors.response.use(
           try {
             // Check if this is a request to a protected endpoint
             const requestUrl = error.config?.url || '';
-            const isProtectedEndpoint = requestUrl.includes('/api/auth/');
+            const publicEndpoints = [
+              '/api/public/',
+              '/api/auth/login',
+              '/api/auth/register',
+              '/api/auth/verify',
+            ];
+            const isPublicEndpoint = publicEndpoints.some(endpoint => 
+              requestUrl.includes(endpoint)
+            );
+            const isProtectedEndpoint = requestUrl.startsWith('/api/') && !isPublicEndpoint;
 
             if (isProtectedEndpoint) {
               // Clear auth data and redirect to login
@@ -81,6 +95,7 @@ frontendApiClient.interceptors.response.use(
               window.location.href = '/login';
             }
           } catch (signOutError) {
+            // Silently fail
           }
         }
       }

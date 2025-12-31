@@ -112,11 +112,19 @@ export async function PUT(request: NextRequest) {
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Clean up the updates object - remove any undefined or null values that might cause issues
+    // Clean up the updates object - remove any undefined, null, or empty string values that might cause issues
+    // But keep empty strings for fields that should be cleared (like description, website)
     const updates: any = {};
     Object.keys(bodyData).forEach(key => {
-      if (bodyData[key] !== undefined && bodyData[key] !== null) {
-        updates[key] = bodyData[key];
+      const value = bodyData[key];
+      // Keep the value if it's not undefined or null
+      // For string fields, keep empty strings for optional fields that can be cleared
+      if (value !== undefined && value !== null) {
+        // For required fields like name and email, don't allow empty strings
+        if ((key === 'name' || key === 'email') && value === '') {
+          return; // Skip empty required fields
+        }
+        updates[key] = value;
       }
     });
     

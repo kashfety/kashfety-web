@@ -703,13 +703,6 @@ export default function DoctorDashboard() {
 
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();
-        console.log('Doctor specialty fields:', {
-          specialty: profileData.doctor?.specialty,
-          specialty_name_ar: profileData.doctor?.specialty_name_ar,
-          name_ar: profileData.doctor?.name_ar,
-          first_name_ar: profileData.doctor?.first_name_ar,
-          last_name_ar: profileData.doctor?.last_name_ar
-        });
         setDoctorProfile(profileData.doctor);
 
         // Check if this is first time setup (no specialty set)
@@ -827,7 +820,6 @@ export default function DoctorDashboard() {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       
       if (!token) {
-        console.error('❌ No auth token found in localStorage');
         toast({
           title: t('error') || "Error",
           description: t('dd_error_auth_required') || "Authentication required. Please log in again.",
@@ -843,15 +835,6 @@ export default function DoctorDashboard() {
         'Content-Type': 'application/json',
         'Authorization': formattedToken
       };
-
-      // Debug: Log token presence and format
-      console.log('🔑 Making authenticated request');
-      console.log('Token format check:', {
-        hasToken: !!token,
-        startsWithBearer: token.startsWith('Bearer '),
-        tokenLength: token.length,
-        firstChars: token.substring(0, 20) + '...'
-      });
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
@@ -870,12 +853,6 @@ export default function DoctorDashboard() {
         const patientData = await patientResponse.json();
         const medicalRecords = medicalRecordsResponse.ok ? await medicalRecordsResponse.json() : { records: [] };
         const appointments = appointmentsResponse.ok ? await appointmentsResponse.json() : { appointments: [] };
-
-        console.log('✅ Patient data loaded:', {
-          patient: patientData.patient?.name,
-          medicalRecords: medicalRecords.records?.length || 0,
-          appointments: appointments.appointments?.length || 0
-        });
 
         // Calculate age from date_of_birth if available
         const calculateAge = (dateOfBirth: string) => {
@@ -985,13 +962,6 @@ export default function DoctorDashboard() {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
 
-      console.log('🔄 [Cancel Appointment] Starting cancellation:', {
-        appointmentId: selectedAppointment.id,
-        hasToken: !!token,
-        tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
-        reason: cancelReason || 'Cancelled by doctor'
-      });
-
       // Try fallback route first for Vercel compatibility
       let response;
       try {
@@ -1030,9 +1000,6 @@ export default function DoctorDashboard() {
         fetchDoctorData(); // Refresh dashboard data
       } else {
         const errorData = await response.json();
-        console.log('❌ [Cancel Appointment] Error response:', {
-          status: response.status,
-          statusText: response.statusText,
           errorData
         });
 

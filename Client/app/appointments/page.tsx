@@ -310,12 +310,6 @@ export default function MyAppointmentsPage() {
 
       // Transform the data to match our interface
       const transformedAppointments: Appointment[] = appointmentsResponse.appointments.map((apt: any) => {
-        console.log('🔍 Raw appointment data:', {
-          id: apt.id,
-          appointment_date: apt.appointment_date,
-          appointment_time: apt.appointment_time,
-          status: apt.status
-        });
 
         // Handle appointment date more safely with timezone-aware parsing
         let appointmentDate: Date;

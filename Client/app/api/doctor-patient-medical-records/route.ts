@@ -58,9 +58,7 @@ export async function GET(request: NextRequest) {
       .eq('role', 'patient')
       .single();
 
-    if (patientError && patientError.code !== 'PGRST116') {
-      console.error('Error fetching patient profile:', patientError);
-    }
+    // Patient profile fetch error is non-critical, continue without it
 
     // Get medical records (consultation records) for this patient
     const { data: records, error } = await supabase

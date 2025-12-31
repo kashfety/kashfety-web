@@ -80,9 +80,19 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // Combine consultation records with patient profile medical info
+    // The frontend expects { records: [...] } format
+    const allRecords = [...(records || [])];
+    
+    // If patient has profile medical info but no consultation records, 
+    // we can include it as a summary record (optional - frontend can also get this from patient details)
+    // For now, just return the consultation records as the frontend expects
+    
     return NextResponse.json({
       success: true,
-      medical_records: records || [],
+      records: allRecords,
+      count: allRecords.length,
+      // Also include patient profile for reference (frontend can use this if needed)
       patient_profile: patientProfile ? {
         medical_history: patientProfile.medical_history,
         allergies: patientProfile.allergies,

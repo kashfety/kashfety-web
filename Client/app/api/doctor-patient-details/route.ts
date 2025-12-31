@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get patient details
+    // Get patient details including medical information
     const { data: patient, error } = await supabase
       .from('users')
-      .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, phone, gender, date_of_birth, created_at, profile_picture')
+      .select('id, name, name_ar, first_name, first_name_ar, last_name, last_name_ar, email, phone, gender, date_of_birth, created_at, profile_picture, medical_history, allergies, medications, emergency_contact')
       .eq('id', patientId)
       .eq('role', 'patient')
       .single();

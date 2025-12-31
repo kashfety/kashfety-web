@@ -240,7 +240,7 @@ export async function DELETE(request: NextRequest) {
     // Get banner details to delete file from storage
     const { data: banner } = await supabase
       .from('banners')
-      .select('file_path')
+      .select('file_path, file_name')
       .eq('id', bannerId)
       .single();
 
@@ -259,11 +259,19 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete file from storage if exists
-    if (banner?.file_path) {
-      await supabase
-        .storage
-        .from('banners')
-        .remove([banner.file_path]);
+    if (banner) {
+      const fileToDelete = banner.file_path || banner.file_name;
+      if (fileToDelete) {
+        try {
+          await supabase
+            .storage
+            .from('banners')
+            .remove([fileToDelete]);
+        } catch (storageError) {
+          // Continue even if storage deletion fails
+          console.error('Failed to delete file from storage:', storageError);
+        }
+      }
     }
 
     return NextResponse.json({

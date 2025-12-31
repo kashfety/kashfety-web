@@ -286,7 +286,7 @@ export default function BannerManagement() {
             }
 
             const response = await fetch(
-                `/api/admin/banners/${bannerToDelete.id}`,
+                `/api/admin-banners?bannerId=${bannerToDelete.id}`,
                 {
                     method: 'DELETE',
                     headers: {

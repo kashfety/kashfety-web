@@ -836,20 +836,34 @@ export default function DoctorDashboard() {
         return;
       }
 
+      // Ensure token is properly formatted (add Bearer prefix if missing)
+      const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': formattedToken
       };
 
-      // Debug: Log token presence (don't log the actual token for security)
-      console.log('🔑 Making authenticated request with token:', token ? 'Token present' : 'Token missing');
+      // Debug: Log token presence and format
+      console.log('🔑 Making authenticated request');
+      console.log('Token format check:', {
+        hasToken: !!token,
+        startsWithBearer: token.startsWith('Bearer '),
+        tokenLength: token.length,
+        firstChars: token.substring(0, 20) + '...'
+      });
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
+      const fetchOptions: RequestInit = { 
+        headers,
+        credentials: 'include' // Ensure cookies are sent
+      };
+
       const [patientResponse, medicalRecordsResponse, appointmentsResponse] = await Promise.all([
-        fetch(`/api/doctor-patient-details?patientId=${patientId}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}`, { headers })),
-        fetch(`/api/doctor-patient-medical-records?patientId=${patientId}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`, { headers })),
-        fetch(`/api/doctor-patient-appointments?patientId=${patientId}${doctorProfile?.id ? `&doctorId=${doctorProfile.id}` : ''}`, { headers }).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`, { headers }))
+        fetch(`/api/doctor-patient-details?patientId=${patientId}`, fetchOptions).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}`, fetchOptions)),
+        fetch(`/api/doctor-patient-medical-records?patientId=${patientId}`, fetchOptions).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/medical-records`, fetchOptions)),
+        fetch(`/api/doctor-patient-appointments?patientId=${patientId}${doctorProfile?.id ? `&doctorId=${doctorProfile.id}` : ''}`, fetchOptions).catch(() => fetch(`/api/doctor-dashboard/patients/${patientId}/appointments${doctorProfile?.id ? `?doctorId=${doctorProfile.id}` : ''}`, fetchOptions))
       ]);
 
       if (patientResponse.ok) {

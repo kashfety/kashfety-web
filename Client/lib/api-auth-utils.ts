@@ -33,12 +33,13 @@ export function verifyToken(token: string): AuthenticatedUser | null {
       issuer: 'doctor-appointment-system'
     }) as AuthenticatedUser;
     return decoded;
-  } catch (error) {
+  } catch (error: any) {
     // Try without issuer check for backward compatibility
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as AuthenticatedUser;
       return decoded;
-    } catch (fallbackError) {
+    } catch (fallbackError: any) {
+      // Token verification failed
       return null;
     }
   }
@@ -49,7 +50,8 @@ export function verifyToken(token: string): AuthenticatedUser | null {
  * Returns the authenticated user or null
  */
 export function getAuthenticatedUser(request: NextRequest): AuthenticatedUser | null {
-  const authHeader = request.headers.get('authorization');
+  // Try both lowercase and capitalized versions (HTTP headers are case-insensitive but Next.js might normalize)
+  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;

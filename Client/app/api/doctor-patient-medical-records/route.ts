@@ -7,25 +7,12 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if authorization header is present
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      console.error('❌ No Authorization header found in request');
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
-    }
-
     // Require doctor authentication
     const authResult = requireDoctor(request);
     if (authResult instanceof NextResponse) {
-      console.error('❌ Authentication failed - status:', authResult.status);
       return authResult; // Returns 401 or 403 error
     }
     const { user } = authResult;
-    
-    console.log('✅ Doctor authenticated:', user.id, user.role);
 
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
@@ -55,7 +42,27 @@ export async function GET(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Get medical records for this patient
+    // Get patient's profile medical information (from users table)
+    const { data: patientProfile, error: patientError } = await supabase
+      .from('users')
+      .select(`
+        id,
+        medical_history,
+        allergies,
+        medications,
+        emergency_contact,
+        date_of_birth,
+        gender
+      `)
+      .eq('id', patientId)
+      .eq('role', 'patient')
+      .single();
+
+    if (patientError && patientError.code !== 'PGRST116') {
+      console.error('Error fetching patient profile:', patientError);
+    }
+
+    // Get medical records (consultation records) for this patient
     const { data: records, error } = await supabase
       .from('medical_records')
       .select(`
@@ -75,7 +82,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      medical_records: records || []
+      medical_records: records || [],
+      patient_profile: patientProfile ? {
+        medical_history: patientProfile.medical_history,
+        allergies: patientProfile.allergies,
+        medications: patientProfile.medications,
+        emergency_contact: patientProfile.emergency_contact,
+        date_of_birth: patientProfile.date_of_birth,
+        gender: patientProfile.gender
+      } : null
     });
 
   } catch (error: any) {

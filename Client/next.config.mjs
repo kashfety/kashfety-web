@@ -1,24 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // ESLint config moved to eslint.config.js or removed - no longer in next.config.mjs
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
   },
-  experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
+  // Turbopack config for Next.js 16
+  // Empty config silences the webpack/turbopack conflict warning
+  // The lockfile warning is expected since we have both root and Client package.json
+  // This is fine - Next.js will use the Client directory as the workspace root
+  turbopack: {},
+  // Keep webpack config for production builds (Turbopack is for dev)
   webpack: (config, { isServer }) => {
     // Disable WASM optimization that might be causing issues
     config.experiments = {

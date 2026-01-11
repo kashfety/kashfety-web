@@ -144,30 +144,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
+      // Use Next.js API route (preferred) or fallback to backend server
+      // Next.js API routes work without a separate backend server
+      const useNextApi = !process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_USE_NEXT_API !== '0'
       
-      // Normalize API URL to avoid double slashes or missing /api  
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      let loginUrl: string
       
-      // Handle both cases: URL with or without /api
-      let baseUrl: string
-      if (apiUrl.includes('/api')) {
-        // If /api is already in the URL, use it as-is (remove trailing /api if duplicated)
-        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+      if (useNextApi) {
+        // Use Next.js API route - works without backend server
+        loginUrl = '/api/auth/login'
       } else {
-        // If no /api, add it
-        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+        // Fallback to backend server if explicitly configured
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+        
+        // Handle both cases: URL with or without /api
+        let baseUrl: string
+        if (apiUrl.includes('/api')) {
+          baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+        } else {
+          baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+        }
+        
+        loginUrl = `${baseUrl}/auth/login`
       }
       
-      const loginUrl = `${baseUrl}/auth/login`
-      
-      const response = await fetch(loginUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important for CORS with credentials
-      })
+      let response: Response
+      try {
+        response = await fetch(loginUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include', // Important for CORS with credentials
+        })
+      } catch (fetchError) {
+        // Handle network errors (server not running, CORS, etc.)
+        const errorMessage = fetchError instanceof Error 
+          ? fetchError.message 
+          : 'Network error'
+        
+        // Provide more helpful error message
+        if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+          if (useNextApi) {
+            throw new Error(
+              'Cannot connect to the login service. Please check your network connection or contact support.'
+            )
+          } else {
+            throw new Error(
+              `Cannot connect to the server. Please ensure the backend server is running at ${loginUrl}. ` +
+              `You can also set NEXT_PUBLIC_USE_NEXT_API=1 to use Next.js API routes instead.`
+            )
+          }
+        }
+        throw new Error(`Login request failed: ${errorMessage}`)
+      }
 
       // Check if response is ok before trying to parse JSON
       let result
@@ -294,16 +325,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
 
-      // Normalize API URL to avoid double slashes or missing /api
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-      let baseUrl: string
-      if (apiUrl.includes('/api')) {
-        baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
-      } else {
-        baseUrl = apiUrl.replace(/\/$/, '') + '/api'
-      }
+      // Use Next.js API route (preferred) or fallback to backend server
+      const useNextApi = !process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_USE_NEXT_API !== '0'
       
-      const registerUrl = `${baseUrl}/auth/register`
+      let registerUrl: string
+      
+      if (useNextApi) {
+        // Use Next.js API route - works without backend server
+        registerUrl = '/api/auth/register-verified'
+      } else {
+        // Fallback to backend server if explicitly configured
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+        
+        // Handle both cases: URL with or without /api
+        let baseUrl: string
+        if (apiUrl.includes('/api')) {
+          baseUrl = apiUrl.replace(/\/api\/?$/, '') + '/api'
+        } else {
+          baseUrl = apiUrl.replace(/\/$/, '') + '/api'
+        }
+        
+        registerUrl = `${baseUrl}/auth/register`
+      }
       
       const response = await fetch(registerUrl, {
         method: 'POST',

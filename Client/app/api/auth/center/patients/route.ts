@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireCenter } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -7,6 +8,13 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
 export async function GET(request: NextRequest) {
+  // Require center authentication even in fallback mode
+  const authResult = requireCenter(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 or 403 error
+  }
+  const { user } = authResult;
+
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   
@@ -25,11 +33,12 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Supabase fallback: requires center_id query param
-  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
+  // Supabase fallback: requires authentication (already verified above)
+  if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
   
   try {
-    const centerId = searchParams.get('center_id');
+    // Use center_id from authenticated user, fallback to query param if needed
+    const centerId = user.center_id || searchParams.get('center_id');
     if (!centerId) return NextResponse.json({ error: 'center_id is required' }, { status: 400 });
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

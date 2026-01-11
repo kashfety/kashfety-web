@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+/**
+ * PUBLIC ENDPOINT - No authentication required
+ * 
+ * This endpoint is intentionally public to allow users to browse available lab test types
+ * before booking. This is necessary for the booking flow where users need to see
+ * available test options before authentication.
+ * 
+ * Note: The frontend primarily uses /api/public/lab-tests/types, but this endpoint
+ * is kept for backward compatibility and direct access.
+ */
 export async function GET(request: NextRequest) {
   try {
     // Get only test types that have active center services

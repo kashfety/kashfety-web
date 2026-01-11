@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+/**
+ * PUBLIC ENDPOINT - No authentication required
+ * 
+ * This endpoint is intentionally public to allow users to browse available lab centers
+ * and their services before booking. This is necessary for the booking flow where
+ * users need to see available options before authentication.
+ * 
+ * Note: The frontend primarily uses /api/public/lab-tests/centers, but this endpoint
+ * is kept for backward compatibility and direct access.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

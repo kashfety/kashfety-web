@@ -34,8 +34,10 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
   const { t, locale } = useLocale();
   const { theme } = useTheme();
   const [isLandingPage, setIsLandingPage] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setIsLandingPage(pathname === '/');
   }, [pathname]);
 
@@ -91,7 +93,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
               className="relative h-8 sm:h-10 lg:h-12 w-32 sm:w-40 lg:w-48 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <Image
-                src={theme === 'dark' ? "/logo/branding-dark.png" : "/logo/branding-light.png"}
+                src={mounted && theme === 'dark' ? "/logo/branding-dark.png" : "/logo/branding-light.png"}
                 alt="Kashfety Logo"
                 fill
                 className="object-contain"

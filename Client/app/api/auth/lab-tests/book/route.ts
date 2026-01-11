@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
+  // Require authentication
+  const authResult = requireAuth(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 error
+  }
+  const { user } = authResult;
+
   try {
     
     const { patient_id, center_id, lab_test_type_id, booking_date, booking_time, notes, duration, fee } = await request.json();
@@ -15,6 +23,22 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'Patient ID, center ID, lab test type ID, booking date, and booking time are required' 
       }, { status: 400 });
+    }
+
+    // Verify authorization: patients can only book for themselves, centers can book for any patient
+    if (user.role === 'patient' && user.id !== patient_id) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Forbidden - Patients can only create bookings for themselves' 
+      }, { status: 403 });
+    }
+
+    // Centers can book on behalf of patients, but verify the center_id matches if user is a center
+    if (user.role === 'center' && user.center_id && user.center_id !== center_id) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Forbidden - Centers can only create bookings for their own center' 
+      }, { status: 403 });
     }
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

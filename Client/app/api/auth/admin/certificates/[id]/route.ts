@@ -151,10 +151,45 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const params = await context.params;
-  return NextResponse.json({ 
-    message: 'Certificate approval route is working',
-    certificateId: params.id,
-    availableMethods: ['PUT', 'POST']
-  });
+  try {
+    // Require authentication even for GET
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized - No token provided' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+
+    if (!decoded) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin or super_admin
+    if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    const params = await context.params;
+    return NextResponse.json({ 
+      message: 'Certificate approval route is working',
+      certificateId: params.id,
+      availableMethods: ['PUT', 'POST']
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

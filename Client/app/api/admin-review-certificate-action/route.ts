@@ -1,54 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-// Verify JWT token and extract user info
-function verifyToken(token: string) {
-  try {
-    return jwt.verify(token, JWT_SECRET) as any;
-  } catch (error) {
-    return null;
-  }
-}
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   
   try {
-    // Get authorization token
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
+    // SECURITY: Require admin or super_admin role
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
     }
-
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin or super_admin
-    if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      );
-    }
+    const { user: adminUser } = authResult;
 
     const body = await request.json();
     const { certificateId, status, rejection_reason, admin_notes, resubmission_requirements, resubmission_deadline } = body;
@@ -76,7 +44,7 @@ export async function POST(request: NextRequest) {
       .update({
         status,
         reviewed_at: new Date().toISOString(),
-        reviewed_by: decoded.id,
+        reviewed_by: adminUser.id,
         rejection_reason: status === 'rejected' ? rejection_reason : null,
         resubmission_requirements: status === 'resubmission_required' ? resubmission_requirements : null,
         resubmission_deadline: status === 'resubmission_required' ? resubmission_deadline : null,

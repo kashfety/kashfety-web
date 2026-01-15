@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -18,6 +19,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
+        // SECURITY: Require admin or super_admin role
+        const authResult = requireAdmin(request);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401 or 403
+        }
 
         // Get the request body
         const body = await request.json();
@@ -30,15 +36,8 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-
-        // Get the authorization token from the request
+        // Get the authorization token from the request (for backend proxy)
         const authHeader = request.headers.get('authorization');
-        if (!authHeader) {
-            return NextResponse.json({
-                success: false,
-                error: 'Unauthorized'
-            }, { status: 401 });
-        }
 
 
         // Try multiple backend endpoints for maximum compatibility

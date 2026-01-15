@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -8,12 +9,23 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as strin
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify JWT token and require doctor role
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+    const { user } = authResult;
+    
+    // SECURITY: Use authenticated doctor's ID
+    const doctorId = user.id;
     const authHeader = request.headers.get('authorization');
     const { searchParams } = new URL(request.url);
 
     if (authHeader) {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/doctor-dashboard/analytics`, {
+        const url = new URL(`${BACKEND_URL}/api/doctor-dashboard/analytics`);
+        url.searchParams.set('doctor_id', doctorId);
+        const response = await fetch(url.toString(), {
           method: 'GET',
           headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
         });
@@ -25,11 +37,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (!FALLBACK_ENABLED) return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
-
-    // Supabase fallback requires doctor_id
-    const doctorId = searchParams.get('doctor_id');
-    if (!doctorId) return NextResponse.json({ error: 'doctor_id is required' }, { status: 400 });
+    // Supabase fallback
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 

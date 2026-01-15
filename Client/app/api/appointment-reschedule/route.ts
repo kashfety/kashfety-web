@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function PUT(request: NextRequest) {
     try {
+        // SECURITY: Require authentication
+        const authResult = requireAuth(request);
+        if (authResult instanceof NextResponse) {
+            return authResult; // Returns 401
+        }
+        const { user } = authResult;
+        
         const { searchParams } = new URL(request.url);
         const appointmentId = searchParams.get('appointmentId');
         const { new_date, new_time, reason } = await request.json();
-
 
         if (!appointmentId) {
             return NextResponse.json({
@@ -27,12 +34,26 @@ export async function PUT(request: NextRequest) {
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-        // First, check if the appointment exists
+        // First, check if the appointment exists and verify ownership
         const { data: appointment, error: fetchError } = await supabase
             .from('appointments')
-            .select('id, status, appointment_date, appointment_time')
+            .select('id, status, appointment_date, appointment_time, patient_id, doctor_id')
             .eq('id', appointmentId)
             .single();
+        
+        // SECURITY: Verify user owns this appointment or is the doctor
+        if (appointment && user.role === 'patient' && appointment.patient_id !== user.id) {
+            return NextResponse.json({
+                success: false,
+                message: 'Forbidden - You can only reschedule your own appointments'
+            }, { status: 403 });
+        }
+        if (appointment && user.role === 'doctor' && appointment.doctor_id !== user.id) {
+            return NextResponse.json({
+                success: false,
+                message: 'Forbidden - You can only reschedule your own appointments'
+            }, { status: 403 });
+        }
 
         if (fetchError || !appointment) {
             return NextResponse.json({

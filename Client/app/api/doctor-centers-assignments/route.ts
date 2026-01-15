@@ -1,36 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function PUT(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-
-    // Extract doctor ID from token
-    let doctorId = '';
-    if (authHeader) {
-      try {
-        const token = authHeader.replace(/^Bearer\s+/i, '');
-        const payload = JSON.parse(Buffer.from(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'));
-        doctorId = payload.id || payload.userId || payload.uid || '';
-      } catch (e) {
-      }
+    // SECURITY: Verify JWT token and require doctor role
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
     }
+    const { user } = authResult;
+    
+    // SECURITY: Use authenticated doctor's ID
+    const finalDoctorId = user.id;
 
     const body = await request.json();
     const { center_ids, primary_center_id } = body;
-
-    // Use doctor_id from body if provided (fallback)
-    const finalDoctorId = doctorId || body.doctor_id;
-
-    if (!finalDoctorId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Doctor ID is required' 
-      }, { status: 400 });
-    }
 
     if (!center_ids || !Array.isArray(center_ids) || center_ids.length === 0) {
       return NextResponse.json({ 

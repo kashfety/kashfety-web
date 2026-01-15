@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -10,33 +10,41 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
+  // SECURITY: Verify JWT token and require doctor role
+  const authResult = requireDoctor(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 or 403
+  }
+  const { user } = authResult;
+
+  // SECURITY: Use authenticated doctor's ID, not query parameter
+  const doctorId = user.id;
   const authHeader = request.headers.get('authorization');
   const searchParams = request.nextUrl.searchParams;
   const limit = parseInt(searchParams.get('limit') || '50');
 
-  // Prefer backend with JWT
-  if (authHeader) {
-    try {
-      const url = new URL(`${BACKEND_URL}/api/doctor-dashboard/patients`);
-      searchParams.forEach((v, k) => url.searchParams.set(k, v));
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
-      });
-      const data = await response.json();
-      if (response.ok) return NextResponse.json(data);
-    } catch (e) {
-      // continue to fallback
-    }
-  }
-
-  if (!FALLBACK_ENABLED) {
-    return NextResponse.json({ error: 'Authorization header required' }, { status: 401 });
-  }
-
+  // Try backend with JWT first (preferred - has proper auth validation)
   try {
+    const url = new URL(`${BACKEND_URL}/api/doctor-dashboard/patients`);
+    searchParams.forEach((v, k) => url.searchParams.set(k, v));
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { Authorization: authHeader || '', 'Content-Type': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok) return NextResponse.json(data);
+    // If backend returns auth error, propagate it
+    if (response.status === 401 || response.status === 403) {
+      return NextResponse.json({ error: data.error || 'Unauthorized' }, { status: response.status });
+    }
+  } catch (e) {
+    // Backend unavailable, continue to fallback with auth requirement
+    console.error('Backend unavailable, using secure fallback:', e);
+  }
 
-    // Get patients who have appointments, with all their medical information
+  // Secure fallback: Only fetch patients who have appointments with THIS doctor
+  try {
+    // Get patients who have appointments with this specific doctor
     const { data: patientAppointments, error: appointmentsError } = await supabase
       .from('appointments')
       .select(`
@@ -63,60 +71,15 @@ export async function GET(request: NextRequest) {
           updated_at
         )
       `)
+      .eq('doctor_id', doctorId)  // SECURITY FIX: Filter by doctor_id
       .order('appointment_date', { ascending: false });
 
     if (appointmentsError) {
-
-      // Fallback approach: Get all patients with role='patient'
-      const { data: patients, error: patientsError } = await supabase
-        .from('users')
-        .select(`
-          id,
-          name,
-          name_ar,
-          first_name,
-          first_name_ar,
-          last_name,
-          last_name_ar,
-          email,
-          phone,
-          gender,
-          date_of_birth,
-          medical_history,
-          allergies,
-          medications,
-          emergency_contact,
-          created_at,
-          updated_at
-        `)
-        .eq('role', 'patient')
-        .limit(limit);
-
-      if (patientsError) {
-        return NextResponse.json(
-          { error: 'Failed to fetch patients' },
-          { status: 500 }
-        );
-      }
-
-      const patientsWithAge = patients?.map(patient => {
-        const age = patient.date_of_birth ?
-          new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() : null;
-
-        return {
-          ...patient,
-          age,
-          totalAppointments: 0,
-          lastAppointment: null
-        };
-      }) || [];
-
-
-      return NextResponse.json({
-        success: true,
-        patients: patientsWithAge,
-        count: patientsWithAge.length
-      });
+      console.error('Failed to fetch patient appointments:', appointmentsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch patients' },
+        { status: 500 }
+      );
     }
 
     // Process successful response with joins
@@ -147,7 +110,6 @@ export async function GET(request: NextRequest) {
 
     const patients = Array.from(patientMap.values()).slice(0, limit);
 
-
     return NextResponse.json({
       success: true,
       patients,
@@ -155,6 +117,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+    console.error('Internal server error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
 export async function PUT(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401
+    }
+    const { user } = authResult;
+    const userId = user.id;
+    const userRole = user.role;
+    
     const { searchParams } = new URL(request.url);
     const appointmentId = searchParams.get('appointmentId');
     const { reason } = await request.json();
-
 
     if (!appointmentId) {
       return NextResponse.json({
@@ -20,53 +27,9 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Get authorization header to check user role
-    const authHeader = request.headers.get('authorization');
-    let userRole = null;
-    let userId = null;
-    let userRoleFromDB = null;
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    if (authHeader) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-
-        // Decode the custom JWT token (not Supabase Auth)
-        const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-        if (decoded) {
-          userId = decoded.id;  // The user's database ID
-          userRole = decoded.role;  // The user's role from the token
-
-          console.log('👤 [Appointment Cancel] Decoded JWT:', {
-            userId: decoded.id,
-            uid: decoded.uid,
-            email: decoded.email,
-            role: decoded.role,
-            name: decoded.name
-          });
-
-          // Optionally fetch fresh role from database for extra security
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', userId)
-            .single();
-
-          if (!userError && userData) {
-            userRoleFromDB = userData.role;
-          } else if (userError) {
-          }
-
-          // Use database role if available, otherwise use token role
-          userRole = userRoleFromDB || userRole;
-        } else {
-        }
-      } catch (error) {
-      }
-    } else {
-    }    // First, check if the appointment exists and get doctor_id
+    // First, check if the appointment exists and get doctor_id
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
       .select('id, status, appointment_date, appointment_time, doctor_id, patient_id')
@@ -80,16 +43,17 @@ export async function PUT(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Check if the user is the doctor for this appointment (alternative to role check)
+    // SECURITY: Verify user owns this appointment or is the doctor/admin
+    const isAppointmentPatient = userId && appointment.patient_id === userId;
     const isAppointmentDoctor = userId && appointment.doctor_id === userId;
-    console.log('🔍 [Appointment Cancel] User check:', {
-      userId,
-      doctorId: appointment.doctor_id,
-      patientId: appointment.patient_id,
-      isAppointmentDoctor,
-      userRole,
-      userRoleFromDB
-    });
+    
+    // Patients can only cancel their own appointments
+    if (userRole === 'patient' && !isAppointmentPatient) {
+      return NextResponse.json({
+        success: false,
+        message: 'Forbidden - You can only cancel your own appointments'
+      }, { status: 403 });
+    }
 
     // Check if appointment is already cancelled
     if (appointment.status === 'cancelled') {
@@ -104,14 +68,6 @@ export async function PUT(request: NextRequest) {
     const isDoctorOrAdmin = userRole === 'doctor' || userRole === 'admin' || userRole === 'super_admin';
     const canBypassRestrictions = isDoctorOrAdmin || isAppointmentDoctor;
 
-    console.log('🔐 [Appointment Cancel] Authorization:', {
-      isDoctorOrAdmin,
-      isAppointmentDoctor,
-      canBypassRestrictions,
-      userRole,
-      userRoleFromDB,
-      userId
-    });
 
     if (appointment.appointment_date && appointment.appointment_time) {
       // Parse appointment date and time correctly
@@ -141,7 +97,7 @@ export async function PUT(request: NextRequest) {
             success: false,
             message: 'Cannot cancel a past appointment',
             code: 'APPOINTMENT_IN_PAST',
-            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userRoleFromDB, userId, doctorId: appointment.doctor_id }
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
 
@@ -152,12 +108,13 @@ export async function PUT(request: NextRequest) {
             message: `Cannot cancel appointment within 24 hours of the scheduled time. Your appointment is in ${hoursUntilAppointment.toFixed(1)} hours. Please contact support for assistance.`,
             code: 'CANCELLATION_TOO_LATE',
             hoursRemaining: hoursUntilAppointment,
-            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userRoleFromDB, userId, doctorId: appointment.doctor_id }
+            debug: { canBypassRestrictions, isDoctorOrAdmin, isAppointmentDoctor, userRole, userId, doctorId: appointment.doctor_id }
           }, { status: 400 });
         }
-      } else {
       }
-    }    // Update the appointment status to cancelled
+    }
+    
+    // Update the appointment status to cancelled
     const { data: updatedAppointment, error: updateError } = await supabase
       .from('appointments')
       .update({

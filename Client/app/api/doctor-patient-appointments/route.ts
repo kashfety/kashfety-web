@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify JWT token and require doctor role
+    const authResult = requireDoctor(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+    const { user } = authResult;
+    
+    // SECURITY: Use authenticated doctor's ID
+    const doctorId = user.id;
+    
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
-    const doctorId = searchParams.get('doctorId');
-
 
     if (!patientId) {
       return NextResponse.json({ 
@@ -20,20 +29,16 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Build query
-    let query = supabase
+    // Build query - SECURITY: Always filter by authenticated doctor's ID
+    const query = supabase
       .from('appointments')
       .select(`
         *,
         doctor:users!fk_appointments_doctor(id, name, specialty, phone),
         center:centers!fk_appointments_center(id, name, address, phone)
       `)
-      .eq('patient_id', patientId);
-
-    // Filter by doctor if provided
-    if (doctorId) {
-      query = query.eq('doctor_id', doctorId);
-    }
+      .eq('patient_id', patientId)
+      .eq('doctor_id', doctorId);
 
     const { data: appointments, error } = await query
       .order('appointment_date', { ascending: false })

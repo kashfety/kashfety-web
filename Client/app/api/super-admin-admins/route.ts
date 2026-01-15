@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireRole } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require super_admin role
+    const authResult = requireRole(request, ['super_admin']);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+    
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search') || '';
     const role = searchParams.get('role') || 'all';
     const status = searchParams.get('status') || 'all';
-
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
@@ -141,6 +147,106 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST handler for creating admins - password hashing should be handled by backend
-// This route is kept for future implementation if needed
+// POST handler for creating admins
+export async function POST(request: NextRequest) {
+  try {
+    // SECURITY: Require super_admin role
+    const authResult = requireRole(request, ['super_admin']);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+    const { user: creator } = authResult;
+
+    const body = await request.json();
+    const { name, email, phone, password, role = 'admin' } = body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return NextResponse.json({
+        success: false,
+        error: 'Name, email, and password are required'
+      }, { status: 400 });
+    }
+
+    // Validate role is admin or super_admin only
+    if (role !== 'admin' && role !== 'super_admin') {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid role. Must be admin or super_admin'
+      }, { status: 400 });
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Check if email already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
+      return NextResponse.json({
+        success: false,
+        error: 'Email already in use'
+      }, { status: 409 });
+    }
+
+    // Hash the password using bcrypt
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the admin user
+    const { data: newAdmin, error: createError } = await supabase
+      .from('users')
+      .insert({
+        name,
+        email,
+        phone: phone || null,
+        password_hash: hashedPassword,
+        role,
+        is_active: true,
+        created_by: creator.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select('id, name, email, phone, role, is_active, created_at')
+      .single();
+
+    if (createError) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to create admin',
+        details: createError.message
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Admin created successfully',
+      data: {
+        admin: {
+          id: newAdmin.id,
+          name: newAdmin.name,
+          email: newAdmin.email,
+          phone: newAdmin.phone,
+          role: newAdmin.role,
+          isActive: newAdmin.is_active,
+          createdAt: newAdmin.created_at
+        }
+      }
+    });
+
+  } catch (error: any) {
+    return NextResponse.json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    }, { status: 500 });
+  }
+}
 

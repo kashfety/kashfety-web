@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function PUT(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401
+    }
+    const { user } = authResult;
+    
     const { searchParams } = new URL(request.url);
     const bookingId = searchParams.get('bookingId');
     const { newDate, newTime, reason } = await request.json();
-
 
     if (!bookingId) {
       return NextResponse.json({ 
@@ -39,6 +46,14 @@ export async function PUT(request: NextRequest) {
         success: false, 
         error: 'Booking not found' 
       }, { status: 404 });
+    }
+    
+    // SECURITY: Verify user owns this booking (patients only reschedule their own)
+    if (user.role === 'patient' && booking.patient_id !== user.id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Forbidden - You can only reschedule your own bookings' 
+      }, { status: 403 });
     }
 
     // Check if booking can be rescheduled

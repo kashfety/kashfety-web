@@ -1,11 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401
+    }
+    const { user } = authResult;
     
     const body = await request.json();
     
@@ -28,6 +35,14 @@ export async function POST(request: NextRequest) {
         success: false,
         message: "Missing required fields: patient_id, doctor_id, appointment_date, appointment_time"
       }, { status: 400 });
+    }
+    
+    // SECURITY: Patients can only book appointments for themselves
+    if (user.role === 'patient' && user.id !== patient_id) {
+      return NextResponse.json({
+        success: false,
+        message: "Forbidden - Patients can only book appointments for themselves"
+      }, { status: 403 });
     }
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

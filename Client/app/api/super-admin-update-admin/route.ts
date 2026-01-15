@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireRole } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require super_admin role
+    const authResult = requireRole(request, ['super_admin']);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
 
     const body = await request.json();
     const { adminId, name, email, phone, role } = body;
@@ -14,12 +20,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Admin ID is required' }, { status: 400 });
     }
 
-
-    // Get the authorization token
+    // Get the authorization token (for backend proxy)
     const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
 
     // Try backend API first, then fallback to Supabase
     const backendUrls = [

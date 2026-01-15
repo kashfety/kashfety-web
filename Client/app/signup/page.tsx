@@ -279,6 +279,35 @@ export default function SignupPage() {
 
       setPendingUserData(userData);
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:beforePhoneCheck',message:'About to check phone',data:{phone:userData.phone},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+
+      // Check if phone number is already registered BEFORE sending OTP
+      const phoneCheckResponse = await fetch('/api/auth/check-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: userData.phone })
+      });
+      
+      const phoneCheckResult = await phoneCheckResponse.json();
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneCheckResult',message:'Phone check response',data:{exists:phoneCheckResult.exists,message:phoneCheckResult.message,status:phoneCheckResponse.status},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C,D'})}).catch(()=>{});
+      // #endregion
+      
+      if (phoneCheckResult.exists) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneExists',message:'Phone exists - setting validation error',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+        setValidationErrors(prev => ({ 
+          ...prev, 
+          phone: t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.' 
+        }));
+        setIsLoading(false);
+        return;
+      }
+
       // Send OTP code using Supabase Auth signInWithOtp (handles both login and signup)
       const { error } = await supabase.auth.signInWithOtp({
         email: formData.email,

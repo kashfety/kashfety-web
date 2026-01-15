@@ -1306,6 +1306,7 @@ export const translations = {
       "Please provide your medical information to help doctors provide better care. You can skip this step and add information later if needed.",
     missing: "is required",
     passwords_do_not_match: "Passwords do not match",
+    phone_already_registered: "This phone number is already registered. Please use a different number or login.",
     login_failed_after_records:
       "Medical records saved but login failed. Please try logging in manually.",
     medical_records_failed: "Failed to save medical records. Please try again.",
@@ -3104,6 +3105,7 @@ export const translations = {
       "يرجى تزويدنا بمعلوماتك الطبية لمساعدة الأطباء على تقديم رعاية أفضل. يمكنك تخطي هذه الخطوة وإضافة المعلومات لاحقاً.",
     missing: "مطلوبة",
     passwords_do_not_match: "كلمتا المرور غير متطابقتين",
+    phone_already_registered: "رقم الهاتف مسجل بالفعل. يرجى استخدام رقم آخر أو تسجيل الدخول.",
     login_failed_after_records:
       "تم حفظ السجل الطبي ولكن فشل تسجيل الدخول. يرجى محاولة تسجيل الدخول يدوياً.",
     medical_records_failed: "فشل حفظ السجل الطبي. يرجى المحاولة مرة أخرى.",

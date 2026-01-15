@@ -298,12 +298,16 @@ export default function SignupPage() {
       
       if (phoneCheckResult.exists) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneExists',message:'Phone exists - setting validation error',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneExists',message:'Phone exists - setting validation error',data:{errorMessage:t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.'},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
         // #endregion
-        setValidationErrors(prev => ({ 
-          ...prev, 
-          phone: t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.' 
-        }));
+        const errorMessage = t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.';
+        setValidationErrors(prev => {
+          const newErrors = { ...prev, phone: errorMessage };
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:setValidationErrors',message:'Validation errors state updated',data:{phoneError:newErrors.phone,allErrors:Object.keys(newErrors)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+          // #endregion
+          return newErrors;
+        });
         setIsLoading(false);
         return;
       }

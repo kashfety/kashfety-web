@@ -31,15 +31,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if phone number exists in users table
-    const { data: existingUser, error: checkError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('phone', phone)
-      .maybeSingle();
+    // Normalize phone number: remove spaces and ensure consistent format
+    const normalizedPhone = phone.replace(/\s+/g, '');
 
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'check-phone/route.ts:POST:queryResult',message:'Supabase query result',data:{existingUser:!!existingUser,userId:existingUser?.id,checkError:checkError?.message},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B,E'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'check-phone/route.ts:POST:normalizedPhone',message:'Phone normalized',data:{original:phone,normalized:normalizedPhone},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
+
+    // Check if phone number exists in users table (try normalized first, then original)
+    let existingUser = null;
+    let checkError = null;
+    
+    // Try normalized phone first (most common format)
+    const { data: user1, error: err1 } = await supabase
+      .from('users')
+      .select('id, phone')
+      .eq('phone', normalizedPhone)
+      .maybeSingle();
+    
+    if (user1) {
+      existingUser = user1;
+    } else if (err1) {
+      checkError = err1;
+    } else {
+      // If normalized doesn't match, try original format
+      const { data: user2, error: err2 } = await supabase
+        .from('users')
+        .select('id, phone')
+        .eq('phone', phone)
+        .maybeSingle();
+      
+      if (user2) {
+        existingUser = user2;
+      } else if (err2) {
+        checkError = err2;
+      }
+    }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'check-phone/route.ts:POST:queryResult',message:'Supabase query result',data:{existingUser:!!existingUser,userId:existingUser?.id,phoneInDb:existingUser?.phone,checkError:checkError?.message,normalizedPhone},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B,E'})}).catch(()=>{});
     // #endregion
 
     if (checkError) {

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Supabase fallback
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { data: user, error } = await supabase
+    const { data: doctorData, error } = await supabase
       .from('users')
       .select('id, name, name_ar, email, phone, specialty, bio, experience_years, consultation_fee, qualifications')
       .eq('id', doctorId)
@@ -56,19 +56,19 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     // Fetch Arabic specialty name if specialty exists
-    if (user && user.specialty) {
+    if (doctorData && doctorData.specialty) {
       const { data: specialtyData } = await supabase
         .from('specialties')
         .select('name_ar')
-        .or(`name.eq.${user.specialty},name_en.eq.${user.specialty}`)
+        .or(`name.eq.${doctorData.specialty},name_en.eq.${doctorData.specialty}`)
         .single();
 
       if (specialtyData) {
-        (user as any).specialty_ar = specialtyData.name_ar;
+        (doctorData as any).specialty_ar = specialtyData.name_ar;
       }
     }
 
-    return NextResponse.json({ success: true, doctor: user });
+    return NextResponse.json({ success: true, doctor: doctorData });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to connect to backend server' }, { status: 500 });
   }

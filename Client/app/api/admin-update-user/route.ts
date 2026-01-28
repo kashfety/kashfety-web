@@ -117,23 +117,30 @@ export async function POST(request: NextRequest) {
             };
 
             // Handle name field updates - sync name with first_name/last_name
-            if (updates.name !== undefined) {
+            // Priority: if name is provided directly, use it and split. Otherwise, combine first_name/last_name
+            if (updates.name !== undefined && updates.name !== null && updates.name.trim() !== '') {
                 // If name is updated directly, split it into first_name and last_name
                 const nameParts = updates.name.trim().split(' ');
                 updateData.name = updates.name.trim();
                 updateData.first_name = nameParts[0] || '';
                 updateData.last_name = nameParts.slice(1).join(' ') || '';
-            } else if (updates.first_name !== undefined || updates.last_name !== undefined) {
-                // If first_name or last_name are updated, auto-generate full name
+            } else {
+                // Determine final first_name and last_name values
                 const firstName = updates.first_name !== undefined ? updates.first_name : (existingUser.first_name || '');
                 const lastName = updates.last_name !== undefined ? updates.last_name : (existingUser.last_name || '');
-                updateData.first_name = firstName;
-                updateData.last_name = lastName;
-                updateData.name = `${firstName} ${lastName}`.trim();
-            } else {
-                // No name fields updated, just apply individual fields if provided
-                if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
-                if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
+                
+                // Always update first_name and last_name if they were provided
+                if (updates.first_name !== undefined) {
+                    updateData.first_name = firstName;
+                }
+                if (updates.last_name !== undefined) {
+                    updateData.last_name = lastName;
+                }
+                
+                // Always update name field when first_name or last_name are being updated
+                if (updates.first_name !== undefined || updates.last_name !== undefined) {
+                    updateData.name = `${firstName} ${lastName}`.trim();
+                }
             }
 
             // Apply other updates

@@ -195,21 +195,23 @@ router.put('/users/:id', async (req, res) => {
         ];
 
         const filteredUpdates = {};
+        
+        // First, copy allowed fields (excluding name fields which we'll handle separately)
         Object.keys(updates).forEach(key => {
-            if (allowedFields.includes(key)) {
+            if (allowedFields.includes(key) && key !== 'name' && key !== 'first_name' && key !== 'last_name') {
                 filteredUpdates[key] = updates[key];
             }
         });
 
         // Handle name field updates - sync name with first_name/last_name
-        if (updates.name !== undefined && updates.name !== null) {
+        // Priority: if name is provided directly, use it and split. Otherwise, combine first_name/last_name
+        if (updates.name !== undefined && updates.name !== null && updates.name.trim() !== '') {
             // If name is updated directly, split it into first_name and last_name
             const nameParts = updates.name.trim().split(' ');
             filteredUpdates.name = updates.name.trim();
             filteredUpdates.first_name = nameParts[0] || '';
             filteredUpdates.last_name = nameParts.slice(1).join(' ') || '';
-        } else if (updates.first_name || updates.last_name) {
-            // Auto-generate full name from first_name and last_name
+        } else {
             // Get current user data to merge with updates
             const { data: currentUser } = await supabaseAdmin
                 .from(TABLES.USERS)
@@ -217,11 +219,22 @@ router.put('/users/:id', async (req, res) => {
                 .eq('id', id)
                 .single();
 
+            // Determine final first_name and last_name values
             const firstName = updates.first_name !== undefined ? updates.first_name : (currentUser?.first_name || '');
             const lastName = updates.last_name !== undefined ? updates.last_name : (currentUser?.last_name || '');
-            filteredUpdates.first_name = firstName;
-            filteredUpdates.last_name = lastName;
-            filteredUpdates.name = `${firstName} ${lastName}`.trim();
+            
+            // Always update first_name and last_name if they were provided
+            if (updates.first_name !== undefined) {
+                filteredUpdates.first_name = firstName;
+            }
+            if (updates.last_name !== undefined) {
+                filteredUpdates.last_name = lastName;
+            }
+            
+            // Always update name field when first_name or last_name are being updated
+            if (updates.first_name !== undefined || updates.last_name !== undefined) {
+                filteredUpdates.name = `${firstName} ${lastName}`.trim();
+            }
         }
 
         // Implement auto-approval logic

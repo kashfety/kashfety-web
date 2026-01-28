@@ -53,15 +53,31 @@ export async function PUT(
     // Supabase fallback: check 24-hour rule before cancelling
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // First, fetch the appointment to check timing
+    // First, fetch the appointment to check timing and ownership
     const { data: appointment, error: fetchError } = await supabase
       .from('appointments')
-      .select('id, status, appointment_date, appointment_time')
+      .select('id, patient_id, doctor_id, status, appointment_date, appointment_time')
       .eq('id', id)
       .single();
 
     if (fetchError || !appointment) {
       return NextResponse.json({ success: false, message: 'Appointment not found' }, { status: 404 });
+    }
+
+    // SECURITY: Verify user owns this appointment or is admin/doctor
+    if (appointment.patient_id !== user.id && user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'doctor') {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Forbidden - You can only cancel your own appointments' 
+      }, { status: 403 });
+    }
+
+    // If user is a doctor, verify they are the assigned doctor
+    if (user.role === 'doctor' && appointment.doctor_id && appointment.doctor_id !== user.id) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Forbidden - You can only cancel appointments assigned to you' 
+      }, { status: 403 });
     }
 
     // Check if appointment is already cancelled

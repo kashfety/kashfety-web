@@ -595,13 +595,23 @@ router.post('/register-verified', async (req, res) => {
       return res.status(400).json({ error: 'Email, password, name, and role are required' });
     }
 
-    // Check if user already exists by email or by Supabase user ID
-    const { data: existingUserByEmail } = await supabase
+    // Check if user already exists by email
+    const { data: existingUserByEmail, error: emailCheckError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
+    // If there's a real database error (not just "no rows found"), handle it
+    if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+      return res.status(500).json({
+        error: 'Failed to check email availability',
+        success: false,
+        message: 'An error occurred while validating your email'
+      });
+    }
+
+    // If user exists, return error
     if (existingUserByEmail) {
       return res.status(400).json({
         error: 'Email already registered',
@@ -728,7 +738,7 @@ router.post('/register-verified', async (req, res) => {
           .from('users')
           .select('*')
           .eq('email', email)
-          .single();
+          .maybeSingle();
 
         if (existingUser) {
           return res.status(400).json({

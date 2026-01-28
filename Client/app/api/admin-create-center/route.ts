@@ -34,43 +34,50 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate email uniqueness
-    try {
-      // Check if email exists in users table
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', email)
-        .single();
+    // Check if email exists in users table
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
 
-      if (existingUser) {
-        return NextResponse.json({ 
-          error: 'Email already registered',
-          message: 'This email is already associated with a user account'
-        }, { status: 400 });
-      }
+    // If there's a real database error (not just "no rows found"), handle it
+    if (userCheckError && userCheckError.code !== 'PGRST116') {
+      return NextResponse.json({ 
+        error: 'Failed to validate email',
+        message: 'An error occurred while checking email availability',
+        details: userCheckError.message 
+      }, { status: 500 });
+    }
 
-      // Check if email exists in centers table
-      const { data: existingCenter } = await supabase
-        .from('centers')
-        .select('id')
-        .eq('email', email)
-        .single();
+    if (existingUser) {
+      return NextResponse.json({ 
+        error: 'Email already registered',
+        message: 'This email is already associated with a user account'
+      }, { status: 400 });
+    }
 
-      if (existingCenter) {
-        return NextResponse.json({ 
-          error: 'Email already registered',
-          message: 'This email is already associated with a center'
-        }, { status: 400 });
-      }
-    } catch (error: any) {
-      // If error is not "no rows returned", it's a real error
-      if (error.code !== 'PGRST116') {
-        return NextResponse.json({ 
-          error: 'Failed to validate email',
-          details: error.message 
-        }, { status: 500 });
-      }
-      // PGRST116 means no rows found, which is what we want
+    // Check if email exists in centers table
+    const { data: existingCenter, error: centerCheckError } = await supabase
+      .from('centers')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    // If there's a real database error (not just "no rows found"), handle it
+    if (centerCheckError && centerCheckError.code !== 'PGRST116') {
+      return NextResponse.json({ 
+        error: 'Failed to validate email',
+        message: 'An error occurred while checking email availability',
+        details: centerCheckError.message 
+      }, { status: 500 });
+    }
+
+    if (existingCenter) {
+      return NextResponse.json({ 
+        error: 'Email already registered',
+        message: 'This email is already associated with a center'
+      }, { status: 400 });
     }
 
     // Hash password

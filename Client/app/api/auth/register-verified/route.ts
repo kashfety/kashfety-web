@@ -71,12 +71,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists by email
-    const { data: existingUserByEmail } = await supabase
+    const { data: existingUserByEmail, error: emailCheckError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
+    // If there's a real database error (not just "no rows found"), handle it
+    if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+      return NextResponse.json({
+        error: 'Failed to check email availability',
+        success: false,
+        message: 'An error occurred while validating your email'
+      }, { status: 500 });
+    }
+
+    // If user exists, return error
     if (existingUserByEmail) {
       return NextResponse.json({
         error: 'Email already registered',

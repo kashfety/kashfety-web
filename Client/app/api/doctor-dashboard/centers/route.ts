@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireDoctor } from '@/lib/api-auth-utils';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const FALLBACK_ENABLED = process.env.DASHBOARD_FALLBACK_ENABLED !== '0';
@@ -146,6 +147,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // SECURITY: Require doctor authentication
+  const authResult = requireDoctor(request);
+  if (authResult instanceof NextResponse) {
+    return authResult; // Returns 401 or 403
+  }
+
   const authHeader = request.headers.get('authorization');
   const body = await request.json().catch(() => ({}));
   // Try to compute doctorId and a sensible primary for proxy/fallback consistency

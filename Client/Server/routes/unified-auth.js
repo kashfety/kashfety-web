@@ -603,16 +603,10 @@ router.post('/register-verified', async (req, res) => {
       .single();
 
     if (existingUserByEmail) {
-      // Generate JWT token for existing user
-      const token = generateToken(existingUserByEmail);
-      const { password_hash: _, ...userResponse } = existingUserByEmail;
-
-      return res.status(200).json({
-        message: 'User already exists',
-        success: true,
-        user: userResponse,
-        token,
-        expiresIn: '24h'
+      return res.status(400).json({
+        error: 'Email already registered',
+        success: false,
+        message: 'This email is already associated with an account'
       });
     }
 
@@ -737,15 +731,10 @@ router.post('/register-verified', async (req, res) => {
           .single();
 
         if (existingUser) {
-          const token = generateToken(existingUser);
-          const { password_hash: _, ...userResponse } = existingUser;
-
-          return res.status(200).json({
-            message: 'User already exists',
-            success: true,
-            user: userResponse,
-            token,
-            expiresIn: '24h'
+          return res.status(400).json({
+            error: 'Email already registered',
+            success: false,
+            message: 'This email is already associated with an account'
           });
         }
       }

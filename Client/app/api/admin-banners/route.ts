@@ -68,6 +68,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
 
     // Parse multipart form data
     const formData = await request.formData();
@@ -176,6 +181,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+
     const body = await request.json();
     const { bannerId, ...updates } = body;
 

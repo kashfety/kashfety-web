@@ -751,3 +751,360 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   REACT-DAY-PICKER V9 CALENDAR - REBUILT FROM SCRATCH
+   Beautiful, clean calendar with proper grid layout
+   ============================================ */
+
+/* Root calendar variables */
+.rdp {
+  --rdp-accent-color: #4DBCC4;
+  --rdp-accent-color-dark: #3da8b0;
+  --rdp-cell-size: 40px;
+  margin: 0;
+}
+
+.rdp * {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   TABLE STRUCTURE - Perfect Grid Layout
+   ============================================ */
+
+/* Main calendar table */
+table.rdp-month_grid,
+.rdp-month_grid {
+  display: table !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0.5rem 0.25rem !important;
+  margin: 0 auto !important;
+}
+
+/* Table sections */
+.rdp-month_grid thead {
+  display: table-header-group !important;
+}
+
+.rdp-month_grid tbody {
+  display: table-row-group !important;
+}
+
+.rdp-month_grid tr {
+  display: table-row !important;
+  width: 100% !important;
+}
+
+/* ============================================
+   EQUAL WIDTH COLUMNS - Perfect Alignment
+   ============================================ */
+
+.rdp-month_grid th,
+.rdp-month_grid td {
+  display: table-cell !important;
+  width: calc(100% / 7) !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 0 !important;
+}
+
+/* ============================================
+   WEEKDAY HEADERS - Clean & Bold
+   ============================================ */
+
+.rdp-month_grid th {
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.75rem 0 !important;
+  color: #374151 !important;
+  background: transparent !important;
+}
+
+.dark .rdp-month_grid th {
+  color: #d1d5db !important;
+}
+
+/* ============================================
+   DATE CELLS - Perfect Centering
+   ============================================ */
+
+.rdp-month_grid td {
+  height: 2.75rem !important;
+  padding: 0.25rem !important;
+  position: relative !important;
+}
+
+/* ============================================
+   DAY BUTTONS - Beautiful & Interactive
+   ============================================ */
+
+.rdp-month_grid .rdp-day {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  min-width: 2.5rem !important;
+  min-height: 2.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  line-height: 1 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  border: 2px solid transparent !important;
+  background: transparent !important;
+  color: #111827 !important;
+}
+
+.dark .rdp-month_grid .rdp-day {
+  color: #f9fafb !important;
+}
+
+/* Hover state - Light mode - Enhanced with accent color */
+.rdp-month_grid .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_outside) {
+  background: rgba(77, 188, 196, 0.2) !important;
+  color: #4DBCC4 !important;
+  border-color: #4DBCC4 !important;
+  border-width: 2px !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 8px rgba(77, 188, 196, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+/* Hover state - Dark mode - Enhanced with accent color */
+.dark .rdp-month_grid .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_outside) {
+  background: rgba(77, 188, 196, 0.25) !important;
+  color: #4DBCC4 !important;
+  border-color: #4DBCC4 !important;
+  border-width: 2px !important;
+  box-shadow: 0 4px 8px rgba(77, 188, 196, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+/* Hover state for outside days */
+.rdp-month_grid .rdp-day_outside:hover:not(.rdp-day_disabled) {
+  background: rgba(77, 188, 196, 0.1) !important;
+  color: #4DBCC4 !important;
+  opacity: 0.8 !important;
+  transform: scale(1.05) !important;
+}
+
+/* ============================================
+   SELECTED DAY - Accent Color
+   ============================================ */
+
+.rdp-month_grid .rdp-day_selected {
+  background: #4DBCC4 !important;
+  color: white !important;
+  border-color: #4DBCC4 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(77, 188, 196, 0.3) !important;
+}
+
+.rdp-month_grid .rdp-day_selected:hover {
+  background: #3da8b0 !important;
+  border-color: #3da8b0 !important;
+  box-shadow: 0 4px 12px rgba(77, 188, 196, 0.4) !important;
+}
+
+/* ============================================
+   TODAY - Ring Highlight
+   ============================================ */
+
+.rdp-month_grid .rdp-day_today:not(.rdp-day_selected) {
+  border-color: #4DBCC4 !important;
+  border-width: 2px !important;
+  font-weight: 700 !important;
+  color: #4DBCC4 !important;
+}
+
+.dark .rdp-month_grid .rdp-day_today:not(.rdp-day_selected) {
+  border-color: #4DBCC4 !important;
+  color: #4DBCC4 !important;
+}
+
+/* ============================================
+   OUTSIDE MONTH - Faded
+   ============================================ */
+
+.rdp-month_grid .rdp-day_outside {
+  color: #9ca3af !important;
+  opacity: 0.5 !important;
+}
+
+.dark .rdp-month_grid .rdp-day_outside {
+  color: #6b7280 !important;
+}
+
+/* ============================================
+   DISABLED DAYS - Strikethrough
+   ============================================ */
+
+.rdp-month_grid .rdp-day_disabled {
+  color: #d1d5db !important;
+  opacity: 0.4 !important;
+  text-decoration: line-through !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+}
+
+.dark .rdp-month_grid .rdp-day_disabled {
+  color: #4b5563 !important;
+}
+
+.rdp-month_grid .rdp-day_disabled:hover {
+  background: transparent !important;
+  transform: none !important;
+  border-color: transparent !important;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 640px) {
+  .rdp-month_grid {
+    border-spacing: 0.25rem 0.125rem !important;
+  }
+  
+  .rdp-month_grid th {
+    font-size: 0.625rem !important;
+    padding: 0.5rem 0 !important;
+  }
+  
+  .rdp-month_grid td {
+    height: 2.25rem !important;
+    padding: 0.125rem !important;
+  }
+  
+  .rdp-month_grid .rdp-day {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem !important;
+    min-height: 2rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ============================================
+   NAVIGATION BUTTONS - Hover Effects
+   ============================================ */
+
+/* Custom navigation buttons in MonthCaption */
+.rdp-caption button[aria-label*="previous"],
+.rdp-caption button[aria-label*="next"] {
+  transition: all 0.2s ease !important;
+}
+
+.rdp-caption button[aria-label*="previous"]:hover:not(:disabled),
+.rdp-caption button[aria-label*="next"]:hover:not(:disabled) {
+  background: rgba(77, 188, 196, 0.15) !important;
+  color: #4DBCC4 !important;
+  border-color: rgba(77, 188, 196, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+.dark .rdp-caption button[aria-label*="previous"]:hover:not(:disabled),
+.dark .rdp-caption button[aria-label*="next"]:hover:not(:disabled) {
+  background: rgba(77, 188, 196, 0.2) !important;
+  color: #4DBCC4 !important;
+  border-color: rgba(77, 188, 196, 0.4) !important;
+}
+
+.rdp-caption button[aria-label*="previous"]:disabled,
+.rdp-caption button[aria-label*="next"]:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
+.rdp-caption button[aria-label*="previous"]:disabled:hover,
+.rdp-caption button[aria-label*="next"]:disabled:hover {
+  background: transparent !important;
+  color: currentColor !important;
+  border-color: currentColor !important;
+  transform: none !important;
+}
+
+/* ============================================
+   NAVIGATION - Arrows Next to Month Header
+   ============================================ */
+
+/* Force caption to be a flex container with space-between */
+.rdp-caption {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  position: relative !important;
+  flex-direction: row !important;
+}
+
+/* Move nav inside caption - make it part of the flex layout */
+.rdp-month .rdp-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  position: static !important;
+  order: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Previous button on the left */
+.rdp-button_previous {
+  order: -1 !important;
+  flex-shrink: 0 !important;
+  position: static !important;
+  margin: 0 !important;
+}
+
+/* Next button on the right */
+.rdp-button_next {
+  order: 1 !important;
+  flex-shrink: 0 !important;
+  position: static !important;
+  margin: 0 !important;
+}
+
+/* Month label centered in the middle */
+.rdp-caption_label {
+  flex: 1 !important;
+  text-align: center !important;
+  margin: 0 !important;
+  order: 0 !important;
+}
+
+/* Ensure the month container doesn't break the layout */
+.rdp-month {
+  position: relative !important;
+}
+
+/* Override any absolute positioning from default styles */
+.rdp-month .rdp-button_previous,
+.rdp-month .rdp-button_next {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* ============================================
+   CONTAINER RESPONSIVENESS
+   ============================================ */
+
+.rdp-root {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.rdp-month {
+  width: 100% !important;
+  max-width: 100% !important;
+}

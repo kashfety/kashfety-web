@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
@@ -37,6 +38,12 @@ export async function GET(request: NextRequest) {
 // POST - Add a new lab test type
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+
     const body = await request.json();
 
     const { 
@@ -125,6 +132,12 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a lab test type (using query parameter instead of dynamic route)
 export async function DELETE(request: NextRequest) {
   try {
+    // SECURITY: Require admin authentication
+    const authResult = requireAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401 or 403
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

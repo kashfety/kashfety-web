@@ -46,7 +46,7 @@ export default function AdminProfileSettings({
   onProfileUpdate
 }: AdminProfileSettingsProps) {
   const { t, isRTL } = useLocale();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<AdminProfileData | null>(null);
@@ -228,6 +228,36 @@ export default function AdminProfileSettings({
           email: updatedProfile.email || "",
           phone: updatedProfile.phone || "",
         });
+
+        // Update localStorage with new profile data to reflect changes immediately
+        if (typeof window !== 'undefined') {
+          const storedUser = localStorage.getItem('auth_user');
+          if (storedUser) {
+            try {
+              const userData = JSON.parse(storedUser);
+              const updatedUser = {
+                ...userData,
+                name: updatedProfile.name || userData.name,
+                first_name: updatedProfile.first_name || userData.first_name,
+                last_name: updatedProfile.last_name || userData.last_name,
+                email: updatedProfile.email || userData.email,
+                phone: updatedProfile.phone || userData.phone,
+              };
+              localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+            } catch (error) {
+              console.error('Failed to update localStorage:', error);
+            }
+          }
+        }
+
+        // Refresh user context to reflect changes immediately
+        if (refreshUser) {
+          try {
+            await refreshUser();
+          } catch (error) {
+            console.error('Failed to refresh user context:', error);
+          }
+        }
 
         setEditMode(false);
 

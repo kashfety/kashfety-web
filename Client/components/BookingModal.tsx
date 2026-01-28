@@ -935,8 +935,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
   // Step navigation handlers (updated for 4-step flow)
   const handleSpecialtySelect = async (method?: string) => {
-    // Determine the search method to use
-    let searchMethodToUse = method || searchMethod;
+    // Determine the search method to use - ensure it's one of the valid types
+    let searchMethodToUse: "centers" | "doctors" | "" = "";
+    
+    if (method === "centers" || method === "doctors") {
+      searchMethodToUse = method;
+    } else if (searchMethod) {
+      searchMethodToUse = searchMethod;
+    }
     
     // For home visits, always use "doctors" search method
     if (selectedLocation === "home") {
@@ -950,7 +956,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
 
       // Ensure searchMethod state is set
       if (searchMethodToUse !== searchMethod) {
-        setSearchMethod(searchMethodToUse);
+        setSearchMethod(searchMethodToUse as "centers" | "doctors" | "");
       }
 
       if (searchMethodToUse === "centers") {
@@ -1472,8 +1478,9 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
               </div>
 
               <div
-                className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900 min-h-0"
+                className={`flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900 min-h-0 ${isRTL ? 'rtl' : 'ltr'}`}
                 style={{ scrollbarGutter: 'stable' }}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
                 {/* Mode Toggle */}
                 <div className="flex justify-center mb-6 gap-3">
@@ -2018,8 +2025,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                       <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">{getLocalizedName(doctor)}</h4>
-                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium">{getLocalizedSpecialtyName(doctor.specialty)}</p>
+                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1 truncate">{getLocalizedName(doctor)}</h4>
+                                        <p className="text-base text-gray-600 dark:text-gray-400 font-medium truncate">{getLocalizedSpecialtyName(doctor.specialty)}</p>
                                       </div>
                                       <div className="text-right flex-shrink-0">
                                         <div className="text-2xl font-bold text-[#4DBCC4] dark:text-[#4DBCC4]">{formatCurrency(doctor.consultation_fee, locale)}</div>
@@ -2136,10 +2143,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-3 mb-2">
                                       <div className="flex-1">
-                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
+                                        <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 truncate">{getLocalizedName(center)}</h4>
                                         <p className="text-base text-gray-700 dark:text-gray-300 flex items-start gap-2">
                                           <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-                                          <span>{center.address}</span>
+                                          <span className="line-clamp-2">{center.address}</span>
                                         </p>
                                         {center.phone && (
                                           <p className="text-base text-gray-700 dark:text-gray-300 flex items-center gap-2 mt-2">
@@ -2268,10 +2275,10 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                       <MapPin className="w-6 h-6 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{getLocalizedName(center)}</h4>
+                                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 truncate">{getLocalizedName(center)}</h4>
                                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 flex items-start gap-2">
                                         <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
-                                        <span>{center.address}</span>
+                                        <span className="line-clamp-2">{center.address}</span>
                                       </p>
                                       {center.phone && (
                                         <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
@@ -2560,7 +2567,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                               </div>
                             ) : (
                               <div>
-                                <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
                                   {availableSlots.filter(slot => slot.is_available && !slot.is_booked).map((slot, index) => (
                                     <motion.div
                                       key={slot.time}

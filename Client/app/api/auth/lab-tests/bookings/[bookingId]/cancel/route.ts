@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -11,6 +17,13 @@ export async function PUT(
   { params }: { params: Promise<{ bookingId: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401
+    }
+    const { user } = authResult;
+
     const { bookingId } = await params;
     const { reason } = await request.json();
 
@@ -27,6 +40,11 @@ export async function PUT(
 
     if (fetchError || !booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    // SECURITY: Verify user owns this booking or is admin/doctor
+    if (booking.patient_id !== user.id && user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'doctor') {
+      return NextResponse.json({ error: 'Forbidden - You can only cancel your own bookings' }, { status: 403 });
     }
 
     // Check if booking is already cancelled

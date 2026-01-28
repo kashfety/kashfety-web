@@ -27,6 +27,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   token: string | null
   getUserRole: () => string | null
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -401,6 +402,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.role || null
   }
 
+  const refreshUser = async (): Promise<void> => {
+    const storedToken = localStorage.getItem('auth_token')
+    if (storedToken) {
+      await verifyToken(storedToken)
+    }
+  }
+
   const value = {
     user,
     token,
@@ -411,6 +419,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     isAuthenticated,
     getUserRole,
+    refreshUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

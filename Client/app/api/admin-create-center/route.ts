@@ -33,6 +33,46 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate email uniqueness
+    try {
+      // Check if email exists in users table
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingUser) {
+        return NextResponse.json({ 
+          error: 'Email already registered',
+          message: 'This email is already associated with a user account'
+        }, { status: 400 });
+      }
+
+      // Check if email exists in centers table
+      const { data: existingCenter } = await supabase
+        .from('centers')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingCenter) {
+        return NextResponse.json({ 
+          error: 'Email already registered',
+          message: 'This email is already associated with a center'
+        }, { status: 400 });
+      }
+    } catch (error: any) {
+      // If error is not "no rows returned", it's a real error
+      if (error.code !== 'PGRST116') {
+        return NextResponse.json({ 
+          error: 'Failed to validate email',
+          details: error.message 
+        }, { status: 500 });
+      }
+      // PGRST116 means no rows found, which is what we want
+    }
+
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);

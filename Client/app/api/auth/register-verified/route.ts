@@ -78,17 +78,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingUserByEmail) {
-      // Generate JWT token for existing user
-      const token = generateToken(existingUserByEmail);
-      const { password_hash: _, ...userResponse } = existingUserByEmail;
-      
       return NextResponse.json({
-        message: 'User already exists',
-        success: true,
-        user: userResponse,
-        token,
-        expiresIn: '24h'
-      });
+        error: 'Email already registered',
+        success: false,
+        message: 'This email is already associated with an account'
+      }, { status: 400 });
     }
 
     // Also check by Supabase user ID if provided
@@ -221,16 +215,11 @@ export async function POST(request: NextRequest) {
           .single();
         
         if (existingUser) {
-          const token = generateToken(existingUser);
-          const { password_hash: _, ...userResponse } = existingUser;
-          
           return NextResponse.json({
-            message: 'User already exists',
-            success: true,
-            user: userResponse,
-            token,
-            expiresIn: '24h'
-          });
+            error: 'Email already registered',
+            success: false,
+            message: 'This email is already associated with an account'
+          }, { status: 400 });
         }
       }
       

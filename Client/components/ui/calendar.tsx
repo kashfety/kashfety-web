@@ -2,12 +2,59 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, MonthCaptionProps, useDayPicker } from "react-day-picker"
+import "react-day-picker/style.css"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
+
+// Custom MonthCaption component to place nav buttons next to the month name
+function CustomMonthCaption(props: MonthCaptionProps) {
+  const { calendarMonth, displayIndex } = props
+  const { goToMonth, previousMonth, nextMonth } = useDayPicker()
+  
+  const monthDate = calendarMonth.year
+    ? new Date(calendarMonth.year, calendarMonth.month)
+    : new Date()
+  
+  return (
+    <div className="flex justify-between items-center pt-1 relative mb-4 px-1 w-full">
+      <button
+        type="button"
+        onClick={() => previousMonth && goToMonth(previousMonth)}
+        disabled={!previousMonth}
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "h-8 w-8 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-[#4DBCC4]/20 hover:text-[#4DBCC4] hover:border-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/20 dark:hover:text-[#4DBCC4] border-gray-300 dark:border-gray-600 flex-shrink-0 transition-all duration-200",
+          !previousMonth && "opacity-30 cursor-not-allowed hover:bg-transparent hover:text-current hover:border-gray-300 dark:hover:border-gray-600"
+        )}
+        aria-label="Go to previous month"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      
+      <div className="text-lg font-bold text-gray-900 dark:text-gray-100 flex-1 text-center">
+        {monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+      </div>
+      
+      <button
+        type="button"
+        onClick={() => nextMonth && goToMonth(nextMonth)}
+        disabled={!nextMonth}
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "h-8 w-8 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-[#4DBCC4]/20 hover:text-[#4DBCC4] hover:border-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/20 dark:hover:text-[#4DBCC4] border-gray-300 dark:border-gray-600 flex-shrink-0 transition-all duration-200",
+          !nextMonth && "opacity-30 cursor-not-allowed hover:bg-transparent hover:text-current hover:border-gray-300 dark:hover:border-gray-600"
+        )}
+        aria-label="Go to next month"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
 
 function Calendar({
   className,
@@ -20,41 +67,31 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center mb-2",
-        caption_label: "text-base font-bold text-gray-900 dark:text-gray-100",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-gray-700 dark:text-gray-300 rounded-md w-10 font-bold text-sm uppercase",
-        row: "flex w-full mt-2",
-        cell: "h-10 w-10 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          // Available days: bright and clear
-          "h-10 w-10 p-0 font-semibold text-gray-900 dark:text-gray-100 hover:bg-[#4DBCC4]/20 hover:text-[#4DBCC4] transition-all aria-selected:opacity-100"
-        ),
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
+        month: "space-y-4 w-full",
+        caption: "hidden",
+        caption_label: "hidden",
+        nav: "hidden",
+        nav_button: "hidden",
+        nav_button_previous: "hidden",
+        nav_button_next: "hidden",
+        month_grid: "w-full",
+        weekdays: "",
+        weekday: "",
+        weeks: "",
+        week: "",
+        day: "",
         day_range_end: "day-range-end",
-        day_selected:
-          "bg-[#4DBCC4] text-white hover:bg-[#3da8b0] hover:text-white focus:bg-[#3da8b0] focus:text-white ring-2 ring-[#4DBCC4] ring-offset-2",
-        day_today: "ring-2 ring-[#4DBCC4] text-gray-900 dark:text-gray-100 font-bold",
-        day_outside:
-          "day-outside text-gray-400 dark:text-gray-600 aria-selected:bg-accent/50 aria-selected:text-gray-400 opacity-50",
-        day_disabled: "text-gray-400 dark:text-gray-600 opacity-30 line-through cursor-not-allowed hover:bg-transparent",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_selected: "",
+        day_today: "",
+        day_outside: "",
+        day_disabled: "",
+        day_range_middle: "",
         day_hidden: "invisible",
         ...classNames,
       }}
       components={{
+        MonthCaption: CustomMonthCaption,
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}

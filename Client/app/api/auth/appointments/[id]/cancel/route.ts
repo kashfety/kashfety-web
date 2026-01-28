@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAuth } from '@/lib/api-auth-utils';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const AUTH_FALLBACK_ENABLED = process.env.AUTH_FALLBACK_ENABLED !== '0';
@@ -11,6 +17,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Returns 401
+    }
+    const { user } = authResult;
+
     const authHeader = request.headers.get('authorization');
 
     const body = await request.json();

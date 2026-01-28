@@ -187,7 +187,7 @@ router.put('/users/:id', async (req, res) => {
 
         // Enhanced allowed fields for comprehensive editing
         const allowedFields = [
-            'first_name', 'last_name', 'email', 'phone', 
+            'first_name', 'last_name', 'name', 'email', 'phone', 
             'date_of_birth', 'gender', 'medical_history', 'allergies', 
             'medications', 'emergency_contact', 'approval_status',
             // Role update only for doctors and admins (patients/centers role is locked)
@@ -201,8 +201,15 @@ router.put('/users/:id', async (req, res) => {
             }
         });
 
-        // Auto-generate full name from first_name and last_name
-        if (updates.first_name || updates.last_name) {
+        // Handle name field updates - sync name with first_name/last_name
+        if (updates.name !== undefined && updates.name !== null) {
+            // If name is updated directly, split it into first_name and last_name
+            const nameParts = updates.name.trim().split(' ');
+            filteredUpdates.name = updates.name.trim();
+            filteredUpdates.first_name = nameParts[0] || '';
+            filteredUpdates.last_name = nameParts.slice(1).join(' ') || '';
+        } else if (updates.first_name || updates.last_name) {
+            // Auto-generate full name from first_name and last_name
             // Get current user data to merge with updates
             const { data: currentUser } = await supabaseAdmin
                 .from(TABLES.USERS)
@@ -210,10 +217,11 @@ router.put('/users/:id', async (req, res) => {
                 .eq('id', id)
                 .single();
 
-            const firstName = updates.first_name || currentUser?.first_name || '';
-            const lastName = updates.last_name || currentUser?.last_name || '';
+            const firstName = updates.first_name !== undefined ? updates.first_name : (currentUser?.first_name || '');
+            const lastName = updates.last_name !== undefined ? updates.last_name : (currentUser?.last_name || '');
+            filteredUpdates.first_name = firstName;
+            filteredUpdates.last_name = lastName;
             filteredUpdates.name = `${firstName} ${lastName}`.trim();
-            
         }
 
         // Implement auto-approval logic

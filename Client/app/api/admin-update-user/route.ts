@@ -91,10 +91,10 @@ export async function POST(request: NextRequest) {
         try {
             const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-            // First verify the user exists
+            // First verify the user exists and get current name fields
             const { data: existingUser, error: fetchError } = await supabase
                 .from('users')
-                .select('id, role, email, name, phone')
+                .select('id, role, email, name, phone, first_name, last_name')
                 .eq('id', userId)
                 .single();
 
@@ -116,10 +116,27 @@ export async function POST(request: NextRequest) {
                 updated_at: new Date().toISOString()
             };
 
-            // Apply updates from the request
-            if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
-            if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
-            if (updates.name !== undefined) updateData.name = updates.name;
+            // Handle name field updates - sync name with first_name/last_name
+            if (updates.name !== undefined) {
+                // If name is updated directly, split it into first_name and last_name
+                const nameParts = updates.name.trim().split(' ');
+                updateData.name = updates.name.trim();
+                updateData.first_name = nameParts[0] || '';
+                updateData.last_name = nameParts.slice(1).join(' ') || '';
+            } else if (updates.first_name !== undefined || updates.last_name !== undefined) {
+                // If first_name or last_name are updated, auto-generate full name
+                const firstName = updates.first_name !== undefined ? updates.first_name : (existingUser.first_name || '');
+                const lastName = updates.last_name !== undefined ? updates.last_name : (existingUser.last_name || '');
+                updateData.first_name = firstName;
+                updateData.last_name = lastName;
+                updateData.name = `${firstName} ${lastName}`.trim();
+            } else {
+                // No name fields updated, just apply individual fields if provided
+                if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
+                if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
+            }
+
+            // Apply other updates
             if (updates.email !== undefined) updateData.email = updates.email;
             if (updates.phone !== undefined) updateData.phone = updates.phone;
             if (updates.approval_status !== undefined) updateData.approval_status = updates.approval_status;

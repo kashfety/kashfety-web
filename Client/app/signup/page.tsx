@@ -312,6 +312,25 @@ export default function SignupPage() {
         return;
       }
 
+      // Check if email is already registered BEFORE sending OTP
+      const emailCheckResponse = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      
+      const emailCheckResult = await emailCheckResponse.json();
+      
+      if (emailCheckResult.exists) {
+        const errorMessage = emailCheckResult.message || t('email_already_registered') || 'This email is already registered. Please use a different email or login.';
+        setValidationErrors(prev => ({
+          ...prev,
+          email: errorMessage
+        }));
+        setIsLoading(false);
+        return;
+      }
+
       // Send OTP code using Supabase Auth signInWithOtp (handles both login and signup)
       const { error } = await supabase.auth.signInWithOtp({
         email: formData.email,

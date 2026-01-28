@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Check email error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error', exists: false },
+      { error: 'Internal server error', exists: false },
       { status: 500 }
     );
   }

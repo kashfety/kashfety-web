@@ -1518,10 +1518,10 @@ export default function DoctorDashboard() {
                               {(showAllAppointments ? sortedAppointments : sortedAppointments.slice(0, 10)).map((appointment) => (
                                 <div
                                   key={appointment.id}
-                                  className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
+                                  className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow ${isRTL ? 'lg:flex-row-reverse' : ''}`}
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 >
-                                  <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'flex-row-reverse' : ''} ${isRTL ? 'lg:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                                       <User className="w-6 h-6 text-white" />
                                     </div>
@@ -1550,7 +1550,7 @@ export default function DoctorDashboard() {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                       <Badge
                                         variant={

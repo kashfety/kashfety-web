@@ -26,7 +26,7 @@ export function Hero({ onCtaClick }: HeroProps) {
       <div className="absolute top-1/3 right-1/4 sm:right-1/3 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-gradient-to-br from-teal-200/20 to-cyan-200/10 dark:from-teal-800/20 dark:to-cyan-800/10 rounded-full blur-2xl scale-in" />
       <div className="hidden sm:block absolute bottom-1/4 left-1/3 w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 bg-gradient-to-br from-blue-200/15 to-purple-200/10 dark:from-blue-800/15 dark:to-purple-800/10 rounded-full blur-3xl parallax-float-slow" style={{ animationDelay: '0.5s' }} />
 
-      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center justify-center min-h-[500px] sm:min-h-[600px]">
+      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center justify-start pt-8 sm:pt-12 md:pt-16 min-h-[500px] sm:min-h-[600px]">
         {/* Tagline */}
         <div className="inline-flex items-center justify-center gap-2 mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 fade-in-down transition-colors duration-300">
           <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-teal-600 dark:text-teal-400 flex-shrink-0" />
@@ -36,14 +36,14 @@ export function Hero({ onCtaClick }: HeroProps) {
         {/* Main headline with typewriter - centered */}
         <div className="mb-4 sm:mb-6 md:mb-8 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-slate-900 dark:text-white fade-in-up stagger-1 transition-colors duration-300 min-h-16 sm:min-h-20 md:min-h-24 flex items-center justify-center">
-            <Typewriter text="Kashfety" speed={80} delay={200} />
+            <Typewriter text={t.hero.headline} speed={80} delay={200} />
           </h1>
         </div>
 
         {/* Slogan */}
         <div className="mb-6 sm:mb-8 md:mb-12 text-center">
           <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-teal-600 dark:text-teal-400 fade-in-up stagger-2 transition-colors duration-300">
-            Healthcare Simplified
+            {t.hero.slogan}
           </p>
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useLocale } from '@/components/providers/locale-provider'
 import { getLandingTranslation } from '@/lib/landing-translations'
+import { toArabicNumerals } from '@/lib/i18n'
 import Link from 'next/link'
 
 export function Footer() {
@@ -15,9 +16,9 @@ export function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
-            <h3 className="font-bold text-base sm:text-lg mb-2 sm:mb-4 text-white">Kashfety</h3>
+            <h3 className="font-bold text-base sm:text-lg mb-2 sm:mb-4 text-white">{t.footer.brandName}</h3>
             <p className={`text-xs sm:text-sm text-slate-400 dark:text-slate-500 ${isArabic ? 'font-arabic' : ''}`}>
-              {isArabic ? 'طريقك إلى صحة أفضل' : 'Your path to better health'}
+              {t.footer.tagline}
             </p>
           </div>
 
@@ -87,7 +88,7 @@ export function Footer() {
           <p
             className={`text-center text-xs sm:text-sm text-slate-400 dark:text-slate-500 ${isArabic ? 'font-arabic' : ''}`}
           >
-            {t.footer.copyright}
+            {toArabicNumerals(t.footer.copyright, locale)}
           </p>
         </div>
       </div>

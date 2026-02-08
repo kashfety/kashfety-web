@@ -6,7 +6,21 @@ import type { Locale } from '@/lib/i18n'
 const enTranslations = {
   hero: {
     tagline: 'Your trusted healthcare partner',
+    slogan: 'Healthcare Simplified',
+    headline: 'Kashfety',
     cta: 'Book Appointment',
+  },
+
+  header: {
+    brandName: 'Kashfety',
+    signIn: 'Sign In',
+    dashboard: 'Dashboard',
+    logout: 'Logout',
+    loading: '...',
+    languageAr: 'العربية',
+    languageEn: 'EN',
+    languageShortAr: 'AR',
+    languageShortEn: 'EN',
   },
 
   howItWorks: {
@@ -66,11 +80,18 @@ const enTranslations = {
       '10k+ Happy Patients',
       'Care Records in One Place',
     ],
+    stats: {
+      medicalCenters: 'Medical Centers',
+      happyPatients: 'Happy Patients',
+      rating: 'Rating',
+    },
     appDownload: 'Get the App',
     appComingSoon: 'iOS & Android Coming Soon',
   },
 
   footer: {
+    brandName: 'Kashfety',
+    tagline: 'Your path to better health',
     company: 'Company',
     about: 'About',
     contact: 'Contact',
@@ -87,7 +108,21 @@ const enTranslations = {
 const arTranslations = {
   hero: {
     tagline: 'شريكك الموثوق في الرعاية الصحية',
+    slogan: 'الرعاية الصحية بكل بساطة',
+    headline: 'كاشفتي',
     cta: 'احجز موعداً',
+  },
+
+  header: {
+    brandName: 'كاشفتي',
+    signIn: 'دخول',
+    dashboard: 'لوحة التحكم',
+    logout: 'خروج',
+    loading: '...',
+    languageAr: 'العربية',
+    languageEn: 'EN',
+    languageShortAr: 'AR',
+    languageShortEn: 'EN',
   },
 
   howItWorks: {
@@ -147,11 +182,18 @@ const arTranslations = {
       '10000+ مريض سعيد',
       'سجلات الرعاية في مكان واحد',
     ],
+    stats: {
+      medicalCenters: 'مركز طبي',
+      happyPatients: 'مريض سعيد',
+      rating: 'تقييم',
+    },
     appDownload: 'تحميل التطبيق',
     appComingSoon: 'iOS و Android قريباً',
   },
 
   footer: {
+    brandName: 'كاشفتي',
+    tagline: 'طريقك إلى صحة أفضل',
     company: 'شركة',
     about: 'حول',
     contact: 'تواصل',

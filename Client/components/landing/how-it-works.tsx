@@ -3,6 +3,7 @@
 import { Calendar, Clock, CheckCircle } from 'lucide-react'
 import { useLocale } from '@/components/providers/locale-provider'
 import { getLandingTranslation } from '@/lib/landing-translations'
+import { toArabicNumerals } from '@/lib/i18n'
 
 export function HowItWorks() {
   const { locale, isRTL } = useLocale()
@@ -49,7 +50,7 @@ export function HowItWorks() {
                   {/* Step number badge */}
                   <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
                     <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-400 dark:to-teal-500 text-white font-bold text-sm sm:text-lg shadow-lg shimmer border-4 border-white dark:border-slate-900">
-                      {step.number}
+                      {toArabicNumerals(step.number, locale)}
                     </div>
                   </div>
 

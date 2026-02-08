@@ -3,6 +3,7 @@
 import { CheckCircle } from 'lucide-react'
 import { useLocale } from '@/components/providers/locale-provider'
 import { getLandingTranslation } from '@/lib/landing-translations'
+import { toArabicNumerals } from '@/lib/i18n'
 
 export function About() {
   const { locale } = useLocale()
@@ -44,21 +45,27 @@ export function About() {
             <div className="relative bg-gradient-to-br from-teal-50 dark:from-slate-800 to-blue-50 dark:to-slate-800 rounded-2xl p-6 sm:p-8 border border-teal-200 dark:border-slate-700 shadow-lg hover:shadow-xl dark:hover:shadow-teal-500/20 transition-shadow duration-300">
               <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
                 <div className="hover:scale-105 transition-transform duration-300">
-                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400">500+</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400" dir="ltr">
+                    {toArabicNumerals('500+', locale)}
+                  </p>
                   <p className={`text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 transition-colors duration-300 ${isArabic ? 'font-arabic' : ''}`}>
-                    {isArabic ? 'مركز طبي' : 'Medical Centers'}
+                    {t.about.stats.medicalCenters}
                   </p>
                 </div>
                 <div className="hover:scale-105 transition-transform duration-300">
-                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400">10k+</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400" dir="ltr">
+                    {locale === 'ar' ? toArabicNumerals('10', locale) + 'ألف+' : toArabicNumerals('10k+', locale)}
+                  </p>
                   <p className={`text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 transition-colors duration-300 ${isArabic ? 'font-arabic' : ''}`}>
-                    {isArabic ? 'مريض سعيد' : 'Happy Patients'}
+                    {t.about.stats.happyPatients}
                   </p>
                 </div>
                 <div className="hover:scale-105 transition-transform duration-300">
-                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400">4.9</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400" dir="ltr">
+                    {toArabicNumerals('4.9', locale)}
+                  </p>
                   <p className={`text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 sm:mt-2 transition-colors duration-300 ${isArabic ? 'font-arabic' : ''}`}>
-                    {isArabic ? 'تقييم' : 'Rating'}
+                    {t.about.stats.rating}
                   </p>
                 </div>
               </div>

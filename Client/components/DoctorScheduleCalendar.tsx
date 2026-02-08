@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/components/providers/locale-provider";
+import { formatLocalizedTime, toArabicNumerals } from "@/lib/i18n";
 import {
     Calendar,
     Clock,
@@ -80,13 +81,6 @@ export default function DoctorScheduleCalendar({
             return [appointment.first_name, appointment.last_name].filter(Boolean).join(' ').trim();
         }
         return appointment.patient_name || (t('cd_unknown_patient') || 'Unknown Patient');
-    };
-
-    // Helper to convert numbers to Arabic numerals
-    const toArabicNumerals = (num: number | string): string => {
-        if (locale !== 'ar') return String(num);
-        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        return String(num).replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
     };
 
     // Helper to get localized status
@@ -214,22 +208,8 @@ export default function DoctorScheduleCalendar({
         }
     };
 
-    // Format time for display
-    const formatTime = (time: string) => {
-        if (!time) return '';
-        const [hours, minutes] = time.split(':');
-        const hour = parseInt(hours);
-
-        if (locale === 'ar') {
-            // Arabic 24-hour format
-            return `${toArabicNumerals(hour)}:${toArabicNumerals(minutes)}`;
-        }
-
-        // English AM/PM format
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-        return `${displayHour}:${minutes} ${ampm}`;
-    };
+    // Format time for display (localized numerals and AM/PM or ص/م)
+    const formatTime = (time: string) => formatLocalizedTime(time, locale);
 
     // Format date for display
     const formatDate = (date: Date) => {
@@ -572,7 +552,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_total_appointments') || 'Total Appointments'}
                                 </p>
                                 <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                    {toArabicNumerals(appointments.length)}
+                                    {toArabicNumerals(appointments.length, locale)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -591,7 +571,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_confirmed') || 'Confirmed'}
                                 </p>
                                 <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'confirmed').length)}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'confirmed').length, locale)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -610,7 +590,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_pending') || 'Pending'}
                                 </p>
                                 <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">
-                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'pending').length)}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'pending').length, locale)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -629,7 +609,7 @@ export default function DoctorScheduleCalendar({
                                     {t('dd_completed') || 'Completed'}
                                 </p>
                                 <p className="text-3xl font-bold text-teal-700 dark:text-teal-300">
-                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'completed').length)}
+                                    {toArabicNumerals(appointments.filter(apt => apt.status === 'completed').length, locale)}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">

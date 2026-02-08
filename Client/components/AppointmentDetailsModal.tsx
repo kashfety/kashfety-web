@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, User, Phone, Mail, MapPin, FileText, Stethoscope, CheckCircle, Building2 } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
+import { formatLocalizedTime } from "@/lib/i18n";
 
 interface Appointment {
     id: string;
@@ -106,22 +107,8 @@ export default function AppointmentDetailsModal({
         return t(key) || status;
     };
 
-    // Format time for display
-    const formatTime = (time: string) => {
-        if (!time) return '';
-        const [hours, minutes] = time.split(':');
-        const hour = parseInt(hours);
-        
-        if (locale === 'ar') {
-            // Arabic 24-hour format
-            return `${toArabicNumerals(hour)}:${toArabicNumerals(parseInt(minutes))}`;
-        }
-        
-        // English AM/PM format
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-        return `${displayHour}:${minutes} ${ampm}`;
-    };
+    // Format time for display (localized numerals and AM/PM or ص/م)
+    const formatTime = (time: string) => formatLocalizedTime(time, locale);
 
     // Format date for display
     const formatDate = (dateStr: string) => {
@@ -424,7 +411,11 @@ export default function AppointmentDetailsModal({
                                                 {t('dd_notes') || 'Notes'}
                                             </p>
                                             <p className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-gray-900 dark:text-white">
-                                                {appointment.notes}
+                                                {appointment.notes === 'Rescheduled: Rescheduled by patient request'
+                                                    ? `${t('rescheduled_prefix')}${t('reschedule_default_reason')}`
+                                                    : appointment.notes.startsWith('Rescheduled: ')
+                                                    ? `${t('rescheduled_prefix')}${appointment.notes.slice(13)}`
+                                                    : appointment.notes}
                                             </p>
                                         </div>
                                     )}

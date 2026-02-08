@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, formatLocalizedDate, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface LabBooking {
@@ -293,6 +293,9 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                       {t('lab_select_new_date') || 'Select New Date'}
                     </Label>
                     <Calendar
+                      captionLocale={locale}
+                      ariaLabelPrevious={t('calendar_prev_month')}
+                      ariaLabelNext={t('calendar_next_month')}
                       mode="single"
                       selected={selectedDate}
                       onSelect={handleDateSelect}
@@ -357,7 +360,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                                       : "hover:bg-emerald-50"
                                   }`}
                               >
-                                <span dir="ltr">{locale === 'ar' ? toArabicNumerals(slot.time, locale) : slot.time}</span>
+                                <span dir="ltr">{formatLocalizedTime(slot.time, locale)}</span>
                                 {slot.is_booked && (
                                   <span className={`text-xs ${isRTL ? 'mr-1' : 'ml-1'}`}>({t('booking_time_booked') || 'Booked'})</span>
                                 )}

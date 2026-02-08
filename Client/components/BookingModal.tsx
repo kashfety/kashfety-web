@@ -13,7 +13,8 @@ import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Searc
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
-import { localizeSpecialty, toArabicNumerals, formatCurrency } from '@/lib/i18n';
+import { localizeSpecialty, toArabicNumerals, formatCurrency, formatLocalizedTime } from '@/lib/i18n';
+import { ar } from 'date-fns/locale';
 import { appointmentService, labService } from '@/lib/api';
 import { useToast } from "@/hooks/use-toast";
 import { useCustomAlert } from "@/hooks/use-custom-alert";
@@ -2407,7 +2408,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3 flex-wrap">
                       <div>
-                        <h3 className="text-lg font-semibold text-black">Select Test Type and Center</h3>
+                        <h3 className="text-lg font-semibold text-black">{t('booking_select_test_type_and_center') || 'Select Test Type and Center'}</h3>
                         <div className="text-sm text-black">{t("browse_available_lab_tests")}</div>
                       </div>
                     </div>
@@ -2522,6 +2523,14 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             </div>
                           )}
                           <Calendar
+                            captionLocale={locale}
+                            ariaLabelPrevious={t('calendar_prev_month')}
+                            ariaLabelNext={t('calendar_next_month')}
+                            locale={locale === 'ar' ? ar : undefined}
+                            formatters={{
+                              formatDay: (date) =>
+                                locale === 'ar' ? toArabicNumerals(date.getDate().toString(), locale) : date.getDate().toString(),
+                            }}
                             mode="single"
                             selected={selectedDate}
                             onSelect={handleDateSelect}
@@ -2588,7 +2597,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                                             : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                       >
-                                        {slot.time}
+                                        <span dir="ltr">{formatLocalizedTime(slot.time, locale)}</span>
                                       </Button>
                                     </motion.div>
                                   ))}

@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, formatLocalizedDate, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface Appointment {
@@ -632,6 +632,9 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           </div>
                         )}
                         <Calendar
+                          captionLocale={locale}
+                          ariaLabelPrevious={t('calendar_prev_month')}
+                          ariaLabelNext={t('calendar_next_month')}
                           mode="single"
                           selected={selectedDate}
                           onSelect={handleDateSelect}
@@ -696,7 +699,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                                             : "hover:ring-2 hover:ring-[#4DBCC4]/50 bg-white dark:bg-gray-800 hover:bg-[#4DBCC4]/5 dark:hover:bg-[#4DBCC4]/10 hover:shadow-lg !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4]"}
                               `}
                                     >
-                                      <span dir="ltr">{locale === 'ar' ? toArabicNumerals(slot.time, locale) : slot.time}</span>
+                                      <span dir="ltr">{formatLocalizedTime(slot.time, locale)}</span>
                                       {slot.is_booked && (
                                         <span className="block text-xs mt-1">({t('booking_time_booked') || 'Booked'})</span>
                                       )}

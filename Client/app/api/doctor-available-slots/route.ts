@@ -1,29 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { toWesternNumerals } from '@/lib/i18n';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+/** Normalize date to YYYY-MM-DD with Western numerals and parse day of week in a timezone-safe way */
+function normalizeDateAndGetDay(dateParam: string | null): { dateStr: string; dayOfWeek: number } | null {
+  if (!dateParam || typeof dateParam !== 'string') return null;
+  const normalized = toWesternNumerals(dateParam.trim());
+  const match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  const year = parseInt(y!, 10);
+  const month = parseInt(m!, 10) - 1;
+  const day = parseInt(d!, 10);
+  if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return null;
+  const requestedDate = new Date(year, month, day);
+  const dayOfWeek = requestedDate.getDay();
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return { dateStr, dayOfWeek };
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const doctorId = searchParams.get('doctorId');
-    const date = searchParams.get('date');
+    const dateParam = searchParams.get('date');
     const centerId = searchParams.get('center_id');
 
-
-    if (!doctorId || !date) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Doctor ID and date are required' 
+    if (!doctorId || !dateParam) {
+      return NextResponse.json({
+        success: false,
+        message: 'Doctor ID and date are required'
       }, { status: 400 });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const parsed = normalizeDateAndGetDay(dateParam);
+    if (!parsed) {
+      return NextResponse.json({ success: false, message: 'Invalid date format. Use YYYY-MM-DD.' }, { status: 400 });
+    }
+    const { dateStr: date, dayOfWeek } = parsed;
 
-    // Parse the date
-    const requestedDate = new Date(date);
-    const dayOfWeek = requestedDate.getDay();
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ success: false, message: 'Server configuration error' }, { status: 500 });
+    }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Get appointment_type if provided
     const appointmentType = searchParams.get('appointment_type');

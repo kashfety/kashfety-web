@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { toWesternNumerals } from '@/lib/i18n';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+/** Normalize date to YYYY-MM-DD with Western numerals and parse day of week in a timezone-safe way */
+function normalizeDateAndGetDay(dateParam: string | null): { dateStr: string; dayOfWeek: number } | null {
+  if (!dateParam || typeof dateParam !== 'string') return null;
+  const normalized = toWesternNumerals(dateParam.trim());
+  const match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  const year = parseInt(y!, 10);
+  const month = parseInt(m!, 10) - 1;
+  const day = parseInt(d!, 10);
+  if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return null;
+  const requestedDate = new Date(year, month, day);
+  const dayOfWeek = requestedDate.getDay();
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return { dateStr, dayOfWeek };
+}
 
 // Proxy to backend available slots endpoint. Uses public backend route to avoid requiring auth in the modal.
 export async function GET(
@@ -12,14 +30,19 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
+    const dateParam = searchParams.get('date');
     const centerId = searchParams.get('center_id');
     const appointmentType = searchParams.get('appointment_type') || undefined;
     const excludeAppointmentId = searchParams.get('exclude_appointment_id'); // For rescheduling
 
-    if (!date) {
+    if (!dateParam) {
       return NextResponse.json({ success: false, message: 'Missing required date parameter' }, { status: 400 });
     }
+    const parsed = normalizeDateAndGetDay(dateParam);
+    if (!parsed) {
+      return NextResponse.json({ success: false, message: 'Invalid date format. Use YYYY-MM-DD.' }, { status: 400 });
+    }
+    const { dateStr: date, dayOfWeek } = parsed;
 
     // Handle both Promise and synchronous params (Next.js 14 vs 15)
     const resolvedParams = context.params instanceof Promise ? await context.params : context.params;
@@ -112,10 +135,6 @@ export async function GET(
 
     // FALLBACK: compute slots directly from DB
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Determine day of week from the requested date (local-safe parsing)
-    const requested = new Date(date);
-    const dayOfWeek = requested.getDay();
 
     // Query doctor_schedules for that day
     // Handle appointment_type: home_visit schedules typically have center_id matching home visit centers

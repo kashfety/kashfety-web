@@ -1522,7 +1522,10 @@ export default function DoctorDashboard() {
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'lg:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                    {/* Text first so in RTL it appears on the right; avatar second */}
+                                    {/* Avatar first so it stays on the right in RTL */}
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <User className="w-6 h-6 text-white" />
+                                    </div>
                                     <div
                                       className="flex-1 min-w-0"
                                       dir={isRTL ? 'rtl' : 'ltr'}
@@ -1550,9 +1553,6 @@ export default function DoctorDashboard() {
                                           {t('symptoms') || 'Symptoms'}: {appointment.symptoms}
                                         </p>
                                       )}
-                                    </div>
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                      <User className="w-6 h-6 text-white" />
                                     </div>
                                   </div>
                                   <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse sm:justify-start text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>

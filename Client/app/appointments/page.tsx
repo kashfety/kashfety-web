@@ -18,7 +18,7 @@ import BookingModal from "@/components/BookingModal"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocale } from "@/components/providers/locale-provider"
-import { toArabicNumerals, localizeSpecialty } from "@/lib/i18n"
+import { toArabicNumerals, localizeSpecialty, getLocalizedRescheduleNotes } from "@/lib/i18n"
 
 interface Appointment {
   id: string
@@ -738,7 +738,7 @@ export default function MyAppointmentsPage() {
                           <div>
                             <div className="text-sm font-medium text-foreground mb-1">{t('appointments_notes_label') || 'Notes'}</div>
                             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                              {appointment.notes}
+                              {getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}
                             </p>
                           </div>
                         )}

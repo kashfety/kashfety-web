@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, User, Phone, Mail, MapPin, FileText, Stethoscope, CheckCircle, Building2 } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
-import { formatLocalizedTime, getCanonicalStatus, getCanonicalAppointmentType, getTypeArabic } from "@/lib/i18n";
+import { formatLocalizedTime, getCanonicalStatus, getCanonicalAppointmentType, getTypeArabic, getLocalizedRescheduleNotes } from "@/lib/i18n";
 
 interface Appointment {
     id: string;
@@ -406,11 +406,7 @@ export default function AppointmentDetailsModal({
                                                 {t('dd_notes') || 'Notes'}
                                             </p>
                                             <p className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-gray-900 dark:text-white">
-                                                {appointment.notes === 'Rescheduled: Rescheduled by patient request'
-                                                    ? `${t('rescheduled_prefix')}${t('reschedule_default_reason')}`
-                                                    : appointment.notes.startsWith('Rescheduled: ')
-                                                    ? `${t('rescheduled_prefix')}${appointment.notes.slice(13)}`
-                                                    : appointment.notes}
+                                                {getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}
                                             </p>
                                         </div>
                                     )}

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Filter, Clock, User, Phone } from "lucide-react"
 import { useLocale } from '@/components/providers/locale-provider'
-import { formatLocalizedNumber, formatLocalizedDate, formatLocalizedTime } from '@/lib/i18n'
+import { formatLocalizedNumber, formatLocalizedDate, formatLocalizedTime, getLocalizedRescheduleNotes } from '@/lib/i18n'
 
 // Sample data for appointments
 const appointments = [
@@ -162,7 +162,7 @@ export default function SchedulePage() {
                           <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} text-gray-500 dark:text-gray-400`} />
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white">{appointment.patientName}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{appointment.notes}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}</div>
                           </div>
                         </div>
                       </TableCell>

@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths, getLocalizedRescheduleNotes } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface Appointment {
@@ -575,7 +575,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               transition={{ delay: 0.5 }}
                               className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100"
                             >
-                              <strong>{t('reschedule_notes') || 'Notes'}:</strong> {appointment.notes}
+                              <strong>{t('reschedule_notes') || 'Notes'}:</strong> {getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}
                             </motion.div>
                           )}
                         </motion.div>

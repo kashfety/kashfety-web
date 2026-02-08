@@ -75,6 +75,44 @@ export function formatCurrency(amount: number, locale?: Locale, currency: string
   return `${formatted} ${currency}`;
 }
 
+/** Known English reschedule note strings stored by the API. */
+const RESCHEDULE_PREFIX = 'Rescheduled: ';
+const RESCHEDULE_DEFAULT_REASON = 'Rescheduled by patient request';
+const RESCHEDULED_BY_PATIENT = 'Rescheduled by patient';
+const RESCHEDULED_BY_REQUEST = 'Rescheduled by request';
+
+/**
+ * Return localized display text for appointment notes that contain reschedule phrases.
+ * Handles notes stored in English by the API so they display correctly in the current locale.
+ */
+export function getLocalizedRescheduleNotes(
+  notes: string | undefined,
+  t: (key: string) => string
+): string {
+  if (!notes || !notes.trim()) return '';
+  const trimmed = notes.trim();
+  const fullDefault = `${RESCHEDULE_PREFIX}${RESCHEDULE_DEFAULT_REASON}`;
+  if (trimmed === fullDefault)
+    return `${t('rescheduled_prefix')}${t('reschedule_default_reason')}`;
+  if (trimmed === RESCHEDULE_DEFAULT_REASON)
+    return t('reschedule_default_reason');
+  if (trimmed === RESCHEDULED_BY_PATIENT)
+    return t('rescheduled_by_patient');
+  if (trimmed === RESCHEDULED_BY_REQUEST)
+    return t('rescheduled_by_request');
+  if (trimmed.startsWith(RESCHEDULE_PREFIX)) {
+    const tail = trimmed.slice(RESCHEDULE_PREFIX.length).trim();
+    if (tail === RESCHEDULE_DEFAULT_REASON)
+      return `${t('rescheduled_prefix')}${t('reschedule_default_reason')}`;
+    if (tail === RESCHEDULED_BY_PATIENT)
+      return `${t('rescheduled_prefix')}${t('rescheduled_by_patient')}`;
+    if (tail === RESCHEDULED_BY_REQUEST)
+      return `${t('rescheduled_prefix')}${t('rescheduled_by_request')}`;
+    return `${t('rescheduled_prefix')}${tail}`;
+  }
+  return notes;
+}
+
 // Helper: normalize and translate specialty names
 function normalizeSpecialty(raw: string): string {
   if (!raw) return "general_medicine"
@@ -1810,6 +1848,9 @@ export const translations = {
     reschedule_slot_unavailable_message: "Sorry, this time slot was just booked by another patient. Please select a different time.",
     reschedule_default_reason: "Rescheduled by patient request",
     rescheduled_prefix: "Rescheduled: ",
+    rescheduled_by_patient: "Rescheduled by patient",
+    rescheduled_by_request: "Rescheduled by request",
+    reschedule_reason_label: "Reason for Rescheduling (Optional)",
     reschedule_success_title: "Appointment Rescheduled",
     reschedule_success_message: "Your appointment was rescheduled successfully.",
     reschedule_error_title: "Error",
@@ -4067,6 +4108,8 @@ export const translations = {
     reschedule_slot_unavailable_message: "عذراً، تم حجز هذه الفترة الزمنية للتو من قبل مريض آخر. يرجى اختيار وقت مختلف.",
     reschedule_default_reason: "تم إعادة الجدولة بطلب من المريض",
     rescheduled_prefix: "إعادة الجدولة: ",
+    rescheduled_by_patient: "تم إعادة الجدولة بطلب من المريض",
+    rescheduled_by_request: "تم إعادة الجدولة بطلب",
     reschedule_success_title: "تم إعادة جدولة الموعد",
     reschedule_success_message: "تم إعادة جدولة موعدك بنجاح.",
     reschedule_error_title: "خطأ",

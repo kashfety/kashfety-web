@@ -9,6 +9,7 @@ import { Phone, FileText, ArrowRight, Calendar, AlertCircle } from "lucide-react
 import Link from "next/link"
 import { useLocale } from "@/components/providers/locale-provider"
 import { cn } from "@/lib/utils"
+import { getLocalizedRescheduleNotes } from "@/lib/i18n"
 
 interface Appointment {
   id: string;
@@ -349,7 +350,7 @@ export default function AppointmentsList() {
                           </div>
                         </div>
                         {appointment.notes && !appointment.isDetailLoading && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{appointment.notes}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}</p>
                         )}
                         {appointment.isDetailLoading && (
                           <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>

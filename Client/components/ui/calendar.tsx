@@ -36,12 +36,13 @@ function CustomMonthCaption(props: MonthCaptionProps) {
   const locale = ctx.locale
   const dateLocale = locale === "ar" || locale.startsWith("ar-") ? "ar-EG" : locale || "en-US"
 
-  const monthDate = calendarMonth.year != null
-    ? new Date(calendarMonth.year, calendarMonth.month)
-    : new Date()
+  // react-day-picker's CalendarMonth has .date (first day of month), not .year/.month
+  const monthDate = calendarMonth.date ?? new Date()
+  const year = monthDate.getFullYear()
+  const monthIndex = monthDate.getMonth()
 
   const captionText = ctx.formatMonthCaption
-    ? ctx.formatMonthCaption(calendarMonth.year ?? monthDate.getFullYear(), calendarMonth.month ?? monthDate.getMonth())
+    ? ctx.formatMonthCaption(year, monthIndex)
     : monthDate.toLocaleDateString(dateLocale, { month: "long", year: "numeric" })
 
   return (
@@ -61,7 +62,7 @@ function CustomMonthCaption(props: MonthCaptionProps) {
       </button>
 
       <div
-        key={`${calendarMonth.year ?? ""}-${calendarMonth.month ?? ""}`}
+        key={`${year}-${monthIndex}`}
         className="text-lg font-bold text-gray-900 dark:text-gray-100 flex-1 text-center"
       >
         {captionText}

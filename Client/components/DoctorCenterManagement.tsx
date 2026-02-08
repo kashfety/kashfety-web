@@ -392,10 +392,10 @@ export default function DoctorCenterManagement() {
             <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_add_center') || 'Add Center / Clinic'}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardContent className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isRTL ? 'md:grid-flow-col-dense' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label htmlFor="center-name" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('name') || 'Name'}</Label>
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label htmlFor="center-name" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('name') || 'Name'}</Label>
               <Input
                 id="center-name"
                 className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}
@@ -405,8 +405,8 @@ export default function DoctorCenterManagement() {
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label htmlFor="center-address" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('address') || 'Address'}</Label>
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label htmlFor="center-address" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('address') || 'Address'}</Label>
               <Input
                 id="center-address"
                 className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}
@@ -416,8 +416,8 @@ export default function DoctorCenterManagement() {
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label htmlFor="center-phone" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('phone') || 'Phone'}</Label>
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label htmlFor="center-phone" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('phone') || 'Phone'}</Label>
               <Input
                 id="center-phone"
                 className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}
@@ -427,8 +427,8 @@ export default function DoctorCenterManagement() {
                 dir="ltr"
               />
             </div>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label htmlFor="center-email" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('email') || 'Email'}</Label>
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label htmlFor="center-email" className={`text-sm font-medium block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('email') || 'Email'}</Label>
               <Input
                 id="center-email"
                 className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}
@@ -485,13 +485,13 @@ export default function DoctorCenterManagement() {
         </CardHeader>
         <CardContent dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isRTL ? 'md:grid-flow-col-dense' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_selected_centers') || 'Selected Centers'}</Label>
-              <p className={`text-lg font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{toArabicNumerals(selectedCenters.length.toString(), locale)} {t('dd_centers_unit') || 'centers'}</p>
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_selected_centers') || 'Selected Centers'}</Label>
+              <p className={`text-lg font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>{toArabicNumerals(selectedCenters.length.toString(), locale)} {t('dd_centers_unit') || 'centers'}</p>
             </div>
-            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_primary_center') || 'Primary Center'}</Label>
-              <p className={`text-lg font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{(primaryCenter || (selectedCenters.length > 0 ? selectedCenters[0] : ''))
+            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+              <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_primary_center') || 'Primary Center'}</Label>
+              <p className={`text-lg font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>{(primaryCenter || (selectedCenters.length > 0 ? selectedCenters[0] : ''))
                 ? getLocalizedCenterName(centers.find(c => c.id === primaryCenter) || { id: '', name: '', address: '', is_assigned: false, is_primary: false })
                 : (t('dd_none_selected') || 'None selected')
               }</p>

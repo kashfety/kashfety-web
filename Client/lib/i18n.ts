@@ -2959,7 +2959,7 @@ export const translations = {
     stat_support_available: "دعم متاح",
 
     // Doctor Dashboard
-    dd_portal: "بوابة الطبيب",
+    dd_portal: "واجهة الطبيب",
     dd_dashboard: "لوحة التحكم",
     dd_management_section: "الإدارة",
     dd_communication_section: "التواصل",

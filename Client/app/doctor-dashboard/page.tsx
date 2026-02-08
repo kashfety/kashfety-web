@@ -281,13 +281,13 @@ function Sidebar({
     return (
       <button
         onClick={() => handleNavigation(tab)}
-        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'} ${isActive
+        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} ${isCollapsed ? '' : 'gap-3'} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 ${isRTL ? 'text-right' : 'text-left'} ${isActive
           ? `bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ${isRTL ? 'border-l-2' : 'border-r-2'} border-blue-500`
           : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
           } ${isCollapsed ? 'justify-center' : ''}`}
         title={isCollapsed ? children?.toString() : ''}
       >
-        <Icon className={`h-4 w-4 flex-shrink-0 ${isCollapsed ? '' : isRTL ? 'ml-3' : 'mr-3'}`} />
+        <Icon className="h-4 w-4 flex-shrink-0" />
         {!isCollapsed && <span>{children}</span>}
       </button>
     );

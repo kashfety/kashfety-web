@@ -21,6 +21,19 @@ export function toArabicNumerals(value: number | string, locale?: Locale): strin
 }
 
 /**
+ * Convert Arabic-Indic numerals (٠-٩) to Western numerals (0-9).
+ * Use when sending date/time or numeric strings to the API or DB so values are always in Western digits.
+ */
+export function toWesternNumerals(value: string | number): string {
+  const s = String(value);
+  const arabicToWestern: Record<string, string> = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+  };
+  return s.replace(/[٠-٩]/g, (d) => arabicToWestern[d] ?? d);
+}
+
+/**
  * Format a phone number according to locale
  * @param phoneNumber - The phone number to format
  * @param locale - Current locale
@@ -1050,6 +1063,7 @@ export const translations = {
     booking_error_message: "Unable to book appointment. Please try again.",
     booking_find_centers: "Find Centers",
     booking_find_doctors: "Find Doctors",
+    booking_search: "Search",
     booking_error_invalid_request: "Invalid Request",
     booking_error_invalid_data: "Invalid booking data. Please check all fields.",
     booking_error_unauthorized: "Please log in again to book an appointment.",
@@ -1120,6 +1134,8 @@ export const translations = {
     booking_loading_times: "Loading available times...",
     booking_time_booked: "Booked",
     booking_no_slots_date: "No available time slots for this date. Please select another date.",
+    booking_try_another_date: "Please select another date",
+    booking_doctor_available_hint: "Available days are highlighted in the calendar",
     booking_select_date_first: "Please select a date first",
     booking_symptoms_label: "Symptoms or Chief Complaint (Optional)",
     booking_notes_label: "Notes (Optional)",
@@ -3223,6 +3239,7 @@ export const translations = {
     booking_error_message: "لم نتمكن من حجز الموعد. يرجى المحاولة مرة أخرى.",
     booking_find_centers: "البحث عن مراكز",
     booking_find_doctors: "البحث عن أطباء",
+    booking_search: "بحث",
     booking_error_invalid_request: "طلب غير صالح",
     booking_error_invalid_data: "بيانات حجز غير صالحة. يرجى التحقق من جميع الحقول.",
     booking_error_unauthorized: "يرجى تسجيل الدخول مرة أخرى لحجز موعد.",
@@ -3293,6 +3310,8 @@ export const translations = {
     booking_loading_times: "جاري تحميل الأوقات المتاحة...",
     booking_time_booked: "محجوز",
     booking_no_slots_date: "لا توجد أوقات متاحة لهذا التاريخ. يرجى اختيار تاريخ آخر.",
+    booking_try_another_date: "يرجى اختيار تاريخ آخر",
+    booking_doctor_available_hint: "الأيام المتاحة مميزة في التقويم",
     booking_select_date_first: "يرجى اختيار التاريخ أولاً",
     booking_symptoms_label: "الأعراض أو الشكوى الرئيسية (اختياري)",
     booking_notes_label: "ملاحظات (اختياري)",

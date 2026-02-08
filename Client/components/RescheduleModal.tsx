@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface Appointment {
@@ -170,7 +170,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return toWesternNumerals(`${year}-${month}-${day}`);
       };
 
       const dateString = formatDateForAPI(date);
@@ -286,12 +286,12 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
     setLoading(true);
 
-    // Helper function for date formatting
+    // Helper function for date formatting (Western numerals for API/DB)
     const formatDateForAPI = (date: Date): string => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return toWesternNumerals(`${year}-${month}-${day}`);
     };
 
     try {
@@ -359,10 +359,10 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       } else {
       }
 
-      // Prepare reschedule data
+      // Prepare reschedule data (normalize to Western numerals for API/DB)
       const rescheduleData = {
-        appointment_date: formatDateForAPI(selectedDate), // Fixed timezone issue
-        appointment_time: selectedTime,
+        appointment_date: formatDateForAPI(selectedDate),
+        appointment_time: toWesternNumerals(selectedTime),
         reason: reason || t('reschedule_default_reason') || "Rescheduled by patient request"
       };
 
@@ -374,14 +374,16 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
       await appointmentService.rescheduleAppointment(appointment.id, rescheduleData);
 
-      // Create updated appointment object for parent component
+      // Create updated appointment object for parent component (Western numerals)
+      const apiDate = formatDateForAPI(selectedDate);
+      const apiTime = toWesternNumerals(selectedTime);
       const updatedAppointment: Appointment = {
         ...appointment,
-        date: formatDateForAPI(selectedDate),
-        time: selectedTime,
-        appointment_date: formatDateForAPI(selectedDate),
-        appointment_time: selectedTime,
-        status: 'rescheduled' // Update status to reflect the change
+        date: apiDate,
+        time: apiTime,
+        appointment_date: apiDate,
+        appointment_time: apiTime,
+        status: 'rescheduled'
       };
 
       // Immediately update parent and close the modal

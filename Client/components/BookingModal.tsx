@@ -13,7 +13,7 @@ import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Searc
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
-import { localizeSpecialty, toArabicNumerals, formatCurrency, formatLocalizedTime } from '@/lib/i18n';
+import { localizeSpecialty, toArabicNumerals, toWesternNumerals, formatCurrency, formatLocalizedTime } from '@/lib/i18n';
 import { ar } from 'date-fns/locale';
 import { appointmentService, labService } from '@/lib/api';
 import { useToast } from "@/hooks/use-toast";
@@ -745,12 +745,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchAvailableSlots = async (doctorId: string, date: Date) => {
     setLoadingAvailability(true);
     try {
-      // Format date in local timezone to prevent date shift
-      const formatDateForAPI = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+      // Format date in local timezone (Western numerals for API/DB)
+      const formatDateForAPI = (d: Date): string => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return toWesternNumerals(`${year}-${month}-${day}`);
       };
 
       const dateString = formatDateForAPI(date);
@@ -810,7 +810,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
     try {
       const startDate = new Date();
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const fmt = (d: Date) => toWesternNumerals(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
       const res = await labService.getAvailableDates(centerId, typeId, { start_date: fmt(startDate), end_date: fmt(endDate) });
       const dates = (res as any)?.available_dates || (res as any)?.data?.available_dates || [];
       setLabAvailableDates(dates.map((d: any) => d.date || d));
@@ -823,7 +823,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchLabAvailableSlots = async (centerId: string, typeId: string, date: Date) => {
     setLoadingAvailability(true);
     try {
-      const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const fmt = (d: Date) => toWesternNumerals(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
       const dateString = fmt(date);
       const res = await labService.getAvailableSlots(centerId, typeId, dateString);
       const data = (res as any)?.data || res;
@@ -1169,7 +1169,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return toWesternNumerals(`${year}-${month}-${day}`);
     };
 
     try {
@@ -1207,8 +1207,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const result = await labService.book({
           center_id: selectedCenter!.id,
           lab_test_type_id: selectedLabType!.id,
-          booking_date: dateString,
-          booking_time: selectedTime,
+          booking_date: toWesternNumerals(dateString),
+          booking_time: toWesternNumerals(selectedTime),
           notes: symptoms.trim() || '',
           fee: actualConsultationFee || undefined
         });
@@ -1292,8 +1292,8 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         const requestData = {
           doctor_id: selectedDoctor!.id,
           center_id: selectedCenter?.id, // Include center for the appointment
-          appointment_date: dateString,
-          appointment_time: selectedTime,
+          appointment_date: toWesternNumerals(dateString),
+          appointment_time: toWesternNumerals(selectedTime),
           type: 'consultation',
           appointment_type: selectedLocation, // "clinic" or "home"
           duration: 30,

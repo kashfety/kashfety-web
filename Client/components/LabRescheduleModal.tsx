@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface LabBooking {
@@ -103,8 +103,7 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
     try {
       const startDate = new Date();
       const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
+      const fmt = (d: Date) => toWesternNumerals(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
 
       const res = await labService.getAvailableDates(centerId, typeId, {
         start_date: fmt(startDate),
@@ -146,9 +145,8 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
 
     setLoadingAvailability(true);
     try {
-      const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const fmt = (d: Date) => toWesternNumerals(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
       const dateString = fmt(date);
-
 
       // Fetch available slots, excluding the current booking ID for rescheduling
       const res = await labService.getAvailableSlots(centerId, typeId, dateString, booking.id);
@@ -189,12 +187,12 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return toWesternNumerals(`${year}-${month}-${day}`);
       };
 
       const dateString = formatDateForAPI(selectedDate);
 
-      await labService.reschedule(booking.id, dateString, selectedTime);
+      await labService.reschedule(booking.id, dateString, toWesternNumerals(selectedTime));
 
       showSuccess(
         t('reschedule_success_title') || "Reschedule Successful!",

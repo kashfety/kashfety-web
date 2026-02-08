@@ -56,17 +56,21 @@ export function formatPhoneNumber(phoneNumber: string | undefined | null, locale
   return cleanNumber;
 }
 
+/** Syrian Pound: Arabic symbol (ليرة سورية) used when locale is Arabic. */
+const SYP_ARABIC = 'ل.س';
+
 /**
  * Format a number as currency with proper localization
  * @param amount - The amount to format
  * @param locale - Current locale
- * @param currency - Currency code (default: 'SYP')
+ * @param currency - Currency code (default: 'SYP'). In Arabic, SYP is displayed as ل.س (Syrian Pound).
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, locale?: Locale, currency: string = 'SYP'): string {
   const formatted = amount.toFixed(2);
   if (locale === 'ar') {
-    return `${toArabicNumerals(formatted, locale)} ${currency}`;
+    const currencyLabel = currency === 'SYP' ? SYP_ARABIC : currency;
+    return `${toArabicNumerals(formatted, locale)} ${currencyLabel}`;
   }
   return `${formatted} ${currency}`;
 }
@@ -273,7 +277,8 @@ export function formatLocalizedNumber(value: number | string, locale: Locale, op
     if (options?.style === 'currency') {
       formatted = numValue.toFixed(options.minimumFractionDigits || 0);
       const arabicNumber = toArabicNumerals(formatted, locale);
-      const currency = options.currency || 'ل.س';
+      // Syrian Pound: show ل.س in Arabic instead of SYP
+      const currency = options.currency === 'SYP' ? 'ل.س' : (options.currency || 'ل.س');
       // Use LTR mark to keep number formatting but place in RTL context
       return `\u202D${arabicNumber}\u202C ${currency}`;
     } else if (options?.style === 'percent') {

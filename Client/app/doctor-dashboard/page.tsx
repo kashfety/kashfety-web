@@ -1521,33 +1521,38 @@ export default function DoctorDashboard() {
                                   className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 >
-                                  <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'flex-row-reverse' : ''} ${isRTL ? 'lg:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                      <User className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                      <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'lg:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {/* Text first so in RTL it appears on the right; avatar second */}
+                                    <div
+                                      className="flex-1 min-w-0"
+                                      dir={isRTL ? 'rtl' : 'ltr'}
+                                      style={{ textAlign: isRTL ? 'right' : 'left' }}
+                                    >
+                                      <h4 className="font-medium text-gray-900 dark:text-white" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {getLocalizedPatientName(appointment)}
                                       </h4>
-                                      <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {toArabicNumerals(new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); const timeStr = dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); return locale === 'ar' ? toArabicNumerals(timeStr, locale) : timeStr; } catch { return appointment.appointment_time; } })()}
                                       </p>
-                                      <p className={`text-sm text-gray-500 dark:text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className="text-sm text-gray-500 dark:text-gray-500" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {appointment.appointment_type === 'home'
                                           ? (t('dd_home_visit') || 'Home Visit')
                                           : (t('dd_clinic_visit') || 'Clinic Visit')}
                                       </p>
                                       {(appointment.center_id || appointment.center || appointment.center_name) && (
-                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse justify-start' : ''} ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ justifyContent: isRTL ? 'flex-start' : 'flex-start' }}>
                                           <Building2 className={`w-3 h-3 flex-shrink-0 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                           <span dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(appointment)}</span>
                                         </p>
                                       )}
                                       {appointment.symptoms && (
-                                        <p className={`text-xs text-gray-500 dark:text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                           {t('symptoms') || 'Symptoms'}: {appointment.symptoms}
                                         </p>
                                       )}
+                                    </div>
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <User className="w-6 h-6 text-white" />
                                     </div>
                                   </div>
                                   <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse sm:justify-start text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1627,16 +1632,6 @@ export default function DoctorDashboard() {
                                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_consult') || 'Consult'}</span>
                                         </Button>
                                       )}
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleViewPatient(appointment.patient_id)}
-                                        className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
-                                        dir={isRTL ? 'rtl' : 'ltr'}
-                                      >
-                                        <User className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{t('view_patient') || 'View Patient'}</span>
-                                      </Button>
                                       {['scheduled', 'confirmed'].includes(appointment.status) && (
                                         <Button
                                           variant="destructive"
@@ -1652,6 +1647,16 @@ export default function DoctorDashboard() {
                                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_cancel') || 'Cancel'}</span>
                                         </Button>
                                       )}
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleViewPatient(appointment.patient_id)}
+                                        className={`text-xs sm:text-sm whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                                        dir={isRTL ? 'rtl' : 'ltr'}
+                                      >
+                                        <User className={`w-3 h-3 sm:w-4 sm:h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{t('view_patient') || 'View Patient'}</span>
+                                      </Button>
                                     </div>
                                   </div>
                                 </div>

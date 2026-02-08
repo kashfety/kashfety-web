@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Chart, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { useLocale } from "@/components/providers/locale-provider"
 
 const data = [
   { date: "Jan", logs: 120 },
@@ -20,11 +21,13 @@ const data = [
 ]
 
 export default function LogActivityChart() {
+  const { t } = useLocale()
+  
   return (
     <Card className="bg-white dark:bg-[#0F0F12] border border-white dark:border-[#1F1F23]">
       <CardHeader>
-        <CardTitle>Audit Log Activity</CardTitle>
-        <CardDescription>Log frequency over the past year</CardDescription>
+        <CardTitle>{t("audit_log_activity")}</CardTitle>
+        <CardDescription>{t("log_frequency_description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="h-[300px]">

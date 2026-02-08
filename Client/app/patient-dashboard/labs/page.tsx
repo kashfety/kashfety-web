@@ -137,10 +137,10 @@ export default function PatientLabsPage() {
                 setTotalCenters(data.total || 0)
                 setTotalPages(Math.ceil((data.total || 0) / itemsPerPage))
             } else {
-                toast.error(data.message || 'Failed to load centers')
+                toast.error(data.message || t('err_load_centers'))
             }
         } catch (error) {
-            toast.error('Failed to load centers')
+            toast.error(t('err_load_centers'))
         } finally {
             setLoading(false)
         }
@@ -164,11 +164,11 @@ export default function PatientLabsPage() {
             if (response.ok && data.success) {
                 setSelectedCenter(data.center)
             } else {
-                toast.error(data.message || 'Failed to load center details')
+                toast.error(data.message || t('err_load_center_details'))
                 setShowDetailsModal(false)
             }
         } catch (error) {
-            toast.error('Failed to load center details')
+            toast.error(t('err_load_center_details'))
         } finally {
             setLoadingDetails(false)
         }

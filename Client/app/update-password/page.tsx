@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useLocale } from "@/components/providers/locale-provider"
 import Link from "next/link"
 
 export default function UpdatePasswordPage() {
+  const { t } = useLocale()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -25,7 +27,7 @@ export default function UpdatePasswordPage() {
 
 
       if (!tokenHash || type !== 'recovery') {
-        setError("Invalid reset link. Please request a new password reset.")
+        setError(t("invalid_reset_link"))
         setTimeout(() => {
           router.push('/forgot-password')
         }, 3000)
@@ -46,12 +48,12 @@ export default function UpdatePasswordPage() {
     setError(null)
 
     if (!password || !confirmPassword) {
-      setError("Please fill in all fields")
+      setError(t("please_fill_all_fields"))
       return
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
+      setError(t("passwords_do_not_match"))
       return
     }
 
@@ -91,7 +93,7 @@ export default function UpdatePasswordPage() {
       }, 3000)
       
     } catch (err: any) {
-      setError(err.message || "An error occurred. Please try again.")
+      setError(err.message || t("an_error_occurred"))
     } finally {
       setIsLoading(false)
     }

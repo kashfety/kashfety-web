@@ -196,8 +196,8 @@ export default function MedicalRecordsSection() {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch medical information",
+        title: t("toast_error"),
+        description: t("err_fetch_medical_info"),
         variant: "destructive"
       });
     } finally {
@@ -230,16 +230,16 @@ export default function MedicalRecordsSection() {
         await fetchMedicalInfo(); // Refresh data
         setEditing(false);
         toast({
-          title: "Success",
-          description: "Medical information updated successfully"
+          title: t("toast_success"),
+          description: t("success_medical_info_updated")
         });
       } else {
         throw new Error(result.message);
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update medical information",
+        title: t("toast_error"),
+        description: t("err_update_medical_info"),
         variant: "destructive"
       });
     } finally {
@@ -304,8 +304,8 @@ export default function MedicalRecordsSection() {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch medical records",
+        title: t("toast_error"),
+        description: t("err_fetch_medical_records"),
         variant: "destructive"
       });
     } finally {
@@ -319,8 +319,8 @@ export default function MedicalRecordsSection() {
 
     if (!recordForm.diagnosis || !recordForm.treatment) {
       toast({
-        title: "Error",
-        description: "Diagnosis and treatment are required",
+        title: t("toast_error"),
+        description: t("validation_diagnosis_required"),
         variant: "destructive"
       });
       return;

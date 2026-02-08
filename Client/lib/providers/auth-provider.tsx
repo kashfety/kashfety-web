@@ -2,6 +2,7 @@
 
 import { createContext, useContext, ReactNode, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useLocale } from "@/components/providers/locale-provider"
 
 interface User {
   id: string
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const router = useRouter()
+  const { t } = useLocale()
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -189,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
           if (useNextApi) {
             throw new Error(
-              'Cannot connect to the login service. Please check your network connection or contact support.'
+              t('err_cannot_connect_login')
             )
           } else {
             throw new Error(
@@ -247,11 +249,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const dashboardPath = getDashboardPath(result.user.role)
         router.push(dashboardPath)
       } else {
-        throw new Error('Invalid response from server')
+        throw new Error(t('err_invalid_server_response'))
       }
 
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Login failed')
+      const error = err instanceof Error ? err : new Error(t('err_login_failed'))
       console.error('Login error details:', {
         message: error.message,
         stack: error.stack,
@@ -361,18 +363,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Registration failed')
+        throw new Error(result.error || result.message || t('err_registration_failed'))
       }
 
       if ((result.message && result.message.includes('registered successfully')) || result.success) {
         // After successful registration, log in the user
         await login(userData.phone, userData.password)
       } else {
-        throw new Error('Registration failed')
+        throw new Error(t('err_registration_failed'))
       }
 
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Registration failed')
+      const error = err instanceof Error ? err : new Error(t('err_registration_failed'))
       setError(error)
       setIsAuthenticated(false)
       throw error

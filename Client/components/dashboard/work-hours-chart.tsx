@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { useLocale } from "@/components/providers/locale-provider"
 
 const data = [
   { name: "Dr. Ahmad", hours: 38, fill: "#15803d" },
@@ -14,12 +15,13 @@ const data = [
 export default function WorkHoursChart() {
   const { theme } = useTheme()
   const isDark = theme === "dark"
+  const { t } = useLocale()
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Work Hours Distribution</CardTitle>
-        <CardDescription>Total hours worked by each doctor this week</CardDescription>
+        <CardTitle>{t("work_hours_distribution")}</CardTitle>
+        <CardDescription>{t("work_hours_description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -46,7 +48,7 @@ export default function WorkHoursChart() {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value, name) => [`${value} hours`, name]}
+                formatter={(value, name) => [`${value} ${t("hours_label")}`, name]}
                 contentStyle={{
                   backgroundColor: isDark ? "#1f2937" : "#ffffff",
                   border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,

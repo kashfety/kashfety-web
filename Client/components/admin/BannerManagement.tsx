@@ -97,7 +97,7 @@ export default function BannerManagement() {
             if (!token) {
                 toast({
                     title: t('error') || 'Error',
-                    description: 'Please log in to continue',
+                    description: t('please_login_continue') || 'Please log in to continue',
                     variant: 'destructive'
                 });
                 setLoading(false);
@@ -158,7 +158,7 @@ export default function BannerManagement() {
         if (!validTypes.includes(file.type)) {
             toast({
                 title: t('invalid_file_type') || 'Invalid file type',
-                description: t('please_select_valid_image') || 'Please select a valid image file (JPEG, PNG, WebP, or GIF)',
+                description: t('invalid_image_type_desc') || 'Please select a valid image file (JPEG, PNG, WebP, or GIF)',
                 variant: 'destructive'
             });
             return;
@@ -169,7 +169,7 @@ export default function BannerManagement() {
         if (file.size > maxSize) {
             toast({
                 title: t('file_too_large') || 'File too large',
-                description: t('max_file_size_10mb') || 'Maximum file size is 10MB',
+                description: t('file_max_size_10mb') || 'Maximum file size is 10MB',
                 variant: 'destructive'
             });
             return;
@@ -197,7 +197,7 @@ export default function BannerManagement() {
             if (!token) {
                 toast({
                     title: t('error') || 'Error',
-                    description: 'Authentication required. Please log in again.',
+                    description: t('auth_required_login_again') || 'Authentication required. Please log in again.',
                     variant: 'destructive'
                 });
                 setUploading(false);
@@ -230,7 +230,7 @@ export default function BannerManagement() {
 
             toast({
                 title: t('success') || 'Success',
-                description: t('banner_uploaded_successfully') || 'Banner uploaded successfully',
+                description: t('success_banner_uploaded') || 'Banner uploaded successfully',
             });
 
             // Reset form
@@ -250,7 +250,7 @@ export default function BannerManagement() {
         } catch (error) {
             toast({
                 title: t('error') || 'Error',
-                description: t('failed_to_upload_banner') || 'Failed to upload banner',
+                description: t('err_upload_banner') || 'Failed to upload banner',
                 variant: 'destructive'
             });
         } finally {
@@ -278,7 +278,7 @@ export default function BannerManagement() {
             if (!token) {
                 toast({
                     title: t('error') || 'Error',
-                    description: 'Authentication required. Please log in again.',
+                    description: t('auth_required_login_again') || 'Authentication required. Please log in again.',
                     variant: 'destructive'
                 });
                 setDeletingBanner(null);

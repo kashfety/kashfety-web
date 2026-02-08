@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/components/providers/locale-provider';
 import {
     Shield,
     Plus,
@@ -102,6 +103,7 @@ interface AdminFormData {
 
 export default function AdminManagement() {
     const { toast } = useToast();
+    const { t } = useLocale();
     const [admins, setAdmins] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -234,8 +236,8 @@ export default function AdminManagement() {
         } catch (error) {
 
             toast({
-                title: "Error",
-                description: "Failed to fetch admin users. Please check your connection and try again.",
+                title: t("toast_error"),
+                description: t("err_fetch_admins"),
                 variant: "destructive"
             });
 
@@ -284,17 +286,17 @@ export default function AdminManagement() {
             const result = await response.json();
 
             toast({
-                title: "Success",
-                description: "Admin created successfully",
+                title: t("toast_success"),
+                description: t("success_admin_created"),
             });
 
             setShowCreateDialog(false);
             resetFormData();
             fetchAdmins();
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Failed to create admin";
+            const errorMessage = error instanceof Error ? error.message : t("err_create_admin");
             toast({
-                title: "Error",
+                title: t("toast_error"),
                 description: errorMessage,
                 variant: "destructive"
             });
@@ -363,8 +365,8 @@ export default function AdminManagement() {
 
 
             toast({
-                title: "Success",
-                description: "Admin updated successfully",
+                title: t("toast_success"),
+                description: t("success_admin_updated"),
             });
 
             // Close dialog and reset form first
@@ -378,9 +380,9 @@ export default function AdminManagement() {
                 fetchAdmins();
             }, 1000); // Increased delay to ensure DB consistency
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Failed to update admin";
+            const errorMessage = error instanceof Error ? error.message : t("err_update_admin");
             toast({
-                title: "Error",
+                title: t("toast_error"),
                 description: errorMessage,
                 variant: "destructive"
             });
@@ -408,15 +410,15 @@ export default function AdminManagement() {
             const data = await response.json();
 
             toast({
-                title: "Success",
-                description: "Admin deleted successfully",
+                title: t("toast_success"),
+                description: t("success_admin_deleted"),
             });
 
             fetchAdmins();
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Failed to delete admin";
+            const errorMessage = error instanceof Error ? error.message : t("err_delete_admin");
             toast({
-                title: "Error",
+                title: t("toast_error"),
                 description: errorMessage,
                 variant: "destructive"
             });
@@ -493,7 +495,7 @@ export default function AdminManagement() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Loading admins...</CardTitle>
+                        <CardTitle>{t("loading_admins")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="animate-pulse space-y-4">
@@ -514,18 +516,18 @@ export default function AdminManagement() {
                 <div>
                     <h2 className="text-2xl font-bold flex items-center">
                         <Shield className="h-6 w-6 mr-2 text-blue-600" />
-                        Admin Management
+                        {t("admin_management_title")}
                     </h2>
-                    <p className="text-muted-foreground">Manage admin users and their permissions</p>
+                    <p className="text-muted-foreground">{t("manage_admin_permissions")}</p>
                 </div>
                 <div className="flex space-x-2">
                     <Button onClick={fetchAdmins}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
+                        {t("refresh")}
                     </Button>
                     <Button onClick={handleCreateAdmin}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Create Admin
+                        {t("create_admin")}
                     </Button>
                 </div>
             </div>
@@ -533,9 +535,9 @@ export default function AdminManagement() {
             {/* Warning Alert */}
             <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Super Admin Access</AlertTitle>
+                <AlertTitle>{t("super_admin_access")}</AlertTitle>
                 <AlertDescription>
-                    You have full control over admin accounts. Use these powers responsibly. All actions are logged and auditable.
+                    {t("admin_access_warning")}
                 </AlertDescription>
             </Alert>
 
@@ -544,7 +546,7 @@ export default function AdminManagement() {
                 <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                         <Filter className="h-5 w-5" />
-                        <span>Filters</span>
+                        <span>{t("filters")}</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -552,7 +554,7 @@ export default function AdminManagement() {
                         <div className="relative">
                             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search admins..."
+                                placeholder={t("search_admins")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -560,23 +562,23 @@ export default function AdminManagement() {
                         </div>
                         <Select value={roleFilter} onValueChange={setRoleFilter}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filter by role" />
+                                <SelectValue placeholder={t("filter_by_role")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All roles</SelectItem>
+                                <SelectItem value="all">{t("all_roles")}</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
                                 <SelectItem value="super_admin">Super Admin</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filter by status" />
+                                <SelectValue placeholder={t("filter_by_status")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All statuses</SelectItem>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
-                                <SelectItem value="locked">Locked</SelectItem>
+                                <SelectItem value="all">{t("all_statuses")}</SelectItem>
+                                <SelectItem value="active">{t("active")}</SelectItem>
+                                <SelectItem value="inactive">{t("inactive")}</SelectItem>
+                                <SelectItem value="locked">{t("locked")}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Button variant="outline" onClick={() => {
@@ -584,7 +586,7 @@ export default function AdminManagement() {
                             setRoleFilter('all');
                             setStatusFilter('all');
                         }}>
-                            Clear Filters
+                            {t("clear_filters")}
                         </Button>
                     </div>
                 </CardContent>
@@ -725,14 +727,14 @@ export default function AdminManagement() {
             <Dialog open={showAdminDetails} onOpenChange={setShowAdminDetails}>
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
-                        <DialogTitle>Admin Details</DialogTitle>
+                        <DialogTitle>{t("admin_details")}</DialogTitle>
                     </DialogHeader>
                     {selectedAdmin && (
                         <div className="space-y-6">
                             {/* Basic Info */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <h3 className="font-semibold mb-2">Basic Information</h3>
+                                    <h3 className="font-semibold mb-2">{t("basic_information")}</h3>
                                     <div className="space-y-2 text-sm">
                                         <div><strong>Name:</strong> {selectedAdmin.name}</div>
                                         <div><strong>Email:</strong> {selectedAdmin.email}</div>
@@ -750,7 +752,7 @@ export default function AdminManagement() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold mb-2">Activity Information</h3>
+                                    <h3 className="font-semibold mb-2">{t("activity_information")}</h3>
                                     <div className="space-y-2 text-sm">
                                         <div><strong>Last Login:</strong> {formatDateTime(selectedAdmin.lastLogin)}</div>
                                         <div><strong>Login Count:</strong> {selectedAdmin.loginCount}</div>
@@ -762,7 +764,7 @@ export default function AdminManagement() {
 
                             {/* Permissions */}
                             <div>
-                                <h3 className="font-semibold mb-2">Permissions</h3>
+                                <h3 className="font-semibold mb-2">{t("permissions")}</h3>
                                 <div className="grid grid-cols-3 gap-2">
                                     {Object.entries(selectedAdmin.permissions).map(([permission, granted]) => (
                                         <div key={permission} className="flex items-center space-x-2">
@@ -782,7 +784,7 @@ export default function AdminManagement() {
                             {/* Lock Information */}
                             {selectedAdmin.accountLocked && (
                                 <div>
-                                    <h3 className="font-semibold mb-2 text-red-600">Lock Information</h3>
+                                    <h3 className="font-semibold mb-2 text-red-600">{t("lock_information")}</h3>
                                     <div className="space-y-2 text-sm">
                                         <div><strong>Reason:</strong> {selectedAdmin.lockReason}</div>
                                         <div><strong>Locked At:</strong> {formatDateTime(selectedAdmin.lockedAt)}</div>
@@ -805,25 +807,25 @@ export default function AdminManagement() {
             }}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>{editingAdmin ? 'Edit Admin' : 'Create New Admin'}</DialogTitle>
+                        <DialogTitle>{editingAdmin ? t("edit_admin") : t("create_new_admin")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-sm font-medium">Full Name</label>
+                                <label className="text-sm font-medium">{t("full_name")}</label>
                                 <Input
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Enter full name"
+                                    placeholder={t("enter_full_name")}
                                 />
                             </div>
                             <div>
-                                <label className="text-sm font-medium">Email</label>
+                                <label className="text-sm font-medium">{t("email")}</label>
                                 <Input
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    placeholder="Enter email"
+                                    placeholder={t("enter_email")}
                                     disabled={!!editingAdmin}
                                 />
                             </div>
@@ -831,16 +833,16 @@ export default function AdminManagement() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-sm font-medium">Phone Number</label>
+                                <label className="text-sm font-medium">{t("phone_number")}</label>
                                 <Input
                                     type="tel"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    placeholder="Enter phone number"
+                                    placeholder={t("enter_phone_number")}
                                 />
                             </div>
                             <div>
-                                <label className="text-sm font-medium">Role</label>
+                                <label className="text-sm font-medium">{t("role")}</label>
                                 <Select value={formData.role} onValueChange={(value: 'admin' | 'super_admin') =>
                                     setFormData({ ...formData, role: value })
                                 }>
@@ -858,21 +860,21 @@ export default function AdminManagement() {
                         {!editingAdmin && (
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-sm font-medium">Password</label>
+                                    <label className="text-sm font-medium">{t("password")}</label>
                                     <Input
                                         type="password"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        placeholder="Enter password"
+                                        placeholder={t("enter_password")}
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium">Confirm Password</label>
+                                    <label className="text-sm font-medium">{t("confirm_password")}</label>
                                     <Input
                                         type="password"
                                         value={formData.confirmPassword}
                                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        placeholder="Confirm password"
+                                        placeholder={t("confirm_password_placeholder")}
                                     />
                                 </div>
                             </div>
@@ -881,8 +883,7 @@ export default function AdminManagement() {
                         {editingAdmin && (
                             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                                 <p className="text-sm text-blue-700">
-                                    <strong>Note:</strong> Password will remain unchanged when editing admin details.
-                                    To change password, please use a separate password reset process.
+                                    <strong>{t("password_note")}:</strong> {t("password_note_text")}
                                 </p>
                             </div>
                         )}
@@ -893,7 +894,7 @@ export default function AdminManagement() {
                                 setShowEditDialog(false);
                                 setEditingAdmin(null);
                             }}>
-                                Cancel
+                                {t("cancel")}
                             </Button>
                             <Button
                                 onClick={(e) => {
@@ -902,8 +903,8 @@ export default function AdminManagement() {
                                     // Validation
                                     if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
                                         toast({
-                                            title: "Validation Error",
-                                            description: "Please fill in all required fields (name, email, phone)",
+                                            title: t("toast_validation_error"),
+                                            description: t("validation_required_fields"),
                                             variant: "destructive"
                                         });
                                         return;
@@ -913,8 +914,8 @@ export default function AdminManagement() {
                                         // For new admin creation, validate passwords
                                         if (!formData.password.trim() || !formData.confirmPassword.trim()) {
                                             toast({
-                                                title: "Validation Error",
-                                                description: "Please provide a password and confirmation",
+                                                title: t("toast_validation_error"),
+                                                description: t("validation_password_required"),
                                                 variant: "destructive"
                                             });
                                             return;
@@ -922,8 +923,8 @@ export default function AdminManagement() {
 
                                         if (formData.password !== formData.confirmPassword) {
                                             toast({
-                                                title: "Validation Error",
-                                                description: "Passwords do not match",
+                                                title: t("toast_validation_error"),
+                                                description: t("validation_passwords_mismatch"),
                                                 variant: "destructive"
                                             });
                                             return;

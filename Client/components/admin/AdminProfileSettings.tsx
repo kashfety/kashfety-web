@@ -80,8 +80,8 @@ export default function AdminProfileSettings({
       const token = localStorage.getItem('auth_token');
       if (!token) {
         toast({
-          title: "Authentication Error",
-          description: "Please log in to view your profile.",
+          title: t("auth_error_title"),
+          description: t("auth_please_login"),
           variant: "destructive"
         });
         return;
@@ -120,15 +120,15 @@ export default function AdminProfileSettings({
       } else {
         const errorData = await response.json();
         toast({
-          title: "Error",
-          description: errorData.message || "Failed to load profile",
+          title: t("toast_error"),
+          description: errorData.message || t("err_load_profile"),
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to load profile. Please try again.",
+        title: t("toast_error"),
+        description: t("err_load_profile_retry"),
         variant: "destructive"
       });
     } finally {
@@ -153,8 +153,8 @@ export default function AdminProfileSettings({
   const validatePasswordChange = () => {
     if (!passwordData.currentPassword) {
       toast({
-        title: "Validation Error",
-        description: "Current password is required",
+        title: t("toast_validation_error"),
+        description: t("validation_current_password_required"),
         variant: "destructive"
       });
       return false;
@@ -162,8 +162,8 @@ export default function AdminProfileSettings({
 
     if (!passwordData.newPassword || passwordData.newPassword.length < 6) {
       toast({
-        title: "Validation Error",
-        description: "New password must be at least 6 characters long",
+        title: t("toast_validation_error"),
+        description: t("validation_password_min_length"),
         variant: "destructive"
       });
       return false;
@@ -171,8 +171,8 @@ export default function AdminProfileSettings({
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
-        title: "Validation Error",
-        description: "New passwords do not match",
+        title: t("toast_validation_error"),
+        description: t("validation_new_passwords_mismatch"),
         variant: "destructive"
       });
       return false;
@@ -262,8 +262,8 @@ export default function AdminProfileSettings({
         setEditMode(false);
 
         toast({
-          title: "Profile Updated",
-          description: "Your profile has been successfully updated.",
+          title: t("profile_updated_title"),
+          description: t("profile_updated_desc"),
         });
 
         if (onProfileUpdate) {
@@ -271,15 +271,15 @@ export default function AdminProfileSettings({
         }
       } else {
         toast({
-          title: "Update Failed",
+          title: t("update_failed_title"),
           description: responseData.message || responseData.error || "Failed to update profile",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
+        title: t("toast_error"),
+        description: t("err_update_profile"),
         variant: "destructive"
       });
     } finally {
@@ -315,21 +315,21 @@ export default function AdminProfileSettings({
         setShowPasswordChange(false);
 
         toast({
-          title: "Password Changed",
-          description: "Your password has been successfully updated.",
+          title: t("password_changed_title"),
+          description: t("password_changed_desc"),
         });
       } else {
         const errorData = await response.json();
         toast({
-          title: "Password Change Failed",
+          title: t("password_change_failed_title"),
           description: errorData.message || "Failed to change password",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to change password. Please try again.",
+        title: t("toast_error"),
+        description: t("err_change_password"),
         variant: "destructive"
       });
     } finally {

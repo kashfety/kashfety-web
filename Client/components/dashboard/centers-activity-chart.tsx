@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Chart, ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useLocale } from "@/components/providers/locale-provider"
 
 const data = [
   { name: "Center A", students: 120, classes: 45 },
@@ -14,11 +15,13 @@ const data = [
 ]
 
 export default function CentersActivityChart() {
+  const { t } = useLocale()
+  
   return (
     <Card className="bg-white dark:bg-[#0F0F12] border border-white dark:border-[#1F1F23]">
       <CardHeader>
-        <CardTitle>Centers Activity</CardTitle>
-        <CardDescription>Students and classes by center</CardDescription>
+        <CardTitle>{t("centers_activity")}</CardTitle>
+        <CardDescription>{t("students_and_classes")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="h-[300px]">
@@ -45,11 +48,11 @@ export default function CentersActivityChart() {
                             <div className="text-sm font-medium">{payload[0].payload.name}</div>
                             <div className="flex items-center gap-2">
                               <div className="h-2 w-2 rounded-full bg-gray-700 dark:bg-gray-300" />
-                              <span className="text-sm text-muted-foreground">Students: {payload[0].value}</span>
+                              <span className="text-sm text-muted-foreground">{t("students_label")}: {payload[0].value}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-600" />
-                              <span className="text-sm text-muted-foreground">Classes: {payload[1].value}</span>
+                              <span className="text-sm text-muted-foreground">{t("classes_label")}: {payload[1].value}</span>
                             </div>
                           </div>
                         </ChartTooltipContent>

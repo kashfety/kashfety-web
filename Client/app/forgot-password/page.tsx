@@ -3,8 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { useLocale } from "@/components/providers/locale-provider"
 
 export default function ForgotPasswordPage() {
+  const { t } = useLocale()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
@@ -43,7 +45,7 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true)
     } catch (err: any) {
-      setError(err.message || "An error occurred. Please try again.")
+      setError(err.message || t("an_error_occurred"))
     } finally {
       setIsLoading(false)
     }
@@ -56,27 +58,27 @@ export default function ForgotPasswordPage() {
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <div className="flex flex-col items-center">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
-                Reset your password
+                {t("reset_your_password")}
               </h1>
               <p className="mt-2 text-sm text-gray-600">
-                Enter your email address and we'll send you a link to reset your password
+                {t("reset_password_desc")}
               </p>
             </div>
 
             {error && (
               <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                <span className="font-medium">Error:</span> {error}
+                <span className="font-medium">{t("error_label")}:</span> {error}
               </div>
             )}
 
             {success ? (
               <div>
                 <div className="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                  <span className="font-medium">Success!</span> Password reset email has been sent to {email}. Please check your inbox.
+                  <span className="font-medium">{t("success_label")}!</span> {t("reset_email_sent").replace("{email}", email)}
                 </div>
                 <div className="mt-4 text-center">
                   <Link href="/login" className="font-medium text-blue-600 hover:underline">
-                    Return to login page
+                    {t("return_to_login")}
                   </Link>
                 </div>
               </div>

@@ -3,9 +3,11 @@
 import { useAuth } from "@/lib/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useLocale } from '@/components/providers/locale-provider'
 
 export default function TestRoleRedirect() {
     const { user, isAuthenticated, loading } = useAuth()
+    const { t } = useLocale()
 
     if (loading) {
         return (
@@ -13,7 +15,7 @@ export default function TestRoleRedirect() {
                 <CardContent className="p-6">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
-                        <p className="mt-2 text-sm text-gray-600">Loading auth state...</p>
+                        <p className="mt-2 text-sm text-gray-600">{t("loading_auth_state")}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -27,7 +29,7 @@ export default function TestRoleRedirect() {
                     <CardTitle>Authentication Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-red-600">Not authenticated</p>
+                    <p className="text-red-600">{t("not_authenticated")}</p>
                 </CardContent>
             </Card>
         )

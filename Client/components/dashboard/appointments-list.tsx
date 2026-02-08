@@ -24,7 +24,7 @@ interface Appointment {
 }
 
 export default function AppointmentsList() {
-  const { isRTL } = useLocale();
+  const { t, isRTL } = useLocale();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,13 +68,13 @@ export default function AppointmentsList() {
             }
             
           } catch (err) {
-            setError("Failed to load appointments");
+            setError(t("err_load_appointments_msg"));
             setLoading(false);
           }
         }, 150); // Fast initial load
         
       } catch (err) {
-        setError("Failed to load appointments");
+        setError(t("err_load_appointments_msg"));
         setLoading(false);
       }
     };
@@ -258,7 +258,7 @@ export default function AppointmentsList() {
             <div className="mx-auto w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
               <AlertCircle className="h-6 w-6 text-red-500" />
             </div>
-            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">Unable to load appointments</h3>
+            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">{t("unable_to_load_appointments")}</h3>
             <p className="mt-2 text-gray-600 dark:text-gray-400">{error}</p>
             <div className="mt-6 flex justify-center gap-3">
               <Button
@@ -269,13 +269,13 @@ export default function AppointmentsList() {
                   window.location.reload();
                 }}
               >
-                Retry
+                {t("retry")}
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => setError(null)}
               >
-                Dismiss
+                {t("dismiss")}
               </Button>
             </div>
           </div>
@@ -284,10 +284,10 @@ export default function AppointmentsList() {
             <div className="mx-auto w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
               <Calendar className="h-6 w-6 text-blue-500" />
             </div>
-            <p className="mt-4 text-gray-600">No appointments scheduled for today.</p>
+            <p className="mt-4 text-gray-600">{t("no_appointments_today")}</p>
             <Link href="/appointments/new">
               <Button className="mt-4 gradient-emerald text-white">
-                Schedule an appointment
+                {t("schedule_appointment")}
               </Button>
             </Link>
           </div>

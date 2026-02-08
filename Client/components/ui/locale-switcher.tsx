@@ -12,7 +12,7 @@ const localeNames = {
 }
 
 export function LocaleSwitcher() {
-  const { locale, setLocale } = useLocale()
+  const { locale, setLocale, t } = useLocale()
 
   return (
     <DropdownMenu>
@@ -23,7 +23,7 @@ export function LocaleSwitcher() {
           className="h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
         >
           <Languages className="h-4 w-4" />
-          <span className="sr-only">Switch language</span>
+          <span className="sr-only">{t("switch_language")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">

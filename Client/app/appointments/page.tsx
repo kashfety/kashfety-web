@@ -410,7 +410,7 @@ export default function MyAppointmentsPage() {
 
       setAppointmentsLoading(false)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to load appointments')
+      setError(error instanceof Error ? error.message : t('err_load_appointments_msg'))
       setAppointmentsLoading(false)
     }
   }
@@ -531,9 +531,9 @@ export default function MyAppointmentsPage() {
           <Card className="text-center py-12">
             <CardContent>
               <div className="text-red-500 text-xl mb-4">⚠️</div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Error Loading Appointments</h3>
-              <p className="text-muted-foreground mb-6">{error}</p>
-              <Button onClick={() => window.location.reload()} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">Try Again</Button>
+              <h3 className="text-xl font-semibold text-foreground mb-2">{t("error_loading_appointments")}</h3>
+              <p className="text-muted-foreground mb-6">{error === 'Network Error' ? t("err_network") : error}</p>
+              <Button onClick={() => window.location.reload()} className="bg-[#4DBCC4] hover:bg-[#4DBCC4]/90 dark:bg-[#2a5f6b] dark:hover:bg-[#2a5f6b]/90 text-white">{t("try_again")}</Button>
             </CardContent>
           </Card>
         </div>

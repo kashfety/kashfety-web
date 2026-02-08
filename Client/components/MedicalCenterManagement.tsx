@@ -91,7 +91,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
     } catch (error) {
       toast({
         title: t('error'),
-        description: "Failed to load medical centers.",
+        description: t("err_load_medical_centers"),
         variant: "destructive"
       });
     } finally {
@@ -116,8 +116,8 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
   const saveNewCenter = async () => {
     if (!newCenter || !newCenter.name || !newCenter.address) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in the required fields.",
+        title: t("toast_validation_error"),
+        description: t("validation_fill_required"),
         variant: "destructive"
       });
       return;
@@ -140,7 +140,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         setNewCenter(null);
         toast({
           title: t('success'),
-          description: "Medical center added successfully.",
+          description: t("success_center_added"),
         });
       } else {
         throw new Error('Failed to add center');
@@ -148,7 +148,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
     } catch (error) {
       toast({
         title: t('error'),
-        description: "Failed to add medical center.",
+        description: t("err_add_center"),
         variant: "destructive"
       });
     }
@@ -173,7 +173,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         setEditingCenter(null);
         toast({
           title: t('success'),
-          description: "Medical center updated successfully.",
+          description: t("success_center_updated"),
         });
       } else {
         throw new Error('Failed to update center');
@@ -181,14 +181,14 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
     } catch (error) {
       toast({
         title: t('error'),
-        description: "Failed to update medical center.",
+        description: t("err_update_center"),
         variant: "destructive"
       });
     }
   };
 
   const deleteCenter = async (centerId: string) => {
-    if (!confirm('Are you sure you want to delete this medical center?')) {
+    if (!confirm(t("confirm_delete_center"))) {
       return;
     }
 
@@ -205,7 +205,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         setCenters(prev => prev.filter(center => center.id !== centerId));
         toast({
           title: t('success'),
-          description: "Medical center deleted successfully.",
+          description: t("success_center_deleted"),
         });
       } else {
         throw new Error('Failed to delete center');
@@ -213,7 +213,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
     } catch (error) {
       toast({
         title: t('error'),
-        description: "Failed to delete medical center.",
+        description: t("err_delete_center"),
         variant: "destructive"
       });
     }
@@ -237,13 +237,13 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         })));
         toast({
           title: t('success'),
-          description: "Primary medical center updated.",
+          description: t("success_primary_updated"),
         });
       }
     } catch (error) {
       toast({
         title: t('error'),
-        description: "Failed to update primary center.",
+        description: t("err_update_primary"),
         variant: "destructive"
       });
     }
@@ -351,7 +351,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                   <Input
                     value={editData.phone}
                     onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="Phone number"
+                    placeholder={t("phone_placeholder")}
                   />
                 ) : (
                   <span className="text-sm">{center.phone}</span>
@@ -364,7 +364,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                   <Input
                     value={editData.email}
                     onChange={(e) => setEditData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Email address"
+                    placeholder={t("email_placeholder")}
                   />
                 ) : (
                   <span className="text-sm">{center.email}</span>
@@ -399,7 +399,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
           {/* Description */}
           {(isEditing || center.description) && (
             <div>
-              <Label>Description</Label>
+              <Label>{t("description")}</Label>
               {isEditing ? (
                 <Textarea
                   value={editData.description || ""}
@@ -415,7 +415,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
           {/* Special Notes */}
           {(isEditing || center.special_notes) && (
             <div>
-              <Label>Special Notes</Label>
+              <Label>{t("special_notes")}</Label>
               {isEditing ? (
                 <Textarea
                   value={editData.special_notes || ""}
@@ -436,7 +436,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                 size="sm"
                 onClick={() => setPrimaryCenter(center.id)}
               >
-                Set as Primary
+                {t("set_as_primary")}
               </Button>
             </div>
           )}
@@ -454,7 +454,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Add New Medical Center
+              {t("add_new_medical_center")}
             </CardTitle>
             <Button
               variant="ghost"
@@ -469,12 +469,12 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Center Name *</Label>
+              <Label htmlFor="name">{t("center_name_required")}</Label>
               <Input
                 id="name"
                 value={newCenter.name || ""}
                 onChange={(e) => setNewCenter(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Medical center name"
+                placeholder={t("center_name_placeholder")}
               />
             </div>
             <div>
@@ -483,18 +483,18 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                 id="phone"
                 value={newCenter.phone || ""}
                 onChange={(e) => setNewCenter(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="Phone number"
+                placeholder={t("phone_placeholder")}
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="address">Address *</Label>
+            <Label htmlFor="address">{t("address_required")}</Label>
             <Textarea
               id="address"
               value={newCenter.address || ""}
               onChange={(e) => setNewCenter(prev => ({ ...prev, address: e.target.value }))}
-              placeholder="Full address"
+              placeholder={t("full_address_placeholder")}
               rows={2}
             />
           </div>
@@ -507,11 +507,11 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                 type="email"
                 value={newCenter.email || ""}
                 onChange={(e) => setNewCenter(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="Email address"
+                placeholder={t("email_placeholder")}
               />
             </div>
             <div>
-              <Label htmlFor="fee">Consultation Fee (USD)</Label>
+              <Label htmlFor="fee">{t("consultation_fee_usd")}</Label>
               <Input
                 id="fee"
                 type="number"
@@ -520,18 +520,18 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
                   ...prev, 
                   consultation_fee: parseFloat(e.target.value) || 0 
                 }))}
-                placeholder="Fee amount"
+                placeholder={t("fee_amount_placeholder")}
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea
               id="description"
               value={newCenter.description || ""}
               onChange={(e) => setNewCenter(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Brief description of the medical center"
+              placeholder={t("center_description_placeholder")}
               rows={3}
             />
           </div>
@@ -541,7 +541,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
               checked={newCenter.is_primary || false}
               onCheckedChange={(checked) => setNewCenter(prev => ({ ...prev, is_primary: checked }))}
             />
-            <Label>Set as primary center</Label>
+            <Label>{t("set_as_primary_center")}</Label>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
@@ -549,11 +549,11 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
               variant="outline"
               onClick={() => setNewCenter(null)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button onClick={saveNewCenter}>
               <Save className="h-4 w-4 mr-1" />
-              Save Center
+              {t("save_center")}
             </Button>
           </div>
         </CardContent>
@@ -567,7 +567,7 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
         <CardContent className="flex items-center justify-center py-8">
           <div className="text-center">
             <div className="animate-spin h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p>Loading medical centers...</p>
+            <p>{t("loading_medical_centers")}</p>
           </div>
         </CardContent>
       </Card>
@@ -607,13 +607,13 @@ export default function MedicalCenterManagement({ doctorId }: MedicalCenterManag
           <Card>
             <CardContent className="text-center py-8">
               <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium mb-2">No Medical Centers</h3>
+              <h3 className="text-lg font-medium mb-2">{t("no_medical_centers")}</h3>
               <p className="text-gray-600 mb-4">
-                Add your medical centers to manage your practice locations.
+                {t("no_medical_centers_desc")}
               </p>
               <Button onClick={startAddingCenter}>
                 <Plus className="h-4 w-4 mr-1" />
-                Add Your First Center
+                {t("add_first_center")}
               </Button>
             </CardContent>
           </Card>

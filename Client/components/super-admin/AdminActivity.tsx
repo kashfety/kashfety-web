@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/components/providers/locale-provider';
 import {
     History,
     Search,
@@ -167,6 +168,7 @@ const getActionDescription = (activity: AdminActivityLog) => {
 
 export default function AdminActivity() {
     const { toast } = useToast();
+    const { t } = useLocale();
     const [activities, setActivities] = useState<AdminActivityLog[]>([]);
     const [stats, setStats] = useState<ActivityStats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -223,8 +225,8 @@ export default function AdminActivity() {
             setTotalPages(1);
 
             toast({
-                title: "Error Loading Data",
-                description: "Failed to load admin activities. Please try again.",
+                title: t("err_loading_data_title"),
+                description: t("err_load_admin_activities"),
                 variant: "destructive"
             });
         } finally {
@@ -272,8 +274,8 @@ export default function AdminActivity() {
             setStats(null);
             
             toast({
-                title: "Error Loading Stats",
-                description: "Failed to load activity statistics. Please try again.",
+                title: t("err_loading_stats_title"),
+                description: t("err_load_activity_stats"),
                 variant: "destructive"
             });
         }
@@ -313,13 +315,13 @@ export default function AdminActivity() {
             document.body.removeChild(a);
 
             toast({
-                title: "Success",
-                description: "Admin activity exported successfully",
+                title: t("toast_success"),
+                description: t("success_activity_exported"),
             });
         } catch (error) {
             toast({
-                title: "Error",
-                description: "Failed to export admin activity",
+                title: t("toast_error"),
+                description: t("err_export_activity"),
                 variant: "destructive"
             });
         }
@@ -345,7 +347,7 @@ export default function AdminActivity() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Loading admin activity...</CardTitle>
+                        <CardTitle>{t("loading_admin_activity")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="animate-pulse space-y-4">
@@ -366,18 +368,18 @@ export default function AdminActivity() {
                 <div>
                     <h2 className="text-2xl font-bold flex items-center">
                         <History className="h-6 w-6 mr-2 text-purple-600" />
-                        Admin Activity
+                        {t("admin_activity_title")}
                     </h2>
-                    <p className="text-muted-foreground">Monitor and audit all administrative actions</p>
+                    <p className="text-muted-foreground">{t("monitor_admin_actions")}</p>
                 </div>
                 <div className="flex space-x-2">
                     <Button onClick={fetchActivities}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
+                        {t("refresh")}
                     </Button>
                     <Button onClick={exportActivities} variant="outline">
                         <Download className="h-4 w-4 mr-2" />
-                        Export
+                        {t("export")}
                     </Button>
                 </div>
             </div>
@@ -389,7 +391,7 @@ export default function AdminActivity() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Total Actions</p>
+                                    <p className="text-sm text-muted-foreground">{t("total_actions")}</p>
                                     <p className="text-2xl font-bold">{stats.totalActions.toLocaleString()}</p>
                                 </div>
                                 <Activity className="h-8 w-8 text-blue-500" />
@@ -400,7 +402,7 @@ export default function AdminActivity() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Today</p>
+                                    <p className="text-sm text-muted-foreground">{t("today")}</p>
                                     <p className="text-2xl font-bold">{stats.actionsToday}</p>
                                 </div>
                                 <Calendar className="h-8 w-8 text-green-500" />
@@ -411,7 +413,7 @@ export default function AdminActivity() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">This Week</p>
+                                    <p className="text-sm text-muted-foreground">{t("this_week")}</p>
                                     <p className="text-2xl font-bold">{stats.actionsThisWeek}</p>
                                 </div>
                                 <Clock className="h-8 w-8 text-orange-500" />
@@ -422,7 +424,7 @@ export default function AdminActivity() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Active Admins</p>
+                                    <p className="text-sm text-muted-foreground">{t("active_admins")}</p>
                                     <p className="text-2xl font-bold">{stats.topAdmins.length}</p>
                                 </div>
                                 <Shield className="h-8 w-8 text-purple-500" />
@@ -437,7 +439,7 @@ export default function AdminActivity() {
                 <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                         <Filter className="h-5 w-5" />
-                        <span>Filters</span>
+                        <span>{t("filters")}</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -445,7 +447,7 @@ export default function AdminActivity() {
                         <div className="relative">
                             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search activities..."
+                                placeholder={t("search_activities")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -453,24 +455,24 @@ export default function AdminActivity() {
                         </div>
                         <Select value={actionTypeFilter} onValueChange={setActionTypeFilter}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filter by action" />
+                                <SelectValue placeholder={t("filter_by_action")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All actions</SelectItem>
-                                <SelectItem value="user_created">User Created</SelectItem>
-                                <SelectItem value="user_updated">User Updated</SelectItem>
-                                <SelectItem value="admin_created">Admin Created</SelectItem>
-                                <SelectItem value="doctor_approved">Doctor Approved</SelectItem>
-                                <SelectItem value="center_created">Center Created</SelectItem>
+                                <SelectItem value="all">{t("all_actions")}</SelectItem>
+                                <SelectItem value="user_created">{t("user_created")}</SelectItem>
+                                <SelectItem value="user_updated">{t("user_updated")}</SelectItem>
+                                <SelectItem value="admin_created">{t("admin_created")}</SelectItem>
+                                <SelectItem value="doctor_approved">{t("doctor_approved")}</SelectItem>
+                                <SelectItem value="center_created">{t("center_created")}</SelectItem>
                                 <SelectItem value="login">Login</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select value={adminFilter} onValueChange={setAdminFilter}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filter by admin" />
+                                <SelectValue placeholder={t("filter_by_admin")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All admins</SelectItem>
+                                <SelectItem value="all">{t("all_admins")}</SelectItem>
                                 {stats?.topAdmins.map((admin) => (
                                     <SelectItem key={admin.adminId} value={admin.adminId}>
                                         {admin.adminName}
@@ -492,7 +494,7 @@ export default function AdminActivity() {
                                             dateRange.from.toLocaleDateString()
                                         )
                                     ) : (
-                                        <span>Pick a date range</span>
+                                        <span>{t("pick_date_range")}</span>
                                     )}
                                 </Button>
                             </PopoverTrigger>

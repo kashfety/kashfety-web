@@ -12,10 +12,10 @@ export default function LogTypesChart() {
   // Restore the original colorful palette for the pie chart
   const data = [
     { name: t('login') || 'Login', value: 540, color: "#4f46e5" }, // Indigo
-    { name: "Create", value: 320, color: "#10b981" }, // Emerald
-    { name: "Update", value: 280, color: "#f59e0b" }, // Amber
+    { name: t("create"), value: 320, color: "#10b981" }, // Emerald
+    { name: t("update"), value: 280, color: "#f59e0b" }, // Amber
     { name: t('delete') || 'Delete', value: 120, color: "#ef4444" }, // Red
-    { name: "Other", value: 180, color: "#8b5cf6" }, // Purple
+    { name: t("other"), value: 180, color: "#8b5cf6" }, // Purple
   ]
 
   // Calculate total logs
@@ -24,8 +24,8 @@ export default function LogTypesChart() {
   return (
     <Card className="bg-white dark:bg-[#0F0F12] border border-white dark:border-[#1F1F23]">
       <CardHeader>
-        <CardTitle>Log Types Distribution</CardTitle>
-        <CardDescription>Breakdown of audit logs by action type</CardDescription>
+        <CardTitle>{t("log_types_distribution")}</CardTitle>
+        <CardDescription>{t("log_types_description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="h-[300px]">
@@ -70,7 +70,7 @@ export default function LogTypesChart() {
                   className="fill-gray-500 dark:fill-gray-400"
                   fontSize={12}
                 >
-                  Total Logs
+                  {t("total_logs")}
                 </Text>
 
                 <Legend layout="horizontal" verticalAlign="bottom" align="center" />

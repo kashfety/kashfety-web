@@ -128,7 +128,7 @@ export default function MedicalRecordsForm({
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        showError("Authentication Error", "Please log in again.");
+        showError(t("auth_error_title"), t("auth_error_login_again"));
         return;
       }
 

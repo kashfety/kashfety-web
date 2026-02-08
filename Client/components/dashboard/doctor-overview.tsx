@@ -46,13 +46,13 @@ export default function DoctorOverview() {
             setDoctors([]);
             setLoading(false);
           } catch (err) {
-            setError("Failed to load doctors");
+            setError(t("err_load_doctors_msg"));
             setLoading(false);
           }
         }, 150); // Reduced from 1000ms to 150ms for much faster loading
 
       } catch (err) {
-        setError("Failed to load doctors");
+        setError(t("err_load_doctors_msg"));
         setLoading(false);
       }
     };
@@ -122,7 +122,7 @@ export default function DoctorOverview() {
         {loading ? (
           <div className="py-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading doctors...</p>
+            <p className="mt-4 text-gray-500">{t("loading_doctors")}</p>
           </div>
         ) : error ? (
           <div className="py-12 text-center">
@@ -132,12 +132,12 @@ export default function DoctorOverview() {
               className="mt-4"
               onClick={() => window.location.reload()}
             >
-              Try Again
+              {t("try_again")}
             </Button>
           </div>
         ) : doctors.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="text-gray-600 dark:text-gray-400">No doctors available at the moment.</p>
+            <p className="text-gray-600 dark:text-gray-400">{t("no_doctors_available")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

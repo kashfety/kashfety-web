@@ -820,7 +820,7 @@ export default function DoctorProfileSettings({
                 >
                   <Upload className="w-4 h-4 me-2" />
                   {uploadingPicture 
-                    ? 'Uploading...' 
+                    ? t("uploading")
                     : (t('profile_picture_upload_btn') || 'Upload Picture')
                   }
                 </label>

@@ -137,10 +137,10 @@ export default function PatientDoctorsPage() {
                 setTotalDoctors(data.total || 0)
                 setTotalPages(Math.ceil((data.total || 0) / itemsPerPage))
             } else {
-                toast.error(data.message || 'Failed to load doctors')
+                toast.error(data.message || t('err_load_doctors_msg'))
             }
         } catch (error) {
-            toast.error('Failed to load doctors')
+            toast.error(t('err_load_doctors_msg'))
         } finally {
             setLoading(false)
         }
@@ -172,10 +172,10 @@ export default function PatientDoctorsPage() {
                 setSelectedDoctor(data.doctor)
                 setShowDetailsModal(true)
             } else {
-                toast.error(data.message || 'Failed to load doctor details')
+                toast.error(data.message || t('err_load_doctor_details'))
             }
         } catch (error) {
-            toast.error('Failed to load doctor details')
+            toast.error(t('err_load_doctor_details'))
         } finally {
             setLoadingDetails(false)
         }

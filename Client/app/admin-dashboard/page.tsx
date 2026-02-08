@@ -493,8 +493,8 @@ export function AdminDashboard({
 
             // Show error toast instead of using mock data
             toast({
-                title: "Error",
-                description: "Failed to load dashboard statistics. Please check your connection and try again.",
+                title: t("toast_error"),
+                description: t("err_load_dashboard_stats"),
                 variant: "destructive"
             });
 

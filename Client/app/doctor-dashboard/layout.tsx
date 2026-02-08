@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/providers/auth-provider"
+import { useLocale } from "@/components/providers/locale-provider"
 
 export default function DoctorDashboardLayout({
     children,
@@ -11,6 +12,7 @@ export default function DoctorDashboardLayout({
 }) {
     const router = useRouter()
     const { user, isAuthenticated, loading } = useAuth()
+    const { t } = useLocale()
     const [isAuthorized, setIsAuthorized] = useState(false)
 
     useEffect(() => {
@@ -47,7 +49,7 @@ export default function DoctorDashboardLayout({
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading dashboard...</p>
+                    <p className="mt-4 text-gray-600">{t("loading_dashboard")}</p>
                 </div>
             </div>
         )

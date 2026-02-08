@@ -399,7 +399,7 @@ export default function SpecialtyManagement() {
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="General Medicine"
+                                placeholder={t("specialty_name_placeholder")}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -429,7 +429,7 @@ export default function SpecialtyManagement() {
                                 id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Brief description of the specialty..."
+                                placeholder={t("specialty_description_placeholder")}
                                 rows={3}
                             />
                         </div>

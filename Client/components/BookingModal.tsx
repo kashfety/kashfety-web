@@ -1390,7 +1390,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         );
       } else if (error.response) {
         const status = error.response.status;
-        const errorMessage = error.response.data?.message || error.response.data?.error || 'Server error occurred';
+        const errorMessage = error.response.data?.message || error.response.data?.error || t("server_error_occurred");
 
         if (status === 401) {
           showError(
@@ -2408,36 +2408,36 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                     <div className="flex items-center justify-between gap-3 flex-wrap">
                       <div>
                         <h3 className="text-lg font-semibold text-black">Select Test Type and Center</h3>
-                        <div className="text-sm text-black">Browse available lab tests and scans</div>
+                        <div className="text-sm text-black">{t("browse_available_lab_tests")}</div>
                       </div>
                     </div>
 
                     <div className="grid gap-4 max-h-96 overflow-y-auto">
-                      {labTypes.map((t) => {
-                        const centersForType = labCentersByType[t.id] || [];
+                      {labTypes.map((labType) => {
+                        const centersForType = labCentersByType[labType.id] || [];
                         return (
-                          <Card key={t.id} className="transition-all hover:shadow-lg bg-white border border-gray-200">
+                          <Card key={labType.id} className="transition-all hover:shadow-lg bg-white border border-gray-200">
                             <CardContent className="p-4 bg-white">
                               <div className="flex items-start gap-3">
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between gap-3">
                                     <div>
-                                      <h4 className="font-semibold text-black">{t.name}</h4>
-                                      {t.category && (
-                                        <p className="text-xs text-black capitalize">{t.category}</p>
+                                      <h4 className="font-semibold text-black">{labType.name}</h4>
+                                      {labType.category && (
+                                        <p className="text-xs text-black capitalize">{labType.category}</p>
                                       )}
                                     </div>
                                   </div>
 
                                   <div className="mt-3">
-                                    <div className="text-xs text-black mb-1">Choose center:</div>
+                                    <div className="text-xs text-black mb-1">{t("choose_center")}</div>
                                     <div className="flex flex-wrap gap-2">
                                       {centersForType.length > 0 ? (
                                         centersForType.map((c) => (
-                                          <button key={c.id} onClick={() => handleLabProceed(t, c)} className="px-3 py-2 rounded border text-xs hover:bg-[#4DBCC4] hover:text-white bg-white text-black border-gray-300 hover:border-[#4DBCC4] transition-all" title={`${c.name} • ${c.address}`}>{c.name}</button>
+                                          <button key={c.id} onClick={() => handleLabProceed(labType, c)} className="px-3 py-2 rounded border text-xs hover:bg-[#4DBCC4] hover:text-white bg-white text-black border-gray-300 hover:border-[#4DBCC4] transition-all" title={`${c.name} • ${c.address}`}>{c.name}</button>
                                         ))
                                       ) : (
-                                        <span className="text-xs text-black">No centers currently offer this test</span>
+                                        <span className="text-xs text-black">{t("no_centers_offer_test")}</span>
                                       )}
                                     </div>
                                     {centersForType.length > 0 && (

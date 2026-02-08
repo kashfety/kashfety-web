@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import './dashboard.css';
 import { useEffect, useState, useMemo } from 'react';
@@ -1757,7 +1757,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         onClick={() => {
                           const allIds = new Set(selectedServices.map(s => s.id));
                           setBulkSelectedTypes(allIds);
-                          setShowBulkActions(allIds.size > 0);
                         }}
                         className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                         dir={isRTL ? 'rtl' : 'ltr'}
@@ -1769,7 +1768,6 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                         size="sm"
                         onClick={() => {
                           setBulkSelectedTypes(new Set());
-                          setShowBulkActions(false);
                         }}
                         className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                         dir={isRTL ? 'rtl' : 'ltr'}
@@ -2413,8 +2411,8 @@ export default function CenterDashboardPage() {
           // Check if the API response indicates success
           if (!statusData.success) {
             toast({
-              title: "Setup Warning",
-              description: statusData.error || "Unable to verify center setup status.",
+              title: t("setup_warning_title"),
+              description: statusData.error || t("unable_verify_center_status"),
               variant: "destructive",
             });
             return;
@@ -2443,21 +2441,21 @@ export default function CenterDashboardPage() {
               const setupData = await setupResponse.json();
               if (setupData.success) {
                 toast({
-                  title: "Center Setup Complete",
-                  description: "Your center record has been created successfully.",
+                  title: t("center_setup_complete_title"),
+                  description: t("center_setup_complete_desc"),
                 });
               } else {
                 toast({
-                  title: "Center Setup Warning",
-                  description: setupData.error || "There was an issue setting up your center record.",
+                  title: t("center_setup_warning_title"),
+                  description: setupData.error || t("center_setup_issue"),
                   variant: "destructive",
                 });
               }
             } else {
               const errorData = await setupResponse.json();
               toast({
-                title: "Center Setup Warning",
-                description: "There was an issue setting up your center record. Some features may not work properly.",
+                title: t("center_setup_warning_title"),
+                description: t("center_setup_issue_features"),
                 variant: "destructive",
               });
             }
@@ -2465,15 +2463,15 @@ export default function CenterDashboardPage() {
         } else {
           const errorData = await statusResponse.json();
           toast({
-            title: "Setup Error",
-            description: errorData.error || "Unable to check center setup status.",
+            title: t("setup_error_title"),
+            description: errorData.error || t("unable_check_center_status"),
             variant: "destructive",
           });
         }
       } catch (error) {
         toast({
-          title: "Setup Error",
-          description: "Unable to verify center setup. Please refresh the page.",
+          title: t("setup_error_title"),
+          description: t("unable_verify_center_refresh"),
           variant: "destructive",
         });
       }
@@ -3183,7 +3181,7 @@ export default function CenterDashboardPage() {
     if (!uploadFile || !selectedAppointment) {
       toast({
         title: t('error'),
-        description: 'Please select a file to upload',
+        description: t('please_select_file'),
         variant: 'destructive'
       });
       return;
@@ -3201,7 +3199,7 @@ export default function CenterDashboardPage() {
       if (response) {
         toast({
           title: t('success'),
-          description: 'Lab result uploaded successfully',
+          description: t('success_lab_result_uploaded'),
         });
         setShowUploadModal(false);
         loadCenterData(); // Refresh data
@@ -3209,7 +3207,7 @@ export default function CenterDashboardPage() {
     } catch (error) {
       toast({
         title: t('error'),
-        description: 'Failed to upload lab result',
+        description: t('err_upload_lab_result'),
         variant: 'destructive'
       });
     } finally {

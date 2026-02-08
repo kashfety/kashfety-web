@@ -62,8 +62,8 @@ export default function DoctorCertificateUpload({
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
                 toast({
-                    title: "Invalid File Type",
-                    description: "Please upload a PDF, JPG, JPEG, or PNG file",
+                    title: t("invalid_file_type_title"),
+                    description: t("invalid_file_type_cert"),
                     variant: "destructive"
                 });
                 return;
@@ -72,8 +72,8 @@ export default function DoctorCertificateUpload({
             // Validate file size (10MB)
             if (file.size > 10 * 1024 * 1024) {
                 toast({
-                    title: "File Too Large",
-                    description: "Please upload a file smaller than 10MB",
+                    title: t("file_too_large_title"),
+                    description: t("file_too_large_cert"),
                     variant: "destructive"
                 });
                 return;

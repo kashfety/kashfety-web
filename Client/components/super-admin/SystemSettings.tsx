@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/components/providers/locale-provider';
 import {
     Settings,
     Save,
@@ -50,6 +51,7 @@ interface SettingsGroup {
 
 export default function SystemSettings() {
     const { toast } = useToast();
+    const { t } = useLocale();
     const [settings, setSettings] = useState<Record<string, SystemSetting>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,27 +60,27 @@ export default function SystemSettings() {
 
     const settingsGroups = {
         general: {
-            title: 'General Settings',
+            title: t('settings_general'),
             icon: Settings,
             keys: ['system_name', 'system_description', 'support_email', 'support_phone']
         },
         security: {
-            title: 'Security & Authentication',
+            title: t('settings_security'),
             icon: Shield,
             keys: ['max_login_attempts', 'session_timeout_minutes', 'require_email_verification', 'require_2fa_for_admins']
         },
         appointments: {
-            title: 'Appointment System',
+            title: t('settings_appointments'),
             icon: Clock,
             keys: ['max_appointment_days_ahead', 'require_admin_approval_for_doctors', 'allow_cancellation_hours', 'appointment_reminder_hours']
         },
         notifications: {
-            title: 'Notifications',
+            title: t('settings_notifications'),
             icon: Bell,
             keys: ['email_notifications_enabled', 'sms_notifications_enabled', 'push_notifications_enabled', 'notification_frequency']
         },
         maintenance: {
-            title: 'System Maintenance',
+            title: t('settings_maintenance'),
             icon: Database,
             keys: ['maintenance_mode', 'backup_frequency', 'log_retention_days', 'auto_cleanup_enabled']
         }
@@ -114,8 +116,8 @@ export default function SystemSettings() {
             setSettings({});
 
             toast({
-                title: "Error Loading Settings",
-                description: "Failed to load system settings. Please try again.",
+                title: t("err_loading_settings_title"),
+                description: t("err_load_system_settings"),
                 variant: "destructive"
             });
         } finally {
@@ -157,8 +159,8 @@ export default function SystemSettings() {
             }
 
             toast({
-                title: "Success",
-                description: "System settings saved successfully",
+                title: t("toast_success"),
+                description: t("success_settings_saved"),
             });
 
             setHasChanges(false);
@@ -166,8 +168,8 @@ export default function SystemSettings() {
             fetchSettings(); // Refresh to get updated timestamps
         } catch (error) {
             toast({
-                title: "Error",
-                description: "Failed to save system settings",
+                title: t("toast_error"),
+                description: t("err_save_settings"),
                 variant: "destructive"
             });
         } finally {
@@ -205,13 +207,13 @@ export default function SystemSettings() {
             document.body.removeChild(a);
 
             toast({
-                title: "Success",
-                description: "Settings exported successfully",
+                title: t("toast_success"),
+                description: t("success_settings_exported"),
             });
         } catch (error) {
             toast({
-                title: "Error",
-                description: "Failed to export settings",
+                title: t("toast_error"),
+                description: t("err_export_settings"),
                 variant: "destructive"
             });
         }
@@ -293,7 +295,7 @@ export default function SystemSettings() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Loading system settings...</CardTitle>
+                        <CardTitle>{t("loading_system_settings")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="animate-pulse space-y-4">
@@ -314,18 +316,18 @@ export default function SystemSettings() {
                 <div>
                     <h2 className="text-2xl font-bold flex items-center">
                         <Settings className="h-6 w-6 mr-2 text-gray-600" />
-                        System Settings
+                        {t("system_settings_title")}
                     </h2>
-                    <p className="text-muted-foreground">Configure system-wide settings and preferences</p>
+                    <p className="text-muted-foreground">{t("configure_system_settings")}</p>
                 </div>
                 <div className="flex space-x-2">
                     <Button onClick={exportSettings} variant="outline">
                         <Download className="h-4 w-4 mr-2" />
-                        Export
+                        {t("export")}
                     </Button>
                     <Button onClick={fetchSettings}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
+                        {t("refresh")}
                     </Button>
                 </div>
             </div>
@@ -333,9 +335,9 @@ export default function SystemSettings() {
             {/* Warning Alert */}
             <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Caution</AlertTitle>
+                <AlertTitle>{t("caution")}</AlertTitle>
                 <AlertDescription>
-                    Changes to system settings can affect the entire platform. Make sure you understand the impact before saving changes.
+                    {t("system_settings_warning")}
                 </AlertDescription>
             </Alert>
 
@@ -346,15 +348,15 @@ export default function SystemSettings() {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                                <span className="text-sm font-medium">You have unsaved changes</span>
+                                <span className="text-sm font-medium">{t("unsaved_changes")}</span>
                             </div>
                             <div className="flex space-x-2">
                                 <Button variant="outline" onClick={resetSettings}>
-                                    Reset
+                                    {t("reset")}
                                 </Button>
                                 <Button onClick={saveSettings} disabled={saving}>
                                     <Save className="h-4 w-4 mr-2" />
-                                    {saving ? 'Saving...' : 'Save Changes'}
+                                    {saving ? t("saving") : t("save_changes")}
                                 </Button>
                             </div>
                         </div>

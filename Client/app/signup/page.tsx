@@ -233,7 +233,7 @@ export default function SignupPage() {
     }
 
     if (formData.role === 'center' && !formData.center_address.trim()) {
-      setError('Center address is required for medical centers')
+      setError(t('center_address_required'))
       setIsLoading(false)
       return
     }
@@ -360,7 +360,7 @@ export default function SignupPage() {
       setIsLoading(true);
 
       if (!pendingUserData) {
-        throw new Error('No pending user data found');
+        throw new Error(t('no_pending_user_data'));
       }
 
       // Extract Supabase user ID from verification data - try multiple possible paths
@@ -370,7 +370,7 @@ export default function SignupPage() {
 
 
       if (!supabaseUserId) {
-        throw new Error('Failed to get user ID from verification data');
+        throw new Error(t('failed_get_user_id'));
       }
 
       // Create user in custom users table using backend API
@@ -419,7 +419,7 @@ export default function SignupPage() {
       }
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Failed to create user profile');
+        throw new Error(result.error || result.message || t('failed_create_profile'));
       }
 
       // Store auth token and proceed based on role
@@ -481,7 +481,7 @@ export default function SignupPage() {
       const password = pendingUserData?.password || formData.password;
 
       if (!email || !password) {
-        throw new Error('Email or password not found. Please login manually.');
+        throw new Error(t('email_password_not_found'));
       }
 
       // Try to login automatically
@@ -523,7 +523,7 @@ export default function SignupPage() {
         },
         body: JSON.stringify({ patient_id: registeredPatient.id, ...medicalData })
       });
-      if (!response.ok) throw new Error('Failed to submit medical records');
+      if (!response.ok) throw new Error(t('failed_submit_medical_records'));
       await handleMedicalRecordsComplete();
     } catch (err: any) {
       setError(t('medical_records_failed') || 'Failed to save medical records. Please try again.');
@@ -538,7 +538,7 @@ export default function SignupPage() {
 
   const handleCertificateUploadComplete = () => {
     setShowDoctorCertificateForm(false);
-    setSuccess('Certificates uploaded successfully! Your account is now pending admin approval. You will be notified once approved.');
+    setSuccess(t('certificates_uploaded_success'));
     setTimeout(() => {
       router.push('/login');
     }, 3000);
@@ -564,7 +564,7 @@ export default function SignupPage() {
     }
 
     setShowDoctorCertificateForm(false);
-    setSuccess('Registration completed! You can upload certificates later. Note: You must upload and get approval before you can login.');
+    setSuccess(t('registration_completed_upload_later'));
     setTimeout(() => {
       router.push('/login');
     }, 3000);
@@ -1196,8 +1196,8 @@ export default function SignupPage() {
                     className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
                   >
                     {validatePassword(formData.password)
-                      ? "✓ Strong password"
-                      : "Password must be 8+ chars with uppercase, lowercase, and number"
+                      ? "✓ " + t("strong_password")
+                      : t("password_requirements")
                     }
                   </motion.p>
                 )}
@@ -1251,7 +1251,7 @@ export default function SignupPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-1 text-sm text-[#4DBCC4]"
                   >
-                    ✓ Passwords match
+                    {"✓ " + t("passwords_match")}
                   </motion.p>
                 )}
               </div>
@@ -1370,9 +1370,9 @@ export default function SignupPage() {
               className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
             >
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white mb-2">Upload Medical Certificates</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">{t("upload_medical_certificates")}</h2>
                 <p className="text-gray-300">
-                  Please upload your medical certificates and licenses for verification. Your account will be pending approval until these documents are reviewed by our admin team.
+                  {t("upload_certificates_desc")}
                 </p>
               </div>
 

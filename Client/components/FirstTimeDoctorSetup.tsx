@@ -151,8 +151,8 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
       if (response.ok) {
         const result = await response.json();
         toast({
-          title: "Setup Complete!",
-          description: "Your doctor profile has been set up successfully.",
+          title: t("setup_complete_title"),
+          description: t("setup_complete_desc"),
         });
         onSetupComplete();
       } else {
@@ -161,8 +161,8 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
       }
     } catch (error: any) {
       toast({
-        title: "Setup Failed",
-        description: error.message || "Failed to complete setup. Please try again.",
+        title: t("setup_failed_title"),
+        description: error.message || t("setup_failed_desc"),
         variant: "destructive"
       });
     } finally {
@@ -206,15 +206,15 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
             <div className="space-y-4">
               <div className="text-center">
                 <Stethoscope className="h-12 w-12 text-blue-600 mx-auto mb-3" />
-                <h2 className="text-xl font-semibold">Professional Information</h2>
-                <p className="text-gray-600">Tell us about your medical expertise</p>
+                <h2 className="text-xl font-semibold">{t("professional_information")}</h2>
+                <p className="text-gray-600">{t("tell_us_expertise")}</p>
               </div>
 
               <div>
-                <Label htmlFor="specialty">Medical Specialty *</Label>
+                <Label htmlFor="specialty">{t("medical_specialty_required")}</Label>
                 <Select onValueChange={(value) => handleDataChange('specialty', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your specialty" />
+                    <SelectValue placeholder={t("select_your_specialty")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SPECIALTIES.map(specialty => (
@@ -227,7 +227,7 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
               </div>
 
               <div>
-                <Label htmlFor="experience">Years of Experience *</Label>
+                <Label htmlFor="experience">{t("years_of_experience_required")}</Label>
                 <Input
                   id="experience"
                   type="number"
@@ -235,10 +235,10 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
                   max="50"
                   value={setupData.experience_years}
                   onChange={(e) => handleDataChange('experience_years', parseInt(e.target.value) || 0)}
-                  placeholder="Enter years of practice"
+                  placeholder={t("enter_years_of_practice")}
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Include your residency and fellowship years
+                  {t("include_residency_years")}
                 </p>
               </div>
             </div>
@@ -249,8 +249,8 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
             <div className="space-y-4">
               <div className="text-center">
                 <DollarSign className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                <h2 className="text-xl font-semibold">Consultation Fee</h2>
-                <p className="text-gray-600">Set your consultation pricing</p>
+                <h2 className="text-xl font-semibold">{t("consultation_fee")}</h2>
+                <p className="text-gray-600">{t("set_consultation_pricing")}</p>
               </div>
 
               <div>
@@ -277,15 +277,15 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
                   <h4 className="font-medium text-blue-800 mb-2">Fee Preview</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>Clinic Consultation:</span>
+                      <span>{t("clinic_consultation")}</span>
                       <span className="font-medium">${setupData.consultation_fee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Home Visit:</span>
+                      <span>{t("home_visit")}</span>
                       <span className="font-medium">${(setupData.consultation_fee + 50).toFixed(2)}</span>
                     </div>
                     <p className="text-xs text-gray-600 mt-2">
-                      Home visits include additional travel fee
+                      {t("home_visit_note")}
                     </p>
                   </div>
                 </div>
@@ -298,21 +298,21 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
             <div className="space-y-4">
               <div className="text-center">
                 <Award className="h-12 w-12 text-purple-600 mx-auto mb-3" />
-                <h2 className="text-xl font-semibold">Professional Bio</h2>
-                <p className="text-gray-600">Describe your background and approach</p>
+                <h2 className="text-xl font-semibold">{t("professional_bio")}</h2>
+                <p className="text-gray-600">{t("describe_background")}</p>
               </div>
 
               <div>
-                <Label htmlFor="bio">Professional Bio *</Label>
+                <Label htmlFor="bio">{t("professional_bio")} *</Label>
                 <Textarea
                   id="bio"
                   value={setupData.bio}
                   onChange={(e) => handleDataChange('bio', e.target.value)}
-                  placeholder="Describe your medical background, areas of expertise, treatment philosophy, and what patients can expect from your care..."
+                  placeholder={t("doctor_bio_placeholder")}
                   rows={6}
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Minimum 50 characters. Current: {setupData.bio.length}
+                  {t("bio_min_chars")} {setupData.bio.length}
                 </p>
               </div>
             </div>
@@ -323,8 +323,8 @@ export default function FirstTimeDoctorSetup({ onSetupComplete }: FirstTimeDocto
             <div className="space-y-4">
               <div className="text-center">
                 <Clock className="h-12 w-12 text-orange-600 mx-auto mb-3" />
-                <h2 className="text-xl font-semibold">Work Schedule</h2>
-                <p className="text-gray-600">Set your availability hours</p>
+                <h2 className="text-xl font-semibold">{t("work_schedule")}</h2>
+                <p className="text-gray-600">{t("set_availability_hours")}</p>
               </div>
 
               <div className="space-y-3">

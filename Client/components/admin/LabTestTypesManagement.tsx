@@ -234,7 +234,7 @@ export default function LabTestTypesManagement() {
                   id="name_ku"
                   value={newTestType.name_ku}
                   onChange={(e) => setNewTestType({ ...newTestType, name_ku: e.target.value })}
-                  placeholder="Kurdish name (optional)"
+                  placeholder={t("kurdish_name_optional")}
                   disabled={submitting}
                 />
               </div>
@@ -244,7 +244,7 @@ export default function LabTestTypesManagement() {
                   id="code"
                   value={newTestType.code}
                   onChange={(e) => setNewTestType({ ...newTestType, code: e.target.value })}
-                  placeholder="e.g., CBC-001"
+                  placeholder={t("test_code_placeholder")}
                   disabled={submitting}
                 />
               </div>
@@ -262,8 +262,8 @@ export default function LabTestTypesManagement() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="lab">Lab Tests</SelectItem>
-                    <SelectItem value="imaging">Imaging</SelectItem>
+                    <SelectItem value="lab">{t("lab_tests")}</SelectItem>
+                    <SelectItem value="imaging">{t("imaging")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -315,7 +315,7 @@ export default function LabTestTypesManagement() {
                 id="description"
                 value={newTestType.description}
                 onChange={(e) => setNewTestType({ ...newTestType, description: e.target.value })}
-                placeholder="Optional description..."
+                placeholder={t("optional_description")}
                 disabled={submitting}
               />
             </div>
@@ -326,7 +326,7 @@ export default function LabTestTypesManagement() {
                 disabled={submitting}
                 className="flex-1"
               >
-                {submitting ? 'Adding...' : 'Add Test Type'}
+                {submitting ? t("adding") : t("add_test_type")}
               </Button>
               <Button
                 onClick={() => {
@@ -346,7 +346,7 @@ export default function LabTestTypesManagement() {
                 variant="outline"
                 disabled={submitting}
               >
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </CardContent>
@@ -359,7 +359,7 @@ export default function LabTestTypesManagement() {
           <div className="relative">
             <Search className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
             <Input
-              placeholder="Search test types..."
+              placeholder={t("search_test_types")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={isRTL ? 'pr-10' : 'pl-10'}
@@ -378,12 +378,12 @@ export default function LabTestTypesManagement() {
         <CardContent>
           {loading ? (
             <div className="text-center py-8 text-gray-500">
-              Loading lab test types...
+              {t("loading_lab_test_types")}
             </div>
           ) : filteredTestTypes.length === 0 ? (
             <div className="text-center py-8">
               <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">No lab test types found</p>
+              <p className="text-gray-500">{t("no_lab_test_types_found")}</p>
             </div>
           ) : (
             <div className="space-y-2">

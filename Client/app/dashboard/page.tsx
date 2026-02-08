@@ -53,29 +53,29 @@ export default function DoctorProfessionalDashboard() {
   // Doctor professional services data
   const doctorServices = [
     {
-      title: "Patient Management",
-      description: "View and manage your active patients and their medical records",
+      title: t("patient_management"),
+      description: t("patient_management_desc"),
       icon: <Users className="h-6 w-6 text-white" />,
       color: "bg-blue-500",
       link: "/doctor/patients",
     },
     {
-      title: "Appointment Scheduling",
-      description: "Manage your schedule and appointment availability",
+      title: t("appointment_scheduling"),
+      description: t("appointment_scheduling_desc"),
       icon: <Calendar className="h-6 w-6 text-white" />,
       color: "bg-emerald-500",
       link: "/schedule",
     },
     {
-      title: "Analytics & Reports",
-      description: "View practice analytics and generate medical reports",
+      title: t("analytics_reports"),
+      description: t("analytics_reports_desc"),
       icon: <BarChart3 className="h-6 w-6 text-white" />,
       color: "bg-indigo-500",
       link: "/analytics",
     },
     {
-      title: "Practice Settings",
-      description: "Configure your practice preferences and work hours",
+      title: t("practice_settings"),
+      description: t("practice_settings_desc"),
       icon: <Settings className="h-6 w-6 text-white" />,
       color: "bg-purple-500",
       link: "/settings",
@@ -158,7 +158,7 @@ export default function DoctorProfessionalDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="scroll-animation hover-lift hover-glow" data-animation="scale-in">
               <StatsCard
-                title="Active Patients"
+                title={t("active_patients")}
                 value="47"
                 icon={Users}
                 description="Total patients under care"
@@ -168,7 +168,7 @@ export default function DoctorProfessionalDashboard() {
             </div>
             <div className="scroll-animation hover-lift hover-glow" data-animation="scale-in">
               <StatsCard
-                title="Today's Consultations"
+                title={t("todays_consultations")}
                 value="8"
                 icon={Calendar}
                 description="Scheduled appointments"
@@ -178,7 +178,7 @@ export default function DoctorProfessionalDashboard() {
             </div>
             <div className="scroll-animation hover-lift hover-glow" data-animation="scale-in">
               <StatsCard
-                title="Practice Hours"
+                title={t("practice_hours")}
                 value="32"
                 icon={Clock}
                 description="Clinical hours this week"
@@ -188,7 +188,7 @@ export default function DoctorProfessionalDashboard() {
             </div>
             <div className="scroll-animation hover-lift hover-glow" data-animation="scale-in">
               <StatsCard
-                title="Consultations Completed"
+                title={t("consultations_completed")}
                 value="23"
                 icon={FileText}
                 description="This month's appointments"

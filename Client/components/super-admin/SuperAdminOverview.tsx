@@ -91,7 +91,7 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Loading super admin overview...</CardTitle>
+                        <CardTitle>{t("loading_super_admin")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="animate-pulse space-y-4">
@@ -110,13 +110,13 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>No Data Available</CardTitle>
+                        <CardTitle>{t("no_data_available")}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>Unable to load super admin statistics.</p>
+                        <p>{t("unable_to_load_stats")}</p>
                         <Button onClick={onRefresh} className="mt-4">
                             <RefreshCw className="h-4 w-4 mr-2" />
-                            Retry
+                            {t("retry")}
                         </Button>
                     </CardContent>
                 </Card>
@@ -134,14 +134,14 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                     <CardHeader>
                         <CardTitle className="flex items-center">
                             <Crown className="h-5 w-5 mr-2" />
-                            Super Admin Overview
+                            {t("super_admin_overview_title")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>Loading super admin statistics...</p>
+                        <p>{t("loading_super_admin_stats")}</p>
                         <Button onClick={onRefresh} className="mt-4">
                             <RefreshCw className="h-4 w-4 mr-2" />
-                            Refresh
+                            {t("refresh")}
                         </Button>
                     </CardContent>
                 </Card>
@@ -193,9 +193,9 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                 <div>
                     <h2 className="text-2xl font-bold flex items-center">
                         <Crown className="h-6 w-6 mr-2 text-yellow-500" />
-                        Super Admin Overview
+                        {t("super_admin_overview_title")}
                     </h2>
-                    <p className="text-muted-foreground">Comprehensive system overview and management</p>
+                    <p className="text-muted-foreground">{t("comprehensive_system_overview")}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                     <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -210,7 +210,7 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                     </Select>
                     <Button onClick={onRefresh}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh
+                        {t("refresh")}
                     </Button>
                 </div>
             </div>
@@ -223,7 +223,7 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Users</p>
                                 <p className="text-2xl font-bold">{overview.totalUsers.toLocaleString()}</p>
-                                <p className="text-xs text-green-600">All system users</p>
+                                <p className="text-xs text-green-600">{t("all_system_users")}</p>
                             </div>
                             <Users className="h-8 w-8 text-blue-500" />
                         </div>
@@ -374,8 +374,8 @@ export default function SuperAdminOverview({ stats, loading, onRefresh, setActiv
                         {adminActivityData.length === 0 || adminActivityData.every(item => item.count === 0) ? (
                             <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
                                 <Activity className="h-12 w-12 mb-4 opacity-50" />
-                                <p className="text-sm">No activity data available</p>
-                                <p className="text-xs mt-1">Activity data will appear here once actions are recorded</p>
+                                <p className="text-sm">{t("no_activity_data")}</p>
+                                <p className="text-xs mt-1">{t("activity_data_will_appear")}</p>
                             </div>
                         ) : (
                             <ResponsiveContainer width="100%" height={300}>

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { useLocale } from "@/components/providers/locale-provider"
 
 const data = [
   { name: "Consultations", hours: 18, fill: "#10b981" },
@@ -14,12 +15,13 @@ const data = [
 export default function TimeDistributionChart() {
   const { theme } = useTheme()
   const isDark = theme === "dark"
+  const { t } = useLocale()
 
   return (
     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
       <CardHeader>
-        <CardTitle>Time Distribution</CardTitle>
-        <CardDescription>How you spend your working hours</CardDescription>
+        <CardTitle>{t("time_distribution")}</CardTitle>
+        <CardDescription>{t("time_distribution_description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px]">

@@ -1525,21 +1525,21 @@ export default function DoctorDashboard() {
                                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                                       <User className="w-6 h-6 text-white" />
                                     </div>
-                                    <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                      <h4 className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <h4 className={`font-medium text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {getLocalizedPatientName(appointment)}
                                       </h4>
-                                      <p className="text-sm text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {toArabicNumerals(new Date(appointment.appointment_date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }), locale)} {t('at') || 'at'} {(() => { try { const [h, m] = (appointment.appointment_time || '').split(':'); const dt = new Date(); dt.setHours(parseInt(h), parseInt(m), 0); const timeStr = dt.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: locale !== 'ar' }); return locale === 'ar' ? toArabicNumerals(timeStr, locale) : timeStr; } catch { return appointment.appointment_time; } })()}
                                       </p>
-                                      <p className="text-sm text-gray-500 dark:text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <p className={`text-sm text-gray-500 dark:text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                         {appointment.appointment_type === 'home'
                                           ? (t('dd_home_visit') || 'Home Visit')
                                           : (t('dd_clinic_visit') || 'Clinic Visit')}
                                       </p>
                                       {(appointment.center_id || appointment.center || appointment.center_name) && (
-                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                          <Building2 className={`w-3 h-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                                        <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1 ${isRTL ? 'flex-row-reverse justify-start' : ''} ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                          <Building2 className={`w-3 h-3 flex-shrink-0 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                                           <span dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(appointment)}</span>
                                         </p>
                                       )}

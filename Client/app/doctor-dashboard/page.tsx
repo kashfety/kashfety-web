@@ -1919,7 +1919,7 @@ export default function DoctorDashboard() {
                         {t('patients') || 'Patients'}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
                       {patients && patients.length > 0 ? (
                         <div className="space-y-4">
                           {(showAllPatients ? patients : patients.slice(0, 10)).map((patient) => {
@@ -1927,37 +1927,43 @@ export default function DoctorDashboard() {
                             return (
                               <div
                                 key={patient.id}
-                                className={`flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:bg-gray-100 dark:hover:bg-[#2A2A2E] transition-colors"
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
-                                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <div className={`flex items-center gap-4 w-full sm:w-auto min-w-0 ${isRTL ? 'sm:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {/* Avatar first so it stays on the right in RTL */}
+                                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                                     <span className="text-white font-medium">
                                       {patientName?.charAt(0)?.toUpperCase() || 'P'}
                                     </span>
                                   </div>
-                                  <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <h4 className="font-medium text-gray-900 dark:text-white">
+                                  <div
+                                    className="flex-1 min-w-0"
+                                    dir={isRTL ? 'rtl' : 'ltr'}
+                                    style={{ textAlign: isRTL ? 'right' : 'left' }}
+                                  >
+                                    <h4 className="font-medium text-gray-900 dark:text-white" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                       {patientName}
                                     </h4>
-                                    <div className={`flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                        <Mail className="w-3 h-3" />
-                                        {patient.email}
+                                    <div className={`flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-0.5 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <Mail className="w-3 h-3 flex-shrink-0" />
+                                        <span dir="ltr">{patient.email}</span>
                                       </span>
-                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                        <Phone className="w-3 h-3" />
-                                        {formatPhoneNumber(patient.phone, locale)}
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <Phone className="w-3 h-3 flex-shrink-0" />
+                                        <span dir="ltr">{formatPhoneNumber(patient.phone, locale)}</span>
                                       </span>
                                       {patient.age && (
-                                        <span>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
+                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <Badge variant="outline" className="text-xs">
+                                    <div className={`flex flex-wrap items-center gap-2 mt-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <Badge variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
                                       </Badge>
                                       {patient.lastAppointment && (
-                                        <Badge variant="secondary" className="text-xs">
+                                        <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                                           {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
                                             year: 'numeric',
                                             month: 'short',
@@ -1966,22 +1972,23 @@ export default function DoctorDashboard() {
                                         </Badge>
                                       )}
                                       {patient.gender && (
-                                        <Badge variant="outline" className="text-xs">
+                                        <Badge variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                                           {patient.gender}
                                         </Badge>
                                       )}
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className={`flex items-center gap-2 w-full sm:w-auto ${isRTL ? 'justify-start' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     className={isRTL ? 'flex-row-reverse' : ''}
+                                    dir={isRTL ? 'rtl' : 'ltr'}
                                     onClick={() => handleViewPatient(patient.id)}
                                   >
                                     <FileText className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                                    {t('medical_records') || 'Records'}
+                                    <span dir={isRTL ? 'rtl' : 'ltr'}>{t('medical_records') || 'Records'}</span>
                                   </Button>
                                 </div>
                               </div>
@@ -1989,29 +1996,28 @@ export default function DoctorDashboard() {
                           })}
 
                           {patients.length > 10 && (
-                            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div className={`text-center pt-4 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                               <Button
                                 variant="outline"
                                 onClick={() => setShowAllPatients(!showAllPatients)}
+                                dir={isRTL ? 'rtl' : 'ltr'}
                               >
-                                {showAllPatients ? (
-                                  <>
-                                    {t('show_less') || 'Show Less'}
-                                  </>
-                                ) : (
-                                  <>
-                                    {t('view_all') || 'View All'} {patients.length} {t('patients') || 'Patients'}
-                                  </>
-                                )}
+                                <span dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {showAllPatients ? (
+                                    <>{t('show_less') || 'Show Less'}</>
+                                  ) : (
+                                    <>{t('view_all') || 'View All'} {toArabicNumerals(patients.length.toString(), locale)} {t('patients') || 'Patients'}</>
+                                  )}
+                                </span>
                               </Button>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="text-center py-8">
-                          <UserCheck className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">{t('noData') || 'No patients yet'}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                        <div className={`py-8 ${isRTL ? 'text-right' : 'text-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <UserCheck className={`w-12 h-12 text-gray-400 dark:text-gray-600 mb-4 ${isRTL ? 'mr-0 ml-auto' : 'mx-auto'}`} />
+                          <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('noData') || 'No patients yet'}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
                             {t('patients_will_appear') || 'Patients will appear here after their first appointment'}
                           </p>
                         </div>

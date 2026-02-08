@@ -12,6 +12,8 @@ type CalendarLocaleContextValue = {
   locale: string
   ariaLabelPrevious?: string
   ariaLabelNext?: string
+  /** When provided, caption text is fully controlled by the parent (updates when month scrolls). */
+  formatMonthCaption?: (year: number, monthIndex: number) => string
 }
 const CalendarLocaleContext = React.createContext<CalendarLocaleContextValue>({ locale: "en-US" })
 
@@ -22,6 +24,8 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   ariaLabelPrevious?: string
   /** Localized aria-label for the next month button */
   ariaLabelNext?: string
+  /** When provided, caption text is fully controlled by the parent; use for i18n (e.g. getLocalizedMonths + toArabicNumerals). */
+  formatMonthCaption?: (year: number, monthIndex: number) => string
 }
 
 // Custom MonthCaption component to place nav buttons next to the month name
@@ -32,9 +36,13 @@ function CustomMonthCaption(props: MonthCaptionProps) {
   const locale = ctx.locale
   const dateLocale = locale === "ar" || locale.startsWith("ar-") ? "ar-EG" : locale || "en-US"
 
-  const monthDate = calendarMonth.year
+  const monthDate = calendarMonth.year != null
     ? new Date(calendarMonth.year, calendarMonth.month)
     : new Date()
+
+  const captionText = ctx.formatMonthCaption
+    ? ctx.formatMonthCaption(calendarMonth.year ?? monthDate.getFullYear(), calendarMonth.month ?? monthDate.getMonth())
+    : monthDate.toLocaleDateString(dateLocale, { month: "long", year: "numeric" })
 
   return (
     <div className="flex justify-between items-center pt-1 relative mb-4 px-1 w-full">
@@ -52,8 +60,11 @@ function CustomMonthCaption(props: MonthCaptionProps) {
         <ChevronLeft className="h-4 w-4" />
       </button>
 
-      <div className="text-lg font-bold text-gray-900 dark:text-gray-100 flex-1 text-center">
-        {monthDate.toLocaleDateString(dateLocale, { month: "long", year: "numeric" })}
+      <div
+        key={`${calendarMonth.year ?? ""}-${calendarMonth.month ?? ""}`}
+        className="text-lg font-bold text-gray-900 dark:text-gray-100 flex-1 text-center"
+      >
+        {captionText}
       </div>
 
       <button
@@ -80,6 +91,7 @@ function Calendar({
   captionLocale,
   ariaLabelPrevious,
   ariaLabelNext,
+  formatMonthCaption,
   ...props
 }: CalendarProps) {
   const locale = captionLocale ?? "en-US"
@@ -87,6 +99,7 @@ function Calendar({
     locale,
     ariaLabelPrevious,
     ariaLabelNext,
+    formatMonthCaption,
   }
   return (
     <CalendarLocaleContext.Provider value={contextValue}>

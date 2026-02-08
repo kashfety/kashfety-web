@@ -13,7 +13,7 @@ import { MapPin, Home, Clock, Star, ChevronLeft, Calendar as CalendarIcon, Searc
 import Image from "next/image";
 import { useAuth } from '@/lib/providers/auth-provider';
 import { useLocale } from '@/components/providers/locale-provider';
-import { localizeSpecialty, toArabicNumerals, toWesternNumerals, formatCurrency, formatLocalizedTime } from '@/lib/i18n';
+import { localizeSpecialty, toArabicNumerals, toWesternNumerals, formatCurrency, formatLocalizedTime, getLocalizedMonths } from '@/lib/i18n';
 import { ar } from 'date-fns/locale';
 import { appointmentService, labService } from '@/lib/api';
 import { useToast } from "@/hooks/use-toast";
@@ -2527,6 +2527,12 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
                             ariaLabelPrevious={t('calendar_prev_month')}
                             ariaLabelNext={t('calendar_next_month')}
                             locale={locale === 'ar' ? ar : undefined}
+                            numerals={locale === 'ar' ? 'arab' : undefined}
+                            formatMonthCaption={(year, monthIndex) =>
+                              locale === 'ar'
+                                ? getLocalizedMonths(locale)[monthIndex] + ' ' + toArabicNumerals(year.toString(), locale)
+                                : new Date(year, monthIndex).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                            }
                             formatters={{
                               formatDay: (date) =>
                                 locale === 'ar' ? toArabicNumerals(date.getDate().toString(), locale) : date.getDate().toString(),

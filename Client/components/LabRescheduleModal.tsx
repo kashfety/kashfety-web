@@ -294,6 +294,12 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                       captionLocale={locale}
                       ariaLabelPrevious={t('calendar_prev_month')}
                       ariaLabelNext={t('calendar_next_month')}
+                      formatMonthCaption={(year, monthIndex) =>
+                        locale === 'ar'
+                          ? getLocalizedMonths(locale)[monthIndex] + ' ' + toArabicNumerals(year.toString(), locale)
+                          : new Date(year, monthIndex).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                      }
+                      numerals={locale === 'ar' ? 'arab' : undefined}
                       mode="single"
                       selected={selectedDate}
                       onSelect={handleDateSelect}
@@ -313,14 +319,6 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
                           const day = date.getDate();
                           return locale === 'ar' ? toArabicNumerals(day.toString(), locale) : day.toString();
                         },
-                        formatCaption: (date, options) => {
-                          if (locale === 'ar') {
-                            const month = getLocalizedMonths(locale)[date.getMonth()];
-                            const year = toArabicNumerals(date.getFullYear().toString(), locale);
-                            return `${month} ${year}`;
-                          }
-                          return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                        }
                       }}
                     />
                   </div>

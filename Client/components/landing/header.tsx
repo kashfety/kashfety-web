@@ -56,14 +56,14 @@ export function Header() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity duration-200 min-w-fit"
+          className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-200 min-w-fit"
         >
-          <div className="relative h-7 w-24 sm:h-8 sm:w-28 md:h-9 md:w-32 flex-shrink-0">
+          <div className="relative h-7 w-8 sm:h-8 sm:w-9 md:h-9 md:w-10 flex-shrink-0 overflow-hidden">
             <Image
               src={mounted && theme === 'dark' ? '/logo/branding-dark.png' : '/logo/branding-light.png'}
               alt={t.header.brandName}
               fill
-              className="object-contain object-left"
+              className="object-cover object-left"
               priority
             />
           </div>

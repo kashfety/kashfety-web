@@ -1121,3 +1121,143 @@ table.rdp-month_grid,
   width: 100% !important;
   max-width: 100% !important;
 }
+
+/* ============================================
+   LANDING PAGE – utilities and keyframes
+   ============================================ */
+
+@layer utilities {
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .fade-in-down {
+    animation: fadeInDown 0.6s ease-out forwards;
+  }
+
+  .stagger-1 {
+    animation-delay: 100ms;
+  }
+
+  .stagger-2 {
+    animation-delay: 200ms;
+  }
+
+  .stagger-3 {
+    animation-delay: 300ms;
+  }
+
+  .stagger-4 {
+    animation-delay: 400ms;
+  }
+
+  .parallax-float {
+    animation: parallaxFloat 6s ease-in-out infinite;
+  }
+
+  .parallax-float-reverse {
+    animation: parallaxFloatReverse 8s ease-in-out infinite;
+  }
+
+  .parallax-float-slow {
+    animation: parallaxFloat 10s ease-in-out infinite;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  .orbit-float {
+    animation: orbitFloat 7s ease-in-out infinite;
+  }
+
+  .slide-in-connector {
+    animation: slideInConnector 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .shimmer {
+    animation: landingShimmer 3s ease-in-out infinite;
+  }
+}
+
+@keyframes slideInConnector {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+@keyframes landingShimmer {
+  0% {
+    box-shadow: 0 0 20px rgba(13, 148, 136, 0);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(13, 148, 136, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(13, 148, 136, 0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes parallaxFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes parallaxFloatReverse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+}
+
+@keyframes orbitFloat {
+  0%, 100% {
+    transform: translateX(0px) translateY(0px);
+  }
+  25% {
+    transform: translateX(15px) translateY(-15px);
+  }
+  50% {
+    transform: translateX(0px) translateY(20px);
+  }
+  75% {
+    transform: translateX(-15px) translateY(-10px);
+  }
+}

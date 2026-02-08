@@ -273,12 +273,12 @@ export default function DoctorCenterManagement() {
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
       {/* Header */}
-      <div className="flex items-center justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-          <Building className="h-5 w-5" />
-          <h2 className="text-xl font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_medical_center_assignments') || 'Medical Center Assignments'}</h2>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+          <Building className="h-5 w-5 flex-shrink-0" />
+          <h2 className="text-xl font-semibold" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>{t('dd_medical_center_assignments') || 'Medical Center Assignments'}</h2>
         </div>
         {hasChanges && (
           <Button
@@ -296,11 +296,11 @@ export default function DoctorCenterManagement() {
 
       {/* Instructions */}
       <Card dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardContent className={`pt-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardContent className={`pt-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
           <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
-            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>• {t('dd_select_centers_instruction_1') || 'Select the medical centers where you want to practice'}</p>
-            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>• {t('dd_select_centers_instruction_2') || 'Choose one center as your primary location'}</p>
-            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>• {t('dd_select_centers_instruction_3') || 'You can set different schedules for each assigned center'}</p>
+            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>• {t('dd_select_centers_instruction_1') || 'Select the medical centers where you want to practice'}</p>
+            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>• {t('dd_select_centers_instruction_2') || 'Choose one center as your primary location'}</p>
+            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>• {t('dd_select_centers_instruction_3') || 'You can set different schedules for each assigned center'}</p>
           </div>
         </CardContent>
       </Card>
@@ -321,42 +321,42 @@ export default function DoctorCenterManagement() {
               onClick={() => toggleCenterSelection(center.id)}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              <CardHeader className={`pb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                <div className="flex items-start justify-between" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <CardTitle className={`text-base flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{getLocalizedCenterName(center)}</CardTitle>
-                  <div className="flex items-center gap-1 flex-shrink-0" dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardHeader className={`pb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+                <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <CardTitle className={`text-base flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>{getLocalizedCenterName(center)}</CardTitle>
+                  <div className={`flex items-center gap-1 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {isSelected && (
                       <CheckCircle className="h-5 w-5 text-blue-500" />
                     )}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+              <CardContent dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
                 <div className="space-y-3" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <div className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <MapPin className={`h-4 w-4 text-gray-500 mt-0.5 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { justifyContent: 'flex-end' } : undefined}>
+                    <MapPin className={`h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
                       {center.address}
                     </p>
                   </div>
 
                   {center.phone && (
-                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse' : 'flex items-center gap-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse justify-end' : 'flex items-center gap-1'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
                       <span>📞</span>
                       <span dir="ltr">{center.phone}</span>
                     </p>
                   )}
 
                   {center.email && (
-                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse' : 'flex items-center gap-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex items-center gap-1 flex-row-reverse justify-end' : 'flex items-center gap-1'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
                       <span>✉️</span>
                       <span dir="ltr">{center.email}</span>
                     </p>
                   )}
 
                   {isSelected && (
-                    <div className="flex items-center justify-between pt-2 border-t" dir={isRTL ? 'rtl' : 'ltr'}>
-                      <span className={`text-xs text-gray-500 flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{isPrimary ? (t('dd_primary_center') || 'Primary Center') : (t('dd_click_to_set_primary') || 'Click to set as primary')}</span>
+                    <div className={`flex items-center justify-between pt-2 border-t ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <span className={`text-xs text-gray-500 flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>{isPrimary ? (t('dd_primary_center') || 'Primary Center') : (t('dd_click_to_set_primary') || 'Click to set as primary')}</span>
                       {isPrimary ? (
                         <Badge variant="default" className={`text-xs ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <Star className={`h-3 w-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
@@ -387,8 +387,8 @@ export default function DoctorCenterManagement() {
 
       {/* Create new center (generic or personal clinic) */}
       <Card dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
             <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_add_center') || 'Add Center / Clinic'}</span>
           </CardTitle>
         </CardHeader>
@@ -478,12 +478,12 @@ export default function DoctorCenterManagement() {
 
       {/* Summary */}
       <Card dir={isRTL ? 'rtl' : 'ltr'}>
-        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-          <CardTitle className={`text-base flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+          <CardTitle className={`text-base flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
             <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_assignment_summary') || 'Assignment Summary'}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardContent dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isRTL ? 'md:grid-flow-col-dense' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
               <Label className={`text-sm font-medium text-gray-600 dark:text-gray-400 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_selected_centers') || 'Selected Centers'}</Label>

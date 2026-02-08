@@ -2057,12 +2057,12 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="centers" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Building2 className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_centers_title') || 'Centers'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0"><Building2 className="h-5 w-5 text-white" /></div>
+                    <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_centers_title') || 'Centers'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
                     </div>
                   </div>
                 </div>

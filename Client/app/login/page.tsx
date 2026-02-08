@@ -276,16 +276,16 @@ export default function LoginPage() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="mb-4 bg-red-500/20 border-l-4 border-red-400 p-4 rounded-lg backdrop-blur-sm"
+                className={`mb-4 border-l-4 p-4 rounded-lg backdrop-blur-sm ${theme === 'dark' ? 'bg-red-500/20 border-red-400' : 'bg-red-50 border-red-500'}`}
               >
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className={`h-5 w-5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-200">{error}</p>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-red-200' : 'text-red-800'}`}>{error}</p>
                   </div>
                 </div>
               </motion.div>

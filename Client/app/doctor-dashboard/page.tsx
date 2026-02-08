@@ -1945,25 +1945,33 @@ export default function DoctorDashboard() {
                                     <h4 className="font-medium text-gray-900 dark:text-white" style={{ textAlign: isRTL ? 'right' : 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                                       {patientName}
                                     </h4>
-                                    <div className={`flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-0.5 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div
+                                      className={`flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mt-0.5 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}
+                                      dir={isRTL ? 'rtl' : 'ltr'}
+                                      style={{ textAlign: isRTL ? 'right' : 'left' }}
+                                    >
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                         <Mail className="w-3 h-3 flex-shrink-0" />
                                         <span dir="ltr">{patient.email}</span>
                                       </span>
-                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                      <span className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                         <Phone className="w-3 h-3 flex-shrink-0" />
                                         <span dir="ltr">{formatPhoneNumber(patient.phone, locale)}</span>
                                       </span>
                                       {patient.age && (
-                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
+                                        <span dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{locale === 'ar' ? toArabicNumerals(patient.age.toString()) : patient.age} {t('years_old') || 'years old'}</span>
                                       )}
                                     </div>
-                                    <div className={`flex flex-wrap items-center gap-2 mt-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                      <Badge variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div
+                                      className={`flex flex-wrap items-center gap-2 mt-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}
+                                      dir={isRTL ? 'rtl' : 'ltr'}
+                                      style={{ textAlign: isRTL ? 'right' : 'left' }}
+                                    >
+                                      <Badge variant="outline" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>
                                         {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
                                       </Badge>
                                       {patient.lastAppointment && (
-                                        <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <Badge variant="secondary" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>
                                           {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
                                             year: 'numeric',
                                             month: 'short',
@@ -1972,7 +1980,7 @@ export default function DoctorDashboard() {
                                         </Badge>
                                       )}
                                       {patient.gender && (
-                                        <Badge variant="outline" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <Badge variant="outline" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>
                                           {patient.gender}
                                         </Badge>
                                       )}

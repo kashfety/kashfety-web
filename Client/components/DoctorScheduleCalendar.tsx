@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale } from "@/components/providers/locale-provider";
-import { formatLocalizedTime, toArabicNumerals } from "@/lib/i18n";
+import { formatLocalizedTime, toArabicNumerals, getCanonicalStatus, getCanonicalAppointmentType, getTypeArabic } from "@/lib/i18n";
 import {
     Calendar,
     Clock,
@@ -83,31 +83,20 @@ export default function DoctorScheduleCalendar({
         return appointment.patient_name || (t('cd_unknown_patient') || 'Unknown Patient');
     };
 
-    // Helper to get localized status
+    // Helper to get localized status (canonical English → proper Arabic counterpart)
     const getLocalizedStatus = (status: string): string => {
-        const statusLower = status.toLowerCase();
-        const key = `dd_status_${statusLower}`;
+        const canonical = getCanonicalStatus(status);
+        const key = `dd_status_${canonical}`;
         return t(key) || status;
     };
 
-    // Localize appointment type
+    // Localize appointment/consultation type (canonical English ↔ proper Arabic counterpart)
     const getLocalizedAppointmentType = (type: string) => {
         if (!type) return '';
-        const lowerType = type.toLowerCase();
-        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
-        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
-        return type;
+        const canonical = getCanonicalAppointmentType(type);
+        return locale === 'ar' ? getTypeArabic(canonical) : canonical;
     };
-
-    // Localize consultation type
-    const getLocalizedConsultationType = (type: string) => {
-        if (!type) return '';
-        const lowerType = type.toLowerCase();
-        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
-        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
-        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
-        return type;
-    };
+    const getLocalizedConsultationType = (type: string) => getLocalizedAppointmentType(type);
 
     // Get all unique time slots from appointments, including non-whole hours
     const getAllTimeSlots = () => {

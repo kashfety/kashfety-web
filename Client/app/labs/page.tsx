@@ -13,7 +13,7 @@ import { labService } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals } from "@/lib/i18n";
+import { toArabicNumerals, getCanonicalStatus } from "@/lib/i18n";
 import LabResultModal from "@/components/LabResultModal";
 import LabRescheduleModal from "@/components/LabRescheduleModal";
 import LabCancelModal from "@/components/LabCancelModal";
@@ -94,9 +94,9 @@ export default function MyLabsPage() {
   };
 
   const getLocalizedStatus = (status: string) => {
-    const statusLower = (status || '').toLowerCase();
-    const statusKey = `appointments_status_${statusLower}`;
-    return t(statusKey) || status.toUpperCase();
+    const canonical = getCanonicalStatus(status || '');
+    const statusKey = `appointments_status_${canonical}`;
+    return t(statusKey) || (status || '').toUpperCase();
   };
 
   const isAbsent = (booking: LabBooking) => {

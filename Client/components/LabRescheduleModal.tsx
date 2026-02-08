@@ -15,7 +15,7 @@ import { useCustomAlert } from "@/hooks/use-custom-alert";
 import CustomAlert from "@/components/CustomAlert";
 import { motion, AnimatePresence } from "framer-motion"
 import { useLocale } from "@/components/providers/locale-provider";
-import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths } from "@/lib/i18n";
+import { toArabicNumerals, toWesternNumerals, formatLocalizedDate, formatLocalizedTime, getLocalizedMonths, getCanonicalStatus } from "@/lib/i18n";
 import { ar } from "date-fns/locale";
 
 interface LabBooking {
@@ -67,9 +67,9 @@ export default function LabRescheduleModal({ isOpen, onClose, booking, onSuccess
   };
 
   const getLocalizedStatus = (status: string) => {
-    const statusLower = (status || '').toLowerCase();
-    const statusKey = `appointments_status_${statusLower}`;
-    return t(statusKey) || status.toUpperCase();
+    const canonical = getCanonicalStatus(status || '');
+    const statusKey = `appointments_status_${canonical}`;
+    return t(statusKey) || (status || '').toUpperCase();
   };
 
   // Reset form when booking changes

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, User, Phone, Mail, MapPin, FileText, Stethoscope, CheckCircle, Building2 } from "lucide-react";
 import { useLocale } from "@/components/providers/locale-provider";
-import { formatLocalizedTime } from "@/lib/i18n";
+import { formatLocalizedTime, getCanonicalStatus, getCanonicalAppointmentType, getTypeArabic } from "@/lib/i18n";
 
 interface Appointment {
     id: string;
@@ -100,10 +100,10 @@ export default function AppointmentDetailsModal({
         }
     };
 
-    // Get localized status text
+    // Get localized status text (canonical English → proper Arabic counterpart via i18n)
     const getLocalizedStatus = (status: string): string => {
-        const statusLower = status.toLowerCase();
-        const key = `dd_status_${statusLower}`;
+        const canonical = getCanonicalStatus(status);
+        const key = `dd_status_${canonical}`;
         return t(key) || status;
     };
 
@@ -128,23 +128,18 @@ export default function AppointmentDetailsModal({
         return num.toString().split('').map(digit => arabicNumerals[parseInt(digit)] || digit).join('');
     };
 
-    // Localize appointment type
+    // Localize appointment type (canonical English ↔ proper Arabic counterpart)
     const getLocalizedAppointmentType = (type: string) => {
         if (!type) return '';
-        const lowerType = type.toLowerCase();
-        if (lowerType === 'clinic') return locale === 'ar' ? 'عيادة' : 'clinic';
-        if (lowerType === 'home') return locale === 'ar' ? 'منزل' : 'home';
-        return type;
+        const canonical = getCanonicalAppointmentType(type);
+        return locale === 'ar' ? getTypeArabic(canonical) : canonical;
     };
 
-    // Localize consultation type
+    // Localize consultation type (canonical English ↔ proper Arabic counterpart)
     const getLocalizedConsultationType = (type: string) => {
         if (!type) return '';
-        const lowerType = type.toLowerCase();
-        if (lowerType === 'consultation') return locale === 'ar' ? 'استشارة' : 'consultation';
-        if (lowerType === 'follow-up') return locale === 'ar' ? 'متابعة' : 'follow-up';
-        if (lowerType === 'checkup') return locale === 'ar' ? 'فحص' : 'checkup';
-        return type;
+        const canonical = getCanonicalAppointmentType(type);
+        return locale === 'ar' ? getTypeArabic(canonical) : canonical;
     };
 
     // Get localized center/clinic name

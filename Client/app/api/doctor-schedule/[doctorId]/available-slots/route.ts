@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { toWesternNumerals } from '@/lib/i18n';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-/** Normalize date to YYYY-MM-DD with Western numerals and parse day of week in a timezone-safe way */
+/** Server-only: convert Arabic-Indic numerals (٠-٩) to Western (0-9). Backend always uses English/Western. */
+function toWesternNumerals(value: string): string {
+  const map: Record<string, string> = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+  return String(value).replace(/[٠-٩]/g, (d) => map[d] ?? d);
+}
+
+/** Normalize date to YYYY-MM-DD with Western numerals and parse day of week in a timezone-safe way. Backend stays English. */
 function normalizeDateAndGetDay(dateParam: string | null): { dateStr: string; dayOfWeek: number } | null {
   if (!dateParam || typeof dateParam !== 'string') return null;
   const normalized = toWesternNumerals(dateParam.trim());

@@ -346,6 +346,78 @@ export function formatLocalizedTimeSimple(timeString: string, locale: Locale): s
   return timeString;
 }
 
+/** Canonical English status values used by API/DB. Arabic display is the proper counterpart. */
+const STATUS_EN_TO_AR: Record<string, string> = {
+  confirmed: 'مؤكد',
+  pending: 'قيد الانتظار',
+  cancelled: 'ملغي',
+  canceled: 'ملغي',
+  completed: 'مكتمل',
+  scheduled: 'مجدول',
+  rescheduled: 'إعادة جدولة',
+};
+const STATUS_AR_TO_EN: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_EN_TO_AR).map(([en, ar]) => [ar, en])
+);
+
+/** Canonical English appointment/consultation type → Arabic display (proper counterpart). */
+const TYPE_EN_TO_AR: Record<string, string> = {
+  clinic: 'عيادة',
+  home: 'منزل',
+  consultation: 'استشارة',
+  'follow-up': 'متابعة',
+  follow_up: 'متابعة',
+  checkup: 'فحص',
+  clinic_consultation: 'استشارة في العيادة',
+  'in-clinic': 'عيادة',
+};
+const TYPE_AR_TO_EN: Record<string, string> = {
+  'عيادة': 'clinic',
+  'منزل': 'home',
+  'استشارة': 'consultation',
+  'متابعة': 'follow-up',
+  'فحص': 'checkup',
+  'استشارة في العيادة': 'clinic_consultation',
+};
+
+/**
+ * Normalize status to canonical English (for API/display lookup). If value is Arabic, returns the English counterpart.
+ */
+export function getCanonicalStatus(value: string | undefined | null): string {
+  if (!value || typeof value !== 'string') return '';
+  const v = value.trim();
+  const lower = v.toLowerCase();
+  if (STATUS_EN_TO_AR[lower]) return lower;
+  return STATUS_AR_TO_EN[v] ?? STATUS_AR_TO_EN[lower] ?? lower;
+}
+
+/**
+ * Normalize appointment/consultation type to canonical English. If value is Arabic, returns the English counterpart.
+ */
+export function getCanonicalAppointmentType(value: string | undefined | null): string {
+  if (!value || typeof value !== 'string') return '';
+  const v = value.trim();
+  const lower = v.toLowerCase();
+  if (TYPE_EN_TO_AR[lower]) return lower;
+  return TYPE_AR_TO_EN[v] ?? TYPE_AR_TO_EN[lower] ?? lower;
+}
+
+/**
+ * Get the Arabic counterpart for a canonical English status. Use for display when locale is ar.
+ */
+export function getStatusArabic(status: string): string {
+  const canonical = getCanonicalStatus(status);
+  return STATUS_EN_TO_AR[canonical] ?? status;
+}
+
+/**
+ * Get the Arabic counterpart for a canonical English type (clinic/home/consultation etc). Use for display when locale is ar.
+ */
+export function getTypeArabic(type: string): string {
+  const canonical = getCanonicalAppointmentType(type);
+  return TYPE_EN_TO_AR[canonical] ?? type;
+}
+
 export const translations = {
   en: {
     // Navigation

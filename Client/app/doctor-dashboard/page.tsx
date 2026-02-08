@@ -1518,7 +1518,7 @@ export default function DoctorDashboard() {
                               {(showAllAppointments ? sortedAppointments : sortedAppointments.slice(0, 10)).map((appointment) => (
                                 <div
                                   key={appointment.id}
-                                  className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow ${isRTL ? 'lg:flex-row-reverse' : ''}`}
+                                  className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-[#1F1F23] bg-gray-50 dark:bg-[#1A1A1E] hover:shadow-md transition-shadow"
                                   dir={isRTL ? 'rtl' : 'ltr'}
                                 >
                                   <div className={`flex items-center gap-4 w-full lg:w-auto min-w-0 ${isRTL ? 'flex-row-reverse' : ''} ${isRTL ? 'lg:justify-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -1550,8 +1550,8 @@ export default function DoctorDashboard() {
                                       )}
                                     </div>
                                   </div>
-                                  <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                    <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto ${isRTL ? 'sm:flex-row-reverse sm:justify-start text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse justify-start' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                       <Badge
                                         variant={
                                           appointment.status === 'completed'
@@ -1602,7 +1602,7 @@ export default function DoctorDashboard() {
                                         </Badge>
                                       )}
                                     </div>
-                                    <div className={`flex flex-wrap items-center gap-1 w-full sm:w-auto ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <div className={`flex flex-wrap items-center gap-1 w-full sm:w-auto ${isRTL ? 'flex-row-reverse justify-start' : 'justify-start'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                       {appointment.status === 'scheduled' && (
                                         <Button
                                           variant="outline"

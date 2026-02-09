@@ -41,33 +41,30 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
     }
   }
 
-  const getDashboardPath = () => {
-    if (!user?.role) return '/'
-    const role = user.role.toLowerCase()
-    const paths: Record<string, string> = {
-      super_admin: '/super-admin-dashboard',
-      admin: '/admin-dashboard',
-      doctor: '/doctor-dashboard',
-      patient: '/', // Same as before: patient "dashboard" is the (new) landing page with patient access
-    }
-    return paths[role] ?? '/'
-  }
-
   if (!mounted) return null
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
-        {/* Menu (sidebar) button for patients */}
+        {/* Menu (sidebar) button for patients — subtle pulse when shown to draw attention */}
         {onMenuToggle ? (
-          <button
-            type="button"
-            onClick={onMenuToggle}
-            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all duration-300 flex-shrink-0 lg:mr-2"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
+          <>
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes landing-menu-pulse {
+                0%, 100% { box-shadow: 0 0 0 0 rgba(77, 188, 196, 0.35); transform: scale(1); }
+                50% { box-shadow: 0 0 0 6px rgba(77, 188, 196, 0); transform: scale(1.08); }
+              }
+              .landing-menu-pulse { animation: landing-menu-pulse 1.1s ease-in-out 4; }
+            ` }} />
+            <button
+              type="button"
+              onClick={onMenuToggle}
+              className="landing-menu-pulse p-2 rounded-lg bg-[#4DBCC4]/15 dark:bg-[#4DBCC4]/20 hover:bg-[#4DBCC4]/25 dark:hover:bg-[#4DBCC4]/30 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border border-[#4DBCC4]/30"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+          </>
         ) : null}
         {/* Logo */}
         <Link
@@ -113,7 +110,7 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
             <span className="sm:hidden">{isArabic ? t.header.languageShortEn : t.header.languageShortAr}</span>
           </button>
 
-          {/* Auth: Sign In or Dashboard + Logout */}
+          {/* Auth: Sign In or Logout (no Dashboard button — access is via burger menu) */}
           {loading ? (
             <Button
               variant="outline"
@@ -124,26 +121,15 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
               {t.header.loading}
             </Button>
           ) : user ? (
-            <>
-              <Link href={getDashboardPath()}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:inline-flex border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-900 dark:text-white transition-all duration-300 h-9 sm:h-10 text-xs sm:text-sm"
-                >
-                  {t.header.dashboard}
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAuthAction}
-                className="border-red-500/70 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 h-9 sm:h-10 text-xs sm:text-sm inline-flex items-center gap-1.5"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t.header.logout}</span>
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAuthAction}
+              className="border-red-500/70 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 h-9 sm:h-10 text-xs sm:text-sm inline-flex items-center gap-1.5"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t.header.logout}</span>
+            </Button>
           ) : (
             <Button
               variant="outline"

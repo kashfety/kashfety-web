@@ -36,19 +36,26 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
   const navigationItems = [
     {
-      icon: Home,
-      label: t('header_home') || 'Home',
+      icon: Users,
+      label: t('header_doctors') || 'Doctors',
       action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/');
+        if (user && user.role === 'patient') {
+          router.push('/patient-dashboard/doctors');
         } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (window.location.pathname !== '/') {
+            router.push('/#doctors');
+          } else {
+            const doctorsSection = document.getElementById('doctors');
+            if (doctorsSection) {
+              doctorsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
         }
       }
     },
     {
       icon: Calendar,
-      label: t('header_my_appointments') || 'My Appointments',
+      label: t('header_my_appointments') || 'My Doctor Appointments',
       action: () => {
         if (!user) {
           router.push('/login');
@@ -57,9 +64,14 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         }
       }
     },
+    ...(user && user.role === 'patient' ? [{
+      icon: Microscope,
+      label: t('labs') || 'Labs',
+      action: () => router.push('/patient-dashboard/labs')
+    }] : []),
     {
       icon: TestTube,
-      label: t('my_labs_title') || 'My Labs',
+      label: t('my_labs_title') || 'My Lab Appointments',
       action: () => {
         if (!user) {
           router.push('/login');
@@ -68,11 +80,6 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         }
       }
     },
-    ...(user && user.role === 'patient' ? [{
-      icon: Microscope,
-      label: t('labs') || 'Labs',
-      action: () => router.push('/patient-dashboard/labs')
-    }] : []),
     ...(user ? [{
       icon: Heart,
       label: t('medical_records') || 'Medical Records',
@@ -84,22 +91,13 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       action: () => router.push('/patient-dashboard/profile')
     }] : []),
     {
-      icon: Users,
-      label: t('header_doctors') || 'Doctors',
+      icon: Home,
+      label: t('header_home') || 'Home',
       action: () => {
-        // If user is a patient, navigate to patient dashboard doctors page
-        if (user && user.role === 'patient') {
-          router.push('/patient-dashboard/doctors');
+        if (window.location.pathname !== '/') {
+          router.push('/');
         } else {
-          // For non-patients, scroll to doctors section on homepage
-          if (window.location.pathname !== '/') {
-            router.push('/#doctors');
-          } else {
-            const doctorsSection = document.getElementById('doctors');
-            if (doctorsSection) {
-              doctorsSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
     }

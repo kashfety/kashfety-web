@@ -37,15 +37,15 @@ export function Header() {
   }
 
   const getDashboardPath = () => {
-    if (!user?.role) return '/patient-dashboard'
+    if (!user?.role) return '/'
     const role = user.role.toLowerCase()
     const paths: Record<string, string> = {
       super_admin: '/super-admin-dashboard',
       admin: '/admin-dashboard',
       doctor: '/doctor-dashboard',
-      patient: '/patient-dashboard',
+      patient: '/', // Same as before: patient "dashboard" is the (new) landing page with patient access
     }
-    return paths[role] ?? '/patient-dashboard'
+    return paths[role] ?? '/'
   }
 
   if (!mounted) return null

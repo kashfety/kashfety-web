@@ -57,10 +57,6 @@ const enTranslations = {
         description: 'Order tests at certified diagnostic centers and get results online',
       },
       {
-        title: 'Medical Imaging',
-        description: 'Schedule X-rays, ultrasounds, and other imaging services',
-      },
-      {
         title: 'Home Visits',
         description: 'Get care in the comfort of your home when available',
       },
@@ -157,10 +153,6 @@ const arTranslations = {
       {
         title: 'اختبارات المختبر',
         description: 'اطلب اختبارات في مراكز تشخيصية معتمدة واحصل على النتائج عبر الإنترنت',
-      },
-      {
-        title: 'التصوير الطبي',
-        description: 'جدول الأشعات السينية والموجات فوق الصوتية وخدمات التصوير الأخرى',
       },
       {
         title: 'الزيارات المنزلية',

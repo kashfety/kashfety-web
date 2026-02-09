@@ -1,6 +1,6 @@
 'use client'
 
-import { Stethoscope, Beaker, ImageIcon, Home } from 'lucide-react'
+import { Stethoscope, Beaker, Home } from 'lucide-react'
 import { useLocale } from '@/components/providers/locale-provider'
 import { getLandingTranslation } from '@/lib/landing-translations'
 
@@ -9,7 +9,7 @@ export function Services() {
   const t = getLandingTranslation(locale)
   const isArabic = locale === 'ar'
 
-  const serviceIcons = [Stethoscope, Beaker, ImageIcon, Home]
+  const serviceIcons = [Stethoscope, Beaker, Home]
   const services = t.services.services.map((service, idx) => ({
     ...service,
     icon: serviceIcons[idx],
@@ -29,13 +29,13 @@ export function Services() {
         </div>
 
         {/* Services grid - responsive columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {services.map((service, idx) => {
             const Icon = service.icon
             return (
               <div
                 key={idx}
-                className={`bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 border border-slate-100 dark:border-slate-700 hover:shadow-xl dark:hover:shadow-teal-500/20 hover:-translate-y-1 transition-all duration-300 fade-in-up stagger-${(idx % 4) + 1}`}
+                className={`bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 border border-slate-100 dark:border-slate-700 hover:shadow-xl dark:hover:shadow-teal-500/20 hover:-translate-y-1 transition-all duration-300 fade-in-up stagger-${(idx % 3) + 1}`}
               >
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-teal-100 dark:from-teal-900/50 to-blue-100 dark:to-blue-900/50 flex items-center justify-center mb-4 shadow-sm">
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 dark:text-teal-400" />

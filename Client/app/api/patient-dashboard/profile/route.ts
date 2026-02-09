@@ -42,11 +42,27 @@ const ALLOWED_GENDERS = ['male', 'female', 'other', 'prefer_not_to_say'] as cons
 
 type AllowedField = (typeof ALLOWED_UPDATE_FIELDS)[number];
 
+/** Fields that may be explicitly set to null (optional); undefined is still rejected. */
+const OPTIONAL_FIELDS_ALLOWING_NULL: readonly AllowedField[] = [
+  'phone',
+  'gender',
+  'date_of_birth',
+];
+
 function validateField(
   field: AllowedField,
   value: unknown
-): { valid: true; value: string } | { valid: false; message: string } {
-  if (value === null || value === undefined) {
+): { valid: true; value: string | null } | { valid: false; message: string } {
+  if (value === undefined) {
+    const message = OPTIONAL_FIELDS_ALLOWING_NULL.includes(field)
+      ? `${field} cannot be undefined`
+      : `${field} cannot be null or undefined`;
+    return { valid: false, message };
+  }
+  if (value === null) {
+    if (OPTIONAL_FIELDS_ALLOWING_NULL.includes(field)) {
+      return { valid: true, value: null };
+    }
     return { valid: false, message: `${field} cannot be null or undefined` };
   }
 
@@ -99,6 +115,9 @@ function validateField(
     default: {
       // string fields: name, name_ar, first_name, last_name, first_name_ar, last_name_ar
       const s = String(value).trim();
+      if (s.length === 0) {
+        return { valid: false, message: `${field} is required` };
+      }
       if (s.length > MAX_STRING_LENGTH) {
         return { valid: false, message: `${field} must be at most ${MAX_STRING_LENGTH} characters` };
       }
@@ -126,10 +145,8 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (error) {
-      const isNotFound =
-        (error as { code?: string; message?: string }).code === 'PGRST116' ||
-        (typeof (error as { message?: string }).message === 'string' &&
-          (error as { message?: string }).message?.toLowerCase().includes('0 rows'));
+      // PostgREST returns PGRST116 when .single() finds 0 rows
+      const isNotFound = (error as { code?: string }).code === 'PGRST116';
       if (isNotFound) {
         return NextResponse.json(
           { success: false, message: 'Patient profile not found' },
@@ -215,7 +232,28 @@ export async function PUT(req: NextRequest) {
       .single();
 
     if (error) {
+      // PostgREST returns PGRST116 when .single() finds 0 rows (profile not found)
+      const code = (error as { code?: string }).code;
+      const msg = (error as { message?: string }).message ?? '';
+      const details = (error as { details?: string }).details ?? '';
+      const isNotFound =
+        code === 'PGRST116' ||
+        msg.includes('PGRST116') ||
+        String(details).includes('PGRST116');
+      if (isNotFound) {
+        return NextResponse.json(
+          { success: false, message: 'Patient profile not found' },
+          { status: 404 }
+        );
+      }
       throw error;
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        { success: false, message: 'Patient profile not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({

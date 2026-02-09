@@ -125,10 +125,15 @@ export default function PatientDoctorsPage() {
             // Try fallback route first for Vercel compatibility
             let response = await fetch(`/api/doctors-list?${queryParams}`)
 
-            // If fallback fails, try the original dynamic route (requires patient auth)
+            // If fallback fails, try the original dynamic route only when we have a token (requires patient auth)
             if (!response.ok) {
+                if (!token) {
+                    toast.error(t('err_load_doctors_msg'))
+                    setLoading(false)
+                    return
+                }
                 response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    headers: { Authorization: `Bearer ${token}` },
                 })
             }
 
@@ -166,9 +171,14 @@ export default function PatientDoctorsPage() {
             } catch (fallbackError) {
             }
 
-            // Fallback to dynamic route (requires patient auth)
+            // Fallback to dynamic route only when we have a token (requires patient auth)
+            if (!token) {
+                toast.error(t('err_load_doctor_details'))
+                setLoadingDetails(false)
+                return
+            }
             const response = await fetch(`/api/patient-dashboard/doctors/${doctorId}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                headers: { Authorization: `Bearer ${token}` },
             })
             const data = await response.json()
 

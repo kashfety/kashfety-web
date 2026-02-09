@@ -5,6 +5,10 @@ import { requirePatient } from '@/lib/api-auth-utils';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 12;
+const MAX_LIMIT = 100;
+
 export async function GET(request: NextRequest) {
     const authResult = requirePatient(request);
     if (authResult instanceof NextResponse) {
@@ -13,8 +17,16 @@ export async function GET(request: NextRequest) {
 
     try {
         const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get('page') || '1', 10);
-        const limit = parseInt(searchParams.get('limit') || '12', 10);
+        const pageRaw = parseInt(searchParams.get('page') ?? '', 10);
+        const limitRaw = parseInt(searchParams.get('limit') ?? '', 10);
+
+        const page = Number.isInteger(pageRaw) && pageRaw >= 1
+            ? pageRaw
+            : DEFAULT_PAGE;
+        const limit = Number.isInteger(limitRaw) && limitRaw >= 1
+            ? Math.min(limitRaw, MAX_LIMIT)
+            : DEFAULT_LIMIT;
+
         const search = searchParams.get('search') || '';
         const specialty = searchParams.get('specialty') || '';
 

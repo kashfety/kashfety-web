@@ -9,6 +9,7 @@ export async function GET(
     request: NextRequest,
     context: { params: Promise<{ centerId: string }> }
 ) {
+    // requirePatient is synchronous (see @/lib/api-auth-utils); no await needed.
     const authResult = requirePatient(request);
     if (authResult instanceof NextResponse) {
         return authResult;

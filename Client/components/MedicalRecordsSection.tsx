@@ -150,7 +150,7 @@ export default function MedicalRecordsSection() {
 
   const fetchSpecialties = async () => {
     try {
-      const response = await fetch('/api/specialties');
+      const response = await fetch('/api/specialties', { headers: getAuthHeaders() });
       const result = await response.json();
 
       if (result.success && result.specialties) {
@@ -306,7 +306,9 @@ export default function MedicalRecordsSection() {
 
     setRecordsLoading(true);
     try {
-      const response = await fetch(`/api/patient-medical-records?patient_id=${user.id}`);
+      const response = await fetch(`/api/patient-medical-records?patient_id=${user.id}`, {
+        headers: getAuthHeaders(),
+      });
       const result = await response.json();
 
       if (result.success) {
@@ -357,7 +359,7 @@ export default function MedicalRecordsSection() {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(body)
       });
 
@@ -401,7 +403,8 @@ export default function MedicalRecordsSection() {
     setRecordsLoading(true);
     try {
       const response = await fetch(`/api/patient-medical-records?record_id=${recordId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders(),
       });
 
       const result = await response.json();

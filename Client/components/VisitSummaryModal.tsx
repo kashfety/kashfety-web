@@ -18,6 +18,14 @@ export default function VisitSummaryModal({ isOpen, onClose, appointmentId, pati
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState<any[]>([]);
 
+  const getAuthHeaders = (): HeadersInit => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     const load = async () => {
@@ -26,7 +34,9 @@ export default function VisitSummaryModal({ isOpen, onClose, appointmentId, pati
         const qs = new URLSearchParams({ appointment_id: appointmentId });
         if (patientId) qs.set('patient_id', patientId);
         if (doctorId) qs.set('doctor_id', doctorId);
-        const res = await fetch(`/api/medical-records?${qs.toString()}`);
+        const res = await fetch(`/api/medical-records?${qs.toString()}`, {
+          headers: getAuthHeaders(),
+        });
         const json = await res.json();
         if (res.ok && json.success) setRecords(json.records || []);
         else setRecords([]);

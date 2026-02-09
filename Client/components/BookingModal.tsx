@@ -79,6 +79,14 @@ interface BookingModalProps {
   onSuccess?: () => void;
 }
 
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', preSelectedDoctorId, preSelectedCenterId, onSuccess }: BookingModalProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -283,7 +291,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchSpecialties = async () => {
     try {
       setLoadingSpecialties(true);
-      const response = await fetch('/api/specialties');
+      const response = await fetch('/api/specialties', { headers: getAuthHeaders() });
       if (response.ok) {
         const data = await response.json();
         setSpecialties(data.specialties);
@@ -380,7 +388,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchDoctorById = async (doctorId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`);
+      const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`, { headers: getAuthHeaders() });
       const data = await response.json();
 
       if (response.ok && data.success && data.doctor) {
@@ -420,7 +428,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
   const fetchCenterById = async (centerId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/lab-details?centerId=${centerId}`);
+      const response = await fetch(`/api/lab-details?centerId=${centerId}`, { headers: getAuthHeaders() });
       const data = await response.json();
 
       if (response.ok && data.success && data.center) {
@@ -459,7 +467,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       if (specialty) params.set('specialty', specialty);
       if (visitType === 'home') params.set('home_visit', 'true');
 
-      const response = await fetch(`/api/doctors?${params.toString()}`);
+      const response = await fetch(`/api/doctors?${params.toString()}`, { headers: getAuthHeaders() });
       const result = await response.json();
 
 
@@ -511,7 +519,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         params.set('home_visit', 'true');
       }
 
-      const response = await fetch(`/api/centers/by-specialty?${params.toString()}`);
+      const response = await fetch(`/api/centers/by-specialty?${params.toString()}`, { headers: getAuthHeaders() });
       const result = await response.json();
 
       if (result && result.success) {
@@ -550,7 +558,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          const response = await fetch(routes[i]);
+          const response = await fetch(routes[i], { headers: getAuthHeaders() });
           if (response.ok) {
             result = await response.json();
             break;
@@ -606,7 +614,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let result: any;
 
       try {
-        response = await fetch(`/api/doctor-centers-by-id?doctor_id=${encodeURIComponent(doctorId)}&visit_type=${visitType}`);
+        response = await fetch(`/api/doctor-centers-by-id?doctor_id=${encodeURIComponent(doctorId)}&visit_type=${visitType}`, { headers: getAuthHeaders() });
         result = await response.json();
 
         if (response.ok && result && result.success) {
@@ -620,7 +628,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       }
 
       // Fallback to dynamic route
-      response = await fetch(`/api/doctors/${doctorId}/centers?visit_type=${visitType}`);
+      response = await fetch(`/api/doctors/${doctorId}/centers?visit_type=${visitType}`, { headers: getAuthHeaders() });
       result = await response.json();
 
       if (result && result.success) {
@@ -666,7 +674,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let data = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          const response = await fetch(routes[i]);
+          const response = await fetch(routes[i], { headers: getAuthHeaders() });
           if (response.ok) {
             data = await response.json();
             break;
@@ -775,7 +783,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          const response = await fetch(routes[i]);
+          const response = await fetch(routes[i], { headers: getAuthHeaders() });
           if (response.ok) {
             result = await response.json();
             break;
@@ -1252,7 +1260,7 @@ export default function BookingModal({ isOpen, onClose, initialMode = 'doctor', 
         let validationResult = null;
         for (let i = 0; i < validationRoutes.length; i++) {
           try {
-            const validationResponse = await fetch(validationRoutes[i]);
+            const validationResponse = await fetch(validationRoutes[i], { headers: getAuthHeaders() });
             if (validationResponse.ok) {
               validationResult = await validationResponse.json();
               break;

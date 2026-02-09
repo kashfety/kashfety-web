@@ -97,6 +97,14 @@ export default function PatientLabsPage() {
         setSidebarOpen(prev => !prev)
     }
 
+    const getAuthHeaders = (): HeadersInit => {
+        const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+        return {
+            'Content-Type': 'application/json',
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        }
+    }
+
     // Redirect if not authenticated or not a patient
     useEffect(() => {
         if (!authLoading && (!isAuthenticated || user?.role !== 'patient')) {
@@ -122,13 +130,13 @@ export default function PatientLabsPage() {
                 ...(categoryFilter && { category: categoryFilter })
             })
 
-            // Try fallback route first for Vercel compatibility
-            let response = await fetch(`/api/labs-list?${queryParams}`)
+            // Try fallback route first for Vercel compatibility (with auth so protected routes work)
+            let response = await fetch(`/api/labs-list?${queryParams}`, { headers: getAuthHeaders() })
 
             // If fallback fails, try the original dynamic route (requires patient auth)
             if (!response.ok) {
                 response = await fetch(`/api/patient-dashboard/labs?${queryParams}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    headers: getAuthHeaders(),
                 })
             }
 
@@ -153,13 +161,13 @@ export default function PatientLabsPage() {
             setLoadingDetails(true)
             setShowDetailsModal(true)
 
-            // Try fallback route first for Vercel compatibility
-            let response = await fetch(`/api/lab-details?centerId=${centerId}`)
+            // Try fallback route first for Vercel compatibility (with auth so protected routes work)
+            let response = await fetch(`/api/lab-details?centerId=${centerId}`, { headers: getAuthHeaders() })
 
             // If fallback fails, try the original dynamic route (requires patient auth)
             if (!response.ok) {
                 response = await fetch(`/api/patient-dashboard/labs/${centerId}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    headers: getAuthHeaders(),
                 })
             }
 

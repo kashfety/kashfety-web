@@ -45,6 +45,14 @@ interface RescheduleModalProps {
   onReschedule?: (updatedAppointment: Appointment) => void;
 }
 
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 export default function RescheduleModal({ isOpen, onClose, appointment, onSuccess, onReschedule }: RescheduleModalProps) {
   const { t, isRTL, locale } = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -110,7 +118,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       let result = null;
       for (let i = 0; i < routes.length; i++) {
         try {
-          const response = await fetch(routes[i]);
+          const response = await fetch(routes[i], { headers: getAuthHeaders() });
           if (response.ok) {
             result = await response.json();
             break;
@@ -202,9 +210,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       for (let i = 0; i < routes.length; i++) {
         try {
           const response = await fetch(routes[i], {
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            headers: getAuthHeaders(),
           });
           if (response.ok) {
             result = await response.json();
@@ -322,7 +328,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
       for (const url of validationUrls) {
         try {
-          const validationResponse = await fetch(url);
+          const validationResponse = await fetch(url, { headers: getAuthHeaders() });
           if (validationResponse.ok) {
             validationResult = await validationResponse.json();
             validationSuccess = true;

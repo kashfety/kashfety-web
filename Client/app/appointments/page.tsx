@@ -97,6 +97,14 @@ export default function MyAppointmentsPage() {
     setSidebarOpen(prev => !prev)
   }
 
+  const getAuthHeaders = (): HeadersInit => {
+    const authToken = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null
+    return {
+      "Content-Type": "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    }
+  }
+
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all') // clinic | home | all
@@ -242,7 +250,9 @@ export default function MyAppointmentsPage() {
     if (!user?.id || appointmentIds.length === 0) return
 
     try {
-      const response = await fetch(`/api/reviews?appointment_ids=${appointmentIds.join(',')}&patient_id=${user.id}`)
+      const response = await fetch(`/api/reviews?appointment_ids=${appointmentIds.join(',')}&patient_id=${user.id}`, {
+        headers: getAuthHeaders(),
+      })
       const data = await response.json()
 
       if (data.success && data.reviewedAppointmentIds) {
@@ -469,7 +479,7 @@ export default function MyAppointmentsPage() {
     if (missing.length === 0) return;
     const uniqueIds = Array.from(new Set(missing.map(a => a.center_id))).filter(Boolean) as string[];
     if (uniqueIds.length === 0) return;
-    Promise.all(uniqueIds.map(id => fetch(`/api/centers/${id}`).then(r => r.json()).catch(() => null)))
+    Promise.all(uniqueIds.map(id => fetch(`/api/centers/${id}`, { headers: getAuthHeaders() }).then(r => r.json()).catch(() => null)))
       .then(results => {
         const idToCenter: Record<string, { name?: string; address?: string }> = {};
         results.forEach((res: any) => {

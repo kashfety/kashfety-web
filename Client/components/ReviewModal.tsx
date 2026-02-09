@@ -16,6 +16,14 @@ interface ReviewModalProps {
   onSuccess?: (rating: number) => void;
 }
 
+function getAuthHeaders(): HeadersInit {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 export default function ReviewModal({ isOpen, onClose, appointmentId, doctorId, patientId, onSuccess }: ReviewModalProps) {
   const { t } = useLocale();
   const [rating, setRating] = useState<number>(0);
@@ -29,7 +37,7 @@ export default function ReviewModal({ isOpen, onClose, appointmentId, doctorId, 
     try {
       const res = await fetch('/api/reviews', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ appointment_id: appointmentId, doctor_id: doctorId, patient_id: patientId, rating, comment })
       });
       const json = await res.json();

@@ -97,6 +97,14 @@ export default function PatientDoctorsPage() {
         setSidebarOpen(prev => !prev)
     }
 
+    const getAuthHeaders = (): HeadersInit => {
+        const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+        return {
+            'Content-Type': 'application/json',
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        }
+    }
+
     // Redirect if not authenticated or not a patient
     useEffect(() => {
         if (!authLoading && (!isAuthenticated || user?.role !== 'patient')) {
@@ -122,8 +130,8 @@ export default function PatientDoctorsPage() {
                 ...(specialtyFilter && { specialty: specialtyFilter })
             })
 
-            // Try fallback route first for Vercel compatibility
-            let response = await fetch(`/api/doctors-list?${queryParams}`)
+            // Try fallback route first for Vercel compatibility (with auth so protected routes work)
+            let response = await fetch(`/api/doctors-list?${queryParams}`, { headers: getAuthHeaders() })
 
             // If fallback fails, try the original dynamic route only when we have a token (requires patient auth)
             if (!response.ok) {
@@ -133,7 +141,7 @@ export default function PatientDoctorsPage() {
                     return
                 }
                 response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: getAuthHeaders(),
                 })
             }
 
@@ -157,9 +165,9 @@ export default function PatientDoctorsPage() {
         try {
             setLoadingDetails(true)
 
-            // Try fallback route first for Vercel compatibility
+            // Try fallback route first for Vercel compatibility (with auth so protected routes work)
             try {
-                const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`)
+                const response = await fetch(`/api/doctor-details?doctorId=${doctorId}`, { headers: getAuthHeaders() })
                 const data = await response.json()
 
                 if (response.ok && data.success) {
@@ -178,7 +186,7 @@ export default function PatientDoctorsPage() {
                 return
             }
             const response = await fetch(`/api/patient-dashboard/doctors/${doctorId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: getAuthHeaders(),
             })
             const data = await response.json()
 

@@ -10,6 +10,7 @@ import {
   Calendar,
   TestTube,
   Users,
+  User,
   Star,
   Settings,
   Info,
@@ -76,6 +77,11 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       icon: Heart,
       label: t('medical_records') || 'Medical Records',
       action: () => router.push('/medical-records')
+    }] : []),
+    ...(user && user.role === 'patient' ? [{
+      icon: User,
+      label: t('profile') || t('my_profile') || 'Profile',
+      action: () => router.push('/patient-dashboard/profile')
     }] : []),
     {
       icon: Users,

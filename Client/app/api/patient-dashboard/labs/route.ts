@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requirePatient } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
+    const authResult = requirePatient(request);
+    if (authResult instanceof NextResponse) {
+        return authResult;
+    }
+
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page') || '1', 10);
@@ -33,8 +39,9 @@ export async function GET(request: NextRequest) {
         const { data: centers, error: centersError, count } = await centersQuery;
 
         if (centersError) {
+            console.error('[patient-dashboard/labs] Failed to fetch centers:', centersError);
             return NextResponse.json(
-                { success: false, message: 'Failed to fetch centers', error: centersError.message },
+                { success: false, message: 'Failed to fetch centers' },
                 { status: 500 }
             );
         }
@@ -92,9 +99,10 @@ export async function GET(request: NextRequest) {
             limit,
             totalPages: Math.ceil((category ? filteredCenters.length : (count || 0)) / limit)
         });
-    } catch (error: any) {
+    } catch (error) {
+        console.error('[patient-dashboard/labs] Error:', error);
         return NextResponse.json(
-            { success: false, message: 'Internal server error', error: error.message },
+            { success: false, message: 'Failed to fetch labs' },
             { status: 500 }
         );
     }

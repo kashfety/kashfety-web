@@ -73,7 +73,7 @@ interface DoctorDetails extends Doctor {
 }
 
 export default function PatientDoctorsPage() {
-    const { user, isAuthenticated, loading: authLoading } = useAuth()
+    const { user, isAuthenticated, loading: authLoading, token } = useAuth()
     const { t, isRTL, locale } = useLocale()
     const router = useRouter()
 
@@ -125,9 +125,11 @@ export default function PatientDoctorsPage() {
             // Try fallback route first for Vercel compatibility
             let response = await fetch(`/api/doctors-list?${queryParams}`)
 
-            // If fallback fails, try the original dynamic route
+            // If fallback fails, try the original dynamic route (requires patient auth)
             if (!response.ok) {
-                response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`)
+                response = await fetch(`/api/patient-dashboard/doctors?${queryParams}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                })
             }
 
             const data = await response.json()
@@ -164,8 +166,10 @@ export default function PatientDoctorsPage() {
             } catch (fallbackError) {
             }
 
-            // Fallback to dynamic route
-            const response = await fetch(`/api/patient-dashboard/doctors/${doctorId}`)
+            // Fallback to dynamic route (requires patient auth)
+            const response = await fetch(`/api/patient-dashboard/doctors/${doctorId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            })
             const data = await response.json()
 
             if (response.ok && data.success) {

@@ -4,7 +4,13 @@ import bcrypt from "bcryptjs";
 import { requirePatient } from "@/lib/api-auth-utils";
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseServiceKey || supabaseServiceKey.trim() === "") {
+  throw new Error(
+    "SUPABASE_SERVICE_ROLE_KEY is missing or empty. Set it in your environment so the change-password API can use the Supabase service role client."
+  );
+}
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export const dynamic = "force-dynamic";
@@ -83,9 +89,10 @@ export async function POST(req: NextRequest) {
       success: true,
       message: "Password updated successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("[change-password] Error changing password:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Failed to change password" },
+      { success: false, message: "Failed to change password" },
       { status: 500 }
     );
   }

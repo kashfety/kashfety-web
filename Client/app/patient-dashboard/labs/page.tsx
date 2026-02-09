@@ -59,7 +59,7 @@ interface CenterWithTests extends Center {
 }
 
 export default function PatientLabsPage() {
-    const { user, isAuthenticated, loading: authLoading } = useAuth()
+    const { user, isAuthenticated, loading: authLoading, token } = useAuth()
     const { t, isRTL, locale } = useLocale()
     const router = useRouter()
 
@@ -125,9 +125,11 @@ export default function PatientLabsPage() {
             // Try fallback route first for Vercel compatibility
             let response = await fetch(`/api/labs-list?${queryParams}`)
 
-            // If fallback fails, try the original dynamic route
+            // If fallback fails, try the original dynamic route (requires patient auth)
             if (!response.ok) {
-                response = await fetch(`/api/patient-dashboard/labs?${queryParams}`)
+                response = await fetch(`/api/patient-dashboard/labs?${queryParams}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                })
             }
 
             const data = await response.json()
@@ -154,9 +156,11 @@ export default function PatientLabsPage() {
             // Try fallback route first for Vercel compatibility
             let response = await fetch(`/api/lab-details?centerId=${centerId}`)
 
-            // If fallback fails, try the original dynamic route
+            // If fallback fails, try the original dynamic route (requires patient auth)
             if (!response.ok) {
-                response = await fetch(`/api/patient-dashboard/labs/${centerId}`)
+                response = await fetch(`/api/patient-dashboard/labs/${centerId}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                })
             }
 
             const data = await response.json()

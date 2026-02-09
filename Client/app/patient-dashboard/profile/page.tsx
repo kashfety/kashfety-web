@@ -93,7 +93,7 @@ export default function PatientProfilePage() {
   }, [isAuthenticated, authLoading, router]);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user?.role !== "patient") {
+    if (!authLoading && isAuthenticated && user && user.role !== "patient") {
       router.push("/");
     }
   }, [authLoading, isAuthenticated, user, router]);
@@ -421,7 +421,7 @@ export default function PatientProfilePage() {
                     <Link href="/patient-dashboard/medical-records">
                       <Button variant="outline" size="sm" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 mt-2">
                         {t("manage_in_medical_records") || "Manage in Medical Records"}
-                        <ArrowRight className={`h-4 w-4 ${isRTL ? "ml-2 rotate-180" : "mr-2"}`} />
+                        <ArrowRight className={`h-4 w-4 ${isRTL ? "mr-2 rotate-180" : "ml-2"}`} />
                       </Button>
                     </Link>
                   </CardContent>

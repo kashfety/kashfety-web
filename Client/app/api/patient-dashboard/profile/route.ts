@@ -2,8 +2,20 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePatient } from '@/lib/api-auth-utils';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl =
+  process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseServiceKey) {
+  throw new Error(
+    'Missing SUPABASE_SERVICE_ROLE_KEY. Set SUPABASE_SERVICE_ROLE_KEY in your environment.'
+  );
+}
+if (!supabaseUrl) {
+  throw new Error(
+    'Missing Supabase URL. Set SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in your environment.'
+  );
+}
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -21,6 +33,79 @@ const ALLOWED_UPDATE_FIELDS = [
   'gender',
   'date_of_birth',
 ] as const;
+
+const MAX_STRING_LENGTH = 255;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DATE_YYYY_MM_DD_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const PHONE_REGEX = /^[\d\s+\-().]{7,30}$/;
+const ALLOWED_GENDERS = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
+
+type AllowedField = (typeof ALLOWED_UPDATE_FIELDS)[number];
+
+function validateField(
+  field: AllowedField,
+  value: unknown
+): { valid: true; value: string } | { valid: false; message: string } {
+  if (value === null || value === undefined) {
+    return { valid: false, message: `${field} cannot be null or undefined` };
+  }
+
+  switch (field) {
+    case 'email': {
+      const s = String(value).trim();
+      if (s.length > MAX_STRING_LENGTH) {
+        return { valid: false, message: `email must be at most ${MAX_STRING_LENGTH} characters` };
+      }
+      if (!EMAIL_REGEX.test(s)) {
+        return { valid: false, message: 'Invalid email format' };
+      }
+      return { valid: true, value: s };
+    }
+    case 'date_of_birth': {
+      const s = String(value).trim();
+      if (!DATE_YYYY_MM_DD_REGEX.test(s)) {
+        return { valid: false, message: 'date_of_birth must be in YYYY-MM-DD format' };
+      }
+      const date = new Date(s);
+      if (Number.isNaN(date.getTime())) {
+        return { valid: false, message: 'Invalid date_of_birth' };
+      }
+      const [y, m, d] = s.split('-').map(Number);
+      if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) {
+        return { valid: false, message: 'Invalid date_of_birth' };
+      }
+      return { valid: true, value: s };
+    }
+    case 'phone': {
+      const s = String(value).trim();
+      if (s.length > MAX_STRING_LENGTH) {
+        return { valid: false, message: `phone must be at most ${MAX_STRING_LENGTH} characters` };
+      }
+      if (!PHONE_REGEX.test(s)) {
+        return { valid: false, message: 'Invalid phone format; use digits, spaces, +, -, ., or parentheses' };
+      }
+      return { valid: true, value: s };
+    }
+    case 'gender': {
+      const s = String(value).trim().toLowerCase();
+      if (!ALLOWED_GENDERS.includes(s as (typeof ALLOWED_GENDERS)[number])) {
+        return {
+          valid: false,
+          message: `gender must be one of: ${ALLOWED_GENDERS.join(', ')}`,
+        };
+      }
+      return { valid: true, value: s };
+    }
+    default: {
+      // string fields: name, name_ar, first_name, last_name, first_name_ar, last_name_ar
+      const s = String(value).trim();
+      if (s.length > MAX_STRING_LENGTH) {
+        return { valid: false, message: `${field} must be at most ${MAX_STRING_LENGTH} characters` };
+      }
+      return { valid: true, value: s };
+    }
+  }
+}
 
 // GET: Fetch patient profile
 export async function GET(req: NextRequest) {
@@ -41,6 +126,16 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (error) {
+      const isNotFound =
+        (error as { code?: string; message?: string }).code === 'PGRST116' ||
+        (typeof (error as { message?: string }).message === 'string' &&
+          (error as { message?: string }).message?.toLowerCase().includes('0 rows'));
+      if (isNotFound) {
+        return NextResponse.json(
+          { success: false, message: 'Patient profile not found' },
+          { status: 404 }
+        );
+      }
       throw error;
     }
 
@@ -91,9 +186,15 @@ export async function PUT(req: NextRequest) {
     const updates: Record<string, unknown> = {};
 
     for (const field of ALLOWED_UPDATE_FIELDS) {
-      if (body[field] !== undefined) {
-        updates[field] = body[field];
+      if (body[field] === undefined) continue;
+      const result = validateField(field, body[field]);
+      if (!result.valid) {
+        return NextResponse.json(
+          { success: false, message: result.message },
+          { status: 400 }
+        );
       }
+      updates[field] = result.value;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -103,7 +204,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    (updates as Record<string, unknown>).updated_at = new Date().toISOString();
+    updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabaseAdmin
       .from('users')

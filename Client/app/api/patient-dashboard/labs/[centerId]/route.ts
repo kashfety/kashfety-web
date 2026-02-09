@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requirePatient } from '@/lib/api-auth-utils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -8,6 +9,11 @@ export async function GET(
     request: NextRequest,
     context: { params: Promise<{ centerId: string }> }
 ) {
+    const authResult = requirePatient(request);
+    if (authResult instanceof NextResponse) {
+        return authResult;
+    }
+
     try {
         const params = await context.params;
         const centerId = params.centerId;
@@ -73,9 +79,10 @@ export async function GET(
             success: true,
             center: centerWithTests
         });
-    } catch (error: any) {
+    } catch (error) {
+        console.error('[patient-dashboard/labs/[centerId]] Error:', error);
         return NextResponse.json(
-            { success: false, message: 'Internal server error', error: error.message },
+            { success: false, message: 'Failed to fetch center details' },
             { status: 500 }
         );
     }

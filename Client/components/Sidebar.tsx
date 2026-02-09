@@ -80,7 +80,7 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     }] : []),
     ...(user && user.role === 'patient' ? [{
       icon: User,
-      label: t('profile') || t('my_profile') || 'Profile',
+      label: t('profile') || 'Profile',
       action: () => router.push('/patient-dashboard/profile')
     }] : []),
     {

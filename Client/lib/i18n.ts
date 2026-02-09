@@ -517,8 +517,10 @@ export const translations = {
     user_settings: "User Settings",
     profile_tab: "Profile",
     account_tab: "Account",
+    account: "Account",
     notifications_tab: "Notifications",
     security_tab: "Security",
+    security: "Security",
     settings_description: "Manage your account settings and preferences",
 
     // Profile Information
@@ -527,7 +529,10 @@ export const translations = {
     change_avatar: "Change Avatar",
     first_name: "First Name",
     last_name: "Last Name",
+    first_name_ar: "First Name (Arabic)",
+    last_name_ar: "Last Name (Arabic)",
     display_name: "Display Name",
+    display_name_ar: "Display Name (Arabic)",
     job_title: "Job Title",
     bio: "Bio",
     bio_placeholder: "Write a short bio about yourself",
@@ -1072,6 +1077,7 @@ export const translations = {
     // Appointments Page
     appointments_page_title: "My Appointments",
     appointments_back_home: "Back to Home",
+    back_to_dashboard: "Back to Dashboard",
     appointments_refresh: "Refresh",
     appointments_book_new: "Book New Appointment",
     appointments_loading: "Loading your appointments...",
@@ -2729,8 +2735,10 @@ export const translations = {
     user_settings: "إعدادات المستخدم",
     profile_tab: "الملف الشخصي",
     account_tab: "الحساب",
+    account: "الحساب",
     notifications_tab: "الإشعارات",
     security_tab: "الأمان",
+    security: "الأمان",
     settings_description: "إدارة إعدادات الحساب والتفضيلات",
 
     // Profile Information
@@ -2739,7 +2747,10 @@ export const translations = {
     change_avatar: "تغيير الصورة الشخصية",
     first_name: "الاسم الأول",
     last_name: "اسم العائلة",
+    first_name_ar: "الاسم الأول (بالعربية)",
+    last_name_ar: "اسم العائلة (بالعربية)",
     display_name: "اسم العرض",
+    display_name_ar: "اسم العرض (بالعربية)",
     job_title: "المسمى الوظيفي",
     bio: "السيرة الذاتية",
     bio_placeholder: "اكتب نبذة مختصرة عن نفسك",
@@ -3266,6 +3277,7 @@ export const translations = {
     // Appointments Page
     appointments_page_title: "مواعيدي",
     appointments_back_home: "العودة للرئيسية",
+    back_to_dashboard: "العودة للوحة التحكم",
     appointments_refresh: "تحديث",
     appointments_book_new: "احجز موعداً جديداً",
     appointments_loading: "جاري تحميل مواعيدك...",

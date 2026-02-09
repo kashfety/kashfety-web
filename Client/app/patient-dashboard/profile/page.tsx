@@ -326,6 +326,38 @@ export default function PatientProfilePage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
+                            <Label htmlFor="first_name_ar">{t("first_name_ar") || "First Name (Arabic)"}</Label>
+                            <Input
+                              id="first_name_ar"
+                              value={formData.first_name_ar}
+                              onChange={(e) => setFormData((f) => ({ ...f, first_name_ar: e.target.value }))}
+                              className="border-[#4DBCC4]/30"
+                              dir="rtl"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="last_name_ar">{t("last_name_ar") || "Last Name (Arabic)"}</Label>
+                            <Input
+                              id="last_name_ar"
+                              value={formData.last_name_ar}
+                              onChange={(e) => setFormData((f) => ({ ...f, last_name_ar: e.target.value }))}
+                              className="border-[#4DBCC4]/30"
+                              dir="rtl"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="name_ar">{t("display_name_ar") || "Display Name (Arabic)"}</Label>
+                          <Input
+                            id="name_ar"
+                            value={formData.name_ar}
+                            onChange={(e) => setFormData((f) => ({ ...f, name_ar: e.target.value }))}
+                            className="border-[#4DBCC4]/30"
+                            dir="rtl"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
                             <Label htmlFor="email">{t("email_address") || "Email"}</Label>
                             <Input
                               id="email"
@@ -408,7 +440,7 @@ export default function PatientProfilePage() {
                         )}
                         {medicalInfo.emergency_contact?.name && (
                           <p className="text-sm">
-                            <span className="font-medium">{t("emergency_contact") || "Emergency contact"}:</span>{" "}
+                            <span className="font-medium">{t("mr_emergency_contact") || "Emergency Contact"}:</span>{" "}
                             {medicalInfo.emergency_contact.name}
                             {medicalInfo.emergency_contact.phone && ` • ${medicalInfo.emergency_contact.phone}`}
                           </p>

@@ -169,14 +169,26 @@ export default function MedicalRecordsSection() {
     }
   };
 
+  const getAuthHeaders = (): HeadersInit => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const fetchMedicalInfo = async () => {
     if (!user?.id) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/patient/medical-info?userId=${user.id}`);
+      const response = await fetch(`/api/patient/medical-info?userId=${user.id}`, {
+        headers: getAuthHeaders(),
+      });
       const result = await response.json();
-
+      if (!response.ok) {
+        throw new Error(result.message || result.error || 'Failed to fetch');
+      }
       if (result.success) {
         setMedicalInfo(result.medical_info);
         setEditForm({
@@ -220,7 +232,7 @@ export default function MedicalRecordsSection() {
 
       const response = await fetch('/api/patient/medical-info', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updateData)
       });
 

@@ -84,7 +84,7 @@ export default function PatientMedicalRecordsPage() {
                 <Link href="/patient-dashboard">
                   <Button variant="outline" size="sm" className="border-[#4DBCC4] text-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:border-[#4DBCC4] dark:text-[#4DBCC4] dark:hover:bg-[#4DBCC4]/20">
                     <ArrowLeft className="w-4 h-4 me-2" />
-                    {t('back') || 'Back to Dashboard'}
+                    {t('back_to_dashboard') || 'Back to Dashboard'}
                   </Button>
                 </Link>
               </div>

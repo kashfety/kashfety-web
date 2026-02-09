@@ -16,18 +16,36 @@ interface LandingHeaderProps {
   onMenuToggle?: () => void
 }
 
+const PULSE_SESSION_KEY = 'sidebar_pulse_after_login'
+
 export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
   const { locale, setLocale } = useLocale()
   const { theme, setTheme } = useTheme()
   const { user, logout, loading } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [shouldPulse, setShouldPulse] = useState(false)
   const t = getLandingTranslation(locale)
   const isArabic = locale === 'ar'
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Pulse the menu button only once after login, not on every page load when already logged in
+  useEffect(() => {
+    if (!onMenuToggle || !mounted) return
+    try {
+      if (sessionStorage.getItem(PULSE_SESSION_KEY) === '1') {
+        sessionStorage.removeItem(PULSE_SESSION_KEY)
+        setShouldPulse(true)
+        const t = setTimeout(() => setShouldPulse(false), 4500)
+        return () => clearTimeout(t)
+      }
+    } catch {
+      // ignore
+    }
+  }, [onMenuToggle, mounted])
 
   const toggleLocale = () => {
     setLocale(isArabic ? 'en' : 'ar')
@@ -62,7 +80,7 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
                 e.stopPropagation()
                 onMenuToggle?.()
               }}
-              className="landing-menu-pulse p-2 rounded-lg bg-[#4DBCC4]/20 dark:bg-[#4DBCC4]/25 hover:bg-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/35 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border-2 border-[#4DBCC4]/50"
+              className={`p-2 rounded-lg bg-[#4DBCC4]/20 dark:bg-[#4DBCC4]/25 hover:bg-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/35 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border-2 border-[#4DBCC4]/50 ${shouldPulse ? 'landing-menu-pulse' : ''}`}
               aria-label="Toggle menu"
             >
               <Menu className="w-5 h-5 sm:w-6 sm:h-6" />

@@ -245,6 +245,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (result.user.role === 'doctor') {
         }
 
+        // For patients, flag so the landing sidebar button pulses once after login (not on later page loads)
+        if (result.user.role === 'patient' && typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('sidebar_pulse_after_login', '1')
+        }
+
         // Redirect based on user role
         const dashboardPath = getDashboardPath(result.user.role)
         router.push(dashboardPath)

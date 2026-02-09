@@ -150,16 +150,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Use Next.js API route (preferred) or fallback to backend server
       // Next.js API routes work without a separate backend server
       const useNextApi = !process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_USE_NEXT_API !== '0'
-      
+
       let loginUrl: string
-      
+
       if (useNextApi) {
         // Use Next.js API route - works without backend server
         loginUrl = '/api/auth/login'
       } else {
         // Fallback to backend server if explicitly configured
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-        
+
         // Handle both cases: URL with or without /api
         let baseUrl: string
         if (apiUrl.includes('/api')) {
@@ -167,10 +167,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           baseUrl = apiUrl.replace(/\/$/, '') + '/api'
         }
-        
+
         loginUrl = `${baseUrl}/auth/login`
       }
-      
+
       let response: Response
       try {
         response = await fetch(loginUrl, {
@@ -183,10 +183,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       } catch (fetchError) {
         // Handle network errors (server not running, CORS, etc.)
-        const errorMessage = fetchError instanceof Error 
-          ? fetchError.message 
+        const errorMessage = fetchError instanceof Error
+          ? fetchError.message
           : 'Network error'
-        
+
         // Provide more helpful error message
         if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
           if (useNextApi) {
@@ -215,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         const errorMessage = result.error || result.message || `Login failed with status ${response.status}`
-        
+
         // If doctor needs to upload certificate, store temporary token for upload
         if (result.requires_certificate_upload && result.certificate_status === 'not_uploaded') {
           localStorage.setItem('doctor_certificate_status', 'not_uploaded')
@@ -224,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('temp_doctor_token', result.temp_token)
           }
         }
-        
+
         throw new Error(errorMessage)
       }
 
@@ -330,16 +330,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Use Next.js API route (preferred) or fallback to backend server
       const useNextApi = !process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_USE_NEXT_API !== '0'
-      
+
       let registerUrl: string
-      
+
       if (useNextApi) {
         // Use Next.js API route - works without backend server
         registerUrl = '/api/auth/register-verified'
       } else {
         // Fallback to backend server if explicitly configured
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-        
+
         // Handle both cases: URL with or without /api
         let baseUrl: string
         if (apiUrl.includes('/api')) {
@@ -347,10 +347,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           baseUrl = apiUrl.replace(/\/$/, '') + '/api'
         }
-        
+
         registerUrl = `${baseUrl}/auth/register`
       }
-      
+
       const response = await fetch(registerUrl, {
         method: 'POST',
         headers: {

@@ -5,13 +5,18 @@ import { useLocale } from '@/components/providers/locale-provider'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/lib/providers/auth-provider'
 import { getLandingTranslation } from '@/lib/landing-translations'
-import { Globe, Moon, Sun, LogOut } from 'lucide-react'
+import { Globe, Moon, Sun, LogOut, Menu } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export function Header() {
+interface LandingHeaderProps {
+  /** When provided (e.g. for logged-in patients), a menu button is shown to open the sidebar */
+  onMenuToggle?: () => void
+}
+
+export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
   const { locale, setLocale } = useLocale()
   const { theme, setTheme } = useTheme()
   const { user, logout, loading } = useAuth()
@@ -53,6 +58,17 @@ export function Header() {
   return (
     <header className="fixed top-0 w-full z-50 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+        {/* Menu (sidebar) button for patients */}
+        {onMenuToggle ? (
+          <button
+            type="button"
+            onClick={onMenuToggle}
+            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all duration-300 flex-shrink-0 lg:mr-2"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        ) : null}
         {/* Logo */}
         <Link
           href="/"

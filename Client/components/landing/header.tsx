@@ -51,16 +51,19 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
           <>
             <style dangerouslySetInnerHTML={{ __html: `
               @keyframes landing-menu-pulse {
-                0%, 100% { box-shadow: 0 0 0 0 rgba(77, 188, 196, 0.35); transform: scale(1); }
-                50% { box-shadow: 0 0 0 6px rgba(77, 188, 196, 0); transform: scale(1.08); }
+                0%, 100% { box-shadow: 0 0 0 0 rgba(77, 188, 196, 0.6), 0 0 12px 2px rgba(77, 188, 196, 0.25); transform: scale(1); }
+                50% { box-shadow: 0 0 0 12px rgba(77, 188, 196, 0), 0 0 20px 4px rgba(77, 188, 196, 0.15); transform: scale(1.15); }
               }
-              .landing-menu-pulse { animation: landing-menu-pulse 1.1s ease-in-out 4; }
+              .landing-menu-pulse { animation: landing-menu-pulse 1s ease-in-out 4; }
             ` }} />
             <button
               type="button"
-              onClick={onMenuToggle}
-              className="landing-menu-pulse p-2 rounded-lg bg-[#4DBCC4]/15 dark:bg-[#4DBCC4]/20 hover:bg-[#4DBCC4]/25 dark:hover:bg-[#4DBCC4]/30 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border border-[#4DBCC4]/30"
-              aria-label="Open menu"
+              onClick={(e) => {
+                e.stopPropagation()
+                onMenuToggle?.()
+              }}
+              className="landing-menu-pulse p-2 rounded-lg bg-[#4DBCC4]/20 dark:bg-[#4DBCC4]/25 hover:bg-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/35 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border-2 border-[#4DBCC4]/50"
+              aria-label="Toggle menu"
             >
               <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>

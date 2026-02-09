@@ -36,6 +36,17 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
 
   const navigationItems = [
     {
+      icon: Home,
+      label: t('header_home') || 'Home',
+      action: () => {
+        if (window.location.pathname !== '/') {
+          router.push('/');
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    },
+    {
       icon: Users,
       label: t('header_doctors') || 'Doctors',
       action: () => {
@@ -89,18 +100,7 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       icon: User,
       label: t('profile') || 'Profile',
       action: () => router.push('/patient-dashboard/profile')
-    }] : []),
-    {
-      icon: Home,
-      label: t('header_home') || 'Home',
-      action: () => {
-        if (window.location.pathname !== '/') {
-          router.push('/');
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }
-    }
+    }] : [])
   ];
 
   return (

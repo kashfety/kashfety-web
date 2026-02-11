@@ -24,7 +24,7 @@ export default function CustomAlert({
   title,
   message,
   type = 'info',
-  confirmText = 'OK',
+  confirmText,
   onConfirm,
   showCancel = false,
   cancelText = 'Cancel'
@@ -123,7 +123,7 @@ export default function CustomAlert({
                 : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            {confirmText}
+            {confirmText ?? (t('ok') || 'OK')}
           </Button>
         </DialogFooter>
       </DialogContent>

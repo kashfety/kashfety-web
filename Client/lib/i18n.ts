@@ -632,6 +632,7 @@ export const translations = {
     days: "days",
     slots: "slots",
     error: "Error",
+    ok: "OK",
     // Days of week
     day_sunday: "Sunday",
     day_monday: "Monday",
@@ -2856,6 +2857,7 @@ export const translations = {
     days: "أيام",
     slots: "فترات",
     error: "خطأ",
+    ok: "موافق",
     // Days of week
     day_sunday: "الأحد",
     day_monday: "الإثنين",

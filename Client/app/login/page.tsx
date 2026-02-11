@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    document.title = `${t('auth_sign_in_title') || 'Sign in to your account'} | Kashfety`
+    document.title = `${t('auth_sign_in_title') || 'Sign in to your account'} | ${t('app_name') || 'Kashfety'}`
   }, [t])
 
   const handleSubmit = async (e: React.FormEvent) => {

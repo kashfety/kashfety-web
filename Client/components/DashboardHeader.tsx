@@ -54,7 +54,7 @@ export default function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
                     <div className="flex">
                         <div className="flex-shrink-0 flex items-center">
                             <Link href={getDashboardPath(user?.role)} className="text-xl font-bold text-emerald-600">
-                                Kashfety
+                                {t('app_name') || 'Kashfety'}
                             </Link>
                         </div>
                         <div className={`ml-6 flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>

@@ -23,7 +23,7 @@ export default function MedicalRecordsPage() {
   };
 
   useEffect(() => {
-    document.title = `${t('medical_records') || 'Medical Records'} | Kashfety`;
+    document.title = `${t('medical_records') || 'Medical Records'} | ${t('app_name') || 'Kashfety'}`;
   }, [t]);
 
   // Redirect non-authenticated users

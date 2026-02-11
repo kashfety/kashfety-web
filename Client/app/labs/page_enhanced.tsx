@@ -217,7 +217,7 @@ export default function MyLabsPage() {
     refresh();
   };
 
-  useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | Kashfety`; }, [t]);
+  useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | ${t('app_name') || 'Kashfety'}`; }, [t]);
   useEffect(() => { if (user && !loading) refresh(); }, [user, loading]);
   useEffect(() => { if (!loading && !user) router.push('/login'); }, [user, loading, router]);
 

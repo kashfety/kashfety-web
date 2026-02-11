@@ -83,7 +83,7 @@ export default function PatientProfilePage() {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   useEffect(() => {
-    document.title = `${t("profile") || "Profile"} | Kashfety`;
+    document.title = `${t("profile") || "Profile"} | ${t("app_name") || "Kashfety"}`;
   }, [t]);
 
   useEffect(() => {

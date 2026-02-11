@@ -116,7 +116,7 @@ export default function SignupPage() {
   }
 
   useEffect(() => {
-    document.title = `${t('auth_create_title') || 'Create your account'} | Kashfety`
+    document.title = `${t('auth_create_title') || 'Create your account'} | ${t('app_name') || 'Kashfety'}`
   }, [t])
 
   // Fetch specialties when role is doctor

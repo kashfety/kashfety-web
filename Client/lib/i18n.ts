@@ -463,6 +463,7 @@ export function getTypeArabic(type: string): string {
 
 export const translations = {
   en: {
+    app_name: "Kashfety",
     // Navigation
     navigation: "Navigation",
     dashboard: "Dashboard",
@@ -553,6 +554,8 @@ export const translations = {
     update_contact_details: "Update your contact details",
     email_address: "Email Address",
     phone_number: "Phone Number",
+    date_of_birth: "Date of Birth",
+    gender: "Gender",
     alternative_email: "Alternative Email",
     enter_alternative_email: "Enter an alternative email",
 
@@ -1229,6 +1232,7 @@ export const translations = {
     booking_badge_home_visits: "Home visits",
     booking_no_home_visits: "This doctor is not available for home visits.",
     booking_no_centers_for_doctor: "No centers available for this doctor.",
+    booking_available: "Available",
     booking_choose_lab_center: "Choose where you want to get your lab test or imaging done",
     booking_no_centers_available: "No centers available",
     booking_lab_services_unavailable: "Lab services are not currently available. Please check back later.",
@@ -2681,6 +2685,7 @@ export const translations = {
     return_to_login: "Return to login page",
   },
   ar: {
+    app_name: "كشفيتي",
     // Navigation
     navigation: "التنقل",
     dashboard: "لوحة التحكم",
@@ -2771,6 +2776,8 @@ export const translations = {
     update_contact_details: "تحديث بيانات الاتصال",
     email_address: "عنوان البريد الإلكتروني",
     phone_number: "رقم الهاتف",
+    date_of_birth: "تاريخ الميلاد",
+    gender: "الجنس",
     alternative_email: "البريد الإلكتروني البديل",
     enter_alternative_email: "أدخل بريد إلكتروني بديل",
 
@@ -3429,6 +3436,7 @@ export const translations = {
     booking_badge_home_visits: "زيارات منزلية",
     booking_no_home_visits: "هذا الطبيب غير متاح للزيارات المنزلية.",
     booking_no_centers_for_doctor: "لا توجد مراكز متاحة لهذا الطبيب.",
+    booking_available: "متاح",
     booking_choose_lab_center: "اختر المكان الذي تريد إجراء الفحص المخبري أو التصوير فيه",
     booking_no_centers_available: "لا توجد مراكز متاحة",
     booking_lab_services_unavailable: "خدمات المختبرات غير متاحة حالياً. يرجى المحاولة لاحقاً.",

@@ -223,7 +223,7 @@ export default function MyLabsPage() {
 
   // Remove the convertToAppointment function as we're using lab-specific modals now
 
-  useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | Kashfety`; }, [t]);
+  useEffect(() => { document.title = `${t('labTestsTitle') || 'Laboratory Tests & Medical Imaging'} | ${t('app_name') || 'Kashfety'}`; }, [t]);
   useEffect(() => { if (user && !loading) refresh(); }, [user, loading, locale]);
   useEffect(() => { if (!loading && !user) router.push('/login'); }, [user, loading, router]);
 

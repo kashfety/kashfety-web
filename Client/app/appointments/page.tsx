@@ -426,7 +426,7 @@ export default function MyAppointmentsPage() {
   }
 
   useEffect(() => {
-    document.title = `${t('appointments_page_title') || 'My Appointments'} | Kashfety`
+    document.title = `${t('appointments_page_title') || 'My Appointments'} | ${t('app_name') || 'Kashfety'}`
   }, [t])
 
   // Refresh appointments when page becomes visible

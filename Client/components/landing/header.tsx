@@ -64,34 +64,36 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
   return (
     <header className="fixed top-0 w-full z-50 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-300">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
-        {/* Menu (sidebar) button for patients — subtle pulse when shown to draw attention */}
-        {onMenuToggle ? (
-          <>
-            <style dangerouslySetInnerHTML={{ __html: `
-              @keyframes landing-menu-pulse {
-                0%, 100% { box-shadow: 0 0 0 0 rgba(77, 188, 196, 0.6), 0 0 12px 2px rgba(77, 188, 196, 0.25); transform: scale(1); }
-                50% { box-shadow: 0 0 0 12px rgba(77, 188, 196, 0), 0 0 20px 4px rgba(77, 188, 196, 0.15); transform: scale(1.15); }
-              }
-              .landing-menu-pulse { animation: landing-menu-pulse 1s ease-in-out 4; }
-            ` }} />
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onMenuToggle?.()
-              }}
-              className={`p-2 rounded-lg bg-[#4DBCC4]/20 dark:bg-[#4DBCC4]/25 hover:bg-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/35 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 lg:mr-2 border-2 border-[#4DBCC4]/50 ${shouldPulse ? 'landing-menu-pulse' : ''}`}
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-          </>
-        ) : null}
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-200 min-w-fit"
-        >
+        {/* Left: Menu + Logo grouped together */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Menu (sidebar) button for patients — subtle pulse when shown to draw attention */}
+          {onMenuToggle ? (
+            <>
+              <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes landing-menu-pulse {
+                  0%, 100% { box-shadow: 0 0 0 0 rgba(77, 188, 196, 0.6), 0 0 12px 2px rgba(77, 188, 196, 0.25); transform: scale(1); }
+                  50% { box-shadow: 0 0 0 12px rgba(77, 188, 196, 0), 0 0 20px 4px rgba(77, 188, 196, 0.15); transform: scale(1.15); }
+                }
+                .landing-menu-pulse { animation: landing-menu-pulse 1s ease-in-out 4; }
+              ` }} />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onMenuToggle?.()
+                }}
+                className={`p-2 rounded-lg bg-[#4DBCC4]/20 dark:bg-[#4DBCC4]/25 hover:bg-[#4DBCC4]/30 dark:hover:bg-[#4DBCC4]/35 text-[#4DBCC4] dark:text-[#5dd5de] transition-all duration-300 flex-shrink-0 border-2 border-[#4DBCC4]/50 ${shouldPulse ? 'landing-menu-pulse' : ''}`}
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+            </>
+          ) : null}
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity duration-200 min-w-fit"
+          >
           <div className="relative h-7 w-8 sm:h-8 sm:w-9 md:h-9 md:w-10 flex-shrink-0 overflow-hidden">
             <Image
               src={mounted && theme === 'dark' ? '/logo/branding-dark.png' : '/logo/branding-light.png'}
@@ -105,6 +107,7 @@ export function Header({ onMenuToggle }: LandingHeaderProps = {}) {
             {t.header.brandName}
           </span>
         </Link>
+        </div>
 
         {/* Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">

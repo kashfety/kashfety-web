@@ -61,7 +61,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { useLocale } from "@/components/providers/locale-provider";
-import { localizeDoctorName, localizeSpecialty, toArabicNumerals, formatPhoneNumber, formatCurrency } from "@/lib/i18n";
+import { localizeDoctorName, localizeSpecialty, toArabicNumerals, formatPhoneNumber, formatCurrency, getLocalizedGenders } from "@/lib/i18n";
 
 // Import dashboard components
 import FirstTimeDoctorSetup from "@/components/FirstTimeDoctorSetup";
@@ -409,7 +409,7 @@ function ProfileHeader({
   };
 
   return (
-    <div className={`relative px-6 flex items-center ${isRTL ? 'justify-start' : 'justify-end'} gap-4 bg-white dark:bg-[#0F0F12] h-full`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`relative px-6 flex items-center ${isRTL ? 'justify-end' : 'justify-start'} gap-4 bg-white dark:bg-[#0F0F12] h-full`} dir={isRTL ? 'rtl' : 'ltr'}>
       <LocaleSwitcher />
       <ThemeToggle />
 
@@ -419,11 +419,11 @@ function ProfileHeader({
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
-            <div className={`hidden sm:block text-${isRTL ? 'right' : 'left'}`}>
+            <div className="hidden sm:block text-left" dir={isRTL ? 'rtl' : 'ltr'}>
               <div className="text-sm font-medium text-gray-900 dark:text-white">
                 {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                 {(locale === 'ar' && doctorProfile?.specialty_name_ar)
                   ? doctorProfile.specialty_name_ar
                   : (doctorProfile?.specialty || 'General Medicine')}
@@ -1148,11 +1148,11 @@ export default function DoctorDashboard() {
               <TabsContent value="overview" className="py-6 px-4 space-y-6 h-full w-full max-w-full">
                 {/* Welcome Header */}
                 <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                  <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                       {t('dd_welcome_back') || 'Welcome back'}, {locale === 'ar' ? 'دكتور' : 'Dr.'} {getLocalizedName(doctorProfile, locale) || doctorProfile?.name || 'Doctor'}
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-gray-600 dark:text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                       {t('dd_whats_happening') || "Here's what's happening in your practice today"}
                     </p>
                     {todayStats?.stats?.nextAppointment && (
@@ -1186,14 +1186,14 @@ export default function DoctorDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <div className="flex items-center justify-between">
+                        <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_todays_appointments') || "Today's Appointments"}</p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             {toArabicNumerals(todayStats?.stats?.todayAppointments || 0, locale)}
                           </p>
                         </div>
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg order-2 shrink-0">
                           <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                       </div>
@@ -1213,14 +1213,14 @@ export default function DoctorDashboard() {
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <div className="flex items-center justify-between">
+                        <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             {toArabicNumerals(analytics?.analytics?.totalPatients || 0, locale)}
                           </p>
                         </div>
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg order-2 shrink-0">
                           <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                       </div>
@@ -1240,14 +1240,14 @@ export default function DoctorDashboard() {
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <div className="flex items-center justify-between">
+                        <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_monthly_revenue') || 'Monthly Revenue'}</p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             {formatCurrency(analytics?.analytics?.totalRevenue || 0, locale, locale === 'ar' ? 'ل.س' : 'SYP')}
                           </p>
                         </div>
-                        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg order-2 shrink-0">
                           <DollarSign className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>
                       </div>
@@ -1267,14 +1267,14 @@ export default function DoctorDashboard() {
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={isRTL ? 'text-right' : 'text-left'}>
+                      <div className="flex items-center justify-between">
+                        <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             {toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}★
                           </p>
                         </div>
-                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg order-2 shrink-0">
                           <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                         </div>
                       </div>
@@ -1291,9 +1291,9 @@ export default function DoctorDashboard() {
                     <div className="p-2 rounded-xl gradient-emerald animate-glow">
                       <Stethoscope className="h-6 w-6 text-white" />
                     </div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h3 className="text-xl font-semibold text-emerald-800 dark:text-emerald-300">{t('dd_professional_dashboard') || 'Doctor Professional Dashboard'}</h3>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_practice_overview') || "Here's your comprehensive practice overview for today"}</p>
+                    <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h3 className="text-xl font-semibold text-emerald-800 dark:text-emerald-300" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_professional_dashboard') || 'Doctor Professional Dashboard'}</h3>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_practice_overview') || "Here's your comprehensive practice overview for today"}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
@@ -1358,7 +1358,7 @@ export default function DoctorDashboard() {
                             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-xs space-y-2" dir={isRTL ? 'rtl' : 'ltr'}>
                               <div className={`flex gap-2 items-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 <div className="w-2 h-2 mt-1 rounded-full bg-blue-500 shrink-0" />
-                                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <span className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_appointments_legend_title') || 'Appointments'}:</span>
                                   <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-1' : 'ml-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {t('dd_appointments_legend_desc') || 'Total bookings made, regardless of status (Scheduled, Confirmed, Completed, or Cancelled). Represents total demand.'}
@@ -1367,7 +1367,7 @@ export default function DoctorDashboard() {
                               </div>
                               <div className={`flex gap-2 items-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                 <div className="w-2 h-2 mt-1 rounded-full bg-emerald-500 shrink-0" />
-                                <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                                <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                   <span className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_consultations_legend_title') || 'Consultations'}:</span>
                                   <span className={`text-gray-600 dark:text-gray-400 ${isRTL ? 'mr-1' : 'ml-1'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {t('dd_consultations_legend_desc') || 'Completed appointments only. Tracks finalized visits and revenue-generating activities.'}
@@ -1416,7 +1416,7 @@ export default function DoctorDashboard() {
                               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                 <User className="w-5 h-5 text-white" />
                               </div>
-                              <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <p className="font-medium text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {getLocalizedName(patient, locale)}
                                 </p>
@@ -1460,17 +1460,17 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_upcoming_appointments_title') || 'Upcoming Appointments'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_manage_consultations') || 'Manage today and upcoming consultations'}</p>
+                    <div className="text-left">
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_upcoming_appointments_title') || 'Upcoming Appointments'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_consultations') || 'Manage today and upcoming consultations'}</p>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-6 scroll-animation" data-animation="slide-in-up">
                   {/* Today's and Upcoming Appointments */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CardHeader className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} text-left`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Calendar className="w-5 h-5" />
                         <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_upcoming_schedule') || 'Upcoming Appointments'}</span>
                       </CardTitle>
@@ -1717,8 +1717,8 @@ export default function DoctorDashboard() {
 
                   {/* Appointment Quick Actions */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
+                    <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className="flex items-center gap-2 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                         <Clock className="w-5 h-5" />
                         {t('quick_actions') || 'Quick Actions'}
                       </CardTitle>
@@ -1820,9 +1820,9 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Users className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_patients_title') || 'Patients'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_patient_list_activity') || 'Your patient list and activity'}</p>
+                    <div className="text-left">
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_patients_title') || 'Patients'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_patient_list_activity') || 'Your patient list and activity'}</p>
                     </div>
                   </div>
                 </div>
@@ -1831,60 +1831,57 @@ export default function DoctorDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals((patients?.length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('dd_total_patients') || 'Total Patients'}</p>
                           </div>
+                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center order-2 shrink-0">
+                            <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                            <UserCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
-                          </div>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals((patients?.filter(p => p.lastAppointment && new Date(p.lastAppointment) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('active_30_days') || 'Active (30 days)'}</p>
                           </div>
+                          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center order-2 shrink-0">
+                            <UserCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                            <Heart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                          </div>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals((patients?.reduce((sum, p) => sum + (p.totalAppointments || 0), 0) || 0).toString(), locale)}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('total_visits') || 'Total Visits'}</p>
                           </div>
+                          <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center order-2 shrink-0">
+                            <Heart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                       <CardContent className="pt-6">
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                          </div>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals(((() => {
                                 const dist = analytics?.analytics?.patientDemographics?.genderDistribution as Record<string, number> | undefined
                                 if (dist && Object.keys(dist).length > 0) {
@@ -1906,6 +1903,9 @@ export default function DoctorDashboard() {
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('female_patients') || 'Female Patients'}</p>
                           </div>
+                          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center order-2 shrink-0">
+                            <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -1913,8 +1913,8 @@ export default function DoctorDashboard() {
 
                   {/* Patient List */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CardHeader className={isRTL ? 'text-right' : 'text-left'}>
-                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <CardHeader className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} text-left`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Users className="w-5 h-5" />
                         {t('patients') || 'Patients'}
                       </CardTitle>
@@ -1963,27 +1963,31 @@ export default function DoctorDashboard() {
                                       )}
                                     </div>
                                     <div
-                                      className={`flex flex-wrap items-center gap-2 mt-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}
+                                      className="flex flex-wrap items-center gap-2 mt-1 text-left"
                                       dir={isRTL ? 'rtl' : 'ltr'}
-                                      style={isRTL ? { direction: 'rtl', textAlign: 'right', justifyContent: 'flex-end' } : { direction: 'ltr', textAlign: 'left' }}
                                     >
-                                      <Badge variant="outline" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
-                                        {locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}
+                                      <Badge variant="outline" className="text-xs text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                                        <span dir={isRTL ? 'rtl' : 'ltr'}>{locale === 'ar' ? toArabicNumerals((patient.totalAppointments || 0).toString()) : (patient.totalAppointments || 0)} {t('visits') || 'visits'}</span>
                                       </Badge>
                                       {patient.lastAppointment && (
-                                        <Badge variant="secondary" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
-                                          {(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+                                        <Badge variant="secondary" className="text-xs text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                                          <span dir={isRTL ? 'rtl' : 'ltr'}>{(t('last_visit') || 'Last visit')}: {new Date(patient.lastAppointment).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
                                             year: 'numeric',
                                             month: 'short',
                                             day: 'numeric'
-                                          })}
+                                          })}</span>
                                         </Badge>
                                       )}
-                                      {patient.gender && (
-                                        <Badge variant="outline" className={`text-xs ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right', direction: 'rtl' } : undefined}>
-                                          {patient.gender}
-                                        </Badge>
-                                      )}
+                                      {patient.gender && (() => {
+                                        const genders = getLocalizedGenders(locale);
+                                        const g = (patient.gender || '').toLowerCase();
+                                        const label = g === 'female' || g === 'f' ? genders.female : g === 'male' || g === 'm' ? genders.male : patient.gender;
+                                        return (
+                                          <Badge variant="outline" className="text-xs text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                                            <span dir={isRTL ? 'rtl' : 'ltr'}>{label}</span>
+                                          </Badge>
+                                        );
+                                      })()}
                                     </div>
                                   </div>
                                 </div>
@@ -2004,7 +2008,7 @@ export default function DoctorDashboard() {
                           })}
 
                           {patients.length > 10 && (
-                            <div className={`text-center pt-4 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                               <Button
                                 variant="outline"
                                 onClick={() => setShowAllPatients(!showAllPatients)}
@@ -2022,7 +2026,7 @@ export default function DoctorDashboard() {
                           )}
                         </div>
                       ) : (
-                        <div className={`py-8 ${isRTL ? 'text-right' : 'text-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div className={`py-8 ${isRTL ? 'text-left' : 'text-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                           <UserCheck className={`w-12 h-12 text-gray-400 dark:text-gray-600 mb-4 ${isRTL ? 'mr-0 ml-auto' : 'mx-auto'}`} />
                           <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('noData') || 'No patients yet'}</p>
                           <p className="text-sm text-gray-500 dark:text-gray-500 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -2037,9 +2041,9 @@ export default function DoctorDashboard() {
 
               <TabsContent value="schedule" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
-                  <div className="flex items-center gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Clock className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_schedule_title') || 'Schedule'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_availability') || 'Manage your availability and time slots'}</p>
                     </div>
@@ -2057,12 +2061,12 @@ export default function DoctorDashboard() {
               </TabsContent>
 
               <TabsContent value="centers" className="py-6 px-4 h-full w-full max-w-full">
-                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
+                <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0"><Building2 className="h-5 w-5 text-white" /></div>
-                    <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} style={isRTL ? { direction: 'rtl', textAlign: 'right' } : undefined}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_centers_title') || 'Centers'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'} style={isRTL ? { textAlign: 'right' } : undefined}>{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
+                    <div className="flex-1 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_centers_title') || 'Centers'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
                     </div>
                   </div>
                 </div>
@@ -2075,9 +2079,9 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Star className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_reviews_title') || 'Reviews & Ratings'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_reviews_subtitle') || 'View feedback from your patients'}</p>
+                    <div className="text-left">
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_reviews_title') || 'Reviews & Ratings'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_reviews_subtitle') || 'View feedback from your patients'}</p>
                     </div>
                   </div>
                 </div>
@@ -2089,12 +2093,12 @@ export default function DoctorDashboard() {
                   </div>
                 ) : reviews.length === 0 ? (
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CardContent className="p-12 text-center">
+                    <CardContent className={`p-12 ${isRTL ? 'text-left' : 'text-center'}`}>
                       <Star className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('dd_no_reviews') || 'No Reviews Yet'}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('dd_no_reviews_desc') || 'Patient reviews will appear here after completed appointments'}
                       </p>
                     </CardContent>
@@ -2104,10 +2108,10 @@ export default function DoctorDashboard() {
                     {/* Average Rating Summary */}
                     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
                       <CardContent className="p-6">
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className={isRTL ? 'text-right' : 'text-left'}>
+                        <div className="flex items-center justify-between">
+                          <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
-                            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals(
                                 reviews.length > 0
                                   ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(2)
@@ -2115,11 +2119,11 @@ export default function DoctorDashboard() {
                                 locale
                               )}★
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
                               {toArabicNumerals(reviews.length, locale)} {reviews.length === 1 ? (t('dd_review') || 'review') : (t('reviews') || 'reviews')}
                             </p>
                           </div>
-                          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl order-2 shrink-0">
                             <Star className="w-8 h-8 text-yellow-600 dark:text-yellow-400 fill-yellow-600 dark:fill-yellow-400" />
                           </div>
                         </div>
@@ -2140,11 +2144,11 @@ export default function DoctorDashboard() {
                                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
                                     {patientName.charAt(0).toUpperCase()}
                                   </div>
-                                  <div className={isRTL ? 'text-right' : 'text-left'}>
-                                    <p className="font-semibold text-gray-900 dark:text-white">
+                                  <div className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <p className="font-semibold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {patientName}
                                     </p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {new Date(review.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
                                         year: 'numeric',
                                         month: 'long',
@@ -2163,13 +2167,13 @@ export default function DoctorDashboard() {
                                         }`}
                                     />
                                   ))}
-                                  <span className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                                  <span className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'mr-2' : 'ml-2'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                     {toArabicNumerals((review.rating || 0).toFixed(1), locale)}
                                   </span>
                                 </div>
                               </div>
                               {review.comment && (
-                                <p className={`text-gray-700 dark:text-gray-300 mt-3 leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <p className="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                   {review.comment}
                                 </p>
                               )}
@@ -2186,9 +2190,9 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
-                    <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">{t('dd_profile_settings_title') || 'Profile Settings'}</h2>
-                      <p className="text-emerald-700/80 dark:text-emerald-400/80">{t('dd_update_practice_info') || 'Update your personal and practice information'}</p>
+                    <div className="text-left">
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_profile_settings_title') || 'Profile Settings'}</h2>
+                      <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_update_practice_info') || 'Update your personal and practice information'}</p>
                     </div>
                   </div>
                 </div>

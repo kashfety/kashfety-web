@@ -42,7 +42,7 @@ type WeeklyDatum = { name: string; patients: number }
 export default function ScheduleChart({ data }: { data?: WeeklyDatum[] }) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
-  const { t, locale } = useLocale()
+  const { t, locale, isRTL } = useLocale()
 
   // Day name translations
   const dayNames: Record<string, string> = {
@@ -63,9 +63,9 @@ export default function ScheduleChart({ data }: { data?: WeeklyDatum[] }) {
 
   return (
     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-      <CardHeader>
-        <CardTitle>{t('dd_weekly_schedule') || 'Weekly Schedule'}</CardTitle>
-        <CardDescription>{t('dd_weekly_schedule_desc') || 'Your patient appointments this week'}</CardDescription>
+      <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardTitle className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_weekly_schedule') || 'Weekly Schedule'}</CardTitle>
+        <CardDescription className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_weekly_schedule_desc') || 'Your patient appointments this week'}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

@@ -9,11 +9,14 @@ import { Button } from '@/components/ui/button';
 import { labService, centerService } from '@/lib/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { TimeInput } from '@/components/ui/time-input';
+import { NumberInput } from '@/components/ui/number-input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocale } from '@/components/providers/locale-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from "next-themes";
-import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime } from '@/lib/i18n';
+import { toArabicNumerals, formatLocalizedNumber, formatLocalizedDate, getLocalizedMonths, getLocalizedGenders, formatLocalizedTime, formatPhoneNumber } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
 import DoctorScheduleCalendar from '@/components/DoctorScheduleCalendar';
 import AppointmentDetailsModal from '@/components/AppointmentDetailsModal';
@@ -146,9 +149,9 @@ function TopNav({
   };
 
   return (
-    <div className={`h-16 border-b border-gray-200 dark:border-[#1F1F23] bg-white dark:bg-[#1A1A1A] flex items-center justify-between px-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-      <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <h1 className={`text-xl font-semibold text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`h-16 border-b border-gray-200 dark:border-[#1F1F23] bg-white dark:bg-[#1A1A1A] flex items-center justify-between px-6 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white text-left" dir={isRTL ? 'rtl' : 'ltr'}>
           {t('cd_welcome_back')}, {getCenterDisplayName()}
         </h1>
         {nextAppointment && (
@@ -297,15 +300,15 @@ function CenterOverview({
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
+            <Card key={index} className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-200">{stat.title}</p>
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="text-left min-w-0">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-200" dir={isRTL ? 'rtl' : 'ltr'}>{stat.title}</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white" dir="ltr">{stat.value}</p>
                     <p className="text-sm text-emerald-600 dark:text-emerald-400" dir={isRTL ? 'rtl' : 'ltr'}><span dir="ltr">{stat.change}</span> {t('cd_from_last_month')}</p>
                   </div>
-                  <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600`}>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}-500 to-${stat.color}-600 flex-shrink-0`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -1969,66 +1972,56 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                           <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                             {/* Time Range */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('start_time')}</Label>
-                                <Input
-                                  type="time"
+                              <div dir={isRTL ? 'rtl' : 'ltr'} className="flex flex-col gap-2.5 min-w-0 w-full">
+                                <Label className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('start_time')}</Label>
+                                <TimeInput
                                   value={config.startTime || '09:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'startTime', e.target.value)}
                                   disabled={loading}
-                                  dir="ltr"
                                   className="w-full"
                                 />
                               </div>
-                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('end_time')}</Label>
-                                <Input
-                                  type="time"
+                              <div dir={isRTL ? 'rtl' : 'ltr'} className="flex flex-col gap-2.5 min-w-0 w-full">
+                                <Label className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('end_time')}</Label>
+                                <TimeInput
                                   value={config.endTime || '17:00'}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'endTime', e.target.value)}
                                   disabled={loading}
-                                  dir="ltr"
                                   className="w-full"
                                 />
                               </div>
-                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('slot_duration_minutes')}</Label>
-                                <Input
-                                  type="number"
-                                  min="15"
-                                  max="120"
-                                  step="15"
-                                  value={config.duration || 30}
+                              <div dir={isRTL ? 'rtl' : 'ltr'} className="flex flex-col gap-2.5 min-w-0 w-full">
+                                <Label className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('slot_duration_minutes')}</Label>
+                                <NumberInput
+                                  min={15}
+                                  max={120}
+                                  step={15}
+                                  value={config.duration ?? 30}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'duration', parseInt(e.target.value))}
                                   disabled={loading}
-                                  dir="ltr"
+                                  placeholder="30"
                                   className="w-full"
-                                  placeholder={formatLocalizedNumber(30, locale)}
                                 />
                               </div>
                             </div>
 
                             {/* Break Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
-                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('break_start_optional')}</Label>
-                                <Input
-                                  type="time"
+                              <div dir={isRTL ? 'rtl' : 'ltr'} className="flex flex-col gap-2.5 min-w-0 w-full">
+                                <Label className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('break_start_optional')}</Label>
+                                <TimeInput
                                   value={config.breakStart || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakStart', e.target.value)}
                                   disabled={loading}
-                                  dir="ltr"
                                   className="w-full"
                                 />
                               </div>
-                              <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                                <Label className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('break_end_optional')}</Label>
-                                <Input
-                                  type="time"
+                              <div dir={isRTL ? 'rtl' : 'ltr'} className="flex flex-col gap-2.5 min-w-0 w-full">
+                                <Label className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('break_end_optional')}</Label>
+                                <TimeInput
                                   value={config.breakEnd || ''}
                                   onChange={(e) => updateDayConfigWithPersistence(day.value, 'breakEnd', e.target.value)}
                                   disabled={loading}
-                                  dir="ltr"
                                   className="w-full"
                                 />
                               </div>
@@ -2042,12 +2035,12 @@ function CenterScheduleManagement({ selectedServices }: { selectedServices: any[
                                 </Label>
                                 <div className={`mt-2 flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   {slots.slice(0, 8).map((slot, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs" dir="ltr">
+                                    <Badge key={index} variant="outline" className="text-xs text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {formatLocalizedTime(slot.time, locale)}
                                     </Badge>
                                   ))}
                                   {slots.length > 8 && (
-                                    <Badge variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    <Badge variant="secondary" className="text-xs text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                       {(t('more_count')).replace('{count}', formatLocalizedNumber(slots.length - 8, locale))}
                                     </Badge>
                                   )}
@@ -2159,12 +2152,13 @@ function Sidebar({
     return (
       <button
         onClick={() => handleNavigation(tab)}
-        className={`w-full flex items-center ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-${isRTL ? 'right' : 'left'} ${isActive
+        className={`w-full flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-left ${isActive
           ? `bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-${isRTL ? 'l' : 'r'}-2 border-emerald-500`
           : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
           }`}
+        dir={isRTL ? 'rtl' : 'ltr'}
       >
-        <Icon className={`h-4 w-4 flex-shrink-0 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+        <Icon className="h-4 w-4 flex-shrink-0" />
         <span>{children}</span>
       </button>
     );
@@ -2256,10 +2250,11 @@ function Sidebar({
             <div className="space-y-1">
               <button
                 onClick={onSignOut}
-                className="w-full flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20"
+                className={`w-full flex items-center gap-4 px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:bg-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 ${isRTL ? 'flex-row-reverse' : ''}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <LogOut className="h-4 w-4 flex-shrink-0 mr-3" />
-                <span className="ml-3">{t('sign_out')}</span>
+                <LogOut className="h-4 w-4 flex-shrink-0" />
+                <span>{t('sign_out')}</span>
               </button>
             </div>
           </div>
@@ -3834,14 +3829,13 @@ export default function CenterDashboardPage() {
                                 <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                                   <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
                                     <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                                      <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                      <Label htmlFor={`fee-${testType.id}`} className="text-sm font-medium text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                                         {(t('fee'))} ({t('currency')})
                                       </Label>
-                                      <Input
+                                      <NumberInput
                                         id={`fee-${testType.id}`}
-                                        type="number"
-                                        placeholder={locale === 'ar' ? toArabicNumerals('0.00') : '0.00'}
-                                        value={state.fee || ''}
+                                        placeholder="0.00"
+                                        value={state.fee ?? ''}
                                         onChange={(e) => {
                                           setServiceStates(prev => ({
                                             ...prev,
@@ -3849,9 +3843,8 @@ export default function CenterDashboardPage() {
                                           }));
                                         }}
                                         className="w-24 text-center"
-                                        min="0"
-                                        step="0.01"
-                                        dir="ltr"
+                                        min={0}
+                                        step={0.01}
                                       />
                                     </div>
                                   </div>
@@ -4248,23 +4241,23 @@ export default function CenterDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
                       <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="centerName" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('center_name')} *</Label>
+                          <Label htmlFor="centerName" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('center_name')} *</Label>
                           <Input
                             id="centerName"
-                            placeholder={centerProfile?.name ? `${t('current_prefix')} ${centerProfile.name}` : (t('enter_center_name'))}
+                            placeholder={centerProfile?.name ? `${t('current_prefix')} ${(locale === 'ar' ? toArabicNumerals(centerProfile.name, 'ar') : centerProfile.name)}` : (t('enter_center_name'))}
                             value={profileForm.name}
                             onChange={(e) => updateProfileForm('name', e.target.value)}
-                            className="mt-1 w-full"
+                            className="mt-1 w-full text-left"
                             required
-                            dir="ltr"
+                            dir={isRTL ? 'rtl' : 'ltr'}
                           />
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_name_appears_on')}</p>
                         </div>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="centerNameAr" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_center_name_arabic')}</Label>
+                          <Label htmlFor="centerNameAr" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('cd_center_name_arabic')}</Label>
                           <Input
                             id="centerNameAr"
-                            placeholder={centerProfile?.name_ar ? `${t('current_prefix')} ${centerProfile.name_ar}` : 'أدخل اسم المركز بالعربية'}
+                            placeholder={centerProfile?.name_ar ? `${t('current_prefix')} ${(locale === 'ar' ? toArabicNumerals(centerProfile.name_ar, 'ar') : centerProfile.name_ar)}` : (t('enter_center_name_ar') || 'أدخل اسم المركز بالعربية')}
                             value={profileForm.name_ar}
                             onChange={(e) => updateProfileForm('name_ar', e.target.value)}
                             className="mt-1 w-full"
@@ -4273,65 +4266,64 @@ export default function CenterDashboardPage() {
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_name_arabic_help')}</p>
                         </div>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="email" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('email')} *</Label>
+                          <Label htmlFor="email" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('email')} *</Label>
                           <Input
                             id="email"
                             type="email"
                             placeholder={centerProfile?.email ? `${t('current_prefix')} ${centerProfile.email}` : (user?.email ? `${t('current_prefix')} ${user.email}` : (t('enter_email')))}
                             value={profileForm.email}
                             onChange={(e) => updateProfileForm('email', e.target.value)}
-                            className="mt-1 w-full"
+                            className="mt-1 w-full text-left"
                             required
                             dir="ltr"
                           />
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_primary_contact_email')}</p>
                         </div>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="phone" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('phone')}</Label>
-                          <Input
+                          <Label htmlFor="phone" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('phone')}</Label>
+                          <PhoneInput
                             id="phone"
-                            placeholder={centerProfile?.phone ? `${t('current_prefix')} ${centerProfile.phone}` : (t('enter_phone'))}
-                            value={profileForm.phone}
+                            placeholder={centerProfile?.phone ? formatPhoneNumber(centerProfile.phone, locale) : (t('enter_phone'))}
+                            value={profileForm.phone ?? ''}
                             onChange={(e) => updateProfileForm('phone', e.target.value)}
-                            className="mt-1 w-full"
-                            dir="ltr"
+                            className="mt-1 w-full text-left"
                           />
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_contact_number_appointments')}</p>
                         </div>
                       </div>
                       <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="address" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('address')}</Label>
+                          <Label htmlFor="address" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('address')}</Label>
                           <Input
                             id="address"
-                            placeholder={centerProfile?.address ? `${t('current_prefix')} ${centerProfile.address}` : (t('enter_address'))}
+                            placeholder={centerProfile?.address ? `${t('current_prefix')} ${(locale === 'ar' ? toArabicNumerals(centerProfile.address, 'ar') : centerProfile.address)}` : (t('enter_address'))}
                             value={profileForm.address}
                             onChange={(e) => updateProfileForm('address', e.target.value)}
-                            className="mt-1 w-full"
+                            className="mt-1 w-full text-left"
                             dir={isRTL ? 'rtl' : 'ltr'}
                           />
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_physical_location')}</p>
                         </div>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="website" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('website')}</Label>
+                          <Label htmlFor="website" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('website')}</Label>
                           <Input
                             id="website"
                             placeholder={centerProfile?.website ? `${t('current_prefix')} ${centerProfile.website}` : (t('enter_website'))}
                             value={profileForm.website}
                             onChange={(e) => updateProfileForm('website', e.target.value)}
-                            className="mt-1 w-full"
+                            className="mt-1 w-full text-left"
                             dir="ltr"
                           />
                           <p className="text-xs text-gray-500 mt-1" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('cd_optional_website')}</p>
                         </div>
                         <div dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                          <Label htmlFor="description" className="block" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>{t('description')}</Label>
+                          <Label htmlFor="description" className="block text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('description')}</Label>
                           <textarea
                             id="description"
-                            placeholder={centerProfile?.description ? `${t('current_prefix')} ${centerProfile.description}` : (t('enter_description'))}
+                            placeholder={centerProfile?.description ? `${t('current_prefix')} ${(locale === 'ar' ? toArabicNumerals(centerProfile.description, 'ar') : centerProfile.description)}` : (t('enter_description'))}
                             value={profileForm.description}
                             onChange={(e) => updateProfileForm('description', e.target.value)}
-                            className="mt-1 w-full p-3 border rounded-lg resize-none"
+                            className="mt-1 w-full p-3 border rounded-lg resize-none text-left"
                             rows={3}
                             dir={isRTL ? 'rtl' : 'ltr'}
                             style={{ textAlign: isRTL ? 'right' : 'left' }}

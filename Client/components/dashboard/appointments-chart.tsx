@@ -19,7 +19,7 @@ const defaultData = [
 export default function AppointmentsChart({ data }: { data?: { name: string; appointments: number; consultations: number }[] }) {
   const { theme } = useTheme()
   const isDark = theme === "dark"
-  const { t, locale } = useLocale()
+  const { t, locale, isRTL } = useLocale()
 
   // Month name translations
   const monthNames: Record<string, string> = {
@@ -45,9 +45,9 @@ export default function AppointmentsChart({ data }: { data?: { name: string; app
 
   return (
     <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
-      <CardHeader>
-        <CardTitle>{t('dd_appointments_trend') || 'Appointments Trend'}</CardTitle>
-        <CardDescription>{t('dd_appointments_trend_desc') || 'Your appointments and consultations over time'}</CardDescription>
+      <CardHeader dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardTitle className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_appointments_trend') || 'Appointments Trend'}</CardTitle>
+        <CardDescription className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_appointments_trend_desc') || 'Your appointments and consultations over time'}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">

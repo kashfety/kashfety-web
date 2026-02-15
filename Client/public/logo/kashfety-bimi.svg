@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     version="1.2"
+     baseProfile="tiny-ps"
+     viewBox="0 0 512 512"
+     width="512"
+     height="512"
+     role="img"
+     aria-label="Kashfety logo">
+  <title>Kashfety</title>
+  <desc>Kashfety square logo for BIMI hosting.</desc>
+
+  <rect x="0" y="0" width="512" height="512" fill="#2A5F6B"/>
+
+  <circle cx="256" cy="256" r="184" fill="#4DBCC4"/>
+
+  <path fill="#FFFFFF" d="M188 146h44v102l102-102h58L280 258l116 108h-62l-102-96v96h-44z"/>
+</svg>

@@ -69,6 +69,16 @@ export function Footer() {
                   {t.footer.terms}
                 </Link>
               </li>
+              <li>
+                <a
+                  href="/logo/kashfety-bimi.svg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-400 dark:text-slate-500 hover:text-white dark:hover:text-slate-300 transition-colors"
+                >
+                  Brand Logo (SVG)
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -3,3 +3,4 @@ docs/
 kashfety-landing-page/
 *.sql
 .cursor/
+*.html

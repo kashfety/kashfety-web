@@ -7,7 +7,9 @@
     "db:reset-seed": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes",
     "db:reset-seed:full": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes --seed-operational-users",
     "db:interactive-seed": "node Client/Server/scripts/interactive-seed.mjs",
-    "db:interactive-seed:safe": "node Client/Server/scripts/interactive-seed.mjs --preset-safe --yes"
+    "db:interactive-seed:safe": "node Client/Server/scripts/interactive-seed.mjs --preset-safe --yes",
+    "auth:confirm-seeded:dry": "node Client/Server/scripts/confirm-seeded-auth-users.mjs",
+    "auth:confirm-seeded": "node Client/Server/scripts/confirm-seeded-auth-users.mjs --execute --yes"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",

@@ -265,6 +265,22 @@ npm run db:interactive-seed:safe
 - Interactive flow auto-detects optional role tables (`admin_users`, `doctors`, `patients`) and seeds links only when those tables exist.
 - During wipe mode, you are prompted whether to also delete non-admin/non-super_admin users from `auth.users`.
 
+- If older seeded users in production cannot log in because their Supabase Auth email is still unconfirmed, run:
+
+```bash
+npm run auth:confirm-seeded:dry
+```
+
+- Apply the auth confirmation backfill:
+
+```bash
+npm run auth:confirm-seeded
+```
+
+- The backfill script confirms matching `auth.users`, syncs `public.users.uid` where needed, and can optionally reset passwords.
+- Signup OTP verification remains the flow for new registrations (`signInWithOtp` + `verifyOtp`), while seeded account operability is handled by this admin backfill.
+- For custom-domain OTP sender setup (SMTP, DNS, templates), see `SUPABASE_CUSTOM_EMAIL_OTP_SETUP.md`.
+
 - Script path: `Client/Server/scripts/reset-and-seed.mjs`
 
 ## 📁 Project Structure

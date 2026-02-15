@@ -226,6 +226,26 @@ curl http://localhost:5000/api/doctors/all
   - Client APIs: `labService`, `centerService` in `Client/lib/api.ts`
 - Center logins: create `users` with `role='center'` and `center_id=<center UUID>`; admin provides phone/password. On login, redirect to a center dashboard route.
 
+### Production reset + reseed (preserve admins)
+
+- This repository now includes a script that:
+  - Preserves only `admin` and `super_admin` users
+  - Clears operational data (`centers`, lab tables, bookings, appointments, schedules, etc.)
+  - Seeds fresh role-aware data in `users` plus related center/lab records
+- Run precheck first:
+
+```bash
+npm run db:precheck
+```
+
+- Execute destructive cleanup + reseed:
+
+```bash
+npm run db:reset-seed
+```
+
+- Script path: `Client/Server/scripts/reset-and-seed.mjs`
+
 ## 📁 Project Structure
 
 ```

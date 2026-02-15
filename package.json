@@ -2,7 +2,9 @@
   "scripts": {
     "dev": "cd Client && next dev",
     "build": "cd Client && next build",
-    "start": "cd Client && next start"
+    "start": "cd Client && next start",
+    "db:precheck": "node Client/Server/scripts/reset-and-seed.mjs --precheck",
+    "db:reset-seed": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",

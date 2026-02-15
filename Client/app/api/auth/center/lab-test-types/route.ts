@@ -1,10 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(request: NextRequest) {
+import { createClient } from '@supabase/supabase-js';
+import { getUserFromAuth } from '../utils/jwt-auth';
+import { validateCenterExists } from '../utils/center-validation';
+
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+function getSupabaseAdminClient() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase configuration');
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
+
+export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseAdminClient();
     const user = await getUserFromAuth(request);
     if (!user || user.role !== 'center') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const centerId = user.center_id || user.id;
+    const centerValidation = await validateCenterExists(centerId);
+    if (!centerValidation.exists) {
+      return NextResponse.json({
+        error: centerValidation.error || 'Center not found',
+        labTestTypes: [],
+        totalTypes: 0,
+        activeServices: 0
+      }, { status: 404 });
     }
 
     // Fetch ALL test types (both lab and imaging) from database
@@ -21,7 +46,6 @@ import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(r
     }
 
     // Get center's current services
-    const centerId = user.center_id || user.id;
     const { data: centerServices, error: servicesError } = await supabase
       .from('center_lab_services')
       .select('lab_test_type_id, base_fee, is_active')
@@ -44,7 +68,8 @@ import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(r
     }
 
     // Combine all test types (lab + imaging) with current service settings
-    const testTypesWithServices = allTestTypes.map(testType => ({
+    const safeTypes = allTestTypes || [];
+    const testTypesWithServices = safeTypes.map(testType => ({
       id: testType.id,
       name: testType.name,
       description: testType.description,
@@ -59,11 +84,12 @@ import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(r
     return NextResponse.json({
       success: true,
       labTestTypes: testTypesWithServices,
-      totalTypes: allTestTypes.length,
+      totalTypes: safeTypes.length,
       activeServices: centerServices?.filter(s => s.is_active).length || 0
     });
 
   } catch (error) {
+    console.error('GET /api/auth/center/lab-test-types failed:', error);
     return NextResponse.json({
       error: 'Internal server error'
     }, { status: 500 });
@@ -72,16 +98,30 @@ import { getUserFromAuth } from '../utils/jwt-auth'; export async function GET(r
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseAdminClient();
     const user = await getUserFromAuth(request);
     if (!user || user.role !== 'center') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    const centerId = user.center_id || user.id;
+    const centerValidation = await validateCenterExists(centerId);
+    if (!centerValidation.exists) {
+      return NextResponse.json({
+        error: centerValidation.error || 'Center not found'
+      }, { status: 404 });
+    }
+
     const body = await request.json();
     const { code, name, category, default_fee } = body;
+    const normalizedCode = String(code || '').trim().toUpperCase();
+    const normalizedName = String(name || '').trim();
+    const parsedDefaultFee = default_fee !== undefined && default_fee !== null && default_fee !== ''
+      ? Number(default_fee)
+      : null;
 
     // Validate required fields
-    if (!code || !name || !category) {
+    if (!normalizedCode || !normalizedName || !category) {
       return NextResponse.json({
         error: 'Missing required fields',
         details: 'code, name, and category are required'
@@ -96,17 +136,31 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    if (parsedDefaultFee !== null && Number.isNaN(parsedDefaultFee)) {
+      return NextResponse.json({
+        error: 'Invalid default_fee',
+        details: 'default_fee must be a valid number'
+      }, { status: 400 });
+    }
+
     // Check if test type with same code already exists
     const { data: existing, error: checkError } = await supabase
       .from('lab_test_types')
       .select('id, code')
-      .eq('code', code.toUpperCase())
-      .single();
+      .eq('code', normalizedCode)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Failed checking duplicate lab test type code:', checkError);
+      return NextResponse.json({
+        error: 'Failed to validate test type code'
+      }, { status: 500 });
+    }
 
     if (existing) {
       return NextResponse.json({
         error: 'Test type already exists',
-        details: `A test type with code "${code.toUpperCase()}" already exists`
+        details: `A test type with code "${normalizedCode}" already exists`
       }, { status: 409 });
     }
 
@@ -114,19 +168,26 @@ export async function POST(request: NextRequest) {
     const { data: newTestType, error: insertError } = await supabase
       .from('lab_test_types')
       .insert({
-        code: code.toUpperCase(),
-        name: name.trim(),
+        code: normalizedCode,
+        name: normalizedName,
         category,
-        default_fee: default_fee ? Number(default_fee) : null,
+        default_fee: parsedDefaultFee,
         created_at: new Date().toISOString()
       })
       .select()
       .single();
 
     if (insertError) {
+      if (insertError.code === '23505') {
+        return NextResponse.json({
+          error: 'Test type already exists',
+          details: `A test type with code "${normalizedCode}" already exists`
+        }, { status: 409 });
+      }
+
+      console.error('Failed creating center lab test type:', insertError);
       return NextResponse.json({
-        error: 'Failed to create lab test type',
-        details: insertError.message
+        error: 'Failed to create lab test type'
       }, { status: 500 });
     }
 
@@ -137,9 +198,9 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error: any) {
+    console.error('POST /api/auth/center/lab-test-types failed:', error);
     return NextResponse.json({
-      error: 'Internal server error',
-      details: error.message
+      error: 'Internal server error'
     }, { status: 500 });
   }
 }

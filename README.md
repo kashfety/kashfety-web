@@ -244,6 +244,27 @@ npm run db:precheck
 npm run db:reset-seed
 ```
 
+- Execute full operational reseed (centers/doctors/patients) with Supabase Auth + `public.users` sync:
+
+```bash
+npm run db:reset-seed:full
+```
+
+- Run interactive segmented seeding (choose wipe/no-wipe, user groups, counts, and related data):
+
+```bash
+npm run db:interactive-seed
+```
+
+- Run safe non-interactive preset (no wipe, seeds admin + super_admin, idempotent catalogs):
+
+```bash
+npm run db:interactive-seed:safe
+```
+
+- Interactive flow auto-detects optional role tables (`admin_users`, `doctors`, `patients`) and seeds links only when those tables exist.
+- During wipe mode, you are prompted whether to also delete non-admin/non-super_admin users from `auth.users`.
+
 - Script path: `Client/Server/scripts/reset-and-seed.mjs`
 
 ## 📁 Project Structure

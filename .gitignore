@@ -1,8 +1,5 @@
-.cursor/
-node_modules/
-.env
-*.md
-cleanup-logs.js
-migrations/
+node_modules
+docs/
 kashfety-landing-page/
-kashfety-landing-page.zip
+*.sql
+.cursor/

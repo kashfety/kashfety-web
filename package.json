@@ -4,7 +4,10 @@
     "build": "cd Client && next build",
     "start": "cd Client && next start",
     "db:precheck": "node Client/Server/scripts/reset-and-seed.mjs --precheck",
-    "db:reset-seed": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes"
+    "db:reset-seed": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes",
+    "db:reset-seed:full": "node Client/Server/scripts/reset-and-seed.mjs --execute --yes --seed-operational-users",
+    "db:interactive-seed": "node Client/Server/scripts/interactive-seed.mjs",
+    "db:interactive-seed:safe": "node Client/Server/scripts/interactive-seed.mjs --preset-safe --yes"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",

@@ -34,13 +34,68 @@ function parseArgs() {
     const flags = {
         precheck: args.includes('--precheck') || !args.includes('--execute'),
         execute: args.includes('--execute'),
-        yes: args.includes('--yes')
+        yes: args.includes('--yes'),
+        seedOperationalUsers: args.includes('--seed-operational-users')
     };
     return flags;
 }
 
-function randomUid(prefix) {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+async function getAuthUserByEmail(email) {
+    let page = 1;
+    const perPage = 200;
+
+    for (; ;) {
+        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+        if (error) {
+            throw new Error(`Failed listing auth users: ${error.message}`);
+        }
+
+        const users = data?.users || [];
+        const found = users.find((user) => (user.email || '').toLowerCase() === email.toLowerCase());
+        if (found) return found;
+
+        if (users.length < perPage) return null;
+        page += 1;
+    }
+}
+
+async function createOrUpdateAuthUser({ email, password, role, metadata }) {
+    const existing = await getAuthUserByEmail(email);
+
+    if (existing) {
+        const { data, error } = await supabase.auth.admin.updateUserById(existing.id, {
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+                ...(existing.user_metadata || {}),
+                ...(metadata || {}),
+                role
+            }
+        });
+
+        if (error) {
+            throw new Error(`Failed updating auth user ${email}: ${error.message}`);
+        }
+
+        return { id: data.user.id, action: 'updated' };
+    }
+
+    const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+            ...(metadata || {}),
+            role
+        }
+    });
+
+    if (error) {
+        throw new Error(`Failed creating auth user ${email}: ${error.message}`);
+    }
+
+    return { id: data.user.id, action: 'created' };
 }
 
 async function getRowCount(table) {
@@ -261,24 +316,17 @@ async function seedCentersAndUsers() {
 
     const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
-    const centerUsers = (insertedCenters || []).map((center, idx) => ({
-        uid: randomUid('center'),
+    const centerUserProfiles = (insertedCenters || []).map((center, idx) => ({
+        center,
         phone: `+96475000020${idx + 1}`,
         first_name: center.name.split(' ')[0],
         last_name: 'Admin',
         name: `${center.name} Admin`,
-        email: `center-admin-${idx + 1}@kashfety.com`,
-        role: 'center',
-        password_hash: passwordHash,
-        is_first_login: false,
-        default_dashboard: 'center-dashboard',
-        approval_status: 'approved',
-        center_id: center.id
+        email: `center-admin-${idx + 1}@kashfety.com`
     }));
 
-    const doctors = [
+    const doctorProfiles = [
         {
-            uid: randomUid('doctor'),
             phone: '+9647500003001',
             first_name: 'Ahmad',
             last_name: 'Karim',
@@ -304,7 +352,6 @@ async function seedCentersAndUsers() {
             }
         },
         {
-            uid: randomUid('doctor'),
             phone: '+9647500003002',
             first_name: 'Sara',
             last_name: 'Nour',
@@ -330,9 +377,8 @@ async function seedCentersAndUsers() {
         }
     ];
 
-    const patients = [
+    const patientProfiles = [
         {
-            uid: randomUid('patient'),
             phone: '+9647500004001',
             first_name: 'Zana',
             last_name: 'Ali',
@@ -350,7 +396,6 @@ async function seedCentersAndUsers() {
             approval_status: 'approved'
         },
         {
-            uid: randomUid('patient'),
             phone: '+9647500004002',
             first_name: 'Ranya',
             last_name: 'Hassan',
@@ -368,7 +413,6 @@ async function seedCentersAndUsers() {
             approval_status: 'approved'
         },
         {
-            uid: randomUid('patient'),
             phone: '+9647500004003',
             first_name: 'Dilan',
             last_name: 'Omar',
@@ -386,6 +430,74 @@ async function seedCentersAndUsers() {
             approval_status: 'approved'
         }
     ];
+
+    const authStats = { created: 0, updated: 0 };
+
+    const centerUsers = [];
+    for (const profile of centerUserProfiles) {
+        const authResult = await createOrUpdateAuthUser({
+            email: profile.email,
+            password: DEFAULT_PASSWORD,
+            role: 'center',
+            metadata: {
+                name: profile.name,
+                phone: profile.phone,
+                center_id: profile.center.id
+            }
+        });
+
+        authStats[authResult.action] += 1;
+
+        centerUsers.push({
+            uid: authResult.id,
+            phone: profile.phone,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            name: profile.name,
+            email: profile.email,
+            role: 'center',
+            password_hash: passwordHash,
+            is_first_login: false,
+            default_dashboard: 'center-dashboard',
+            approval_status: 'approved',
+            center_id: profile.center.id
+        });
+    }
+
+    const doctors = [];
+    for (const profile of doctorProfiles) {
+        const authResult = await createOrUpdateAuthUser({
+            email: profile.email,
+            password: DEFAULT_PASSWORD,
+            role: 'doctor',
+            metadata: {
+                name: profile.name,
+                phone: profile.phone,
+                specialty: profile.specialty
+            }
+        });
+
+        authStats[authResult.action] += 1;
+        doctors.push({ ...profile, uid: authResult.id });
+    }
+
+    const patients = [];
+    for (const profile of patientProfiles) {
+        const authResult = await createOrUpdateAuthUser({
+            email: profile.email,
+            password: DEFAULT_PASSWORD,
+            role: 'patient',
+            metadata: {
+                name: profile.name,
+                phone: profile.phone
+            }
+        });
+
+        authStats[authResult.action] += 1;
+        patients.push({ ...profile, uid: authResult.id });
+    }
+
+    console.log(`- Synced auth users (created: ${authStats.created}, updated: ${authStats.updated})`);
 
     const [{ data: insertedCenterUsers, error: centerUsersErr }, { data: insertedDoctors, error: doctorsErr }, { data: insertedPatients, error: patientsErr }] = await Promise.all([
         supabase.from('users').insert(centerUsers).select('id, center_id, name, role'),
@@ -407,6 +519,96 @@ async function seedCentersAndUsers() {
         doctors: insertedDoctors || [],
         patients: insertedPatients || []
     };
+}
+
+async function seedCentersOnly() {
+    const centers = [
+        {
+            name: 'Kashfety Diagnostic Center',
+            name_ar: 'مركز كشفتي التشخيصي',
+            address: 'Ainkawa, Erbil',
+            phone: '+9647500001001',
+            email: 'center1@kashfety.com',
+            center_type: 'generic',
+            approval_status: 'approved',
+            offers_labs: true,
+            offers_imaging: true
+        },
+        {
+            name: 'Razi Medical Lab',
+            name_ar: 'مختبر الرازي الطبي',
+            address: '60 Meter Road, Erbil',
+            phone: '+9647500001002',
+            email: 'center2@kashfety.com',
+            center_type: 'generic',
+            approval_status: 'approved',
+            offers_labs: true,
+            offers_imaging: false
+        }
+    ];
+
+    const { data: insertedCenters, error: centersError } = await supabase
+        .from('centers')
+        .insert(centers)
+        .select('id, name, offers_labs, offers_imaging');
+
+    if (centersError) throw new Error(`Failed seeding centers: ${centersError.message}`);
+    console.log(`- Seeded ${(insertedCenters || []).length} centers`);
+
+    return { centers: insertedCenters || [] };
+}
+
+async function seedCenterServicesAndSchedules(centers, seededTestTypes) {
+    if (!centers.length || !seededTestTypes.length) {
+        throw new Error('Missing centers or lab test types needed for service/schedule seed');
+    }
+
+    const services = [];
+    for (const center of centers) {
+        for (const type of seededTestTypes) {
+            const isImaging = ['XRAYCHEST', 'USABD', 'CTHEAD'].includes(type.code);
+            if (isImaging && !center.offers_imaging) continue;
+
+            services.push({
+                center_id: center.id,
+                lab_test_type_id: type.id,
+                base_fee: type.default_fee,
+                is_active: true,
+                display_order: 0
+            });
+        }
+    }
+
+    const { error: serviceErr } = await supabase.from('center_lab_services').insert(services);
+    if (serviceErr) throw new Error(`Failed seeding center_lab_services: ${serviceErr.message}`);
+    console.log(`- Seeded ${services.length} center_lab_services rows`);
+
+    const schedules = [];
+    const defaultSlots = [
+        { time: '09:00', duration: 30 },
+        { time: '09:30', duration: 30 },
+        { time: '10:00', duration: 30 },
+        { time: '10:30', duration: 30 }
+    ];
+
+    for (const svc of services) {
+        for (const day of [0, 1, 2, 3, 4]) {
+            schedules.push({
+                center_id: svc.center_id,
+                lab_test_type_id: svc.lab_test_type_id,
+                day_of_week: day,
+                is_available: true,
+                time_slots: defaultSlots,
+                slot_duration: 30,
+                break_start: '12:00',
+                break_end: '13:00'
+            });
+        }
+    }
+
+    const { error: scheduleErr } = await supabase.from('center_lab_schedules').insert(schedules);
+    if (scheduleErr) throw new Error(`Failed seeding center_lab_schedules: ${scheduleErr.message}`);
+    console.log(`- Seeded ${schedules.length} center_lab_schedules rows`);
 }
 
 async function seedRelations(seedState) {
@@ -651,6 +853,7 @@ async function main() {
 
     console.log('Kashfety reset-and-seed utility');
     console.log(`Supabase project: ${SUPABASE_URL}`);
+    console.log(`Mode: ${args.seedOperationalUsers ? 'full-seed (includes center/doctor/patient users)' : 'admin-only users (default)'}`);
 
     await precheckReport();
 
@@ -682,8 +885,16 @@ async function main() {
 
     console.log('\n[2/3] Seeding fresh data...');
     const { seededTestTypes } = await seedCatalogs();
-    const seededUsers = await seedCentersAndUsers();
-    await seedRelations({ ...seededUsers, seededTestTypes });
+
+    if (args.seedOperationalUsers) {
+        const seededUsers = await seedCentersAndUsers();
+        await seedRelations({ ...seededUsers, seededTestTypes });
+    } else {
+        const { centers } = await seedCentersOnly();
+        await seedCenterServicesAndSchedules(centers, seededTestTypes);
+        console.log('- Skipped center/doctor/patient user seeding (admin-only users mode)');
+        console.log('- Skipped appointments/lab_bookings/billing relational seed (requires non-admin users)');
+    }
 
     await runIntegrityChecks();
 

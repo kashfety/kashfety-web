@@ -906,11 +906,22 @@ export default function DoctorDashboard() {
     if (!selectedAppointment) return;
 
     try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+
+      if (!token) {
+        toast({
+          title: t('error') || "Error",
+          description: t('dd_error_auth_required') || "Authentication required. Please log in again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Save medical record using Next.js API route
       const response = await fetch('/api/doctor-dashboard/medical-records', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

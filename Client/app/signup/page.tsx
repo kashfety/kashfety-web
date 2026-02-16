@@ -280,7 +280,7 @@ export default function SignupPage() {
       setPendingUserData(userData);
 
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:beforePhoneCheck',message:'About to check phone',data:{phone:userData.phone},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'signup/page.tsx:handleSubmit:beforePhoneCheck', message: 'About to check phone', data: { phone: userData.phone }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'C' }) }).catch(() => { });
       // #endregion
 
       // Check if phone number is already registered BEFORE sending OTP
@@ -289,22 +289,22 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: userData.phone })
       });
-      
+
       const phoneCheckResult = await phoneCheckResponse.json();
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneCheckResult',message:'Phone check response',data:{exists:phoneCheckResult.exists,message:phoneCheckResult.message,status:phoneCheckResponse.status},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C,D'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'signup/page.tsx:handleSubmit:phoneCheckResult', message: 'Phone check response', data: { exists: phoneCheckResult.exists, message: phoneCheckResult.message, status: phoneCheckResponse.status }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'C,D' }) }).catch(() => { });
       // #endregion
-      
+
       if (phoneCheckResult.exists) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:phoneExists',message:'Phone exists - setting validation error',data:{errorMessage:t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.'},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'signup/page.tsx:handleSubmit:phoneExists', message: 'Phone exists - setting validation error', data: { errorMessage: t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.' }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'D' }) }).catch(() => { });
         // #endregion
         const errorMessage = t('phone_already_registered') || 'This phone number is already registered. Please use a different number or login.';
         setValidationErrors(prev => {
           const newErrors = { ...prev, phone: errorMessage };
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:handleSubmit:setValidationErrors',message:'Validation errors state updated',data:{phoneError:newErrors.phone,allErrors:Object.keys(newErrors)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/78d1136f-9142-45b6-842c-ca61d8e46e6a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'signup/page.tsx:handleSubmit:setValidationErrors', message: 'Validation errors state updated', data: { phoneError: newErrors.phone, allErrors: Object.keys(newErrors) }, timestamp: Date.now(), sessionId: 'debug-session', hypothesisId: 'D' }) }).catch(() => { });
           // #endregion
           return newErrors;
         });
@@ -318,9 +318,9 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email })
       });
-      
+
       const emailCheckResult = await emailCheckResponse.json();
-      
+
       if (emailCheckResult.exists) {
         const errorMessage = emailCheckResult.message || t('email_already_registered') || 'This email is already registered. Please use a different email or login.';
         setValidationErrors(prev => ({
@@ -1156,30 +1156,32 @@ export default function SignupPage() {
               <label htmlFor="password" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                 {t('auth_password_label') || 'Password'}
               </label>
-              <div className="mt-1 relative">
-                <motion.input
-                  whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
-                  transition={{ duration: 0.2 }}
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={(e) => {
-                    handleChange(e)
-                    clearValidationError('password')
-                  }}
-                  className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.password ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                    }`}
-                  placeholder={t('auth_password_placeholder') || 'Enter strong password'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div className="mt-1">
+                <div className="relative">
+                  <motion.input
+                    whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                    transition={{ duration: 0.2 }}
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={formData.password}
+                    onChange={(e) => {
+                      handleChange(e)
+                      clearValidationError('password')
+                    }}
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.password ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                      }`}
+                    placeholder={t('auth_password_placeholder') || 'Enter strong password'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {validationErrors.password && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}
@@ -1212,30 +1214,32 @@ export default function SignupPage() {
               <label htmlFor="confirmPassword" className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                 {t('auth_password_confirm_label') || 'Confirm Password'}
               </label>
-              <div className="mt-1 relative">
-                <motion.input
-                  whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
-                  transition={{ duration: 0.2 }}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={(e) => {
-                    handleChange(e)
-                    clearValidationError('confirmPassword')
-                  }}
-                  className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
-                    }`}
-                  placeholder={t('auth_password_confirm_placeholder') || 'Confirm your password'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div className="mt-1">
+                <div className="relative">
+                  <motion.input
+                    whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                    transition={{ duration: 0.2 }}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    value={formData.confirmPassword}
+                    onChange={(e) => {
+                      handleChange(e)
+                      clearValidationError('confirmPassword')
+                    }}
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all ${validationErrors.confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-white/30'
+                      }`}
+                    placeholder={t('auth_password_confirm_placeholder') || 'Confirm your password'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {validationErrors.confirmPassword && (
                   <motion.p
                     initial={{ opacity: 0, y: -10 }}

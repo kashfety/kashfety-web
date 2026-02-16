@@ -2780,6 +2780,18 @@ router.get('/doctor/analytics', authenticateToken, async (req, res) => {
     // Calculate total revenue
     const totalRevenue = completedAppointments.reduce((sum, apt) => sum + (apt.consultation_fee || 0), 0);
 
+    // Average rating from actual reviews only
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('doctor_id', req.user.id);
+
+    let avgRating = 0;
+    if (reviews && reviews.length > 0) {
+      const sum = reviews.reduce((total, review) => total + Number(review.rating || 0), 0);
+      avgRating = Math.round((sum / reviews.length) * 100) / 100;
+    }
+
     // Age demographics
     const ageGroups = { '0-18': 0, '19-35': 0, '36-50': 0, '51-65': 0, '65+': 0 };
     const genderDistribution = { male: 0, female: 0, other: 0 };
@@ -2815,7 +2827,7 @@ router.get('/doctor/analytics', authenticateToken, async (req, res) => {
         totalPatients: uniquePatients.size,
         thisMonthAppointments: thisMonthAppointments.length,
         completionRate,
-        avgRating: 4.5, // TODO: Calculate from reviews
+        avgRating,
         totalRevenue,
         patientDemographics: {
           ageGroups,

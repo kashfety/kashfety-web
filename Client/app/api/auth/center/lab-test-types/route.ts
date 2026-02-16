@@ -113,9 +113,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { code, name, category, default_fee } = body;
+    const { code, name, name_en, name_ar, category, default_fee } = body;
     const normalizedCode = String(code || '').trim().toUpperCase();
     const normalizedName = String(name || '').trim();
+    const normalizedNameEn = String(name_en || '').trim();
+    const normalizedNameAr = String(name_ar || '').trim();
     const parsedDefaultFee = default_fee !== undefined && default_fee !== null && default_fee !== ''
       ? Number(default_fee)
       : null;
@@ -143,6 +145,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    const normalizedNameLower = normalizedName.toLowerCase();
+    const normalizedNameEnLower = normalizedNameEn.toLowerCase();
+    const normalizedNameArLower = normalizedNameAr.toLowerCase();
+
     // Check if test type with same code already exists
     const { data: existing, error: checkError } = await supabase
       .from('lab_test_types')
@@ -160,7 +166,48 @@ export async function POST(request: NextRequest) {
     if (existing) {
       return NextResponse.json({
         error: 'Test type already exists',
-        details: `A test type with code "${normalizedCode}" already exists`
+        details: `A test type with code "${normalizedCode}" already exists`,
+        conflictField: 'code'
+      }, { status: 409 });
+    }
+
+    // Check duplicate naming conflicts (case-insensitive) across default/en/ar names
+    const { data: allTypes, error: allTypesError } = await supabase
+      .from('lab_test_types')
+      .select('id, name, name_en, name_ar');
+
+    if (allTypesError) {
+      console.error('Failed checking duplicate lab test type names:', allTypesError);
+      return NextResponse.json({
+        error: 'Failed to validate test type name'
+      }, { status: 500 });
+    }
+
+    const hasNameConflict = (row: any) => {
+      const rowName = String(row.name || '').trim().toLowerCase();
+      const rowNameEn = String(row.name_en || '').trim().toLowerCase();
+      const rowNameAr = String(row.name_ar || '').trim().toLowerCase();
+
+      if (normalizedNameLower && (rowName === normalizedNameLower || rowNameEn === normalizedNameLower || rowNameAr === normalizedNameLower)) {
+        return { conflictField: 'name', conflictValue: normalizedName };
+      }
+      if (normalizedNameEnLower && (rowName === normalizedNameEnLower || rowNameEn === normalizedNameEnLower || rowNameAr === normalizedNameEnLower)) {
+        return { conflictField: 'name_en', conflictValue: normalizedNameEn };
+      }
+      if (normalizedNameArLower && (rowName === normalizedNameArLower || rowNameEn === normalizedNameArLower || rowNameAr === normalizedNameArLower)) {
+        return { conflictField: 'name_ar', conflictValue: normalizedNameAr };
+      }
+
+      return null;
+    };
+
+    const conflict = (allTypes || []).map(hasNameConflict).find(Boolean) as { conflictField: 'name' | 'name_en' | 'name_ar'; conflictValue: string } | undefined;
+
+    if (conflict) {
+      return NextResponse.json({
+        error: 'Test type name already exists',
+        details: `A test type with this name already exists: "${conflict.conflictValue}"`,
+        conflictField: conflict.conflictField
       }, { status: 409 });
     }
 
@@ -170,6 +217,8 @@ export async function POST(request: NextRequest) {
       .insert({
         code: normalizedCode,
         name: normalizedName,
+        name_en: normalizedNameEn || normalizedName,
+        name_ar: normalizedNameAr || null,
         category,
         default_fee: parsedDefaultFee,
         created_at: new Date().toISOString()
@@ -181,7 +230,8 @@ export async function POST(request: NextRequest) {
       if (insertError.code === '23505') {
         return NextResponse.json({
           error: 'Test type already exists',
-          details: `A test type with code "${normalizedCode}" already exists`
+          details: `A test type with code "${normalizedCode}" already exists`,
+          conflictField: 'code'
         }, { status: 409 });
       }
 

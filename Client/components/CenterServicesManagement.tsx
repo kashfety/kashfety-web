@@ -56,9 +56,13 @@ export default function CenterServicesManagement() {
   // New lab test type dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [createConflictField, setCreateConflictField] = useState<'' | 'code' | 'name' | 'name_en' | 'name_ar'>('');
   const [newTestType, setNewTestType] = useState({
     code: '',
     name: '',
+    name_en: '',
+    name_ar: '',
     category: 'lab' as 'lab' | 'imaging',
     default_fee: ''
   });
@@ -105,10 +109,14 @@ export default function CenterServicesManagement() {
     }
 
     setCreating(true);
+    setCreateError('');
+    setCreateConflictField('');
     try {
       const response = await labService.createLabTestType({
         code: newTestType.code,
         name: newTestType.name,
+        name_en: newTestType.name_en || undefined,
+        name_ar: newTestType.name_ar || undefined,
         category: newTestType.category,
         default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
       });
@@ -130,12 +138,22 @@ export default function CenterServicesManagement() {
       toast({ title: t('success') || 'Success', description: t('services_created_successfully') || 'Lab test type created successfully' });
 
       // Reset form and close dialog
-      setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
+      setNewTestType({ code: '', name: '', name_en: '', name_ar: '', category: 'lab', default_fee: '' });
+      setCreateError('');
+      setCreateConflictField('');
       setShowCreateDialog(false);
     } catch (error: any) {
+      const backendMessage = error.response?.data?.details || error.response?.data?.error || t('services_failed_create') || 'Failed to create lab test type';
+      const conflictField = error.response?.data?.conflictField as '' | 'code' | 'name' | 'name_en' | 'name_ar' | undefined;
+
+      if (error.response?.status === 409) {
+        setCreateError(backendMessage);
+        setCreateConflictField(conflictField || 'name');
+      }
+
       toast({
         title: t('error') || 'Error',
-        description: error.response?.data?.error || t('services_failed_create') || 'Failed to create lab test type',
+        description: backendMessage,
         variant: 'destructive'
       });
     } finally {
@@ -182,7 +200,14 @@ export default function CenterServicesManagement() {
                       <Input
                         id="code"
                         value={newTestType.code}
-                        onChange={(e) => setNewTestType(prev => ({ ...prev, code: e.target.value }))}
+                        onChange={(e) => {
+                          setNewTestType(prev => ({ ...prev, code: e.target.value }));
+                          if (createError) {
+                            setCreateError('');
+                            setCreateConflictField('');
+                          }
+                        }}
+                        className={createConflictField === 'code' ? 'border-red-500 focus-visible:ring-red-500' : ''}
                         placeholder={t('services_code_placeholder') || "e.g., CBC, MRI"}
                       />
                     </div>
@@ -191,8 +216,47 @@ export default function CenterServicesManagement() {
                       <Input
                         id="name"
                         value={newTestType.name}
-                        onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) => {
+                          setNewTestType(prev => ({ ...prev, name: e.target.value }));
+                          if (createError) {
+                            setCreateError('');
+                            setCreateConflictField('');
+                          }
+                        }}
+                        className={createConflictField === 'name' ? 'border-red-500 focus-visible:ring-red-500' : ''}
                         placeholder={t('services_name_placeholder') || "e.g., Complete Blood Count"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name_en" className="text-gray-700 dark:text-gray-300">{t('services_name_en') || 'Name (English)'}</Label>
+                      <Input
+                        id="name_en"
+                        value={newTestType.name_en}
+                        onChange={(e) => {
+                          setNewTestType(prev => ({ ...prev, name_en: e.target.value }));
+                          if (createError) {
+                            setCreateError('');
+                            setCreateConflictField('');
+                          }
+                        }}
+                        className={createConflictField === 'name_en' ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                        placeholder={t('services_name_en_placeholder') || "e.g., Complete Blood Count"}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name_ar" className="text-gray-700 dark:text-gray-300">{t('services_name_ar') || 'Name (Arabic)'}</Label>
+                      <Input
+                        id="name_ar"
+                        value={newTestType.name_ar}
+                        onChange={(e) => {
+                          setNewTestType(prev => ({ ...prev, name_ar: e.target.value }));
+                          if (createError) {
+                            setCreateError('');
+                            setCreateConflictField('');
+                          }
+                        }}
+                        className={createConflictField === 'name_ar' ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                        placeholder={t('services_name_ar_placeholder') || "مثال: تعداد الدم الشامل"}
                       />
                     </div>
                     <div className="space-y-2">
@@ -220,9 +284,16 @@ export default function CenterServicesManagement() {
                         placeholder="0.00"
                       />
                     </div>
+                    {createError && (
+                      <p className="text-sm text-red-600 dark:text-red-400">{createError}</p>
+                    )}
                   </div>
                   <DialogFooter className={`${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
-                    <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={creating}>
+                    <Button variant="outline" onClick={() => {
+                      setCreateError('');
+                      setCreateConflictField('');
+                      setShowCreateDialog(false);
+                    }} disabled={creating}>
                       {t('services_cancel') || 'Cancel'}
                     </Button>
                     <Button onClick={handleCreateTestType} disabled={creating} className="bg-emerald-600 hover:bg-emerald-700 text-white">

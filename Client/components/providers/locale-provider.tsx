@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, startTransition } from "react"
 import type { Locale } from "@/lib/i18n"
 import { defaultLocale, isRTL, getTranslation } from "@/lib/i18n"
 
@@ -25,25 +25,24 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     }
     return defaultLocale
   })
-  const [mounted, setMounted] = useState(false)
-
-  const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale)
-    if (typeof window !== "undefined") {
-      localStorage.setItem("locale", newLocale)
-      document.documentElement.lang = newLocale
-      document.documentElement.dir = isRTL(newLocale) ? "rtl" : "ltr"
+  const setLocale = useCallback((newLocale: Locale) => {
+    if (newLocale === locale) {
+      return
     }
-  }
+
+    startTransition(() => {
+      setLocaleState(newLocale)
+    })
+  }, [locale])
 
   const t = (key: string): string => {
     return getTranslation(locale, key)
   }
 
   useEffect(() => {
-    setMounted(true)
-    // Apply the locale to the document on mount
+    // Apply locale effects after state update (outside interaction handler)
     if (typeof window !== "undefined") {
+      localStorage.setItem("locale", locale)
       document.documentElement.lang = locale
       document.documentElement.dir = isRTL(locale) ? "rtl" : "ltr"
     }

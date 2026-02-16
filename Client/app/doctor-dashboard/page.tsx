@@ -818,7 +818,7 @@ export default function DoctorDashboard() {
 
       // Get auth token for authenticated requests
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      
+
       if (!token) {
         toast({
           title: t('error') || "Error",
@@ -838,7 +838,7 @@ export default function DoctorDashboard() {
 
       // Fetch detailed patient information using fallback routes for Vercel compatibility
       // Filter appointments by current doctor only
-      const fetchOptions: RequestInit = { 
+      const fetchOptions: RequestInit = {
         headers,
         credentials: 'include' // Ensure cookies are sent
       };
@@ -1021,6 +1021,7 @@ export default function DoctorDashboard() {
       const storedUserStr = localStorage.getItem('auth_user');
       const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
       const doctorId = user?.id || storedUser?.id;
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
 
       if (!doctorId) {
         toast({
@@ -1031,13 +1032,23 @@ export default function DoctorDashboard() {
         return;
       }
 
+      if (!token) {
+        toast({
+          title: t('error') || "Error",
+          description: t('dd_error_auth_required') || "Authentication required. Please log in again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Use the fallback route directly (works on Vercel)
-      const response = await fetch(`/api/doctor-update-appointment-status?appointmentId=${encodeURIComponent(appointmentId)}&doctor_id=${encodeURIComponent(doctorId)}`, {
+      const response = await fetch(`/api/doctor-update-appointment-status?appointmentId=${encodeURIComponent(appointmentId)}`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status, doctor_id: doctorId })
+        body: JSON.stringify({ status })
       });
 
       const result = await response.json();
@@ -1267,20 +1278,31 @@ export default function DoctorDashboard() {
 
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
-                            {toArabicNumerals((analytics?.analytics?.avgRating || 0).toFixed(2), locale)}★
-                          </p>
-                        </div>
-                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg order-2 shrink-0">
-                          <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <Progress value={(analytics?.analytics?.avgRating || 0) * 20} className="h-2" />
-                      </div>
+                      {(() => {
+                        const avgRating = analytics?.analytics?.avgRating || 0;
+                        const hasReviews = avgRating > 0;
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between">
+                              <div className="text-left order-1 min-w-0 flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('dd_average_rating') || 'Average Rating'}</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                                  {hasReviews
+                                    ? `${toArabicNumerals(avgRating.toFixed(2), locale)}★`
+                                    : (t('dd_no_reviews') || 'No reviews yet')}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg order-2 shrink-0">
+                                <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                              </div>
+                            </div>
+                            <div className="mt-4">
+                              <Progress value={hasReviews ? avgRating * 20 : 0} className="h-2" />
+                            </div>
+                          </>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 </div>

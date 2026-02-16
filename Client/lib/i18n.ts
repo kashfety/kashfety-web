@@ -576,6 +576,10 @@ export const translations = {
     services_code_placeholder: "e.g., CBC, MRI",
     services_name: "Name",
     services_name_placeholder: "e.g., Complete Blood Count",
+    services_name_en: "Name (English)",
+    services_name_en_placeholder: "e.g., Complete Blood Count",
+    services_name_ar: "Name (Arabic)",
+    services_name_ar_placeholder: "e.g., تعداد الدم الشامل",
     services_category: "Category",
     services_lab: "Lab",
     services_imaging: "Imaging",
@@ -593,6 +597,7 @@ export const translations = {
     services_fill_required_fields: "Please fill in all required fields",
     services_created_successfully: "Lab test type created successfully",
     services_failed_create: "Failed to create lab test type",
+    services_name_conflict: "A lab service with this name already exists",
 
     // Doctor Dashboard Messages
     dd_error_load_dashboard: "Failed to load dashboard data. Please try again.",
@@ -2801,6 +2806,10 @@ export const translations = {
     services_code_placeholder: "مثال: CBC, MRI",
     services_name: "الاسم",
     services_name_placeholder: "مثال: تعداد الدم الشامل",
+    services_name_en: "الاسم (بالإنجليزية)",
+    services_name_en_placeholder: "مثال: Complete Blood Count",
+    services_name_ar: "الاسم (بالعربية)",
+    services_name_ar_placeholder: "مثال: تعداد الدم الشامل",
     services_category: "الفئة",
     services_lab: "مخبري",
     services_imaging: "تصوير",
@@ -2818,6 +2827,7 @@ export const translations = {
     services_fill_required_fields: "يرجى ملء جميع الحقول المطلوبة",
     services_created_successfully: "تم إنشاء نوع الفحص المخبري بنجاح",
     services_failed_create: "فشل في إنشاء نوع الفحص المخبري",
+    services_name_conflict: "يوجد بالفعل خدمة مخبرية بهذا الاسم",
 
     // Doctor Dashboard Messages (Arabic)
     dd_error_load_dashboard: "فشل في تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى.",

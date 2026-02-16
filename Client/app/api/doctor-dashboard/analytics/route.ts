@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return authResult; // Returns 401 or 403
     }
     const { user } = authResult;
-    
+
     // SECURITY: Use authenticated doctor's ID
     const doctorId = user.id;
     const authHeader = request.headers.get('authorization');
@@ -73,7 +73,8 @@ export async function GET(request: NextRequest) {
 
     const completionRate = thisMonthAppointments > 0 ? Math.round((completed / thisMonthAppointments) * 100) : 0;
 
-    // Average rating: calculate from reviews table and round to 2 decimal places
+    // Average rating: derive only from real review rows.
+    // If no reviews exist, rating should be 0 (not seeded/default profile rating).
     let avgRating = 0;
     const { data: ratings } = await supabase
       .from('reviews')
@@ -82,17 +83,7 @@ export async function GET(request: NextRequest) {
 
     if (ratings && ratings.length > 0) {
       const sum = ratings.reduce((s: number, r: any) => s + Number(r.rating || 0), 0);
-      avgRating = Math.round((sum / ratings.length) * 100) / 100; // Round to 2 decimal places
-    } else {
-      // Fallback to users.rating if no reviews exist
-      const { data: docRow } = await supabase
-        .from('users')
-        .select('rating')
-        .eq('id', doctorId)
-        .single();
-      if (docRow && typeof docRow.rating !== 'undefined' && docRow.rating !== null) {
-        avgRating = Math.round(Number(docRow.rating) * 100) / 100; // Round to 2 decimal places
-      }
+      avgRating = Math.round((sum / ratings.length) * 100) / 100;
     }
 
     return NextResponse.json({

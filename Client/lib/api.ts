@@ -45,7 +45,7 @@ frontendApiClient.interceptors.request.use(
         ];
 
         // Check if this is a public endpoint
-        const isPublicEndpoint = config.url && publicEndpoints.some(endpoint => 
+        const isPublicEndpoint = config.url && publicEndpoints.some(endpoint =>
           config.url!.includes(endpoint)
         );
 
@@ -83,7 +83,7 @@ frontendApiClient.interceptors.response.use(
               '/api/auth/register',
               '/api/auth/verify',
             ];
-            const isPublicEndpoint = publicEndpoints.some(endpoint => 
+            const isPublicEndpoint = publicEndpoints.some(endpoint =>
               requestUrl.includes(endpoint)
             );
             const isProtectedEndpoint = requestUrl.startsWith('/api/') && !isPublicEndpoint;
@@ -582,7 +582,7 @@ export const labService = {
     frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/status`, { status, notes }),
   attachResult: async (bookingId: string, payload: { result_file_url?: string; result_notes?: string }) =>
     frontendApi.put(`/api/auth/lab-tests/bookings/${bookingId}/result`, payload),
-  createLabTestType: async (payload: { code: string; name: string; category: 'lab' | 'imaging'; default_fee?: number }) =>
+  createLabTestType: async (payload: { code: string; name: string; name_en?: string; name_ar?: string; category: 'lab' | 'imaging'; default_fee?: number }) =>
     frontendApi.post('/api/auth/center/lab-test-types', payload)
 };
 

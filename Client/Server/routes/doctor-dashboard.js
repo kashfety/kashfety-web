@@ -412,6 +412,11 @@ router.get('/analytics', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Only doctors can access this endpoint' });
     }
 
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('doctor_id', req.user.id);
+
     // Get all appointments for this doctor
     const { data: allAppointments, error: appointmentsError } = await supabase
       .from('appointments')
@@ -437,7 +442,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
         .select('id, appointment_date, status, appointment_type, consultation_fee, patient_id')
         .eq('doctor_id', req.user.id);
 
-      return res.json(calculateAnalytics(basicAppointments || [], []));
+      return res.json(calculateAnalytics(basicAppointments || [], [], reviews || []));
     }
 
     // Get patient demographics separately if join failed
@@ -448,7 +453,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
       .in('id', patientIds)
       .eq('role', 'patient');
 
-    res.json(calculateAnalytics(allAppointments, patients || []));
+    res.json(calculateAnalytics(allAppointments, patients || [], reviews || []));
 
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -456,7 +461,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
 });
 
 // Helper function to calculate analytics
-function calculateAnalytics(appointments, patients) {
+function calculateAnalytics(appointments, patients, reviews = []) {
   // Get unique patients count
   const uniquePatients = new Set();
   appointments.forEach(apt => {
@@ -509,13 +514,20 @@ function calculateAnalytics(appointments, patients) {
     }
   });
 
+  // Average rating from actual reviews only
+  let avgRating = 0;
+  if (reviews.length > 0) {
+    const sum = reviews.reduce((total, review) => total + Number(review.rating || 0), 0);
+    avgRating = Math.round((sum / reviews.length) * 100) / 100;
+  }
+
   return {
     success: true,
     analytics: {
       totalPatients: uniquePatients.size,
       thisMonthAppointments: thisMonthAppointments.length,
       completionRate,
-      avgRating: 4.5, // TODO: Calculate from reviews
+      avgRating,
       totalRevenue,
       patientDemographics: {
         ageGroups,

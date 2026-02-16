@@ -2338,6 +2338,8 @@ export default function CenterDashboardPage() {
   const [newTestType, setNewTestType] = useState({
     code: '',
     name: '',
+    name_en: '',
+    name_ar: '',
     category: 'lab' as 'lab' | 'imaging',
     default_fee: ''
   });
@@ -3012,6 +3014,8 @@ export default function CenterDashboardPage() {
       const response = await labService.createLabTestType({
         code: newTestType.code,
         name: newTestType.name,
+        name_en: newTestType.name_en || undefined,
+        name_ar: newTestType.name_ar || undefined,
         category: newTestType.category,
         default_fee: newTestType.default_fee ? Number(newTestType.default_fee) : undefined
       });
@@ -3021,7 +3025,7 @@ export default function CenterDashboardPage() {
       toast({ title: t('success'), description: t('lab_test_type_created') });
 
       // Reset form and close dialog
-      setNewTestType({ code: '', name: '', category: 'lab', default_fee: '' });
+      setNewTestType({ code: '', name: '', name_en: '', name_ar: '', category: 'lab', default_fee: '' });
       setShowCreateDialog(false);
 
       // Reload all data from server to get the fresh list with the new test type
@@ -3664,6 +3668,32 @@ export default function CenterDashboardPage() {
                                 onChange={(e) => setNewTestType(prev => ({ ...prev, name: e.target.value }))}
                                 placeholder="e.g., Complete Blood Count"
                                 dir={isRTL ? 'rtl' : 'ltr'}
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                              <Label htmlFor="name_en" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                {t('services_name_en') || 'Name (English)'}
+                              </Label>
+                              <Input
+                                id="name_en"
+                                value={newTestType.name_en}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, name_en: e.target.value }))}
+                                placeholder={t('services_name_en_placeholder') || 'e.g., Complete Blood Count'}
+                                dir="ltr"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                              <Label htmlFor="name_ar" dir={isRTL ? 'rtl' : 'ltr'} style={{ textAlign: isRTL ? 'right' : 'left' }}>
+                                {t('services_name_ar') || 'Name (Arabic)'}
+                              </Label>
+                              <Input
+                                id="name_ar"
+                                value={newTestType.name_ar}
+                                onChange={(e) => setNewTestType(prev => ({ ...prev, name_ar: e.target.value }))}
+                                placeholder={t('services_name_ar_placeholder') || 'مثال: تعداد الدم الشامل'}
+                                dir="rtl"
                                 className="w-full"
                               />
                             </div>

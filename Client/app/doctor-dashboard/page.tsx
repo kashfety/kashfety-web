@@ -415,11 +415,11 @@ function ProfileHeader({
 
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none">
-          <div className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1F1F23] transition-colors">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <div className={`flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1F1F23] transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-4 h-4 text-white" />
             </div>
-            <div className="hidden sm:block text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="hidden sm:block text-start" dir={isRTL ? 'rtl' : 'ltr'}>
               <div className="text-sm font-medium text-gray-900 dark:text-white">
                 {getLocalizedName(doctorProfile, locale) || 'Doctor'}
               </div>
@@ -438,11 +438,11 @@ function ProfileHeader({
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           <div className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <div className={`flex items-center gap-3 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="w-6 h-6 text-white" />
               </div>
-              <div>
+              <div className="min-w-0 text-start">
                 <div className="font-medium text-gray-900 dark:text-white">
                   {getLocalizedName(doctorProfile, locale) || 'Doctor'}
                 </div>
@@ -1493,7 +1493,7 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow"><Calendar className="h-5 w-5 text-white" /></div>
-                    <div className="text-left">
+                    <div className="text-start">
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_upcoming_appointments_title') || 'Upcoming Appointments'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_consultations') || 'Manage today and upcoming consultations'}</p>
                     </div>
@@ -1502,8 +1502,8 @@ export default function DoctorDashboard() {
                 <div className="space-y-6 scroll-animation" data-animation="slide-in-up">
                   {/* Today's and Upcoming Appointments */}
                   <Card className="border-0 shadow-xl shadow-emerald-500/5 gradient-card" dir={isRTL ? 'rtl' : 'ltr'}>
-                    <CardHeader className="text-left" dir={isRTL ? 'rtl' : 'ltr'}>
-                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} text-left`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <CardHeader className="text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} text-start`} dir={isRTL ? 'rtl' : 'ltr'}>
                         <Calendar className="w-5 h-5" />
                         <span dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_upcoming_schedule') || 'Upcoming Appointments'}</span>
                       </CardTitle>
@@ -1723,8 +1723,8 @@ export default function DoctorDashboard() {
                           return (
                             <div className="text-center py-12" dir={isRTL ? 'rtl' : 'ltr'}>
                               <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                              <h3 className={`text-lg font-medium text-gray-900 dark:text-white mb-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
-                              <p className={`text-gray-600 dark:text-gray-400 mb-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('appointments_no_appointments_title') || 'No Appointments Yet'}</h3>
+                              <p className="text-gray-600 dark:text-gray-400 mb-4 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                                 {t('appointments_no_appointments_desc') || "You haven't booked any appointments yet. Start by booking your first appointment."}
                               </p>
                               <Button

@@ -807,13 +807,13 @@ export default function DoctorProfileSettings({
             </div>
 
             {/* Upload Section */}
-            <div className="flex-1 space-y-4 text-start min-w-0">
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 hover:border-blue-400 transition-colors text-start" dir={isRTL ? 'rtl' : 'ltr'}>
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2 block" />
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="flex-1 min-w-0 flex justify-center">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 hover:border-blue-400 transition-colors w-full max-w-md flex flex-col items-center text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Upload className="w-8 h-8 text-gray-400 mb-2 flex-shrink-0" />
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('profile_picture_upload_hint') || 'انقر لرفع صورة ملف جديدة'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('profile_picture_supported_formats') || 'الصيغ المدعومة: JPEG, PNG, WebP, GIF (بحد أقصى 5MB)'}
                 </p>
                 <label
@@ -821,7 +821,7 @@ export default function DoctorProfileSettings({
                   className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 >
-                  <Upload className={`w-4 h-4 ${isRTL ? 'ms-2' : 'me-2'}`} />
+                  <Upload className={`w-4 h-4 flex-shrink-0 ${isRTL ? 'ms-2' : 'me-2'}`} />
                   {uploadingPicture 
                     ? t("uploading")
                     : (t('profile_picture_upload_btn') || 'Upload Picture')

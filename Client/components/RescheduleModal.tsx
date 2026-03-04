@@ -63,6 +63,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
   // Enhanced state for comprehensive schedule handling (like BookingModal)
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string, is_available: boolean, is_booked: boolean }>>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [loadingWorkingDays, setLoadingWorkingDays] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [doctorWorkingDays, setDoctorWorkingDays] = useState<number[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
@@ -81,20 +82,31 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       setBookedSlots([]);
 
       // Fetch doctor's working days and available dates when modal opens
-      // Try to get doctor_id from various possible locations
       const doctorId = appointment.doctor_id || (appointment as any)?.doctor?.id || (appointment as any)?.doctor_id;
 
       if (doctorId) {
         fetchDoctorAvailability(doctorId);
       } else {
+        // No doctor ID: don't show loading forever; use fallback so calendar can still render
+        setLoadingWorkingDays(false);
+        const fallbackDays = [1, 2, 3, 4, 5];
+        setDoctorWorkingDays(fallbackDays);
+        const today = new Date();
+        const dates: string[] = [];
+        for (let i = 0; i < 30; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+          if (fallbackDays.includes(d.getDay())) dates.push(d.toISOString().split("T")[0]);
+        }
+        setAvailableDates(dates);
       }
     }
   }, [isOpen, appointment]);
 
   // Enhanced doctor availability fetching (from BookingModal)
   const fetchDoctorAvailability = async (doctorId: string) => {
+    setLoadingWorkingDays(true);
     try {
-
       // Calculate date range for next 30 days
       const today = new Date();
       const startDate = today.toISOString().split('T')[0];
@@ -166,6 +178,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
       // Use safe fallback on any error
       setAvailableDates([]);
       setDoctorWorkingDays([1, 2, 3, 4, 5]); // Monday to Friday as fallback
+    } finally {
+      setLoadingWorkingDays(false);
     }
   };
 
@@ -465,13 +479,14 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.3 }}
                 className="max-h-[85vh] overflow-y-auto bg-white dark:bg-gray-900"
+                dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <div className="space-y-6 p-6">
+                <div className="space-y-6 p-6 text-start">
                   {/* Header Section - Matching BookingModal */}
-                  <div className={`flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg border-l-4 border-[#4DBCC4] shadow-sm ${isRTL ? 'border-r-4 border-l-0 flex-row-reverse text-right' : 'border-l-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
-                      <h3 className={`text-2xl font-bold text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{t('reschedule_title') || 'Reschedule Appointment'}</h3>
-                      <p className={`text-base text-gray-700 dark:text-gray-300 mt-2 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-center justify-between gap-3 flex-wrap bg-gradient-to-r from-[#4DBCC4]/10 to-[#3da8b0]/10 dark:from-[#4DBCC4]/20 dark:to-[#3da8b0]/20 p-5 rounded-lg shadow-sm ${isRTL ? 'border-r-4 border-r-[#4DBCC4] flex-row-reverse' : 'border-l-4 border-l-[#4DBCC4]'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="text-start min-w-0" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('reschedule_title') || 'Reschedule Appointment'}</h3>
+                      <p className="text-base text-gray-700 dark:text-gray-300 mt-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('reschedule_with') || 'with'} {appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}
                       </p>
                     </div>
@@ -489,7 +504,7 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
-                          className={`font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+                          className={`font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2 text-start ${isRTL ? 'flex-row-reverse' : ''}`}
                           dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -579,7 +594,8 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.5 }}
-                              className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100"
+                              className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 text-start"
+                              dir={isRTL ? 'rtl' : 'ltr'}
                             >
                               <strong>{t('reschedule_notes') || 'Notes'}:</strong> {getLocalizedRescheduleNotes(appointment.notes, t) || appointment.notes}
                             </motion.div>
@@ -589,17 +605,17 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                     </Card>
                   </motion.div>
 
-                  {/* Show loading message if doctor working days not loaded yet */}
-                  {doctorWorkingDays.length === 0 && (
-                    <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-2">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-yellow-600"></div>
+                  {/* Show loading only while actually fetching working days */}
+                  {loadingWorkingDays && (
+                    <div className={`p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800 text-start ${isRTL ? 'flex flex-col items-end' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <div className={`flex items-center gap-3 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-yellow-300 border-t-yellow-600 flex-shrink-0" />
                         <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
                           {t('booking_loading_availability') || 'Loading doctor availability...'}
                         </p>
                       </div>
-                      <p className="text-base text-gray-700 dark:text-gray-300">
-                        {t('booking_please_wait_schedule') || 'Please wait while we fetch the schedule.'}
+                      <p className="text-base text-gray-700 dark:text-gray-300 text-start">
+                        {t('booking_please_wait_schedule') || 'Please wait while we prepare the schedule.'}
                       </p>
                     </div>
                   )}
@@ -614,13 +630,13 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                     >
                       {/* Calendar */}
                       <div className="flex flex-col">
-                        <h4 className={`font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <CalendarIcon className={`w-6 h-6 text-[#4DBCC4] ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <h4 className={`font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <CalendarIcon className={`w-6 h-6 text-[#4DBCC4] flex-shrink-0 ${isRTL ? 'ms-2' : 'me-2'}`} />
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('reschedule_select_new_date') || 'Select New Date'}</span>
                         </h4>
                         {doctorWorkingDays.length > 0 && (
-                          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
-                            <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed">
+                          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <p className="text-base text-gray-900 dark:text-gray-100 leading-relaxed text-start">
                               <strong className="text-[#4DBCC4]">{appointment.doctorName || t('reschedule_doctor_label') || 'Doctor'}</strong> {t('booking_doctor_available_on') || 'is available on:'} {' '}
                               <span className="font-semibold">
                                 {doctorWorkingDays.map(day => {
@@ -667,16 +683,16 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
                       {/* Time Slots */}
                       <div>
-                        <h4 className={`font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                          <Clock className={`w-6 h-6 text-[#4DBCC4] ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <h4 className={`font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <Clock className={`w-6 h-6 text-[#4DBCC4] flex-shrink-0 ${isRTL ? 'ms-2' : 'me-2'}`} />
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{t('reschedule_select_new_time') || 'Select New Time'}</span>
                         </h4>
                         {selectedDate ? (
                           loadingAvailability ? (
-                            <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="flex flex-col items-center gap-3">
-                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-[#4DBCC4]"></div>
-                                <span className="text-base text-gray-900 dark:text-gray-100 font-medium">{t('booking_loading_times') || 'Loading available times...'}</span>
+                            <div className={`flex py-12 bg-gray-50 dark:bg-gray-800 rounded-lg ${isRTL ? 'justify-end' : 'justify-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                              <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-col'}`}>
+                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-[#4DBCC4] flex-shrink-0" />
+                                <span className="text-base text-gray-900 dark:text-gray-100 font-medium text-start">{t('booking_loading_times') || 'Loading available times...'}</span>
                               </div>
                             </div>
                           ) : (
@@ -715,18 +731,18 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                               </div>
 
                               {availableSlots.length === 0 && (
-                                <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800">
-                                  <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Clock className="w-8 h-8 text-red-500" />
+                                <div className={`py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-dashed border-red-300 dark:border-red-800 text-start ${isRTL ? 'flex flex-col items-end' : 'text-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                  <div className={`w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4 ${isRTL ? '' : 'mx-auto'}`}>
+                                    <Clock className="w-8 h-8 text-red-500 flex-shrink-0" />
                                   </div>
-                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">
+                                  <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2 text-start">
                                     {t('booking_no_slots_date') || 'No available time slots for this date'}
                                   </p>
-                                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                  <p className="text-gray-600 dark:text-gray-400 text-sm text-start">
                                     {t('booking_try_another_date') || 'Please select another date'}
                                   </p>
                                   {doctorWorkingDays.length > 0 && (
-                                    <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium">
+                                    <p className="text-[#4DBCC4] dark:text-[#4DBCC4] text-sm mt-3 font-medium text-start">
                                       {t('booking_doctor_available_hint') || 'Available days are highlighted in the calendar'}
                                     </p>
                                   )}
@@ -735,9 +751,9 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                             </div>
                           )
                         ) : (
-                          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg">{t('booking_select_date_first') || 'Please select a date first'}</p>
+                          <div className={`py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 text-start ${isRTL ? 'flex flex-col items-end' : 'text-center'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                            <CalendarIcon className={`w-16 h-16 text-gray-400 mb-4 flex-shrink-0 ${isRTL ? '' : 'mx-auto'}`} />
+                            <p className="text-gray-900 dark:text-gray-100 font-semibold text-lg text-start">{t('booking_select_date_first') || 'Please select a date first'}</p>
                           </div>
                         )}
                       </div>
@@ -746,17 +762,17 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
 
                   {/* Consultation Fee Display */}
                   {actualConsultationFee > 0 && (
-                    <div className="p-4 bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 rounded-lg border-2 border-[#4DBCC4]/30">
-                      <p className="text-base text-gray-900 dark:text-gray-100">
+                    <div className="p-4 bg-[#4DBCC4]/10 dark:bg-[#4DBCC4]/20 rounded-lg border-2 border-[#4DBCC4]/30 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                      <p className="text-base text-gray-900 dark:text-gray-100 text-start">
                         <span className="font-semibold text-[#4DBCC4]">{t('reschedule_consultation_fee') || 'Consultation Fee'}:</span> ₱{actualConsultationFee}
                       </p>
                     </div>
                   )}
 
                   {/* Reason for Rescheduling Section */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div>
-                      <Label htmlFor="reason" className={`text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 block ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                      <Label htmlFor="reason" className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 block text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                         {t('reschedule_reason_label') || 'Reason for Rescheduling (Optional)'}
                       </Label>
                       <Textarea
@@ -764,25 +780,27 @@ export default function RescheduleModal({ isOpen, onClose, appointment, onSucces
                         placeholder={t('reschedule_reason_placeholder') || "Please provide a reason for rescheduling..."}
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                        className="mt-2 border-2 border-gray-300 dark:border-gray-600 focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/20 text-gray-900 dark:text-gray-100"
+                        className="mt-2 border-2 border-gray-300 dark:border-gray-600 focus:border-[#4DBCC4] focus:ring-2 focus:ring-[#4DBCC4]/20 text-gray-900 dark:text-gray-100 text-start"
                         rows={3}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       />
                     </div>
                   </div>
                 </div>
 
-                <DialogFooter className="gap-2 p-6 -mb-6 bg-white dark:bg-gray-900 border-t-2 border-gray-200 dark:border-gray-700">
+                <DialogFooter className={`gap-2 p-6 -mb-6 bg-white dark:bg-gray-900 border-t-2 border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   <Button variant="outline" onClick={onClose} disabled={loading} className="border-2 border-gray-300 dark:border-gray-600 hover:border-[#4DBCC4] dark:hover:border-[#4DBCC4] hover:bg-[#4DBCC4]/10 dark:hover:bg-[#4DBCC4]/20 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 hover:!text-gray-900 dark:hover:!text-gray-100 font-semibold">
                     {t('reschedule_cancel') || 'Cancel'}
                   </Button>
                   <Button
                     onClick={handleReschedule}
                     disabled={!selectedDate || !selectedTime || loading}
-                    className="bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] dark:from-[#4DBCC4] dark:to-[#3da8b0] dark:hover:from-[#3da8b0] dark:hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                    className={`bg-gradient-to-r from-[#4DBCC4] to-[#3da8b0] hover:from-[#3da8b0] hover:to-[#4DBCC4] dark:from-[#4DBCC4] dark:to-[#3da8b0] dark:hover:from-[#3da8b0] dark:hover:to-[#4DBCC4] text-white font-semibold shadow-lg hover:shadow-xl transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   >
                     {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent flex-shrink-0" />
                         {t('reschedule_rescheduling') || 'Rescheduling...'}
                       </div>
                     ) : (

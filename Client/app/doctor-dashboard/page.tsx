@@ -2097,7 +2097,7 @@ export default function DoctorDashboard() {
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0"><Building2 className="h-5 w-5 text-white" /></div>
-                    <div className="flex-1 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
+                    <div className="flex-1 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_centers_title') || 'Centers'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_manage_medical_centers') || 'Manage your associated medical centers'}</p>
                     </div>
@@ -2222,8 +2222,8 @@ export default function DoctorDashboard() {
               <TabsContent value="profile" className="py-6 px-4 h-full w-full max-w-full">
                 <div className="relative p-6 rounded-2xl glass-effect mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className="p-2 rounded-xl gradient-emerald animate-glow"><Settings className="h-5 w-5 text-white" /></div>
-                    <div className="text-left">
+                    <div className="p-2 rounded-xl gradient-emerald animate-glow flex-shrink-0"><Settings className="h-5 w-5 text-white" /></div>
+                    <div className="flex-1 text-start">
                       <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_profile_settings_title') || 'Profile Settings'}</h2>
                       <p className="text-emerald-700/80 dark:text-emerald-400/80" dir={isRTL ? 'rtl' : 'ltr'}>{t('dd_update_practice_info') || 'Update your personal and practice information'}</p>
                     </div>

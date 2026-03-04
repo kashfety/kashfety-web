@@ -386,47 +386,47 @@ export default function DoctorProfileSettings({
   }
 
   return (
-    <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`space-y-6 text-start ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('profile_settings_title') || 'Profile Settings'}</h2>
-          <p className="text-gray-600">{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
+      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="min-w-0 text-start">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white" dir={isRTL ? 'rtl' : 'ltr'}>{t('profile_settings_title') || 'Profile Settings'}</h2>
+          <p className="text-gray-600 dark:text-gray-400" dir={isRTL ? 'rtl' : 'ltr'}>{t('profile_settings_desc') || 'Manage your professional profile and consultation fees'}</p>
         </div>
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800">
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800 flex-shrink-0">
           {t('doctor_profile') || 'ملف الطبيب'}
         </Badge>
       </div>
 
       {/* Basic Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
+      <Card dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="text-start">
+          <CardTitle className={`flex items-center gap-2 text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <User className="w-5 h-5 flex-shrink-0" />
             {t('dd_basic_info') || 'المعلومات الأساسية'}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 text-start">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={isRTL ? "md:order-last" : ""}>
-              <Label htmlFor="name" className="block mb-2">{t('fullName') || 'Full Name (English)'}</Label>
+              <Label htmlFor="name" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('fullName') || 'Full Name (English)'}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder={t('fullNamePlaceholder') || "أدخل اسمك الكامل بالإنجليزية"}
-                className="text-left"
+                className="text-start"
                 dir="ltr"
               />
             </div>
             <div className={isRTL ? "md:order-first" : ""}>
-              <Label htmlFor="name_ar" className="block mb-2">{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
+              <Label htmlFor="name_ar" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('fullNameArabic') || 'Full Name (Arabic)'}</Label>
               <Input
                 id="name_ar"
                 value={formData.name_ar}
                 onChange={(e) => handleInputChange('name_ar', e.target.value)}
                 placeholder={t('fullNameArabicPlaceholder') || "أدخل اسمك الكامل بالعربية"}
-                className="text-right"
+                className="text-start"
                 dir="rtl"
               />
             </div>
@@ -434,46 +434,46 @@ export default function DoctorProfileSettings({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={isRTL ? "md:order-last" : ""}>
-              <Label htmlFor="specialty" className="block mb-2">{t('specialty') || 'Specialty'}</Label>
+              <Label htmlFor="specialty" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('specialty') || 'Specialty'}</Label>
               <Input
                 id="specialty"
                 value={formData.specialty}
                 readOnly
                 disabled
-                className="bg-gray-100 text-gray-500 text-left"
+                className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 text-start"
                 placeholder={t('specialtyPlaceholder') || "e.g., Cardiology, Dermatology"}
                 dir="ltr"
               />
             </div>
             <div className={isRTL ? "md:order-first" : ""}>
-              <Label htmlFor="specialty_ar" className="block mb-2">{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
+              <Label htmlFor="specialty_ar" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('specialtyArabic') || 'Specialty (Arabic)'}</Label>
               <Input
                 id="specialty_ar"
                 value={formData.specialty_ar}
                 readOnly
                 disabled
-                className={`bg-gray-100 text-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                className="bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 text-start"
                 placeholder={t('specialtyArabicPlaceholder') || "التخصص بالعربية"}
                 dir="rtl"
               />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="bio" className="block mb-2">{t('professionalBio') || 'Professional Bio'}</Label>
+          <div className="text-start">
+            <Label htmlFor="bio" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('professionalBio') || 'Professional Bio'}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               placeholder={t('professionalBioPlaceholder') || "اكتب خلفيتك وخبراتك ونهجك في رعاية المرضى..."}
               rows={4}
-              className={isRTL ? 'text-right' : 'text-left'}
+              className="text-start"
               dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
 
-          <div>
-            <Label htmlFor="experience" className="block mb-2">{t('yearsOfExperience') || 'Years of Experience'}</Label>
+          <div className="text-start">
+            <Label htmlFor="experience" className="block mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>{t('yearsOfExperience') || 'Years of Experience'}</Label>
             <Input
               id="experience"
               type="number"
@@ -482,7 +482,7 @@ export default function DoctorProfileSettings({
               value={formData.experience_years}
               onChange={(e) => handleInputChange('experience_years', parseInt(e.target.value) || 0)}
               placeholder={t('yearsOfExperiencePlaceholder') || "Enter years of experience"}
-              className={isRTL ? 'text-right' : 'text-left'}
+              className="text-start"
               dir="ltr"
             />
           </div>
@@ -490,17 +490,17 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Consultation Fee Settings */}
-      <Card className="border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-900/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-emerald-800">
-            <DollarSign className="w-5 h-5" />
+      <Card className="border-emerald-200 bg-emerald-50/30 dark:border-emerald-800 dark:bg-emerald-900/10" dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="text-start">
+          <CardTitle className={`flex items-center gap-2 text-start text-emerald-800 dark:text-emerald-200 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <DollarSign className="w-5 h-5 flex-shrink-0" />
             {t('dd_consultation_fee_settings') || 'إعدادات رسوم الاستشارة'}
           </CardTitle>
-          <p className="text-sm text-emerald-600">
+          <p className="text-sm text-emerald-600 dark:text-emerald-400 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
             {t('dd_consultation_fee_desc') || 'Set your consultation fee that will be displayed to patients and used in billing'}
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 text-start">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="consultation_fee" className="text-base font-medium block mb-2">
@@ -563,9 +563,9 @@ export default function DoctorProfileSettings({
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
-              <h4 className="font-medium text-emerald-800 mb-2">{t('feePreview') || 'Fee Preview'}</h4>
-              <div className="space-y-2 text-sm">
+            <div className="bg-white dark:bg-[#0F0F12] p-4 rounded-lg border border-emerald-200 dark:border-emerald-900 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h4 className="font-medium text-emerald-800 dark:text-emerald-200 mb-2">{t('feePreview') || 'Fee Preview'}</h4>
+              <div className="space-y-2 text-sm text-start">
                 <div className="flex justify-between">
                   <span>{t('clinicConsultation') || 'Clinic Consultation'}:</span>
                   <span className="font-medium">{formData.consultation_fee.toFixed(2)} {t('currency_symbol') || 'SYP'}</span>
@@ -582,24 +582,24 @@ export default function DoctorProfileSettings({
             </div>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+            <h4 className={`font-medium text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <Clock className="w-4 h-4 flex-shrink-0" />
               {t('feeChangeNotice') || 'ملاحظة تغيير الرسوم'}
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-blue-700 dark:text-blue-300 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
               {t('feeChangeNoticeText') || 'سيتم تطبيق التغييرات على الرسوم على الحجوزات الجديدة فقط. الحجوزات الحالية ستبقى بسعرها الأصلي.'}
             </p>
           </div>
 
           {/* Save Consultation Fee Button */}
-          <div className="flex justify-end mt-4">
+          <div className={`flex mt-4 ${isRTL ? 'justify-start' : 'justify-end'}`}>
             <Button
               onClick={handleSaveProfile}
               disabled={saving}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className={`bg-emerald-600 hover:bg-emerald-700 ${isRTL ? 'flex-row-reverse' : ''}`}
             >
-              <Save className="w-4 h-4 me-2" />
+              <Save className={`w-4 h-4 ${isRTL ? 'ms-2' : 'me-2'}`} />
               {saving ? (t('saving') || "Saving...") : (t('saveConsultationFee') || "Save Consultation Fee")}
             </Button>
           </div>
@@ -607,15 +607,15 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Qualifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="w-5 h-5" />
+      <Card dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="text-start">
+          <CardTitle className={`flex items-center gap-2 text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <Award className="w-5 h-5 flex-shrink-0" />
             {t('dd_qualifications_certifications') || 'المؤهلات والشهادات'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
+        <CardContent className="text-start">
+          <div className="space-y-2 text-start">
             {formData.qualifications.length > 0 ? (
               formData.qualifications.map((qualification, index) => (
                 <Badge key={index} variant="secondary" className="me-2 mb-2">
@@ -626,21 +626,21 @@ export default function DoctorProfileSettings({
               <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dd_no_qualifications') || 'لا توجد مؤهلات مسجلة'}</p>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
             {t('dd_contact_support_qualifications') || 'اتصل بالدعم لتحديث مؤهلاتك وشهاداتك'}
           </p>
         </CardContent>
       </Card>
 
       {/* Certificates Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="w-5 h-5" />
+      <Card dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="text-start">
+          <CardTitle className={`flex items-center gap-2 text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <Award className="w-5 h-5 flex-shrink-0" />
             {t('certificates_title') || 'شهاداتي'}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-start">
           {loadingCertificates ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -648,9 +648,9 @@ export default function DoctorProfileSettings({
           ) : certificates.length > 0 ? (
             <div className="space-y-4">
               {certificates.map((certificate) => (
-                <div key={certificate.id} className={`border rounded-lg p-4 space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
+                <div key={certificate.id} className="border rounded-lg p-4 space-y-3 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                  <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="space-y-2 text-start min-w-0 flex-1">
                       <h3 className="font-medium">
                         {getLocalizedCertificateType(certificate.certificate_type)}
                       </h3>
@@ -680,7 +680,7 @@ export default function DoctorProfileSettings({
                         {t('certificate_uploaded_on') || 'تم الرفع في'}: <span dir="ltr">{new Date(certificate.submitted_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className={`flex flex-col gap-2 flex-shrink-0 ${isRTL ? 'items-start' : 'items-end'}`}>
                       {/* Status Badge */}
                       <div className="flex items-center gap-1">
                         {certificate.status === 'approved' && <CheckCircle className="w-4 h-4 text-green-600" />}
@@ -704,12 +704,13 @@ export default function DoctorProfileSettings({
                         </Badge>
                       </div>
                       {/* Action Buttons */}
-                      <div className="flex gap-2">
+                      <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleViewCertificate(certificate.id, certificate.certificate_file_url)}
-                          className="flex items-center gap-1"
+                          className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <Eye className="w-3 h-3" />
                           {t('certificate_view_btn') || 'عرض'}
@@ -718,7 +719,8 @@ export default function DoctorProfileSettings({
                           size="sm"
                           variant="outline"
                           onClick={() => handleDownloadCertificate(certificate.id, certificate.certificate_file_url, certificate.certificate_file_name)}
-                          className="flex items-center gap-1"
+                          className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <Download className="w-3 h-3" />
                           {t('certificate_download_btn') || 'تنزيل'}
@@ -729,21 +731,21 @@ export default function DoctorProfileSettings({
 
                   {/* Rejection Reason */}
                   {certificate.status === 'rejected' && certificate.rejection_reason && (
-                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
+                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                       <p className="text-sm font-medium text-red-800 dark:text-red-400">
                         {t('certificate_admin_feedback') || 'ملاحظات الإدارة'}:
                       </p>
-                      <p className="text-sm text-red-700 mt-1">{certificate.rejection_reason}</p>
+                      <p className="text-sm text-red-700 dark:text-red-300 mt-1">{certificate.rejection_reason}</p>
                     </div>
                   )}
 
                   {/* Admin Notes */}
                   {certificate.admin_notes && (
-                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                       <p className="text-sm font-medium text-blue-800 dark:text-blue-400">
                         {t('admin_notes') || 'ملاحظات الإدارة'}:
                       </p>
-                      <p className="text-sm text-blue-700 mt-1">{certificate.admin_notes}</p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{certificate.admin_notes}</p>
                     </div>
                   )}
                 </div>
@@ -764,18 +766,18 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Profile Picture Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
+      <Card dir={isRTL ? 'rtl' : 'ltr'}>
+        <CardHeader className="text-start">
+          <CardTitle className={`flex items-center gap-2 text-start ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <User className="w-5 h-5 flex-shrink-0" />
             {t('profile_picture_title') || 'صورة الملف الشخصي'}
           </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
             {t('profile_picture_description') || 'ارفع صورة ملف مهنية سيتم عرضها للمرضى'}
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
+        <CardContent className="space-y-4 text-start">
+          <div className={`flex flex-col gap-6 items-start ${isRTL ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
             {/* Current Profile Picture */}
             <div className="flex flex-col items-center space-y-3">
               <div className="relative">
@@ -796,7 +798,7 @@ export default function DoctorProfileSettings({
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                 {profilePictureUrl
                   ? (t('profile_picture_current') || 'الصورة الحالية')
                   : (t('profile_picture_no_image') || 'لا توجد صورة مرفوعة')
@@ -805,20 +807,21 @@ export default function DoctorProfileSettings({
             </div>
 
             {/* Upload Section */}
-            <div className="flex-1 space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <div className="flex-1 space-y-4 text-start min-w-0">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 hover:border-blue-400 transition-colors text-start" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2 block" />
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('profile_picture_upload_hint') || 'انقر لرفع صورة ملف جديدة'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-start" dir={isRTL ? 'rtl' : 'ltr'}>
                   {t('profile_picture_supported_formats') || 'الصيغ المدعومة: JPEG, PNG, WebP, GIF (بحد أقصى 5MB)'}
                 </p>
                 <label
                   htmlFor="profile-picture-upload"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
+                  dir={isRTL ? 'rtl' : 'ltr'}
                 >
-                  <Upload className="w-4 h-4 me-2" />
+                  <Upload className={`w-4 h-4 ${isRTL ? 'ms-2' : 'me-2'}`} />
                   {uploadingPicture 
                     ? t("uploading")
                     : (t('profile_picture_upload_btn') || 'Upload Picture')
@@ -839,14 +842,15 @@ export default function DoctorProfileSettings({
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
         <Button 
           onClick={handleSaveProfile}
           disabled={saving}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className={`bg-emerald-600 hover:bg-emerald-700 ${isRTL ? 'flex-row-reverse' : ''}`}
           size="lg"
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
-          <Save className="w-4 h-4 me-2" />
+          <Save className={`w-4 h-4 ${isRTL ? 'ms-2' : 'me-2'}`} />
           {saving ? (t('dd_save_profile_saving') || "Saving...") : (t('dd_save_profile') || "Save Profile")}
         </Button>
       </div>

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import { useLocale } from '@/components/providers/locale-provider'
+import { toArabicNumerals } from '@/lib/i18n'
 
 interface Country {
   code: string
@@ -85,7 +86,7 @@ export default function CountryCodeSelector({
   label = "Phone Number"
 }: CountryCodeSelectorProps) {
   const { theme } = useTheme()
-  const { t, locale } = useLocale()
+  const { t, locale, isRTL } = useLocale()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -134,24 +135,28 @@ export default function CountryCodeSelector({
 
   const isPhoneValid = phoneNumber ? validatePhoneNumber(phoneNumber, selectedCountry.phoneCode) : true
 
+  const displayPhoneCode = locale === 'ar'
+    ? `+${toArabicNumerals(selectedCountry.phoneCode.replace(/^\+/, ''), 'ar')}`
+    : selectedCountry.phoneCode
+
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" dir={isRTL ? 'rtl' : 'ltr'}>
       <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
         {label}
       </label>
-      <div className="flex space-x-2">
+      <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Country Code Selector */}
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <motion.button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`flex items-center space-x-2 px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all`}
+            className={`flex items-center justify-center gap-2 w-[91px] h-[45px] min-w-[91px] border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all`}
           >
-            <span className="text-lg">{selectedCountry.flag}</span>
-            <span className="text-sm">{selectedCountry.phoneCode}</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="text-lg flex-shrink-0">{selectedCountry.flag}</span>
+            <span className="text-sm truncate">{displayPhoneCode}</span>
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </motion.button>
@@ -192,13 +197,11 @@ export default function CountryCodeSelector({
                         setSearchTerm('')
                       }}
                       whileHover={{ backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }}
-                      className={`w-full flex items-center space-x-3 px-4 py-2 text-left transition-colors ${
-                        theme === 'dark' ? 'hover:bg-white/10' : 'hover:bg-gray-100'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-2 transition-colors ${theme === 'dark' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
                     >
-                      <span className="text-lg">{country.flag}</span>
+                      <span className="text-lg flex-shrink-0">{country.flag}</span>
                       <span className={`font-mono text-sm min-w-[3rem] ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                        {country.phoneCode}
+                        {locale === 'ar' ? `+${toArabicNumerals(country.phoneCode.replace(/^\+/, ''), 'ar')}` : country.phoneCode}
                       </span>
                       <span className={`text-sm truncate ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                         {locale === 'ar' ? country.nameAr : country.name}
@@ -212,14 +215,15 @@ export default function CountryCodeSelector({
         </div>
 
         {/* Phone Number Input */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <motion.input
             type="tel"
             value={phoneNumber}
             onChange={(e) => onPhoneNumberChange(e.target.value)}
             placeholder={placeholder}
+            dir={isRTL ? 'rtl' : 'ltr'}
             whileFocus={{ scale: 1.02, boxShadow: "0 0 20px rgba(16, 185, 129, 0.3)" }}
-            className={`appearance-none block w-full px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all ${
+            className={`appearance-none block w-full h-[38px] px-3 py-2 border rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} ${theme === 'dark' ? 'placeholder-gray-400' : 'placeholder-gray-800'} focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all ${
               error || (!isPhoneValid && phoneNumber) 
                 ? 'border-red-400 focus:ring-red-400' 
                 : 'border-white/30'

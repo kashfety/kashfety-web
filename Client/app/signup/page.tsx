@@ -837,11 +837,11 @@ export default function SignupPage() {
                   required
                   value={formData.role}
                   onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                  className={`appearance-none block w-full px-3 py-2 pe-8 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                   style={{
                     backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                     backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.5rem center',
+                    backgroundPosition: isRTL ? 'left 0.5rem center' : 'right 0.5rem center',
                     backgroundSize: '1.5em 1.5em'
                   }}
                 >
@@ -877,11 +877,11 @@ export default function SignupPage() {
                         name="gender"
                         value={formData.gender}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 pe-8 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         style={{
                           backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                           backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 0.5rem center',
+                          backgroundPosition: isRTL ? 'left 0.5rem center' : 'right 0.5rem center',
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >
@@ -907,6 +907,8 @@ export default function SignupPage() {
                         id="date_of_birth"
                         name="date_of_birth"
                         type="date"
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                        lang={locale === 'ar' ? 'ar' : 'en'}
                         value={formData.date_of_birth}
                         onChange={handleChange}
                         className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
@@ -943,11 +945,11 @@ export default function SignupPage() {
                         required
                         value={formData.specialty}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 pe-8 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         style={{
                           backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                           backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 0.5rem center',
+                          backgroundPosition: isRTL ? 'left 0.5rem center' : 'right 0.5rem center',
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >
@@ -1093,11 +1095,11 @@ export default function SignupPage() {
                         name="center_type"
                         value={formData.center_type}
                         onChange={handleChange}
-                        className={`appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
+                        className={`appearance-none block w-full px-3 py-2 pe-8 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 sm:text-sm transition-all`}
                         style={{
                           backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${theme === 'dark' ? 'white' : 'black'}"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`)}")`,
                           backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 0.5rem center',
+                          backgroundPosition: isRTL ? 'left 0.5rem center' : 'right 0.5rem center',
                           backgroundSize: '1.5em 1.5em'
                         }}
                       >

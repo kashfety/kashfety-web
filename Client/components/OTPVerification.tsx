@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { useLocale } from '@/components/providers/locale-provider'
+import { toArabicNumerals, toWesternNumerals } from '@/lib/i18n'
 
 interface OTPVerificationProps {
   email: string
@@ -17,7 +18,7 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
   const [isResending, setIsResending] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const { t } = useLocale()
+  const { t, locale, isRTL } = useLocale()
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,8 +92,10 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
     }
   }
 
+  const backLabel = t('otp_back_button') || 'Back to signup'
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Animated Background Elements */}
       <motion.div
         className="absolute inset-0 opacity-20"
@@ -128,7 +131,7 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-3 text-center text-3xl font-extrabold text-white"
+          className="mt-3 text-center text-3xl font-extrabold text-white text-start"
         >
           {t('otp_verification_title') || 'Verify Your Email'}
         </motion.h2>
@@ -136,7 +139,7 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-2 text-center text-sm text-gray-300"
+          className="mt-2 text-center text-sm text-gray-300 text-start"
         >
           {t('otp_verification_subtitle') || `We've sent a verification code to:`}
           <br />
@@ -150,7 +153,7 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
         transition={{ duration: 0.8, delay: 0.3 }}
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10"
       >
-        <div className="bg-white/10 backdrop-blur-lg py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-lg py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/20" dir={isRTL ? 'rtl' : 'ltr'}>
           <AnimatePresence>
             {error && (
               <motion.div
@@ -160,14 +163,14 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
                 transition={{ duration: 0.3 }}
                 className="mb-4 bg-red-500/20 border-l-4 border-red-400 p-4 rounded-lg backdrop-blur-sm"
               >
-                <div className="flex">
+                <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-200">{error}</p>
+                  <div className={isRTL ? 'mr-3' : 'ml-3'}>
+                    <p className="text-sm text-red-200 text-start">{error}</p>
                   </div>
                 </div>
               </motion.div>
@@ -181,14 +184,14 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
                 transition={{ duration: 0.3 }}
                 className="mb-4 bg-green-500/20 border-l-4 border-green-400 p-4 rounded-lg backdrop-blur-sm"
               >
-                <div className="flex">
+                <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="flex-shrink-0">
                     <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-green-200">{success}</p>
+                  <div className={isRTL ? 'mr-3' : 'ml-3'}>
+                    <p className="text-sm text-green-200 text-start">{success}</p>
                   </div>
                 </div>
               </motion.div>
@@ -207,7 +210,7 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 1.0 }}
             >
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-200">
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-200 text-start">
                 {t('otp_verification_code') || 'Verification Code'}
               </label>
               <div className="mt-1">
@@ -217,16 +220,19 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
                   id="otp"
                   name="otp"
                   type="text"
+                  inputMode="numeric"
                   maxLength={6}
                   required
-                  value={otp}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                  value={locale === 'ar' ? toArabicNumerals(otp, 'ar') : otp}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+                    const raw = e.target.value
+                    const value = toWesternNumerals(raw).replace(/\D/g, '').slice(0, 6)
                     setOtp(value)
                     if (error) setError('')
                   }}
                   placeholder={t('otp_placeholder') || 'Enter 6-digit code'}
-                  className="appearance-none block w-full px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all text-center text-lg tracking-widest"
+                  className="appearance-none block w-full h-[38px] max-w-[366px] px-3 py-2 border border-white/30 rounded-lg shadow-sm bg-white/10 backdrop-blur-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 sm:text-sm transition-all text-center text-lg tracking-widest"
                 />
               </div>
             </motion.div>
@@ -255,14 +261,14 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
                 )}
               </motion.button>
 
-              <div className="flex items-center justify-between text-sm">
+              <div className={`flex items-center justify-between text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <motion.button
                   type="button"
                   onClick={onBack}
                   whileHover={{ scale: 1.05 }}
                   className="font-medium text-gray-300 hover:text-emerald-300 transition-colors"
                 >
-                  {t('otp_back_button') || '← Back to signup'}
+                  {isRTL ? `${backLabel} →` : `← ${backLabel}`}
                 </motion.button>
 
                 <motion.button
@@ -270,14 +276,14 @@ export default function OTPVerification({ email, onVerificationSuccess, onBack }
                   onClick={handleResendOTP}
                   disabled={isResending}
                   whileHover={{ scale: 1.05 }}
-                  className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
+                  className={`font-medium text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50 ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                   {isResending ? (
-                    <span className="flex items-center">
+                    <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full mr-2"
+                        className={`w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full ${isRTL ? 'ml-2' : 'mr-2'}`}
                       />
                       {t('otp_resending') || 'Resending...'}
                     </span>
